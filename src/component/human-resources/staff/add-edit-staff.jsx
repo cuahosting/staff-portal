@@ -1,0 +1,1688 @@
+import React, { useEffect, useState } from "react";
+import Modal from "../../common/modal/modal";
+import PageHeader from "../../common/pageheader/pageheader";
+import Table from "../../common/table/table";
+import axios from "axios";
+import Loader from "../../common/loader/loader";
+import { showAlert } from "../../common/sweetalert/sweetalert";
+import { toast } from "react-toastify";
+import { connect } from "react-redux";
+import { serverLink } from "../../../resources/url";
+import { formatDate, formatDateAndTime, projectEmail, encryptData } from "../../../resources/constants";
+import { Link } from "react-router-dom";
+import Select from 'react-select';
+import { projectName, simpleFileUploadAPIKey } from "../../../resources/url";
+import { projectDomain, removeSpace } from "../../../resources/constants";
+import SimpleFileUpload from "react-simple-file-upload";
+
+
+function AddEditStaff(props)
+{
+  const token = props.loginData[0].token;
+
+  const [isLoading, setIsLoading] = useState(true);
+  const currentYear = new Date().getFullYear();
+  const [datatable, setDatatable] = useState({
+    columns: [
+      {
+        label: "S/N",
+        field: "sn",
+      },
+      {
+        label: "StaffID",
+        field: "StaffID",
+      },
+      {
+        label: "First Name",
+        field: "FirstName",
+      },
+      {
+        label: "Middle Name",
+        field: "MiddleName",
+      },
+      {
+        label: "Surname",
+        field: "Surname",
+      },
+      {
+        label: "Gender",
+        field: "Gender",
+      },
+      {
+        label: "Phone Number",
+        field: "PhoneNumber",
+      },
+      {
+        label: "Official EmailAddress",
+        field: "OfficialEmailAddress",
+      },
+      // {
+      //   label: "Action",
+      //   field: "action",
+      // },
+      {
+        label: "View",
+        field: "view",
+      },
+    ],
+    rows: [],
+  });
+
+  const [lastId, setLastId] = useState("");
+  const [newId, setNewId] = useState("");
+  const password = encryptData("123456789");
+  const [insertUser, setInsertUser] = useState("");
+
+  const [createStaff, setCreateStaff] = useState({
+    EntryID: "",
+    FirstName: "",
+    MiddleName: "",
+    Surname: "",
+    TitleID: "",
+    Gender: "",
+    DateOfBirth: "",
+    MaritalStatus: "",
+    NationalityID: "",
+    StateID: "",
+    LgaID: "",
+    Religion: "",
+    PhoneNumber: "",
+    AltPhoneNumber: "",
+    EmailAddress: "",
+    OfficialEmailAddress: "",
+    ContactAddress: "",
+    StaffType: "",
+    DesignationID: "",
+    GrossPay: "",
+    DepartmentCode: "",
+    IsActive: "",
+    IsAcademicStaff: "",
+    DateOfFirstEmployment: "",
+    DateOfCurrentEmployment: "",
+    ContractStartDate: "",
+    ContractEndDate: "",
+    LineManagerID: "",
+    CourseCode: "",
+    Password: encryptData("123456789"),
+    AddedBy: "",
+    AddedDate: "",
+    UpdatedBy: "",
+    UpdatedDate: "",
+    BankID: "",
+    AccountNumber: "",
+    BVN: "",
+    AccountType: "",
+    NFirstName: "",
+    NSurname: "",
+    NMiddleName: "",
+    Relationship: "",
+    NPhoneNumber: "",
+    NEmailAddress: "",
+    NContactAddress: "",
+    Biography: "",
+    file: "",
+    Research: "",
+    Facebook: "",
+    Linkedin: "",
+    Twitter: "",
+    Scholar: "",
+    Researchgate: "",
+    Academia: "",
+    Orcid: "",
+    file2: "",
+    update_passport: ""
+  });
+  const [data, setData] = useState({
+    country: [],
+    state: [],
+    lga: [],
+    designation: [],
+    stafftype: [],
+    linemanager: [],
+    department: [],
+    course: [],
+    bank: [],
+    lastId: {},
+    title: [],
+  });
+  const [nationalities, setNaytionalities] = useState([])
+  const [stateList, setStateList] = useState([]);
+  const [lgaList, setLgaList] = useState([]);
+
+  const getData = async () =>
+  {
+    await axios
+      .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
+      .then((response) =>
+      {
+        setData(response.data);
+        let nat = [];
+        response.data.country.length > 0 &&
+          response.data.country.map((row) =>
+          {
+            nat.push({ value: row.EntryID, label: row.Country })
+          })
+        setNaytionalities(nat)
+      })
+
+      .catch((error) =>
+      {
+        console.log("NETWORK ERROR", error);
+      });
+  };
+
+  const getStaff = async () =>
+  {
+    await axios
+      .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
+      .then((result) =>
+      {
+        if (result.data.length > 0)
+        {
+          let rows = [];
+          result.data.map((staff, index) =>
+          {
+            rows.push({
+              sn: index + 1,
+              EntryID: staff.EntryID,
+              StaffID: staff.StaffID,
+              FirstName: staff.FirstName,
+              MiddleName: staff.MiddleName,
+              Surname: staff.Surname,
+              TitleID: staff.TitleID,
+              Gender: staff.Gender,
+              DateOfBirth:
+                formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
+              MaritalStatus: staff.MaritalStatus,
+              NationalityID: staff.NationalityID,
+              StateID: staff.StateID,
+              LgaID: staff.LgaID,
+              Religion: staff.Religion,
+              PhoneNumber: staff.PhoneNumber,
+              AltPhoneNumber: staff.AltPhoneNumber,
+              EmailAddress: staff.EmailAddress,
+              OfficialEmailAddress: staff.OfficialEmailAddress,
+              ContactAddress: staff.ContactAddress,
+              StaffType: staff.StaffType,
+              DesignationID: staff.DesignationID,
+              GrossPay: staff.GrossPay,
+              DepartmentCode: staff.DepartmentCode,
+              IsActive: staff.IsActive,
+              IsAcademicStaff: staff.IsAcademicStaff,
+              DateOfFirstEmployment:
+                formatDateAndTime(staff.DateOfFirstEmployment, "date") ?? "N/A",
+              DateOfCurrentEmployment:
+                formatDateAndTime(staff.DateOfCurrentEmployment, "date") ??
+                "N/A",
+              ContractStartDate:
+                formatDateAndTime(staff.ContractStartDate, "date") ?? "N/A",
+              ContractEndDate:
+                formatDateAndTime(staff.ContractEndDate, "date") ?? "N/A",
+              LineManagerID: staff.LineManagerID,
+              CourseCode: staff.CourseCode,
+              AddedBy: staff.AddedBy,
+              UpdatedBy: staff.UpdatedBy,
+              UpdatedDate: staff.UpdatedDate,
+              BankID: staff.BankID,
+              AccountNumber: staff.AccountNumber,
+              BVN: staff.BVN,
+              AccountType: staff.AccountType,
+              NFirstName: staff.NFirstName,
+              NSurname: staff.NSurname,
+              NMiddleName: staff.NMiddleName,
+              Relationship: staff.Relationship,
+              NPhoneNumber: staff.NPhoneNumber,
+              NEmailAddress: staff.NEmailAddress,
+              NContactAddress: staff.NContactAddress,
+              Biography: staff.Biography,
+              file: staff.file,
+              Research: staff.Research,
+              Facebook: staff.Facebook,
+              Linkedin: staff.Linkedin,
+              Twitter: staff.Twitter,
+              Scholar: staff.Scholar,
+              Researchgate: staff.Researchgate,
+              Academia: staff.Academia,
+              Orcid: staff.Orcid,
+              action: (
+                <button
+                  className="btn btn-sm btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_general"
+                  onClick={() =>
+                  {
+                    setNewId(staff.StaffID);
+                    const nat = nationalities.filter(x => x.value === staff.NationalityID)[0];
+                    setCreateStaff({
+                      EntryID: staff.EntryID,
+                      FirstName: staff.FirstName,
+                      MiddleName: staff.MiddleName,
+                      Surname: staff.Surname,
+                      TitleID: staff.TitleID,
+                      Gender: staff.Gender,
+                      DateOfBirth:
+                        formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
+                      MaritalStatus: staff.MaritalStatus,
+                      NationalityID: { value: nat.EntryID, label: nat.Country }, //staff.NationalityID,
+                      StateID: staff.StateID,
+                      LgaID: staff.LgaID,
+                      Religion: staff.Religion,
+                      PhoneNumber: staff.PhoneNumber,
+                      AltPhoneNumber: staff.AltPhoneNumber,
+                      EmailAddress: staff.EmailAddress,
+                      OfficialEmailAddress: staff.OfficialEmailAddress,
+                      ContactAddress: staff.ContactAddress,
+                      StaffType: staff.StaffType,
+                      DesignationID: staff.DesignationID,
+                      GrossPay: staff.GrossPay,
+                      DepartmentCode: staff.DepartmentCode,
+                      IsActive: staff.IsActive,
+                      IsAcademicStaff: staff.IsAcademicStaff,
+                      DateOfFirstEmployment:
+                        formatDateAndTime(
+                          staff.DateOfFirstEmployment,
+                          "date"
+                        ) ?? "N/A",
+                      DateOfCurrentEmployment:
+                        formatDateAndTime(
+                          staff.DateOfCurrentEmployment,
+                          "date"
+                        ) ?? "N/A",
+                      ContractStartDate:
+                        formatDateAndTime(staff.ContractStartDate, "date") ??
+                        "N/A",
+                      ContractEndDate:
+                        formatDateAndTime(staff.ContractEndDate, "date") ??
+                        "N/A",
+                      LineManagerID: staff.LineManagerID,
+                      CourseCode: staff.CourseCode,
+                      AddedBy: staff.AddedBy,
+                      UpdatedBy: props.loginData[0].StaffID,
+                      UpdatedDate: props.loginData[0].StaffID,
+                      BankID: staff.BankID,
+                      AccountNumber: staff.AccountNumber,
+                      BVN: staff.BVN,
+                      AccountType: staff.AccountType,
+                      NFirstName: staff.NFirstName,
+                      NSurname: staff.NSurname,
+                      NMiddleName: staff.NMiddleName,
+                      Relationship: staff.Relationship,
+                      NPhoneNumber: staff.NPhoneNumber,
+                      NEmailAddress: staff.NEmailAddress,
+                      NContactAddress: staff.NContactAddress,
+                      Biography: staff.Biography,
+                      file: staff.file,
+                      Research: staff.Research,
+                      Facebook: staff.Facebook,
+                      Linkedin: staff.Linkedin,
+                      Twitter: staff.Twitter,
+                      Scholar: staff.Scholar,
+                      Researchgate: staff.Researchgate,
+                      Academia: staff.Academia,
+                      Orcid: staff.Orcid,
+                      update_passport: false,
+                      file2: staff.Image,
+                      action: "update",
+                    })
+                  }
+                  }
+                >
+                  <i className="fa fa-pen" />
+                </button>
+              ),
+              view: (
+                <Link
+                  to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
+                >
+                  <button
+                    className="btn btn-sm btn-primary"
+                    to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
+                  >
+                    <i className="fa fa-eye" />
+                  </button>
+                </Link>
+                //
+                // <button
+                //     className="btn btn-sm btn-primary"
+                //     to={`/staff/${staff.StaffID}`.toLowerCase()}
+                // >
+                //   <i className="fa fa-eye" />
+                // </button>
+              ),
+            });
+          });
+
+          setDatatable({
+            ...datatable,
+            columns: datatable.columns,
+            rows: rows,
+          });
+        }
+        setIsLoading(false);
+      })
+      .catch((err) =>
+      {
+        console.log("NETWORK ERROR");
+      });
+  };
+  const handleNationalityChange = (e) =>
+  {
+    console.log(e)
+    if (e.id === "NationalityID")
+    {
+      setStateList(
+        data.state.filter((item) => item.NationalityID === parseInt(e.value))
+      );
+      setLgaList([]);
+    }
+
+    if (e.id === "StateID")
+    {
+      setLgaList(data.lga.filter((item) => item.StateID === parseInt(e.value)));
+    }
+
+    setCreateStaff({
+      ...createStaff,
+      NationalityID: e.value,
+      NationalityID2: e
+    })
+  }
+
+  const onEdit = (e) =>
+  {
+    const id = e.target.id;
+    const value = id === "file" ? e.target.files[0] : e.target.value;
+    if (e.target.id === "file")
+    {
+      const file = e.target.files[0]
+      if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg")
+      {
+
+      } else
+      {
+        toast.error("Only .png, .jpg and .jpeg format allowed!");
+        return;
+      }
+      if (file.size > 1000000)
+      {
+        toast.error("max file size is 1mb")
+        return;
+
+      }
+      setCreateStaff({
+        ...createStaff,
+        [id]: value,
+        update_passport: true
+      });
+      return;
+    }
+
+    if (id === "NationalityID")
+    {
+      setStateList(
+        data.state.filter((item) => item.NationalityID === parseInt(value))
+      );
+      setLgaList([]);
+    }
+
+    if (id === "StateID")
+    {
+      setLgaList(data.lga.filter((item) => item.StateID === parseInt(value)));
+    }
+
+    setCreateStaff({
+      ...createStaff,
+      [id]: value,
+    });
+
+    getLastStaffID().then(r => { });
+  };
+
+  const getInsertedUserID = async () =>
+  {
+    setInsertUser(
+      props.loginData[0].StaffID.length > 0
+        ? props.loginData[0].StaffID
+        : "System Generated"
+    );
+  };
+
+  const getLastStaffID = async () =>
+  {
+    await axios
+      .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
+      .then((response) =>
+      {
+        setLastId(response.data.lastId[0].StaffID);
+
+        const indexOfId = lastId.split("E")[1];
+        const lastIndex = Number(indexOfId) + 1;
+
+        const padStaffID = (lastIndex, places) =>
+          String(lastIndex).padStart(places, "0");
+        setNewId(`E${padStaffID(lastIndex, 4)}`);
+      })
+      .catch((error) =>
+      {
+        console.log("NETWORK ERROR", error);
+      });
+  };
+
+  const onSubmit = async (e) =>
+  {
+    e.preventDefault();
+    for (let key in createStaff)
+    {
+      if (
+        createStaff.hasOwnProperty(key) &&
+        key !== "AddedDate" &&
+        key !== "MiddleName" &&
+        key !== "EntryID" &&
+        key !== "AddedBy" &&
+        key !== "UpdatedBy" &&
+        key !== "UpdatedDate" &&
+        key !== "AltPhoneNumber" &&
+        key !== "OfficialEmailAddress" &&
+        key !== "StaffID" &&
+        key !== "IsActive" &&
+        key !== "IsAcademicStaff" &&
+        key !== "Password" &&
+        key !== "Biography" &&
+        key !== "file" &&
+        key !== "Research" &&
+        key !== "Facebook" &&
+        key !== "Linkedin" &&
+        key !== "Twitter" &&
+        key !== "Scholar" &&
+        key !== "Researchgate" &&
+        key !== "Academia" &&
+        key !== "Orcid" &&
+        key !== "BankID" &&
+        key !== "AccountNumber" &&
+        key !== "BVN" &&
+        key !== "AccountType" &&
+        key !== "NFirstName" &&
+        key !== "NSurname" &&
+        key !== "NMiddleName" &&
+        key !== "NPhoneNumber" &&
+        key !== "NEmailAddress" &&
+        key !== "NContactAddress" &&
+        key !== "NContactAddress" &&
+        key !== "Relationship" &&
+        key !== "LineManagerID" &&
+        key !== "StateID" &&
+        key !== "LgaID" &&
+        key !== "file2" &&
+        key !== "file" &&
+        key != "update_passport"
+      )
+      {
+        if (createStaff[key] === "")
+        {
+          await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
+          return false;
+        }
+      }
+    }
+
+    // if (createStaff.file.size / 1024 > 2048) {
+    //   toast.error(`File Size Can't be more than 2MB`);
+    //   return false;
+    // }
+
+
+    if (createStaff.EntryID === "")
+    {
+      toast.info("Adding new staff. Please wait..");
+
+
+      if (createStaff.EmailAddress !== "")
+      {
+        const sendData = {
+          EntryID: createStaff.EntryID,
+          StaffID: newId,
+          FirstName: createStaff.FirstName,
+          MiddleName: createStaff.MiddleName,
+          Surname: createStaff.Surname,
+          TitleID: createStaff.TitleID,
+          Gender: createStaff.Gender,
+          DateOfBirth: createStaff.DateOfBirth,
+          MaritalStatus: createStaff.MaritalStatus,
+          NationalityID: createStaff.NationalityID,
+          StateID: createStaff.StateID,
+          LgaID: createStaff.LgaID,
+          Religion: createStaff.Religion,
+          PhoneNumber: createStaff.PhoneNumber,
+          AltPhoneNumber: createStaff.AltPhoneNumber,
+          EmailAddress: createStaff.EmailAddress,
+          OfficialEmailAddress: `${removeSpace(createStaff.FirstName.toString().trim())}.${removeSpace(createStaff.Surname.toString().trim())}${projectDomain}`,
+          ContactAddress: createStaff.ContactAddress,
+          StaffType: createStaff.StaffType,
+          DesignationID: createStaff.DesignationID,
+          GrossPay: createStaff.GrossPay,
+          DepartmentCode: createStaff.DepartmentCode,
+          IsActive: createStaff.IsActive,
+          IsAcademicStaff: createStaff.IsAcademicStaff,
+          DateOfFirstEmployment: createStaff.DateOfFirstEmployment,
+          DateOfCurrentEmployment: createStaff.DateOfCurrentEmployment,
+          ContractStartDate: createStaff.ContractStartDate,
+          ContractEndDate: createStaff.ContractEndDate,
+          LineManagerID: createStaff.LineManagerID,
+          CourseCode: createStaff.CourseCode,
+          AddedBy: props.loginData[0].StaffID,
+          UpdatedBy: createStaff.UpdatedBy,
+          UpdatedDate: createStaff.UpdatedDate,
+          BankID: createStaff.BankID,
+          AccountNumber: createStaff.AccountNumber,
+          Password: createStaff.Password,
+          BVN: createStaff.BVN,
+          AccountType: createStaff.AccountType,
+          NFirstName: createStaff.NFirstName,
+          NSurname: createStaff.NSurname,
+          NMiddleName: createStaff.NMiddleName,
+          Relationship: createStaff.Relationship,
+          NPhoneNumber: createStaff.NPhoneNumber,
+          NEmailAddress: createStaff.NEmailAddress,
+          NContactAddress: createStaff.NContactAddress,
+          Biography: createStaff.Biography,
+          file: createStaff.file2,
+          Research: createStaff.Research,
+          Facebook: createStaff.Facebook,
+          Linkedin: createStaff.Linkedin,
+          Twitter: createStaff.Twitter,
+          Scholar: createStaff.Scholar,
+          Researchgate: createStaff.Researchgate,
+          Academia: createStaff.Academia,
+          Orcid: createStaff.Orcid,
+          //file2: createStaff.file2
+        };
+
+        axios
+          .post(
+            `${serverLink}staff/hr/staff-management/add/staff/${newId}`,
+            sendData, token
+          )
+
+          .then(async (res) =>
+          {
+
+            if (res.data.message === "success")
+            {
+              toast.success("Staff Added Successfully");
+              if (createStaff.update_passport === true)
+              {
+                let formData = new FormData();
+                formData.append("file", createStaff.file);
+                formData.append("StaffID", newId)
+                await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/passport`, formData)
+              }
+              getLastStaffID();
+              getData();
+              getStaff();
+              getInsertedUserID();
+              setCreateStaff({
+                ...createStaff,
+                EntryID: "",
+                StaffID: "",
+                FirstName: "",
+                MiddleName: "",
+                Surname: "",
+                TitleID: "",
+                Gender: "",
+                DateOfBirth: "",
+                MaritalStatus: "",
+                NationalityID: "",
+                StateID: "",
+                LgaID: "",
+                Religion: "",
+                PhoneNumber: "",
+                AltPhoneNumber: "",
+                EmailAddress: "",
+                OfficialEmailAddress: "",
+                ContactAddress: "",
+                StaffType: "",
+                DesignationID: "",
+                GrossPay: "",
+                DepartmentCode: "",
+                IsActive: "",
+                IsAcademicStaff: "",
+                DateOfFirstEmployment: "",
+                DateOfCurrentEmployment: "",
+                ContractStartDate: "",
+                ContractEndDate: "",
+                LineManagerID: "",
+                CourseCode: "",
+                Password: createStaff.Password,
+                AddedBy: "",
+                AddedDate: "",
+                UpdatedBy: "",
+                UpdatedDate: "",
+                BankID: "",
+                AccountNumber: "",
+                BVN: "",
+                AccountType: "",
+                NFirstName: "",
+                NSurname: "",
+                NMiddleName: "",
+                Relationship: "",
+                NPhoneNumber: "",
+                NEmailAddress: "",
+                NContactAddress: "",
+                Biography: "",
+                file: "",
+                Research: "",
+                Facebook: "",
+                Linkedin: "",
+                Twitter: "",
+                Scholar: "",
+                Researchgate: "",
+                Academia: "",
+                Orcid: "",
+              });
+              getLastStaffID();
+            } else
+            {
+              console.log("Error from insert", res);
+              toast.error(`Something went wrong submitting your document!`);
+            }
+          })
+          .catch((error) =>
+          {
+            console.log("Error", error);
+          });
+      } else
+      {
+        toast.error(
+          `Image format not supported. Kindly format and try again!`
+        );
+      }
+      // })
+      // .catch((error) => {
+      //   console.log("NETWORK ERROR", error);
+      // });
+
+    } else
+    {
+      if (createStaff.DateOfBirth === "2008-12-30T23:00:00.000Z")
+      {
+        await showAlert(
+          "ERROR",
+          "DateOfBirth Can't be empty and other related date fields",
+          "error"
+        );
+        return false;
+      }
+
+      toast.info("Updating staff. Please wait..");
+      await axios
+        .patch(
+          `${serverLink}staff/hr/staff-management/update/staff`,
+          createStaff, token
+        )
+        .then(async (result) =>
+        {
+          if (result.data.message === "success")
+          {
+            toast.success("Staff Updated Successfully");
+            if (createStaff.update_passport === true)
+            {
+              let formData = new FormData();
+              formData.append("file", createStaff.file);
+              formData.append("StaffID", newId)
+              await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/passport`, formData)
+            }
+
+            getStaff();
+            getLastStaffID();
+            getData();
+            getStaff();
+            getInsertedUserID();
+
+            // ADD STAFF BANK
+          } else
+          {
+            showAlert(
+              "ERROR",
+              "Something went wrong. Please try again!",
+              "error"
+            );
+          }
+        })
+        .catch((error) =>
+        {
+          showAlert(
+            "NETWORK ERROR",
+            "Please check your connection and try again!",
+            "error"
+          );
+        });
+    }
+  };
+
+  useEffect(() =>
+  {
+    getLastStaffID().then((r) => { });
+    getStaff().then((r) => { });
+    getData().then((r) => { });
+  }, []);
+
+  const handlePassportUpload = (url) =>
+  {
+    console.log(url)
+    if (url !== '')
+    {
+      setCreateStaff({
+        ...createStaff,
+        file2: url
+      })
+
+    }
+  }
+
+  return isLoading ? (
+    <Loader />
+  ) : (
+    <div className="d-flex flex-column flex-row-fluid">
+      <PageHeader
+        title={"Add Staff"}
+        items={["Human Resource", "Staff Management", "Add Staff"]}
+      />
+      <div className="flex-column-fluid">
+        <div className="card">
+          <div className="card-header border-0 pt-6">
+            <div className="card-title" />
+            <div className="card-toolbar">
+              <div
+                className="d-flex justify-content-end"
+                data-kt-customer-table-toolbar="base"
+              >
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_general"
+                  onClick={() =>
+                    setCreateStaff({
+                      ...createStaff,
+                      EntryID: "",
+                      FirstName: "",
+                      MiddleName: "",
+                      Surname: "",
+                      TitleID: "",
+                      Gender: "",
+                      DateOfBirth: "",
+                      MaritalStatus: "",
+                      NationalityID: "",
+                      StateID: "",
+                      LgaID: "",
+                      Religion: "",
+                      PhoneNumber: "",
+                      AltPhoneNumber: "",
+                      EmailAddress: "",
+                      OfficialEmailAddress: "",
+                      ContactAddress: "",
+                      StaffType: "",
+                      DesignationID: "",
+                      GrossPay: "",
+                      DepartmentCode: "",
+                      IsActive: "",
+                      IsAcademicStaff: "",
+                      DateOfFirstEmployment: "",
+                      DateOfCurrentEmployment: "",
+                      ContractStartDate: "",
+                      ContractEndDate: "",
+                      LineManagerID: "",
+                      CourseCode: "",
+                      Password: createStaff.Password,
+                      AddedDate: "",
+                      AddedBy: insertUser,
+                      UpdatedBy: insertUser,
+                      UpdatedDate: "",
+                      Biography: "",
+                      file: "",
+                      Research: "",
+                      Facebook: "",
+                      Linkedin: "",
+                      Twitter: "",
+                      Scholar: "",
+                      Researchgate: "",
+                      Academia: "",
+                      Orcid: "",
+                    })
+                  }
+                >
+                  Add Staff
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="card-body pt-0">
+            <Table data={datatable} />
+          </div>
+        </div>
+        <Modal
+          large={true}
+          title={"Add and Edit Staff Form"}
+          style={{
+            width: "500px",
+          }}
+        >
+          <form onSubmit={onSubmit} >
+            <h5>Basic Information</h5>
+            <hr />
+
+            <div className="row">
+              <div className="col-lg-12">
+                <div className="form-group">
+                  <label htmlFor="file">Passport (optional) <strong className="text-danger"><small>File must not exceed 1mb</small></strong> </label>
+                  {/* <SimpleFileUpload
+                    apiKey={simpleFileUploadAPIKey}
+                    tag={`${projectName}-passport`}
+                    onSuccess={handlePassportUpload}
+                    accepted={"image/*"}
+                    maxFileSize={1}
+                    preview="false"
+                    width="100%"
+                    height="100"
+                  /> */}
+                  <input
+                    type="file"
+                    accept=".pdf, .jpg, .png, .jpeg"
+                    id="file"
+                    name="file"
+                    className="form-control"
+                    placeholder="file"
+                    onChange={onEdit}
+                  />
+                  <span className="alert-info">
+                    Only .pdf, .jpg, .png, .jpeg are allowed
+                  </span>
+                </div>
+              </div>
+
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="TitleID">Title</label>
+                  <select
+                    id="TitleID"
+                    className="form-control"
+                    required
+                    value={createStaff.TitleID}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {data.title ? (
+                      <>
+                        {data.title.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.EntryID}>
+                              {item.TitleName}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </select>
+                </div>
+              </div>
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="FirstName">First Name</label>
+                  <input
+                    type="text"
+                    id="FirstName"
+                    className="form-control"
+                    placeholder="First Name*"
+                    required
+                    value={createStaff.FirstName}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="MiddleName">Middle Name</label>
+                  <input
+                    type="text"
+                    id="MiddleName"
+                    className="form-control"
+                    placeholder="Middle Name"
+                    value={createStaff.MiddleName}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Surname">Surname</label>
+                  <input
+                    type="text"
+                    id="Surname"
+                    className="form-control"
+                    placeholder="Surname"
+                    value={createStaff.Surname}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="PhoneNumber">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="PhoneNumber"
+                    className="form-control"
+                    placeholder="Phone Number*"
+                    required
+                    value={createStaff.PhoneNumber}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="EmailAddress">Email Address</label>
+                  <input
+                    type="email"
+                    id="EmailAddress"
+                    className="form-control"
+                    placeholder="Email Address"
+                    value={createStaff.EmailAddress}
+                    onChange={onEdit}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="DateOfBirth">Date of Birth</label>
+                  <input
+                    type="date"
+                    id="DateOfBirth"
+                    className="form-control"
+                    placeholder="Date of Birth*"
+                    required
+                    max={`${currentYear - 13}-01-01`}
+                    value={formatDate(createStaff.DateOfBirth)}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Religion">Religion</label>
+                  <select
+                    id="Religion"
+                    className="form-control"
+                    value={createStaff.Religion}
+                    onChange={onEdit}
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    <option value="Islam">Islam</option>
+                    <option value="Christianity">Christianity</option>
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Gender">Gender</label>
+                  <select
+                    id="Gender"
+                    className="form-control"
+                    required
+                    value={createStaff.Gender}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="N/A">N/A</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="NationalityID">Nationality</label>
+
+                  {/* <Select
+                    name="NationalityID"
+                    id="NationalityID"
+                    value={createStaff.NationalityID2}
+                    onChange={handleNationalityChange}
+                    options={nationalities}
+                    placeholder="select staff"
+                  /> */}
+                  <select
+                    id="NationalityID"
+                    className="form-control"
+                    required
+                    value={createStaff.NationalityID}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {data.country ? (
+                      <>
+                        {data.country.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.EntryID}>
+                              {item.Country}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </select>
+                </div>
+              </div>
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="StateID">State of Origin</label>
+                  <select
+                    id="StateID"
+                    className="form-control"
+                    required
+                    value={createStaff.StateID}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {stateList ? (
+                      <>
+                        {stateList.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.EntryID}>
+                              {item.StateName}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="LgaID">Local Government</label>
+                  <select
+                    id="LgaID"
+                    className="form-control"
+                    required
+                    value={createStaff.LgaID}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {lgaList ? (
+                      <>
+                        {lgaList.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.EntryID}>
+                              {item.LgaName}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                    <option value="Others">Others</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="MaritalStatus">Marital Status</label>
+                  <select
+                    id="MaritalStatus"
+                    className="form-control"
+                    required
+                    value={createStaff.MaritalStatus}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    <option value="Married">Married</option>
+                    <option value="Single">Single</option>
+                    <option value="N/A">N/A</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-12 col-md-12 pt-5">
+              <div className="form-group">
+                <label htmlFor="ContactAddress">Contact Address</label>
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  id="ContactAddress"
+                  placeholder="Contact Address"
+                  required
+                  value={createStaff.ContactAddress}
+                  onChange={onEdit}
+                />
+              </div>
+            </div>
+            <h5 className="pt-10">Administrative Details</h5>
+            <hr />
+            <div className="row">
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="StaffType">Staff Type</label>
+                  <select
+                    id="StaffType"
+                    className="form-control"
+                    required
+                    value={createStaff.StaffType}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {data.stafftype ? (
+                      <>
+                        {data.stafftype.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.TypeName}>
+                              {item.TypeName}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="DesignationID">Designation</label>
+                  <select
+                    id="DesignationID"
+                    className="form-control"
+                    required
+                    value={createStaff.DesignationID}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {data.designation ? (
+                      <>
+                        {data.designation.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.EntryID}>
+                              {item.DesignationName}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="GrossPay">Gross Pay</label>
+                  <input
+                    type="float"
+                    id="GrossPay"
+                    className="form-control"
+                    placeholder="Gross Pay"
+                    value={createStaff.GrossPay}
+                    onChange={onEdit}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="DateOfFirstEmployment">
+                    Date Of First Employment
+                  </label>
+                  <input
+                    type="date"
+                    id="DateOfFirstEmployment"
+                    className="form-control"
+                    placeholder="Date Of First Employment"
+                    required
+                    value={formatDate(createStaff.DateOfFirstEmployment)}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="DateOfCurrentEmployment">
+                    Date Of Current Employment
+                  </label>
+                  <input
+                    type="date"
+                    id="DateOfCurrentEmployment"
+                    className="form-control"
+                    placeholder="Date Of Current Employment"
+                    value={formatDate(createStaff.DateOfCurrentEmployment)}
+                    onChange={onEdit}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="ContractStartDate">Contract Start Date</label>
+                  <input
+                    type="date"
+                    id="ContractStartDate"
+                    required
+                    className="form-control"
+                    placeholder="Contract Start Date"
+                    value={formatDate(createStaff.ContractStartDate)}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="ContractEndDate">Contract End Date</label>
+                  <input
+                    type="date"
+                    required
+                    id="ContractEndDate"
+                    className="form-control"
+                    placeholder="Contract End Date"
+                    value={createStaff.ContractEndDate}
+                    //value={formatDate(createStaff.ContractEndDate)}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+
+              <div className="col-lg-4 col-md-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="LineManagerID">Line Manager</label>
+                  <select
+                    id="LineManagerID"
+                    className="form-control"
+                    required
+                    value={createStaff.LineManagerID}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {data.linemanager ? (
+                      <>
+                        {data.linemanager.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.StaffID}>
+                              {item.StaffID} -- {item.FirstName} {item.MiddleName} {item.Surname}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <div className="col-lg-4 col-md-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="DepartmentCode">Department</label>
+                  <select
+                    id="DepartmentCode"
+                    className="form-control"
+                    required
+                    value={createStaff.DepartmentCode}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {data.department ? (
+                      <>
+                        {data.department.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.DepartmentCode}>
+                              {item.DepartmentName}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <div className="col-lg-4 col-md-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="CourseCode">Course</label>
+                  <select
+                    id="CourseCode"
+                    className="form-control"
+                    required
+                    value={createStaff.CourseCode}
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {data.course ? (
+                      <>
+                        {data.course.map((item, index) =>
+                        {
+                          return (
+                            <option key={index} value={item.CourseCode}>
+                              {item.CourseName}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                    <option value="N/A">N/A</option>
+                  </select>
+                </div>
+              </div>
+
+              <h5 className="pt-10">Social Networks (optional section)</h5>
+              <hr />
+
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Facebook">Facebook</label>
+                  <input
+                    type="text"
+                    id="Facebook"
+                    className="form-control"
+                    placeholder="Facebook"
+                    value={createStaff.Facebook}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Twitter">Twitter</label>
+                  <input
+                    type="text"
+                    id="Twitter"
+                    className="form-control"
+                    placeholder="Twitter"
+                    value={createStaff.Twitter}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-4 pt-5">
+                <div className="form-group">
+                  <label htmlFor="LinkedIn">LinkedIn</label>
+                  <input
+                    type="text"
+                    id="Linkedin"
+                    className="form-control"
+                    placeholder="LinkedIn"
+                    value={createStaff.Linkedin}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Scholar">Scholar</label>
+                  <input
+                    type="text"
+                    id="Scholar"
+                    className="form-control"
+                    placeholder="Scholar"
+                    value={createStaff.Scholar}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Researchgate">Researchgate</label>
+                  <input
+                    type="text"
+                    id="Researchgate"
+                    className="form-control"
+                    placeholder="Researchgate"
+                    value={createStaff.Researchgate}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Academia">Academia</label>
+                  <input
+                    type="text"
+                    id="Academia"
+                    className="form-control"
+                    placeholder="Academia"
+                    value={createStaff.Academia}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Orcid">Orcid</label>
+                  <input
+                    type="text"
+                    id="Orcid"
+                    className="form-control"
+                    placeholder="Orcid"
+                    value={createStaff.Orcid}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-6 col-md-12 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Biography"> Biography</label>
+                  <textarea
+                    className="form-control"
+                    rows="3"
+                    id="Biography"
+                    placeholder="Biography"
+                    value={createStaff.Biography}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+              <div className="col-lg-6 col-md-12 pt-5">
+                <div className="form-group">
+                  <label htmlFor="Research">Research</label>
+                  <textarea
+                    className="form-control"
+                    rows="3"
+                    id="Research"
+                    placeholder="Research"
+                    value={createStaff.Research}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+
+              {/*<h5 className="pt-10">Next of Kin Details</h5>*/}
+              {/*<hr />*/}
+
+              {/*<div className="col-lg-4 pt-5">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="NFirstName">First Name</label>*/}
+              {/*    <input*/}
+              {/*      type="text"*/}
+              {/*      id="NFirstName"*/}
+              {/*      className="form-control"*/}
+              {/*      placeholder="First Name"*/}
+              {/*      value={createStaff.NFirstName}*/}
+              {/*      onChange={onEdit}*/}
+              {/*    />*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+              {/*<div className="col-lg-4 pt-5">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="NSurname">Surname</label>*/}
+              {/*    <input*/}
+              {/*      type="text"*/}
+              {/*      id="NSurname"*/}
+              {/*      className="form-control"*/}
+              {/*      placeholder="Surname"*/}
+              {/*      value={createStaff.NSurname}*/}
+              {/*      onChange={onEdit}*/}
+              {/*    />*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+              {/*<div className="col-lg-4 pt-5">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="NMiddleName">Middle Name</label>*/}
+              {/*    <input*/}
+              {/*      type="text"*/}
+              {/*      id="NMiddleName"*/}
+              {/*      className="form-control"*/}
+              {/*      placeholder="Middle Name"*/}
+              {/*      value={createStaff.NMiddleName}*/}
+              {/*      onChange={onEdit}*/}
+              {/*    />*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+              {/*<div className="col-lg-4 pt-5">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="Relationship">Relationship</label>*/}
+              {/*    <select*/}
+              {/*      id="Relationship"*/}
+              {/*      className="form-control"*/}
+              {/*      */}
+              {/*      value={createStaff.Relationship}*/}
+              {/*      onChange={onEdit}*/}
+              {/*    >*/}
+              {/*      <option value="">Select Option</option>*/}
+              {/*      <option value="Wife">Wife</option>*/}
+              {/*      <option value="Husband">Husband</option>*/}
+              {/*      <option value="Mother">Mother</option>*/}
+              {/*      <option value="Sister">Sister</option>*/}
+              {/*      <option value="Son">Son</option>*/}
+              {/*      <option value="Brother">Brother</option>*/}
+              {/*      <option value="Father">Father</option>*/}
+              {/*      <option value="Daughter">Daughter</option>*/}
+              {/*      <option value="Uncle">Uncle</option>*/}
+              {/*      <option value="Aunty">Aunty</option>*/}
+              {/*      <option value="N/A">N/A</option>*/}
+              {/*    </select>*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+              {/*<div className="col-lg-4 pt-5">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="NPhoneNumber">PhoneNumber</label>*/}
+              {/*    <input*/}
+              {/*      type="number"*/}
+              {/*      id="NPhoneNumber"*/}
+              {/*      className="form-control"*/}
+              {/*      placeholder="Phone Number"*/}
+              {/*      value={createStaff.NPhoneNumber}*/}
+              {/*      onChange={onEdit}*/}
+              {/*    />*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+              {/*<div className="col-lg-4 pt-5">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="NEmailAddress">Email Address</label>*/}
+              {/*    <input*/}
+              {/*      type="email"*/}
+              {/*      id="NEmailAddress"*/}
+              {/*      className="form-control"*/}
+              {/*      placeholder="Email Address"*/}
+              {/*      value={createStaff.NEmailAddress}*/}
+              {/*      onChange={onEdit}*/}
+              {/*    />*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+              {/*<div className="col-lg-12 col-md-12 pt-5">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="NContactAddress">Contact Address</label>*/}
+              {/*    <textarea*/}
+              {/*      className="form-control"*/}
+              {/*      rows="3"*/}
+              {/*      id="NContactAddress"*/}
+              {/*      placeholder="Contact Address"*/}
+              {/*      required*/}
+              {/*      value={createStaff.NContactAddress}*/}
+              {/*      onChange={onEdit}*/}
+              {/*    />*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+
+              <h5 className="pt-10">Account Status</h5>
+              <hr />
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="IsAcademicStaff">Is Academic Staff?</label>
+                  <select
+                    id="IsAcademicStaff"
+                    className="form-control"
+                    value={createStaff.IsAcademicStaff}
+                    onChange={onEdit}
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+              </div>
+              <div className="col-lg-6 col-md-6 pt-5">
+                <div className="form-group">
+                  <label htmlFor="IsActive">Is Staff Active?</label>
+                  <select
+                    id="IsActive"
+                    className="form-control"
+                    value={createStaff.IsActive}
+                    onChange={onEdit}
+                    required
+                  >
+                    <option value="">Select Option</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group pt-10">
+              <button type="submit" className="btn btn-primary w-100">
+                Submit
+              </button>
+            </div>
+          </form>
+        </Modal>
+      </div>
+    </div>
+  );
+}
+
+const mapStateToProps = (state) =>
+{
+  return {
+    loginData: state.LoginDetails,
+  };
+};
+
+export default connect(mapStateToProps, null)(AddEditStaff);

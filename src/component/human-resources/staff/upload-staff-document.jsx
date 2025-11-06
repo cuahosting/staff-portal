@@ -1,0 +1,435 @@
+import React, { useEffect, useState } from "react";
+import PageHeader from "../../common/pageheader/pageheader";
+import axios from "axios";
+import { projectName, serverLink, simpleFileUploadAPIKey } from "../../../resources/url";
+import Loader from "../../common/loader/loader";
+import { showAlert } from "../../common/sweetalert/sweetalert";
+import { toast } from "react-toastify";
+import SimpleFileUpload from "react-simple-file-upload";
+import { connect } from "react-redux";
+import Select2 from "react-select2-wrapper";
+import "react-select2-wrapper/css/select2.css";
+
+function UploadStaffDocument(props)
+{
+  const token = props.loginData[0].token;
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [staffList, setStaffList] = useState([]);
+  const [addDocument, setAddDocument] = useState(false);
+  const [staffDocuments, setStaffDocuments] = useState([]);
+  const addForm = () =>
+  {
+    setAddDocument(true);
+    setAddStaffDocument({
+      StaffID: "",
+      DocumentType: "",
+      file: "",
+      InsertedBy: "",
+      InsertedDate: "",
+    });
+  };
+  const [addStaffDocument, setAddStaffDocument] = useState({
+    StaffID: "",
+    DocumentType: "",
+    file: "",
+    InsertedBy: "",
+    InsertedDate: "",
+  });
+
+  useEffect(() =>
+  {
+    getStaff().then((r) => { });
+  }, []);
+
+  const deleteItem = async (id, image) =>
+  {
+    if (id)
+    {
+      toast.info(`Deleting... Please wait!`);
+      await axios
+        .delete(`${serverLink}application/pg/document/delete/${id}/${image}`, token)
+        .then((res) =>
+        {
+          if (res.data.message === "success")
+          {
+            // props.update_app_data();
+            toast.success(`Deleted`);
+          } else
+          {
+            toast.error(
+              `Something went wrong. Please check your connection and try again!`
+            );
+          }
+        })
+        .catch((error) =>
+        {
+          console.log("NETWORK ERROR", error);
+        });
+    }
+  };
+
+  const getStaff = async () =>
+  {
+    await axios
+      .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
+      .then((response) =>
+      {
+        let rows = [];
+        response.data.length > 0 &&
+          response.data.map((row) =>
+          {
+            rows.push({ text: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname, id: row.StaffID });
+          });
+        setStaffList(rows);
+        setIsLoading(false);
+      })
+      .catch((err) =>
+      {
+        console.log("NETWORK ERROR");
+      });
+  };
+
+  const getStaffDocument = async (staffId) =>
+  {
+    await axios
+      .get(`${serverLink}staff/hr/staff-management/staff/document/`, staffId, token)
+      .then((response) =>
+      {
+        setStaffDocuments(response.data);
+      })
+      .catch((err) =>
+      {
+        console.log("NETWORK ERROR");
+      });
+  };
+
+
+  const handlePassportUpload = async (url) =>
+  {
+    if (url !== '' && addStaffDocument.DocumentType !== '' && addStaffDocument.DocumentType.length > 0
+      && addStaffDocument.InsertedDate !== '' && addStaffDocument.InsertedDate.length > 0
+      && addStaffDocument.InsertedBy !== '' && addStaffDocument.InsertedBy.length > 0)
+    {
+      await showAlert("EMPTY FIELD", `All fields are required`, "error");
+      return false;
+    }
+
+
+
+
+    const sendData = {
+      StaffID: addStaffDocument.StaffID,
+      DocumentType: addStaffDocument.DocumentType,
+      Document: url,
+      InsertedBy: props.loginData[0].StaffID,
+      InsertedDate: addStaffDocument.InsertedDate,
+    };
+
+    console.log(sendData)
+
+    // return false;
+    await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/document`, sendData, token)
+      .then((res) =>
+      {
+        if (res.data.message === "success")
+        {
+          toast.success(`Document Uploaded`);
+          setAddDocument(false);
+
+        } else
+        {
+          toast.error(`Something went wrong submitting your document!`);
+        }
+      })
+      .catch((error) =>
+      {
+        console.log("Error", error);
+      });
+  }
+
+  const onSubmit = async (e) =>
+  {
+    e.preventDefault();
+    for (let key in addStaffDocument)
+    {
+      if (
+        addStaffDocument.hasOwnProperty(key) &&
+        key !== "InsertedBy" &&
+        key !== "InsertedDate"
+      )
+      {
+        if (addStaffDocument[key] === "")
+        {
+          await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
+          return false;
+        }
+      }
+    }
+
+    if (addStaffDocument.file.size / 1024 > 2048)
+    {
+      toast.error(`File Size Can't be more than 2MB`);
+      return false;
+    }
+
+    toast.info(`Submitting... Please wait!`);
+
+    let formData = new FormData();
+    formData.append("file", addStaffDocument.file);
+
+    await axios
+      .post(`${serverLink}staff/hr/staff-management/uploadDocument`, formData, token)
+      .then((res) =>
+      {
+        if (res.data.type === "success")
+        {
+          const sendData = {
+            StaffID: addStaffDocument.StaffID,
+            DocumentType: addStaffDocument.DocumentType,
+            Document: res.data.file.filename,
+            InsertedBy: addStaffDocument.InsertedBy,
+            InsertedDate: addStaffDocument.InsertedDate,
+          };
+          axios
+            .post(
+              `${serverLink}staff/hr/staff-management/upload/staff/document`,
+              sendData, token
+            )
+            .then((res) =>
+            {
+              if (res.data.message === "success")
+              {
+                // props.update_app_data();
+                toast.success(`Document Uploaded`);
+                setAddDocument(false);
+              } else
+              {
+                toast.error(`Something went wrong submitting your document!`);
+              }
+            })
+            .catch((error) =>
+            {
+              console.log("Error", error);
+            });
+        } else
+        {
+          toast.error(
+            `Something went wrong uploading your document. Please try again!`
+          );
+        }
+      })
+      .catch((error) =>
+      {
+        console.log("NETWORK ERROR", error);
+      });
+  };
+
+  const onEdit = (e) =>
+  {
+    const id = e.target.id;
+    const value = id === "file" ? e.target.files[0] : e.target.value;
+
+    setAddStaffDocument({
+      ...addStaffDocument,
+      [id]: value,
+    });
+
+    getStaffDocument().then((r) => { });
+  };
+
+  const handleStaffEdit = (e) =>
+  {
+    setAddStaffDocument({
+      ...addStaffDocument,
+      [e.target.id]: e.target.value,
+    });
+  }
+
+
+  return isLoading ? (
+    <Loader />
+  ) : (
+    <div className="d-flex flex-column flex-row-fluid">
+      <PageHeader
+        title={"Upload Staff Document"}
+        items={["Human Resource", "Staff Management", "Upload Staff Document"]}
+      />
+      <div className="row">
+        <div className="register">
+          {addDocument ? (
+            <div style={{ float: "right" }}>
+              {/*<button className="btn btn-primary" onClick={onSubmit}>*/}
+              {/*  Save*/}
+              {/*</button>*/}
+            </div>
+          ) : (
+            <div style={{ float: "right" }}>
+              <button className="btn btn-primary" onClick={addForm}>
+                Add Staff Document
+              </button>
+            </div>
+          )}
+          <br />
+          <br />
+          <br />
+          <hr />
+
+          {addDocument ? (
+            <div className="row">
+              <div className="col-lg-4 col-md-4">
+                <div className="form-group">
+                  <label htmlFor="DocumentType">StaffID</label>
+                  <Select2
+                    id="StaffID"
+                    value={addStaffDocument.StaffID}
+                    data={staffList}
+                    onSelect={handleStaffEdit}
+                    options={{
+                      placeholder: "Search staff",
+                    }}
+                  />
+
+                  {/* <select
+                    id="StaffID"
+                    name="StaffID"
+                    value={addStaffDocument.StaffID}
+                    className="form-control"
+                    onChange={onEdit}
+                  >
+                    <option value="">Select Option</option>
+                    {staffList ? (
+                      <>
+                        {staffList.map((item, index) => {
+                          return (
+                            <option key={index} value={item.StaffID}>
+                              {item.StaffID}
+                            </option>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </select> */}
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-4">
+                <div className="form-group">
+                  <label htmlFor="DocumentType">Document Type</label>
+                  <input
+                    type="text"
+                    id="DocumentType"
+                    className="form-control"
+                    placeholder="Enter Document Title"
+                    value={addStaffDocument.DocumentType}
+                    onChange={onEdit}
+                  />
+                </div>
+              </div>
+
+
+              <div className="col-lg-4 col-md-4">
+                <div className="form-group">
+                  <label htmlFor="Designation">Upload Document </label>
+                  <strong className="text-danger"><small>File must not exceed 2mb</small></strong>
+                  <SimpleFileUpload
+                    apiKey={simpleFileUploadAPIKey}
+                    tag={`${projectName}-passport`}
+                    onSuccess={handlePassportUpload}
+                    accepted={"image/*"}
+                    maxFileSize={2}
+                    preview="false"
+                    width="100%"
+                    height="100"
+                  />
+
+                  <span className="badge bg-primary">
+                    Only .jpg, .png, .jpeg are allowed, Max of 2MB
+                  </span>
+                </div>
+              </div>
+
+
+              {/*<div className="col-lg-4 col-md-4">*/}
+              {/*  <div className="form-group">*/}
+              {/*    <label htmlFor="Designation">File Name</label>*/}
+              {/*    <input*/}
+              {/*      type="file"*/}
+              {/*      accept=".pdf, .jpg, .png, .jpeg"*/}
+              {/*      id="file"*/}
+              {/*      name="file"*/}
+              {/*      className="form-control"*/}
+              {/*      placeholder="File Name"*/}
+              {/*      required*/}
+              {/*      onChange={onEdit}*/}
+              {/*    />*/}
+              {/*    <span className="badge bg-secondary">*/}
+              {/*      Only .pdf, .jpg, .png, .jpeg are allowed*/}
+              {/*    </span>*/}
+              {/*  </div>*/}
+              {/*</div>*/}
+
+            </div>
+          ) : null}
+
+          {/*<div className="table-responsive">*/}
+          {/*  {!staffDocuments.length < 1 ? (*/}
+          {/*    <table className="table table-hover">*/}
+          {/*      <thead>*/}
+          {/*        <tr>*/}
+          {/*          <th>Document Type</th>*/}
+          {/*          <th>File Name</th>*/}
+          {/*          <th>Action</th>*/}
+          {/*        </tr>*/}
+          {/*      </thead>*/}
+          {/*      <tbody>*/}
+          {/*        {staffDocuments.map((item, index) => (*/}
+          {/*          <tr key={index}>*/}
+          {/*            <td>{item.Document}</td>*/}
+          {/*            <td>*/}
+          {/*              <a*/}
+          {/*                target="_blank"*/}
+          {/*                // referrerPolicy="no-referrer"*/}
+          {/*                // href={`${serverLink}public/uploads/application/document/${item.FileName}`}*/}
+          {/*              >*/}
+          {/*                <i className="fa fa-file-pdf-o" />*/}
+          {/*              </a>*/}
+          {/*            </td>*/}
+          {/*            <td>*/}
+          {/*              <Button*/}
+          {/*                variant="danger"*/}
+          {/*                onClick={() =>*/}
+          {/*                  deleteItem(item.EntryID, item.FileName)*/}
+          {/*                }*/}
+          {/*              >*/}
+          {/*                <i*/}
+          {/*                  className="fa fa-trash-o small"*/}
+          {/*                  style={{ fontsize: "30px" }}*/}
+          {/*                ></i>*/}
+          {/*              </Button>*/}
+          {/*            </td>*/}
+          {/*          </tr>*/}
+          {/*        ))}*/}
+          {/*      </tbody>*/}
+          {/*    </table>*/}
+          {/*  ) : (*/}
+          {/*    <div className="alert alert-info">*/}
+          {/*      There is no record. Click on Add Document*/}
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</div>*/}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const mapStateToProps = (state) =>
+{
+  return {
+    loginData: state.LoginDetails,
+  };
+};
+
+export default connect(mapStateToProps, null)(UploadStaffDocument);

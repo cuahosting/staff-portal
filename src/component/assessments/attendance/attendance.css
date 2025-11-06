@@ -1,0 +1,40 @@
+@media print {
+    .text-size{
+        font-size: 10px !important;
+    }
+    #printPageButton {
+        display: none;
+    }
+
+    .hideSection {
+        display: none;
+    }
+
+    .hideFooter {
+        display: none !important;
+    }
+    .pagebreak {
+        page-break-before: always;
+    }
+}
+
+.item-data {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.head{
+    text-align: center;
+}
+
+.head-item {
+    display: flex;
+    justify-content: center;
+}
+
+.head-main{
+    margin: auto;
+    position: relative;
+
+}

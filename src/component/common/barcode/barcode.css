@@ -1,0 +1,49 @@
+.BarcodeContainer {
+    font-family: sans-serif;
+    text-align: center;
+}
+
+.item-data {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.head{
+    text-align: center;
+}
+
+.head-item {
+    display: flex;
+    justify-content: center;
+}
+
+.head-main{
+    margin: auto;
+    position: relative;
+
+}
+
+/*.bgImg{*/
+/*    background-image: url('../images/logo2.PNG');*/
+/*    background-repeat: no-repeat;*/
+/*    background-size:  cover;*/
+/*    background-position: center;*/
+/*}*/
+
+
+.img-responsive{
+    max-height:178.22px;
+}
+
+/*@media print {*/
+/*    .hero-image {*/
+/*        -webkit-print-color-adjust: exact !important; !*Chrome, Safari *!*/
+/*        color-adjust: exact !important;  !*Firefox*!*/
+/*        background-image: url('../images/logo2.PNG')  !important;*/
+/*        background-repeat: no-repeat  !important;*/
+/*        background-size: cover  !important;*/
+/*        background-position: center  !important;*/
+
+/*    }*/
+/*}*/

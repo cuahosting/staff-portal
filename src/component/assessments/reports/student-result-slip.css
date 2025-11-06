@@ -1,0 +1,102 @@
+@media print {
+    .printPageButton {
+        display: none;
+    }
+    .page {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: white;
+        page-break-after: always;
+    }
+
+    .myDivToPrint {
+        height: 100%;
+        width: 100%;
+        position:absolute;
+        top: 0;
+        left: 0;
+        margin: 0;
+        padding: 10px;
+        background-color: transparent;
+        font: 10pt "Tahoma";
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: white;
+        page-break-after: always;
+    }
+}
+
+table {
+    font: 10pt "Tahoma";
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+th {
+    font: 10pt "Tahoma";
+    font-weight: bold;
+}
+
+table, th, td{
+    border: 1px solid lightgrey;
+    height: 25px !important;
+    padding: 3px;
+}
+
+
+.row {
+    width: 100%
+}
+
+.col-2 {
+    width: 15%;
+    float: left;
+}
+
+.col-4 {
+    width: 35%;
+    float: left;
+}
+
+.col-3 {
+    width: 25%;
+    float: left;
+}
+
+.text-upper {
+    text-transform: capitalize;
+}
+
+.text-center {
+    text-align: center;
+}
+
+table {
+    font: 10pt "Tahoma";
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+th {
+    font: 8pt "Tahoma";
+    font-weight: bold;
+}
+
+table, th, td {
+    border: 1px solid lightgrey;
+    height: 25px !important;
+    padding: 3px;
+}
+
+.header {
+    width: 100%;
+    text-align: center;
+}
+

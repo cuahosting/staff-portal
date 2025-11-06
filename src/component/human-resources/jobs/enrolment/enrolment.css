@@ -1,0 +1,9 @@
+.social {
+    opacity: 1
+}
+
+.social:hover {
+    width: '60px';
+    opacity: 0.5;
+
+}

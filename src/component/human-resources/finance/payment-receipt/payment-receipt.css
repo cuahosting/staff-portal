@@ -1,0 +1,17 @@
+@media print {
+    #printPageButton {
+        display: none;
+    }
+
+    .hideSection {
+        display: none;
+    }
+
+    .hideFooter {
+        display: none !important;
+    }
+
+    #MainBody {
+        margin-left: 0px !important;
+    }
+}

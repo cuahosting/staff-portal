@@ -1,0 +1,90 @@
+import React from "react";
+
+export default function StudentGroupForm(props) {
+    return (
+        <>
+            <div className="form-group mb-4">
+                <label htmlFor="GroupName">Group Name</label>
+                <input
+                    type="text"
+                    id={"GroupName"}
+                    onChange={props.onEdit}
+                    value={props.data.GroupName}
+                    className={"form-control"}
+                    placeholder={"Enter the Group Name"}
+                />
+            </div>
+            <div className="form-group mb-4">
+                <label htmlFor="GroupCode">Group Code</label>
+                <input
+                    type="text"
+                    id={"GroupCode"}
+                    onChange={props.onEdit}
+                    value={props.data.GroupCode}
+                    className={"form-control"}
+                    placeholder={"Enter the Group Code"}
+                />
+            </div>
+            <div className="form-group mb-4">
+                <label htmlFor="CourseCode">Course </label>
+                <select
+                    id={"CourseCode"}
+                    onChange={props.onEdit}
+                    value={props.data.CourseCode}
+                    className={"form-control"}
+                >
+                    <option>Select Course</option>
+                    {
+                        props.courseList.length > 0 && props.courseList.map((course, index) => {
+                            return <option key={index} value={course.CourseCode}>{course.CourseName}</option>
+                        })
+                    }
+
+                </select>
+            </div>
+            <div className="row">
+                <div className="form-group mb-4 col-md-6">
+                    <label htmlFor="CourseLevel">Course Level</label>
+                    <select
+                        id={"CourseLevel"}
+                        onChange={props.onEdit}
+                        value={props.data.CourseLevel}
+                        className={"form-control"}
+                    >
+                        <option>Select Course Level</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="300">300</option>
+                        <option value="400">400</option>
+                        <option value="500">500</option>
+                        <option value="600">600</option>
+                        <option value="700">700</option>
+                        <option value="800">800</option>
+                        <option value="900">900</option>
+                    </select>
+                </div>
+                <div className="form-group mb-4 col-md-6">
+                    <label htmlFor="CourseSemester">Course Semester </label>
+                    <select
+                        id={"CourseSemester"}
+                        onChange={props.onEdit}
+                        value={props.data.CourseSemester}
+                        className={"form-control"}
+                    >
+                        <option>Select Course Semester</option>
+                        <option value="First">First Semester</option>
+                        <option value="Second">Second Semester</option>
+                    </select>
+                </div>
+            </div>
+            <div className="form-group pt-2">
+                <button onClick={props.onSubmit} id="kt_modal_new_address_submit" data-kt-indicator={props.isFormLoading} className="btn btn-primary w-100">
+                    <span className="indicator-label">Submit</span>
+                    <span className="indicator-progress">Please wait...
+                            <span className="spinner-border spinner-border-sm align-middle ms-2"/>
+                    </span>
+                </button>
+            </div>
+        </>
+    )
+}

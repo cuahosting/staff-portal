@@ -1,0 +1,118 @@
+.id_front {
+    height: 375px;
+    width: 250px;
+    position: absolute;
+    border-radius: 10px;
+}
+
+.id_front_top {
+    height: 30%;
+    width: 100%;
+    /*background-color: rgb(153, 13, 13);*/
+    background-color: #082c3c;
+    z-index: -1;
+    padding: 10px;
+    z-index: 1;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.id_front_top_text {
+    color: white;
+    font-weight: bolder;
+    font-size: 20px;
+    margin-left: 20px;
+    line-height: 1.2;
+}
+
+.id_front_middle_image {
+    height: 100px;
+    width: 100px;
+    background-color:rgb(255, 253, 253);
+    border-radius: 10px;
+    position: absolute;
+    top: 90px;
+    left: 75px;
+    z-index: 5;
+}
+
+.id_front_bottom {
+    height: 70%;
+    width: 100%;
+    background-color: #082c3c;
+    background-color: rgb(255, 253, 253);
+    position: absolute;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+
+.id_back {
+    height: 375px;
+    width: 250px;
+    position: absolute;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 1px;
+    /*border-color: rgb(153, 13, 13);*/
+    border-color: #082c3c;
+}
+
+.id_back_top {
+    height: 25%;
+    width: 100%;
+    background-color: rgb(255, 253, 253);
+    z-index: 1;
+    padding: 10px;
+    z-index: 1;
+    text-align: center;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+
+}
+
+.id_card_footer_front {
+    font-size: 14px;
+    /*background-color: rgb(153, 13, 13);*/
+    background-color: #082c3c;
+    color: white;
+    bottom: absolute;
+    text-align: center;
+    position: relative;
+    top: 26px;
+    z-index: 5;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.id_card_footer_back {
+    font-size: 14px;
+    /*background-color: rgb(153, 13, 13);*/
+    background-color: #082c3c;
+    color: white;
+    text-align: center;
+    position: relative;
+    top: 45px;
+    z-index: 5;
+    border-bottom-left-radius:8px;
+    border-bottom-right-radius: 8px;
+}
+
+.bottom {
+    height: 70%;
+    width: 100%;
+    background-color: rgb(255, 253, 253);
+    position: absolute;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.bottom p {
+    position: relative;
+    top: 60px;
+    text-align: center;
+    text-transform: capitalize;
+    font-weight: bold;
+    font-size: 20px;
+    text-emphasis: spacing;
+}

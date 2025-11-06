@@ -1,0 +1,113 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { serverLink } from "../../../resources/url";
+import { connect } from "react-redux/es/exports";
+import Loader from "../../common/loader/loader";
+import {toast} from "react-toastify";
+import PageHeader from "../../common/pageheader/pageheader";
+import {currencyConverter, formatDate, formatDateAndTime, sumObjectArray} from "../../../resources/constants";
+import Modal from "../../common/modal/modal";
+import ReportTable from "../../common/table/report_table";
+import swal from "sweetalert";
+import Select from "react-select";
+
+function FinanceReportBankReconciliation(props) {
+    const token = props.LoginDetails[0].token;
+    const [isLoading, setIsLoading] = useState(true);
+    const columns = ["S/N", "Transaction Date", "Description", "Debit Account", "Credit Account", "Amount", "Added By", "Added Date"];
+    const [dataTable, setDataTable] = useState([]);
+    const [transactionList, setTransactionList] = useState([])
+    const [accountList, setAccountList] = useState([])
+    const [reportData, setReportData] = useState({start_date:'', end_date:''})
+    const getAccountName = (account_list, account_id) => {
+        const list = account_list.filter(r=>r.EntryID === account_id);
+        return list.length > 0 ? list[0].AccountName : 'No Account'
+    }
+
+    const getData = async () => {
+        await axios.get(`${serverLink}staff/finance/finance-and-budget/transaction-data`, token)
+            .then((result) => {
+                if (result.data.message === 'success') {
+                    setTransactionList(result.data.data)
+                    setAccountList(result.data.account)
+                }
+                setIsLoading(false);
+            })
+            .catch((err) => {
+                toast.error("NETWORK ERROR")
+            });
+    }
+
+    const handleChange = (e) => {
+        const report_data = {
+            ...reportData,
+            [e.target.id]: e.target.value
+        };
+        setReportData(report_data)
+        if (report_data.start_date !== '' && report_data.end_date !== '') {
+            let transaction_list = transactionList.filter(item => {return (new Date(item.TransactionDate).getTime() >= new Date(report_data.start_date).getTime() && new Date(item.TransactionDate).getTime() <= new Date(report_data.end_date).getTime())});
+
+            if (transaction_list.length > 0) {
+                let rows = [];
+                transaction_list.map((item, index) => {
+                    rows.push([
+                        index+1, formatDateAndTime(item.TransactionDate, 'date'), item.Description, getAccountName(accountList, item.DebitAccountID), getAccountName(accountList, item.CreditAccountID),
+                        currencyConverter(item.Amount), item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date')
+                    ]);
+                });
+                rows.push([`${transaction_list.length} rows`, '--', '--', '--', '--', currencyConverter(sumObjectArray(transaction_list, 'Amount')), '--', '--'])
+                setDataTable(rows)
+            } else {
+                toast.error("No transaction record within the selected date range");
+                setDataTable([])
+            }
+        }
+    }
+
+    useEffect(() => {
+        getData()
+    }, []);
+
+    return isLoading ? (
+            <Loader />
+        ) :
+        (
+            <>
+                <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width:'100%' }}>
+                    <div className="">
+                        <PageHeader
+                            title={"BANK RECONCILIATION REPORT"}
+                            items={["Human-Resources", "Finance & Budget", "Bank Reconciliation Report"]}
+                        />
+                        <div className="row col-md-12">
+                            <div className="col-md-6 mb-3">
+                                <label htmlFor="start_date">Report Start Date</label>
+                                <input type="date" id="start_date" className="form-control" value={reportData.start_date} onChange={handleChange}/>
+                            </div>
+                            <div className="col-md-6 mb-3">
+                                <label htmlFor="end_date">Report End Date</label>
+                                <input type="date" id="end_date" className="form-control" disabled={reportData.start_date===''} min={reportData.start_date} value={reportData.end_date} onChange={handleChange}/>
+                            </div>
+                        </div>
+                        <div className="row col-md-12" style={{width:'100%'}}>
+                            <ReportTable
+                                title={`Bank Reconciliation Report`}
+                                columns={columns}
+                                data={dataTable}
+                                height={"600px"}
+                            />
+                        </div>
+                    </div>
+
+                </div>
+            </>
+        )
+}
+
+
+const mapStateToProps = (state) => {
+    return {
+        LoginDetails: state.LoginDetails,
+    };
+};
+export default connect(mapStateToProps, null)(FinanceReportBankReconciliation);

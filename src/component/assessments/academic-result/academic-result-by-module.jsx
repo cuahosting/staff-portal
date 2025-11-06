@@ -1,0 +1,158 @@
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux/es/exports";
+import { serverLink } from "../../../resources/url";
+import axios from "axios";
+import Loader from "../../common/loader/loader";
+import PageHeader from "../../common/pageheader/pageheader";
+import ReportTable from "../../common/table/report_table";
+import { toast } from "react-toastify";
+import Select from "react-select";
+
+function AcademicResultByModule(props)
+{
+    const token = props.LoginDetails[0].token;
+    const staff = props.LoginDetails[0].StaffID;
+
+    const [isLoading, setIsLoading] = useState(true);
+    const columns = ["S/N", "StudentID", "Student", "Module", "Level", "Semester", "Grade", "CAs", "Exams", "Total"];
+    const [data, setData] = useState([]);
+    const [semesterList, setSemesterList] = useState([]);
+    const [semesterOptions, setSemesterOptions] = useState([]);
+    const [moduleList, setModules] = useState([]);
+    const [moduleOptions, setModulesOptions] = useState([]);
+    const [moduleCode, setModuleCode] = useState({
+        ModuleCode: "",
+        ModuleCode2: "",
+    })
+
+    const getModules = async () =>
+    {
+        await axios
+            .get(`${serverLink}staff/assessment/exam/module/${staff}`, token)
+            .then((result) =>
+            {
+                let rows = [];
+                if (result.data.length > 0)
+                {
+                    const mapFromRes = new Map(result.data.map(c => [c.ModuleCode, c]));
+
+                    const uniqueModules = [...mapFromRes.values()];
+
+                    uniqueModules.map((row) =>
+                    {
+                        rows.push({ value: row.ModuleCode, label: row.ModuleName + ` (${row.ModuleCode})` })
+                    });
+                    setModulesOptions(rows)
+                    setModules(uniqueModules);
+                }
+                setIsLoading(false)
+            });
+
+
+    };
+
+    const getData = async (module) =>
+    {
+        setIsLoading(true)
+        await axios.get(`${serverLink}staff/assessment/exam/result/by/module/${module}`, token)
+            .then((result) =>
+            {
+                let rows = [];
+                if (result.data.length > 0)
+                {
+                    result.data.map((exam, index) =>
+                    {
+                        rows.push([
+                            index + 1,
+                            exam.StudentID,
+                            exam.StudentName,
+                            exam.ModuleCode,
+                            exam.StudentLevel,
+                            exam.StudentSemester,
+                            exam.StudentGrade,
+                            exam.CAScore,
+                            exam.ExamScore,
+                            exam.Total
+                        ]);
+                    });
+                    setIsLoading(false)
+                }
+                else
+                {
+                    toast.error('no record');
+                    setIsLoading(false)
+                }
+                setIsLoading(false);
+                setData(rows)
+            })
+            .catch((err) =>
+            {
+                console.log(err)
+                console.log("NETWORK ERROR");
+            });
+    }
+
+
+
+    const onDepartmentChange = (e) =>
+    {
+        setModuleCode({
+            ...moduleCode,
+            ModuleCode: e.value,
+            ModuleCode2: e,
+        })
+        getData(e.value);
+    }
+
+
+    useEffect(() =>
+    {
+        getModules();
+    }, [""]);
+
+    return isLoading ? (
+        <Loader />
+    ) : (
+        <div className="d-flex flex-column flex-row-fluid">
+            <PageHeader
+                title={"ACADEMIC RESULT BY MODULE"}
+                items={["Assessment", "ACADEMIC RESULT", " BY MODULE"]}
+            />
+            <div className="row">
+                {
+                    <div className="col-md-12 mb-4 form-group">
+                        <label htmlFor="_Semester">Select Module</label>
+                        <Select
+                            name="ModuleCode"
+                            className="form-select form-select"
+                            value={moduleCode.ModuleCode2}
+                            onChange={onDepartmentChange}
+                            options={moduleOptions}
+                            placeholder="Select Module"
+                        />
+                    </div>
+                }
+
+            </div>
+            <div className="flex-column-fluid mb-2">
+                <div className="row">
+                    {
+                        <div className="mt-4">
+                            {data.length > 0 &&
+                                <ReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY MODULE"} />
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const mapStateToProps = (state) =>
+{
+    return {
+        LoginDetails: state.LoginDetails,
+    };
+};
+export default connect(mapStateToProps, null)(AcademicResultByModule);
