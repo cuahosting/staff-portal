@@ -96,7 +96,7 @@ const StaffLeaveApplications = (props) => {
                                     data-bs-target="#leave" data-bs-toggle="modal"
                                     onClick={async () => {
                                         try {
-                                            const cat_ = await leave_cat.length > 0 ?
+                                            const cat_ = (await leave_cat.length) > 0 ?
                                                 leave_cat.filter(x => x.StaffID.toString() === item.StaffID.toString()) : []
                                             if (cat_.length > 0) {
                                                 setTimeout(async () => {

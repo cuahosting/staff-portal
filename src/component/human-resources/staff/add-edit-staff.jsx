@@ -331,7 +331,7 @@ function AddEditStaff(props)
                 </button>
               ),
               view: (
-                <Link
+                (<Link
                   to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
                 >
                   <button
@@ -340,7 +340,7 @@ function AddEditStaff(props)
                   >
                     <i className="fa fa-eye" />
                   </button>
-                </Link>
+                </Link>)
                 //
                 // <button
                 //     className="btn btn-sm btn-primary"

@@ -103,7 +103,7 @@ function AttendanceList(props)
                                     //     checked={true}
                                     //     disabled
                                     // />
-                                    <span className="text-success">attended</span>
+                                    (<span className="text-success">attended</span>)
                                 ),
                         });
                     });

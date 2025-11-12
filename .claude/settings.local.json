@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm ls:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npx @mui/codemod@latest v5.0.0/preset-safe:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

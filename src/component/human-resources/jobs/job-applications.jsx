@@ -57,7 +57,7 @@ function JobApplications(props) {
 
     const getData = async () => {
         departmentList.length > 0 &&
-            await axios.get(`${serverLink}jobs/job-applications/all/list`, token)
+            (await axios.get(`${serverLink}jobs/job-applications/all/list`, token)
                 .then((result) => {
                     if (result.data.length > 0) {
                         let rows = [];
@@ -91,7 +91,7 @@ function JobApplications(props) {
                 .catch((err) => {
                     console.log(err)
                     console.log('NETWORK ERROR');
-                });
+                }));
     }
 
 

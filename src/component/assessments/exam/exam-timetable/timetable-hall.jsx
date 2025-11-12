@@ -282,7 +282,7 @@ function ExamTimeTableHall(props) {
                                         })
                                         setIsSubmitting(false)
 
-                                        let vacant_spaces = await result.data.length > 0 ?
+                                        let vacant_spaces = (await result.data.length) > 0 ?
                                             result.data.filter(x => parseInt(x.VenueID) === parseInt(createVenue.VenueID) &&
                                                 x.StartTime.toString() === exam.StartTime.toString() &&
                                                 x.EndTime.toString() === exam.EndTime.toString()
