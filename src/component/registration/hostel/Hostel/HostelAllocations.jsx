@@ -13,8 +13,7 @@ import {
   CommentsDisabledOutlined,
   ConnectingAirportsOutlined,
 } from "@mui/icons-material";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import { useForm } from "react-hook-form";
 import Select from 'react-select';
 
@@ -628,7 +627,7 @@ function HostelAllocations(props) {
             <form onSubmit={handleSubmit(allocateBed)} novalidate>
               <div className="form-group">
                 <label htmlFor="hostelFor">Select Student</label>
-                <Select2
+                <Select
                                             id="StudentID"
                                             defaultValue={""}
                                             data={studentSelectList}

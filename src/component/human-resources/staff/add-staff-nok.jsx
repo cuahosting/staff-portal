@@ -6,8 +6,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 
 function AddStaffNOK(props)
 {
@@ -237,7 +236,7 @@ function AddStaffNOK(props)
               <div className="col-lg-6 col-md-6 pt-5">
                 <div className="form-group">
                   <label htmlFor="StaffID">StaffID</label>
-                  <Select2
+                  <Select
                     id="StaffID"
                     value={addStaffNOK.StaffID}
                     data={staffList}

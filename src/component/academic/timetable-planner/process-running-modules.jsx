@@ -6,8 +6,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert, showConfirm, showConfirmAndContinue } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import ReportTable from "../../common/table/report_table";
 import { showContentAlert } from "../../common/sweetalert/sweetalert";
 
@@ -204,7 +203,7 @@ function ProcessRunningModules(props) {
                         <div className="row col-md 12 mt-4">
                             <div className="col-md-12 mt-2 mb-2">
                                 <label htmlFor="SemesterCode">School Semester</label>
-                                <Select2
+                                <Select
                                     id="SemesterCode"
                                     value={data.SemesterCode}
                                     data={semesterList}

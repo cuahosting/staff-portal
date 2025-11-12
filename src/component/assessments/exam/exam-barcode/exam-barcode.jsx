@@ -6,8 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import LinearProgressWithLabel from "../../../common/linear-progress-bar/linear-progress-bar";
 import Box from "@mui/material/Box";
 import Table from "../../../common/table/table";
@@ -493,7 +492,7 @@ function ExamBarcode(props) {
                                     <div className="tab-pane fade active show" id="semester" role="tabpanel">
                                         <div className="d-flex col-md-12">
                                             <div className="col-md-11 form-group">
-                                                <Select2
+                                                <Select
                                                     id="SemesterCode"
                                                     name="SemesterCode"
                                                     data={semesterList}
@@ -525,7 +524,7 @@ function ExamBarcode(props) {
                                         <div className={"row"}>
                                             <div className="form-group col-md-5 mb-4">
                                                 <label htmlFor="SemesterCode2">Semester</label>
-                                                <Select2
+                                                <Select
                                                     id="SemesterCode2"
                                                     name="SemesterCode2"
                                                     data={semesterList}
@@ -539,7 +538,7 @@ function ExamBarcode(props) {
                                             </div>
                                             <div className="form-group col-md-5 mb-4">
                                                 <label htmlFor="ModuleCode">Module</label>
-                                                <Select2
+                                                <Select
                                                     id="ModuleCode"
                                                     name="ModuleCode"
                                                     data={moduleList}
@@ -571,7 +570,7 @@ function ExamBarcode(props) {
                                         <div className={"row"}>
                                             <div className="form-group col-md-3 mb-4">
                                                 <label htmlFor="SemesterCode3">Semester</label>
-                                                <Select2
+                                                <Select
                                                     id="SemesterCode3"
                                                     name="SemesterCode3"
                                                     data={semesterList}
@@ -585,7 +584,7 @@ function ExamBarcode(props) {
                                             </div>
                                             <div className="form-group col-md-3 mb-4">
                                                 <label htmlFor="ModuleCode2">Module</label>
-                                                <Select2
+                                                <Select
                                                     id="ModuleCode2"
                                                     name="ModuleCode2"
                                                     data={moduleList}
@@ -599,7 +598,7 @@ function ExamBarcode(props) {
                                             </div>
                                             <div className="form-group col-md-3 mb-4">
                                                 <label htmlFor="StudentID">Student</label>
-                                                <Select2
+                                                <Select
                                                     id="StudentID"
                                                     name="StudentID"
                                                     data={studentList}

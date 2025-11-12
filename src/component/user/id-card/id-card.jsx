@@ -6,7 +6,7 @@ import axios from "axios";
 import {
     serverLink
 } from "../../../resources/url";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 import { useQRCode } from 'next-qrcode';
 import { useReactToPrint } from "react-to-print";
 import { shortCode } from "../../../resources/constants";
@@ -188,7 +188,7 @@ function GenerateIDCard(props) {
                                                 <>
                                                     <div className="form-group pt-3">
                                                         <label htmlFor="UserID">Select Staff</label>
-                                                        <Select2
+                                                        <Select
                                                             id="UserID"
                                                             name="UserID"
                                                             data={staffList}
@@ -212,7 +212,7 @@ function GenerateIDCard(props) {
 
                                                     <div className="form-group pt-3">
                                                         <label htmlFor="UserID">Select Student</label>
-                                                        <Select2
+                                                        <Select
                                                             id="UserID"
                                                             name="UserID"
                                                             data={studentsList}

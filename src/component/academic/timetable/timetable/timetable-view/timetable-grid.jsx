@@ -5,8 +5,7 @@ import Loader from "../../../../common/loader/loader";
 import PageHeader from "../../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../../resources/url";
 import { useEffect } from "react";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import TimetableView from "../../timetable-view/timetable-view";
 
 const ViewTimeTableGrid = (props) => {
@@ -184,7 +183,7 @@ const ViewTimeTableGrid = (props) => {
             <div className="flex-column-fluid">
                 <div className="row col-md-12 mb-3">
                     <div className="col-md-4">
-                        <Select2
+                        <Select
                             id="Semester"
                             data={semesterList}
                             defaultValue={semester}
@@ -195,7 +194,7 @@ const ViewTimeTableGrid = (props) => {
                         />
                     </div>
                     <div className="col-md-4">
-                        <Select2
+                        <Select
                             id="ViewBy"
                             disabled={semester === ""}
                             data={[
@@ -218,7 +217,7 @@ const ViewTimeTableGrid = (props) => {
                         />
                     </div>
                     <div className="col-md-4">
-                        <Select2
+                        <Select
                             id="ViewByValue"
                             disabled={semester === "" || viewType === ""}
                             data={selectedType}

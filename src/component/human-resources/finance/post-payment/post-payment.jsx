@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -1094,7 +1093,7 @@ function PostPayment(props)
                                 </div>
                                 <div className="form-group mb-4" id="student_id">
                                     <label htmlFor="StudentID">Select Student</label>
-                                    <Select2
+                                    <Select
                                         defaultValue={selectedStudent.StudentID}
                                         data={studentSelectList}
                                         onChange={handleStudentChange}

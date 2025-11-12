@@ -7,8 +7,7 @@ import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { connect } from "react-redux";
 import Table from "../../common/table/table";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import Select from 'react-select';
 
 function OfficerAssignment(props) {
@@ -251,7 +250,7 @@ function OfficerAssignment(props) {
                           </option>
                         ))}
                       </select> */}
-                      <Select2
+                      <Select
                         id="courseCode"
                         //disabled={item.SemesterCode === ""}
 
@@ -282,7 +281,7 @@ function OfficerAssignment(props) {
                           </option>
                         ))}
                       </select> */}
-                      <Select2
+                      <Select
                         id="staffID"
                         //disabled={item.SemesterCode === ""}
                         value={data.staffID}

@@ -5,7 +5,7 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import { useLocation } from "react-router";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 import { toast } from "react-toastify";
 import ExamTemplate from "./Exam_template.csv"
 import papa from 'papaparse'
@@ -237,7 +237,7 @@ function ExamResultBulkUpload(props) {
                                     <div className="col-md-6">
                                         <div className="form-group">
                                             <label htmlFor="SemesterCode">Select Semester</label>
-                                            <Select2
+                                            <Select
                                                 id="SemesterCode"
                                                 name="SemesterCode"
                                                 data={semesterList}
@@ -254,7 +254,7 @@ function ExamResultBulkUpload(props) {
 
                                         <div className="form-group pt-5">
                                             <label htmlFor="ModuleCode">Select Module</label>
-                                            <Select2
+                                            <Select
                                                 id="ModuleCode"
                                                 name="ModuleCode"
                                                 data={moduleListSelect}

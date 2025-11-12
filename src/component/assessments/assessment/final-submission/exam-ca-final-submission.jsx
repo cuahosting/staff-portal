@@ -4,7 +4,7 @@ import axios from "axios";
 import {serverLink} from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import {connect} from "react-redux";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 import ReportTable from "../../../common/table/report_table";
 import {toast} from "react-toastify";
 import {showAlert} from "../../../common/sweetalert/sweetalert";
@@ -192,7 +192,7 @@ function EXAMCAFinalSubmission(props) {
                 <div className="row pt-5">
                     <div className="col-lg-12 col-md-4 pt-5">
                         <label htmlFor="ModuleCode">Select Module</label>
-                        <Select2
+                        <Select
                             id="ModuleCode"
                             name="ModuleCode"
                             value={createFindCARecord.ModuleCode}

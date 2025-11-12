@@ -4,8 +4,7 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import { connect } from "react-redux";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import {toast} from "react-toastify";
 import {useParams} from "react-router-dom";
 import {useNavigate} from "react-router";
@@ -530,7 +529,7 @@ function ManageTimetableSchedule(props) {
 
               <div className="col-md-4">
                 <label htmlFor="ModuleCode">Select Module</label>
-                <Select2
+                <Select
                   id="ModuleCode"
                   disabled={item.SemesterCode === ""}
                   defaultValue={item.ModuleCode}
@@ -629,7 +628,7 @@ function ManageTimetableSchedule(props) {
             <div className="row pt-5">
               <div className="col-md-6">
                 <label htmlFor="VenueID">Select Venue</label>
-                <Select2
+                <Select
                   id="VenueID"
                   defaultValue={item.VenueID}
                   data={venueList}
@@ -642,7 +641,7 @@ function ManageTimetableSchedule(props) {
 
               <div className="col-md-6">
                 <label htmlFor="StaffID">Select Staff</label>
-                <Select2
+                <Select
                   id="StaffID"
                   multiple
                   defaultValue={timetableStaff}
@@ -658,7 +657,7 @@ function ManageTimetableSchedule(props) {
             <div className="row pt-5">
               <div className="col-md-12">
                 <label htmlFor="StudentGroup">Select Groups</label>
-                <Select2
+                <Select
                   id="StudentGroup"
                   multiple
                   defaultValue={timetableGroup}

@@ -6,8 +6,7 @@ import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 
 function MissingRegistrationModule(props) {
     const token = props.LoginDetails[0].token;
@@ -253,7 +252,7 @@ function MissingRegistrationModule(props) {
                         <div className="row col-md 12 mt-4">
                             <div className="col-md-4 mt-2 mb-2">
                                 <label htmlFor="StudentID">Student</label>
-                                <Select2
+                                <Select
                                     id="StudentID"
                                     value={data.StudentID}
                                     data={studentsList}
@@ -268,7 +267,7 @@ function MissingRegistrationModule(props) {
                                 <>
                                     <div className="col-md-4 mt-2 mb-2">
                                         <label htmlFor="SemesterCode">School Semester</label>
-                                        <Select2
+                                        <Select
                                             id="SemesterCode"
                                             value={data.SemesterCode}
                                             data={semesterList}
@@ -280,7 +279,7 @@ function MissingRegistrationModule(props) {
                                     </div>
                                     <div className="col-md-4 mt-2 mb-2">
                                         <label htmlFor="ModuleCode">Module</label>
-                                        <Select2
+                                        <Select
                                             id="ModuleCode"
                                             value={data.ModuleCode}
                                             data={moduleList}

@@ -14,8 +14,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 
 function HostelAllocationForm(props) {
   const token = props.loginData.token;
@@ -165,7 +164,7 @@ function HostelAllocationForm(props) {
                 <h3>
                   {StudentName} {id}
                 </h3>
-                <Select2
+                <Select
                   id="StudentID"
                   value={studentSelectList.id}
                   data={studentSelectList}

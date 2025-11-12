@@ -6,8 +6,7 @@ import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import {connect} from "react-redux";
 import {Link} from "react-router-dom";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import ReportTable from "../../common/table/report_table";
 
 function SemesterRegistration(props) {
@@ -238,7 +237,7 @@ function SemesterRegistration(props) {
                                 <div className="col-lg-12 col-md-12 pt-5">
                                     <div className="form-group">
                                         <label htmlFor="StudentID">Select Student</label>
-                                        <Select2
+                                        <Select
                                             id="StudentID"
                                             defaultValue={selectedStudent.StudentID}
                                             data={studentSelectList}

@@ -6,8 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import { useForm } from "react-hook-form";
 import { encryptData, projectDomain } from "../../../../resources/constants";
 function AddStudentPortal(props) {
@@ -126,7 +125,7 @@ function AddStudentPortal(props) {
                   placeholder="Enter Student ID"
                   className="form-control"
                 /> */}
-                <Select2
+                <Select
                   defaultValue={selectedStudent.StudentID}
                   data={studentSelectList}
                   onChange={handleChange}

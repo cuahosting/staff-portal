@@ -6,8 +6,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 
 function AddStaffQualifications(props) {
   const token = props.loginData[0].token;
@@ -184,7 +183,7 @@ function AddStaffQualifications(props) {
               <div className="col-lg-4 col-md-4 pt-5">
                 <div className="form-group">
                   <label htmlFor="StaffID">StaffID</label>
-                  <Select2
+                  <Select
                     id="StaffID"
                     value={addStaffQualifications.StaffID}
                     data={staffList}

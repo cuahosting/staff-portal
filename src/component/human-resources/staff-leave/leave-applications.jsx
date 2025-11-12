@@ -13,8 +13,7 @@ import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
 import { decryptData, formatDate, formatDateAndTime } from "../../../resources/constants";
 import Loader from "../../common/loader/loader";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import staffList from "../../user/staff-report/staff-list";
 import * as DOMPurify from 'dompurify';
 

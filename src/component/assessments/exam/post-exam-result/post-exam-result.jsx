@@ -5,7 +5,7 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import { useLocation } from "react-router";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 import { toast } from "react-toastify";
 const randomToken = require('random-token');
 
@@ -400,7 +400,7 @@ function PostExamResult(props)
                                 <div className="col-md-3">
                                     <div className="form-group">
                                         <label htmlFor="SemesterCode">Select Semester</label>
-                                        <Select2
+                                        <Select
                                             id="SemesterCode"
                                             name="SemesterCode"
                                             data={semesterList}
@@ -418,7 +418,7 @@ function PostExamResult(props)
                                         !pageName.includes('Barcode') &&
                                         <div className="form-group pt-5">
                                             <label htmlFor="ModuleCode">Select Module</label>
-                                            <Select2
+                                            <Select
                                                 id="ModuleCode"
                                                 name="ModuleCode"
                                                 data={moduleListSelect}

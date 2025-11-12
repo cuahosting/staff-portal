@@ -5,7 +5,6 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import axios from "axios";
 import {serverLink} from "../../../../resources/url";
 import {toast} from "react-toastify";
-import "react-select2-wrapper/css/select2.css";
 import ReportTable from "../../../common/table/report_table";
 import { showConfirm } from "../../../common/sweetalert/sweetalert";
 

@@ -5,8 +5,7 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import axios from "axios";
 import {serverLink} from "../../../../resources/url";
 import {toast} from "react-toastify";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import ReportTable from "../../../common/table/report_table";
@@ -149,7 +148,7 @@ function ApproveResult(props) {
                             <div className="col-md-6">
                                 <div className="form-group">
                                     <label htmlFor="SemesterCode">Select Semester</label>
-                                    <Select2
+                                    <Select
                                         id="SemesterCode"
                                         defaultValue={semesterCode}
                                         data={semesterList}

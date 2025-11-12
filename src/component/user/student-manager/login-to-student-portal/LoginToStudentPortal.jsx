@@ -6,8 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink, serverStatus } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import { useForm } from "react-hook-form";
 import
   {
@@ -104,7 +103,7 @@ function LoginToStudentPortal(props)
               <div className="row">
                 <div className="col">
                   <label htmlFor="roomNumber">Student ID</label>
-                  <Select2
+                  <Select
                     defaultValue={selectedStudent.StudentID}
                     data={studentSelectList}
                     onChange={handleChange}

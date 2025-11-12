@@ -6,8 +6,7 @@ import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
 import ReportTable from "../../common/table/report_table";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 
 function StudentsConstactByLecturerModule(props) {
   const token = props.login[0].token;
@@ -110,7 +109,7 @@ function StudentsConstactByLecturerModule(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Module
                       </label>
-                      <Select2
+                      <Select
                     id="moduleCode"
                     data={moduleList}
                     value={module.moduleCode}

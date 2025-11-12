@@ -5,10 +5,9 @@ import PageHeader from "../../common/pageheader/pageheader";
 import axios from "axios";
 import {serverLink} from "../../../resources/url";
 import {toast} from "react-toastify";
-import "react-select2-wrapper/css/select2.css";
 import ReportTable from "../../common/table/report_table";
 import { showConfirm } from "../../common/sweetalert/sweetalert";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 import {formatDateAndTime} from "../../../resources/constants";
 
 function ResultActivityTracker(props) {
@@ -80,7 +79,7 @@ function ResultActivityTracker(props) {
                             <div className="col-md-12">
                                 <div className="form-group">
                                     <label htmlFor="SemesterCode">Select Semester</label>
-                                    <Select2
+                                    <Select
                                         id="SemesterCode"
                                         name="SemesterCode"
                                         data={semesterList}

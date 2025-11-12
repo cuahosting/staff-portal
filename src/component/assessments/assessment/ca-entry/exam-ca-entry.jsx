@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 import ReportTable from "../../../common/table/report_table";
 import CATemplate from "./CA_template.csv"
 
@@ -260,7 +260,7 @@ function ExamCAEntry(props) {
                 <div className="row pt-5">
                     <div className="col-lg-6 col-md-4 pt-5">
                         <label htmlFor="ModuleCode">Select Module</label>
-                        <Select2
+                        <Select
                             id="ModuleCode"
                             name="ModuleCode"
                             value={createFindCARecord.ModuleCode}

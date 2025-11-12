@@ -6,8 +6,7 @@ import Loader from "../../common/loader/loader";
 import ReportTable from "../../common/table/report_table";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 
 const StudentListByLecturerModule = (props) => {
   const token = props.login[0].token;
@@ -114,7 +113,7 @@ const StudentListByLecturerModule = (props) => {
                         Select Module
                       </label>
 
-                      <Select2
+                      <Select
                     id="code"
                     data={moduleList}
                     value={moduleCode.code}

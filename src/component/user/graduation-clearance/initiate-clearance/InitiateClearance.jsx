@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 
 function InitiateClearance(props) {
   const token = props.loginData.token;
@@ -81,7 +81,7 @@ function InitiateClearance(props) {
             <div className="row g-3">
               <div className="col-sm-3">
                 <label htmlFor="hostelId">Select Student</label>
-                <Select2
+                <Select
                   defaultValue={selectedStudent.StudentID}
                   data={studentSelectList}
                   onChange={handleChange}

@@ -1,7 +1,6 @@
 import { formatDate, shortCode } from "../../../../resources/constants";
 import { serverLink } from "../../../../resources/url";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import './enrolment.css'
 
 const StaffEnrolmentModal = (props) => {

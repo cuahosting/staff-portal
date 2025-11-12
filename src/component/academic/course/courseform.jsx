@@ -1,5 +1,5 @@
 import React from "react";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 
 export default function CourseForm(props) {
     return (
@@ -106,7 +106,7 @@ export default function CourseForm(props) {
             </div>
             <div className="form-group mb-4">
                 <label htmlFor="DepartmentCode">Department </label>
-                {/*<Select2*/}
+                {/*<Select*/}
                 {/*    id="DepartmentCode"*/}
                 {/*    name="DepartmentCode"*/}
                 {/*    data={departmentList}*/}

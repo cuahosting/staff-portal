@@ -4,7 +4,7 @@ import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import axios from "axios";
 import { projectName, serverLink, simpleFileUploadAPIKey } from "../../../resources/url";
-import Select2 from "react-select2-wrapper";
+import Select from "react-select";
 import { toast } from "react-toastify";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import SimpleFileUpload from "react-simple-file-upload";
@@ -252,7 +252,7 @@ function CaptureBiometric(props) {
                             {createRequest.CardType === "Staff" && (
                                 <div className="col-lg-6 pt-5">
                                     <label htmlFor="UserID">Select Staff</label>
-                                    <Select2
+                                    <Select
                                         id="UserID"
                                         name="UserID"
                                         data={staffList}
@@ -269,7 +269,7 @@ function CaptureBiometric(props) {
                             {createRequest.CardType === "Student" && (
                                 <div className="col-lg-6 pt-5">
                                     <label htmlFor="UserID">Select Student</label>
-                                    <Select2
+                                    <Select
                                         id="UserID"
                                         name="UserID"
                                         data={studentsList}

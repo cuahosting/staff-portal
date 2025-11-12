@@ -9,8 +9,7 @@ import Modal from "../../../common/modal/modal";
 import ReportTable from "../../../common/table/report_table";
 import {decryptData, encryptData, formatDateAndTime} from "../../../../resources/constants";
 import {CommentsDisabledOutlined} from "@mui/icons-material";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import {useForm} from "react-hook-form";
 
 function UpdateStudentDetails(props) {
@@ -201,7 +200,7 @@ function UpdateStudentDetails(props) {
                         <form onSubmit={handleSubmit(updateStudentDetail)}>
                             <div className="form-group">
                                 <label htmlFor="roomNumber">Student ID</label>
-                                <Select2
+                                <Select
                                     defaultValue={selectedStudent.StudentID}
                                     data={studentSelectList}
                                     onChange={handleChange}

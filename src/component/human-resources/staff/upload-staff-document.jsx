@@ -7,8 +7,7 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import SimpleFileUpload from "react-simple-file-upload";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 
 function UploadStaffDocument(props)
 {
@@ -280,7 +279,7 @@ function UploadStaffDocument(props)
               <div className="col-lg-4 col-md-4">
                 <div className="form-group">
                   <label htmlFor="DocumentType">StaffID</label>
-                  <Select2
+                  <Select
                     id="StaffID"
                     value={addStaffDocument.StaffID}
                     data={staffList}

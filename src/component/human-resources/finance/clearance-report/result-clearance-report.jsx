@@ -6,8 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { connect } from "react-redux";
 import ReportTable from "../../../common/table/report_table";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import Select from "react-select";
 import {formatDateAndTime} from "../../../../resources/constants";
 
 const ResultClearanceReport = (props) => {
@@ -114,7 +113,7 @@ const ResultClearanceReport = (props) => {
                                             <label className="required fs-6 fw-bold mb-2">
                                                 Select Semester
                                             </label>
-                                            <Select2
+                                            <Select
                                                 id="semesterCode"
                                                 data={semesterList}
                                                 value={semesterCode.semesterCode}
