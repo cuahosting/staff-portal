@@ -5,7 +5,11 @@
       "Bash(npm install)",
       "Bash(npm install:*)",
       "Bash(npx @mui/codemod@latest v5.0.0/preset-safe:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm audit fix:*)",
+      "Bash(npm start)",
+      "Bash(git mv:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

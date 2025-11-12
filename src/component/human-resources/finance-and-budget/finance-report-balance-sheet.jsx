@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import Loader from "../../common/loader/loader";
 import {toast} from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";

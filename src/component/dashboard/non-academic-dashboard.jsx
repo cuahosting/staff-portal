@@ -1,5 +1,5 @@
 import React from "react";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import { formatDateAndTime, shortCode } from "../../resources/constants";
 import PictureCard from "./sections/picture-card";
 import OverviewCard from "./sections/overview-card";

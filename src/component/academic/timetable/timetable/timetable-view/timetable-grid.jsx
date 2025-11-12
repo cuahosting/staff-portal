@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from 'axios';
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import Loader from "../../../../common/loader/loader";
 import PageHeader from "../../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../../resources/url";

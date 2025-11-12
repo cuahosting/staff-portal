@@ -4,7 +4,7 @@ import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 
 

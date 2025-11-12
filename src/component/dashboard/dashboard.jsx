@@ -1,5 +1,5 @@
 import React from "react";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import Academic_Staff_Dashboard from "./academic-dashboard";
 import Non_Academic_Staff_Dashboard from "./non-academic-dashboard"
 import { useState } from "react";

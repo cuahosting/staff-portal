@@ -5,7 +5,7 @@ import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert, showConfirm, showConfirmAndContinue } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import ReportTable from "../../common/table/report_table";

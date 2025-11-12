@@ -7,7 +7,7 @@ import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import swal from "sweetalert";
 import Select from "react-select";
 function Department(props) {

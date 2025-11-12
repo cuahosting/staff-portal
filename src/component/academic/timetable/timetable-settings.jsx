@@ -3,7 +3,7 @@ import PageHeader from "../../common/pageheader/pageheader";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import BlocksSettings from "./block/block";
 import CampusSettings from "./campus/campus";
 import VenueSettings from "./venue/venues";

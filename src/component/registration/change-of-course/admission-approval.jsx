@@ -7,7 +7,7 @@ import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import ReportTable from "../../common/table/report_table";
 import { formatDateAndTime } from "../../../resources/constants";
 

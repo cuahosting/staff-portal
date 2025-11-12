@@ -3,7 +3,7 @@ import { projectName, serverLink } from "../../../../resources/url";
 import { Link } from "react-router-dom";
 import axios from "axios"
 import { decryptData, encryptData, formatDateAndTime, shortCode } from "../../../../resources/constants";
-import { connect } from "react-redux/es/exports";
+import { connect } from "react-redux";
 import { useParams } from "react-router";
 import { useEffect } from "react";
 import Loader from "../../../common/loader/loader";
