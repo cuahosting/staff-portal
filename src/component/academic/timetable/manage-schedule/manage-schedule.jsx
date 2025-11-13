@@ -8,7 +8,6 @@ import Select from "react-select";
 import {toast} from "react-toastify";
 import {useParams} from "react-router-dom";
 import {useNavigate} from "react-router";
-import Select from "react-select";
 
 function ManageTimetableSchedule(props) {
   const token = props.loginData[0].token;

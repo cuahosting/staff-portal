@@ -8,7 +8,6 @@ import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { connect } from "react-redux";
 import Table from "../../common/table/table";
 import Select from "react-select";
-import Select from 'react-select';
 
 function OfficerAssignment(props) {
   const token = props.login[0].token;

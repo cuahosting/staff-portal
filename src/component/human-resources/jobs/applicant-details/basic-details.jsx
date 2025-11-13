@@ -1,21 +1,15 @@
 import JoditEditor from "jodit-react";
-import React, { useState } from "react";
+import React from "react";
 import Modal from "../../../common/modal/modal";
-import { Document, Page, pdfjs } from 'react-pdf';
 import { serverLink } from "../../../../resources/url";
 import { Link } from "react-router-dom";
 import * as DOMPurify from 'dompurify';
 import { projectURL, shortCode } from "../../../../resources/constants";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-
 
 const BasicApplicantDetails = (props) =>
 {
     const editorRef = React.createRef();
-    const [numPages, setnumPages] = useState(null);
-    const [pageNumber, setpageNumber] = useState(1);
-
 
     const applicant = props.applicant
     const makeDecisionButton = applicant.Status === "0" ? false : applicant.Status === "1" ? false : true
@@ -33,16 +27,17 @@ const BasicApplicantDetails = (props) =>
     const mname = applicant.MiddleName !== "" ? applicant.MiddleName : ""
     const sname = applicant.Surname !== "" ? applicant.Surname : ""
 
-    const onDocumentLoadSuccess = ({ numPages }) =>
-    {
-        setnumPages(numPages)
-    };
+    const cvUrl = applicant.CurriculumVitae !== null
+        ? applicant.CurriculumVitae.includes("simplefileupload")
+            ? applicant.CurriculumVitae
+            : `${serverLink}public/uploads/${shortCode}/job_application/cv/${applicant.CurriculumVitae}`
+        : "";
 
-    const goToPrevPage = () =>
-        setpageNumber(pageNumber - 1)
-
-    const goToNextPage = () =>
-        setpageNumber(pageNumber + 1)
+    const openPdfInNewWindow = () => {
+        if (cvUrl) {
+            window.open(cvUrl, '_blank', 'width=1200,height=800');
+        }
+    }
 
     return (
         <div className="col-md-12">
@@ -210,35 +205,35 @@ const BasicApplicantDetails = (props) =>
                         </div>
                     </div>
                     <div className="card-body p-9">
-                        <div className="row col-md-12">
-                            <h3 className="row float-start">
-                                <a target="_blank" href={applicant.CurriculumVitae !== null ? applicant.CurriculumVitae.includes("simplefileupload") ? applicant.CurriculumVitae : `${serverLink}public/uploads/${shortCode}/job_application/cv/${applicant.CurriculumVitae}` : ""} >Click to view CV in new Tab</a>
-                            </h3>
+                        <div className="row col-md-12 mb-4">
+                            <div className="d-flex justify-content-between align-items-center">
+                                <a target="_blank" rel="noreferrer" href={cvUrl} className="btn btn-primary">
+                                    <i className="fa fa-external-link me-2"></i>
+                                    Open CV in New Tab
+                                </a>
+                                <button onClick={openPdfInNewWindow} className="btn btn-secondary">
+                                    <i className="fa fa-window-maximize me-2"></i>
+                                    Open CV in Popup Window
+                                </button>
+                            </div>
                         </div>
                         <div className="row col-md-12 mb-7">
                             <div className="col-md-12">
-                                <div className="d-flex justify-content-center" style={{ width: '1055px', borderStyle: 'groove', borderWidth: '3px', borderRadius: '5px' }}>
-                                    <Document
-                                        file={applicant.CurriculumVitae !== null ? applicant.CurriculumVitae.includes("simplefileupload") ? applicant.CurriculumVitae : `${serverLink}public/uploads/${shortCode}/job_application/cv/${applicant.CurriculumVitae}` : ""}
-                                        onLoadSuccess={onDocumentLoadSuccess}
-                                    >
-                                        <Page pageNumber={pageNumber} width={1050} />
-                                    </Document>
+                                <div className="d-flex justify-content-center" style={{ width: '100%', height: '800px', borderStyle: 'groove', borderWidth: '3px', borderRadius: '5px' }}>
+                                    {cvUrl ? (
+                                        <iframe
+                                            src={cvUrl}
+                                            style={{ width: '100%', height: '100%', border: 'none' }}
+                                            title="Curriculum Vitae"
+                                        />
+                                    ) : (
+                                        <div className="d-flex align-items-center justify-content-center text-muted">
+                                            <p>No CV available</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-
-                        <div className="row col-md-12">
-                            <strong style={{ color: 'green' }}>Page {pageNumber} of {numPages}</strong>
-                            <nav>
-                                <div style={{ float: 'right' }}>
-                                    <button className='btn btn-sm btn-success m-r-10' onClick={goToPrevPage}><i className='fa fa-arrow-left'></i>Prev</button>&emsp;
-                                    <button className='btn btn-sm btn-success' onClick={goToNextPage}><i className='fa fa-arrow-right'></i> Next</button>
-                                </div>
-                            </nav>
-
-                        </div>
-
                     </div>
                 </div>
             </div>

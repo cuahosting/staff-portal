@@ -9,7 +9,10 @@
       "Bash(npm audit fix:*)",
       "Bash(npm start)",
       "Bash(git mv:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git commit:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

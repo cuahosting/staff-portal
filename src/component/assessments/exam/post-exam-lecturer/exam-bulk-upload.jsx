@@ -7,11 +7,9 @@ import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Select from "react-select";
 import { toast } from "react-toastify";
-import ExamTemplate from "./Exam_template.csv"
+import ExamTemplate from "./Exam_template.csv?url"
 import papa from 'papaparse'
-
-
-const randomToken = require('random-token');
+import randomToken from 'random-token';
 
 function ExamResultBulkUpload(props) {
     const token = props.loginData.token;

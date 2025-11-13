@@ -8,7 +8,6 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import Select from "react-select";
-import Select from 'react-select';
 
 function ModuleAssignment2(props) {
   const token = props.LoginDetails[0].token;

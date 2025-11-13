@@ -10,7 +10,7 @@ import {toast} from "react-toastify";
 import {connect} from "react-redux";
 import {ModulesForm} from "./modulesform";
 import ModulePrerequisites from "./prerequisites";
-import ModuleTemplate from "../../../images/Module Templates.csv";
+import ModuleTemplate from "../../../images/Module Templates.csv?url";
 import swal from "sweetalert";
 
 function Modules(props) {

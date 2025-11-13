@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import './cu_admission.css'
 import BgImage from './cu_bg_1.jpg'
 import VCSign from './cu_sign.png'
+import RegSign from './reg_sign.png'
 import { currencyConverter, formatDate, formatDateAndTime } from '../../../../../resources/constants';
 
 const CosmopolitanAdmissionLetter = (props) =>
@@ -106,7 +107,7 @@ const CosmopolitanAdmissionLetter = (props) =>
                                 <br />
                                 <div> Please note that this offer of admission is subject to your acceptance of the conditions and undertaking.</div>
                                 <div>Please accept my congratulations on your admission!</div>
-                                <img src={require("./reg_sign.png")} style={{ width: "240px", height: '50px', marginTop: '15px' }} />
+                                <img src={RegSign} style={{ width: "240px", height: '50px', marginTop: '15px' }} />
                                 <div>
                                     Mani Ibrahim Ahmad, PhD. FNIM<br />
                                     Registrar

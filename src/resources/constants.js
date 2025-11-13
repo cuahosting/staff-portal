@@ -1,8 +1,7 @@
 import { serverLink } from "./url";
 import axios from "axios";
 import './email.css'
-
-const CryptoJS = require("crypto-js");
+import CryptoJS from "crypto-js";
 //
 // export const projectName = "Baba Ahmed University | Staff Portal";
 // export const projectCode = "BABA_AHMED_UNIVERSITY_STAFF_PORTAL";

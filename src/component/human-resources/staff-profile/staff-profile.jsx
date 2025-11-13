@@ -11,6 +11,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { encryptData, formatDate, formatDateAndTime, removeSpace, shortCode } from "../../../resources/constants";
 import { connect } from "react-redux";
 import { Button } from "@mui/material";
+import AvatarMale from './avatar-male.jpg';
 
 function StaffProfile(props)
 {
@@ -917,7 +918,7 @@ function StaffProfile(props)
                         ? staffInformation.staff[0].Image.includes("simplefileupload.com") ? staffInformation.staff[0].Image :
                           staffInformation.staff[0].Image !== "" ?
                             `${serverLink}public/uploads/${shortCode}/hr/document/${staffInformation.staff[0].Image}` :
-                            require('./avatar-male.jpg') : require('./avatar-male.jpg')
+                            AvatarMale : AvatarMale
                     }
                     alt="Staff Picture"
                   />

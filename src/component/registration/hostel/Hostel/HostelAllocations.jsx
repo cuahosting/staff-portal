@@ -15,7 +15,6 @@ import {
 } from "@mui/icons-material";
 import Select from "react-select";
 import { useForm } from "react-hook-form";
-import Select from 'react-select';
 
 
 function HostelAllocations(props) {

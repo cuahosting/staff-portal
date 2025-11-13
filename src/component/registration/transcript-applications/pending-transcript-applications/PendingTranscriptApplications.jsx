@@ -8,7 +8,6 @@ import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
 import ReportTable from "../../../common/table/report_table";
 import { formatDateAndTime, shortCode } from "../../../../resources/constants";
-import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
 
 function AllTranscriptApplications(props) {
   const token = props.loginData.token;
@@ -17,12 +16,6 @@ function AllTranscriptApplications(props) {
   const [fileUrl, setFileUrl] = useState("");
   const [studentName, setStudentName] = useState("");
   const [tableData, setTableData] = useState([]);
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
-
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages);
-  }
   const columns = [
     "S/N",
     "Student ID",
@@ -147,15 +140,30 @@ function AllTranscriptApplications(props) {
         <Modal title={"Payment Evidence for " + studentName}>
           <form>
             <div className="form-group pt-2">
-              <Document
-                file={`${fileUrl}`}
-                onLoadSuccess={onDocumentLoadSuccess}
-              >
-                <Page pageNumber={pageNumber} />
-              </Document>
-              <p>
-                Page {pageNumber} of {numPages}
-              </p>
+              <div className="d-flex justify-content-center mb-3">
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href={fileUrl}
+                  className="btn btn-primary"
+                >
+                  <i className="fa fa-external-link me-2"></i>
+                  Open Payment Evidence in New Tab
+                </a>
+              </div>
+              <div style={{ width: '100%', height: '600px', border: '1px solid #ddd', borderRadius: '5px' }}>
+                {fileUrl ? (
+                  <iframe
+                    src={fileUrl}
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    title="Payment Evidence"
+                  />
+                ) : (
+                  <div className="d-flex align-items-center justify-content-center h-100 text-muted">
+                    <p>No payment evidence available</p>
+                  </div>
+                )}
+              </div>
             </div>
           </form>
         </Modal>

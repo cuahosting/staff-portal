@@ -10,7 +10,6 @@ import Select from "react-select";
 import LinearProgressWithLabel from "../../../common/linear-progress-bar/linear-progress-bar";
 import Box from "@mui/material/Box";
 import Table from "../../../common/table/table";
-import Select from 'react-select';
 import { formatDateAndTime } from "../../../../resources/constants";
 import { useReactToPrint } from 'react-to-print';
 import Barcode from "react-hooks-barcode";

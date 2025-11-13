@@ -8,7 +8,6 @@ import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
 import Select from "react-select";
 import ReportTable from "../../common/table/report_table";
-import Select from 'react-select';
 
 
 function LecturerAssignment(props) {

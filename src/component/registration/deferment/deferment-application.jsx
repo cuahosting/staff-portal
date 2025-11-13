@@ -3,7 +3,7 @@ import Loader from "../../common/loader/loader";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import ReportTable from "../../common/table/report_table";
-import { connect } from 'react-redux/es/exports'
+import { connect } from 'react-redux'
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import { formatDateAndTime } from "../../../resources/constants";

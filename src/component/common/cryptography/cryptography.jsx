@@ -1,6 +1,5 @@
 import { projectCode } from "../../../resources/constants";
-
-const CryptoJS = require("crypto-js");
+import CryptoJS from "crypto-js";
 
 export function encryptData(string, val = false) {
   try {

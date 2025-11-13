@@ -13,7 +13,6 @@ import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
 import { decryptData, formatDate, formatDateAndTime } from "../../../resources/constants";
 import Loader from "../../common/loader/loader";
-import Select from "react-select";
 import staffList from "../../user/staff-report/staff-list";
 import * as DOMPurify from 'dompurify';
 

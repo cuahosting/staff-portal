@@ -18,7 +18,7 @@ import
 } from "../../../actions/setactiondetails";
 import JoditEditor from "jodit-react";
 import SimpleFileUpload from "react-simple-file-upload";
-import DOMPurify, { sanitize } from "dompurify";
+import * as DOMPurify from 'dompurify';
 
 function EditStaffProfile(props)
 {

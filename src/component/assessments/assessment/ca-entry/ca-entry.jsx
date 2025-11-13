@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import Select from "react-select";
 import ReportTable from "../../../common/table/report_table";
-import CATemplate from "./CA_template.csv"
+import CATemplate from "./CA_template.csv?url"
 
 function CAEntry(props)
 {

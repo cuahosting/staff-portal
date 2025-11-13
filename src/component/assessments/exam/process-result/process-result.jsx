@@ -6,10 +6,9 @@ import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import { toast } from "react-toastify";
 import Select from "react-select";
-import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import ReportTable from "../../../common/table/report_table";
-const randomToken = require('random-token');
+import randomToken from 'random-token';
 
 
 function ProcessResult(props)

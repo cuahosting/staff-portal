@@ -6,7 +6,6 @@ import { projectName, serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import Table from "../../common/table/table";
-import Moment from "react-moment";
 import { encryptData } from "../../common/cryptography/cryptography";
 import {formatDate, formatDateAndTime, shortCode} from "../../../resources/constants";
 import { showAlert } from "../../common/sweetalert/sweetalert";

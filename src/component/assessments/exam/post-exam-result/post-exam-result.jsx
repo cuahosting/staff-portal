@@ -7,7 +7,7 @@ import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Select from "react-select";
 import { toast } from "react-toastify";
-const randomToken = require('random-token');
+import randomToken from 'random-token';
 
 function PostExamResult(props)
 {
