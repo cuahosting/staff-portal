@@ -6,6 +6,7 @@ import { EmailTemplates, encryptData, projectLogo, sendEmail } from "../../../re
 import { toast } from "react-toastify";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
+import "./auth-animations.css";
 
 function ForgotPassword(props)
 {
@@ -55,10 +56,10 @@ function ForgotPassword(props)
 
   return (
     <>
-      <div className="d-flex flex-column flex-root">
+      <div className="d-flex flex-column flex-root auth-page auth-background">
         <div className="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-contain bgi-attachment-fixed">
           <div className="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
-            <div className="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
+            <div className="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto auth-card">
               <form
                 onSubmit={onSubmit}
                 className="form w-100"
@@ -67,42 +68,48 @@ function ForgotPassword(props)
                 action="#"
               >
                 <div className="text-center mb-10">
-                  <img alt="Logo" src={projectLogo} className="h-40px mb-5" />
-                  <h1 className="text-dark mb-3">Forgot Password ?</h1>
-                  <div className="text-gray-400 fw-bold fs-4">
-                    Enter your email to reset your password.
+                  <img alt="Logo" src={projectLogo} className="h-80px mb-5 auth-logo" />
+                  <h1 className="text-dark mb-3 auth-title">Forgot Password?</h1>
+                  <div className="auth-description">
+                    Enter your email address and we'll send you a link to reset your password.
                   </div>
                 </div>
 
-                <div className="fv-row mb-10">
-                  <label className="form-label fs-6 fw-bolder text-dark">
+                <div className="fv-row mb-10 auth-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark auth-label">
                     Staff Email Address
                   </label>
-
-                  <input
-                    className="form-control form-control-lg form-control-solid"
-                    type="email"
-                    name="EmailAddress"
-                    value={reset.EmailAddress}
-                    onChange={onEdit}
-                    autoComplete="off"
-                  />
+                  <div className="auth-input-wrapper">
+                    <input
+                      className="form-control form-control-lg form-control-solid auth-input"
+                      type="email"
+                      name="EmailAddress"
+                      value={reset.EmailAddress}
+                      onChange={onEdit}
+                      autoComplete="off"
+                      placeholder="Enter your email address"
+                    />
+                  </div>
                 </div>
 
-                <div className="text-center">
+                <div className="text-center auth-form-group">
                   <button
                     type="submit"
                     id="kt_sign_in_submit"
-                    className="btn btn-lg btn-primary w-100 mb-5"
+                    className="btn btn-lg btn-primary w-100 mb-5 auth-button"
                   >
-                    <span className="indicator-label">Reset</span>
+                    <span className="indicator-label">Reset Password</span>
                     <span className="indicator-progress">
                       Please wait...
-                      <span className="spinner-border spinner-border-sm align-middle ms-2" />
+                      <span className="spinner-border spinner-border-sm align-middle ms-2 auth-spinner" />
                     </span>
                   </button>
                 </div>
-                <NavLink to={'/'}>Back to Login</NavLink>
+                <div className="text-center auth-form-group">
+                  <NavLink to={'/'} className="auth-link text-primary fw-bold">
+                    <i className="bi bi-arrow-left me-2"></i>Back to Login
+                  </NavLink>
+                </div>
               </form>
             </div>
           </div>

@@ -5,26 +5,29 @@ import PublicRoutes from "./component/pageroutes/publicroutes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../src/resources/select2.css";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 function App(props) {
   return (
-    <div >
-      <Router>
-        {props.loginData.length < 1 ? <PublicRoutes /> : <PageRoutes />}
-      </Router>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-      {/* Same as */}
-      <ToastContainer />
-    </div>
+    <GoogleOAuthProvider clientId="172821218711-pe2vgt64309g7pu0ftfo6oaja7e9bjdh.apps.googleusercontent.com">
+      <div >
+        <Router>
+          {props.loginData.length < 1 ? <PublicRoutes /> : <PageRoutes />}
+        </Router>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Same as */}
+        <ToastContainer />
+      </div>
+    </GoogleOAuthProvider>
   );
 }
 
