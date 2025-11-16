@@ -40,7 +40,7 @@ import StaffProfile from "../human-resources/staff-profile/staff-profile";
 import HRPayrollRunAllowanceAndDeduction from "../human-resources/payroll/run-allowance-and-deduction/hr-payroll-run-allowance-and-deduction";
 import HrPayrollPostSchedule from "../human-resources/payroll/post-schedule/hr-payroll-post-schedule";
 import HrSalarySettings from "../human-resources/payroll/salary-settings/hr-salary-settings";
-import PermissionMenus from "../settings/permission/menus/permission-menu";
+import PermissionMenus from "../settings/menus/permission-menu";
 import PermissionGroup from "../settings/permission/group/permission-group";
 import PermissionPermission from "../settings/permission/permission/permission-permission";
 import AddStaffBank from "../human-resources/staff/add-staff-bank";
@@ -243,6 +243,9 @@ import AcademicResultByUniversity from "../assessments/academic-result/academic-
 import StudentResultSlip from "../assessments/reports/student-result-slip";
 import ExamBulkUpload from "../assessments/exam/post-exam-lecturer/exam-bulk-upload";
 import ExamResultBulkUpload from "../assessments/exam/post-exam-lecturer/exam-bulk-upload";
+import MainMenuTab from "../settings/menus/MainMenuTab";
+import SubMenuTab from "../settings/menus/SubMenuTab";
+import SubSubMenuTab from "../settings/menus/SubSubMenuTab";
 
 export default function PageRoutes()
 {
@@ -831,6 +834,18 @@ export default function PageRoutes()
                 <Route
                   path="/settings/permission/menus"
                   element={<PermissionMenus />}
+                />
+                <Route
+                  path="/settings/menu/mainmenus"
+                  element={<MainMenuTab />}
+                />
+                <Route
+                  path="/settings/menu/submenus"
+                  element={<SubMenuTab />}
+                />
+                <Route
+                  path="/settings/menu/subsubmenus"
+                  element={<SubSubMenuTab />}
                 />
                 <Route
                   path="/settings/permission/group"

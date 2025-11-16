@@ -15,5 +15,8 @@
 
 // Export all form components from a single entry point
 export { default as Input } from './Input';
+export { default as Select } from './Select';
 export { default as SearchSelect } from './SearchSelect';
+export { default as Textarea } from './Textarea';
+export { default as DataTable } from './DataTable';
 export { default as ExampleForm } from './ExampleForm';

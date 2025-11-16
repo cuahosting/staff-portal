@@ -1,17 +1,21 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import Select from 'react-select';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 /**
- * Standardized SearchSelect Component (wrapper around react-select)
+ * Standardized SearchSelect Component (MUI Autocomplete-based)
  *
- * A searchable dropdown component built on react-select with Bootstrap 5 theming,
- * automatic sorting, and support for both modern and legacy data formats.
+ * A searchable dropdown component built on MUI Autocomplete with automatic sorting,
+ * and support for both modern and legacy data formats.
+ *
+ * NOW USES MUI AUTOCOMPLETE INTERNALLY
+ * API remains the same for backward compatibility
  *
  * Features:
  * - Searchable dropdown with fuzzy matching
  * - Automatically sorts options alphabetically by label (configurable)
- * - Consistent Bootstrap 5 styling
+ * - Consistent MUI theming with floating labels
  * - Support for legacy data format {id, text} and modern {value, label}
  * - Multi-select capability
  * - Clearable selection
@@ -32,8 +36,9 @@ import Select from 'react-select';
  * @param {boolean} isClearable - Show clear button
  * @param {string} error - Error message to display
  * @param {boolean} autoSort - Auto-sort options alphabetically (default: true)
- * @param {object} customStyles - Custom react-select style overrides
- * @param {object} props - Additional props to pass to react-select
+ * @param {boolean} isLoading - Loading state for async options
+ * @param {function} noOptionsMessage - Message displayed when no options available
+ * @param {object} props - Additional props to pass to MUI Autocomplete
  *
  * @example
  * // Modern format
@@ -76,7 +81,9 @@ const SearchSelect = React.memo(({
   isClearable = true,
   error = '',
   autoSort = true,
-  customStyles = {},
+  isLoading = false,
+  noOptionsMessage,
+  isSearchable = true,
   ...props
 }) => {
   // Convert legacy {id, text} format to {value, label} format
@@ -90,14 +97,14 @@ const SearchSelect = React.memo(({
       if (option.id !== undefined && option.text !== undefined) {
         return {
           value: option.id,
-          label: option.text
+          label: option.text,
         };
       }
       // If option is just a string
       if (typeof option === 'string') {
         return {
           value: option,
-          label: option
+          label: option,
         };
       }
       return option;
@@ -115,11 +122,26 @@ const SearchSelect = React.memo(({
     return normalized;
   }, [options, autoSort]);
 
-  // Normalize value to match react-select format
+  // Normalize value to match MUI Autocomplete format
   const normalizedValue = useMemo(() => {
-    if (!value) return null;
+    if (!value) {
+      return isMulti ? [] : null;
+    }
 
-    // If value is already an object with value/label, use it
+    // For multi-select
+    if (isMulti) {
+      if (Array.isArray(value)) {
+        return value.map(v => {
+          if (typeof v === 'object' && v.value !== undefined) {
+            return v;
+          }
+          return normalizedOptions.find(opt => opt.value === v) || null;
+        }).filter(Boolean);
+      }
+      return [];
+    }
+
+    // For single select
     if (typeof value === 'object' && value.value !== undefined) {
       return value;
     }
@@ -127,61 +149,60 @@ const SearchSelect = React.memo(({
     // If value is a string or number, find matching option
     const matchedOption = normalizedOptions.find(opt => opt.value === value);
     return matchedOption || null;
-  }, [value, normalizedOptions]);
+  }, [value, normalizedOptions, isMulti]);
 
-  // Custom styles to match Bootstrap theme
-  const defaultStyles = {
-    control: (base, state) => ({
-      ...base,
-      minHeight: '42px',
-      borderColor: error ? '#dc3545' : state.isFocused ? '#86b7fe' : '#ced4da',
-      boxShadow: state.isFocused
-        ? error
-          ? '0 0 0 0.25rem rgba(220, 53, 69, 0.25)'
-          : '0 0 0 0.25rem rgba(13, 110, 253, 0.25)'
-        : 'none',
-      '&:hover': {
-        borderColor: error ? '#dc3545' : '#86b7fe'
-      }
-    }),
-    menu: (base) => ({
-      ...base,
-      zIndex: 9999
-    }),
-    ...customStyles
+  // Wrapper for onChange to maintain backward compatibility
+  // Convert MUI's (event, newValue, reason) to react-select's (selectedOption, actionMeta)
+  const handleChange = (event, newValue, reason) => {
+    if (!onChange) return;
+
+    // Create actionMeta object similar to react-select
+    const actionMeta = {
+      action: reason, // 'select-option', 'remove-value', 'clear', etc.
+      option: newValue,
+    };
+
+    // Call onChange with react-select signature
+    onChange(newValue, actionMeta);
   };
 
-  const errorId = error ? `${id}-error` : undefined;
+  // Error helper text with icon (matching Input component)
+  const helperText = error ? (
+    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+      </svg>
+      {error}
+    </span>
+  ) : '';
 
   return (
-    <div className="form-group mb-4">
-      {label && (
-        <label htmlFor={id} className="form-label">
-          {label}
-          {required && <span className="text-danger" aria-label="required"> *</span>}
-        </label>
-      )}
-      <Select
-        inputId={id}
-        name={name || id}
+    <div className="mb-4">
+      <Autocomplete
+        id={id}
         options={normalizedOptions}
         value={normalizedValue}
-        onChange={onChange}
-        placeholder={placeholder}
-        isDisabled={disabled}
-        isMulti={isMulti}
-        isClearable={isClearable}
-        styles={defaultStyles}
-        classNamePrefix="react-select"
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={errorId}
+        onChange={handleChange}
+        disabled={disabled}
+        multiple={isMulti}
+        disableClearable={!isClearable}
+        loading={isLoading}
+        noOptionsText={noOptionsMessage ? noOptionsMessage() : 'No options'}
+        getOptionLabel={(option) => option?.label || ''}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            name={name || id}
+            label={label}
+            placeholder={placeholder}
+            required={required}
+            error={!!error}
+            helperText={helperText}
+          />
+        )}
         {...props}
       />
-      {error && (
-        <div id={errorId} className="text-danger small mt-1" role="alert">
-          {error}
-        </div>
-      )}
     </div>
   );
 });
@@ -200,13 +221,13 @@ SearchSelect.propTypes = {
     PropTypes.oneOfType([
       PropTypes.shape({
         value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        label: PropTypes.string
+        label: PropTypes.string,
       }),
       PropTypes.shape({
         id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        text: PropTypes.string
+        text: PropTypes.string,
       }),
-      PropTypes.string
+      PropTypes.string,
     ])
   ),
 
@@ -215,7 +236,7 @@ SearchSelect.propTypes = {
     PropTypes.object,
     PropTypes.string,
     PropTypes.number,
-    PropTypes.array
+    PropTypes.array,
   ]),
 
   /** Change handler receives (selectedOption, actionMeta) */
@@ -245,9 +266,6 @@ SearchSelect.propTypes = {
   /** Automatically sort options alphabetically by label */
   autoSort: PropTypes.bool,
 
-  /** Custom react-select style overrides */
-  customStyles: PropTypes.object,
-
   /** Loading state for async options */
   isLoading: PropTypes.bool,
 
@@ -256,15 +274,6 @@ SearchSelect.propTypes = {
 
   /** Enable search functionality */
   isSearchable: PropTypes.bool,
-
-  /** Custom filter function for options */
-  filterOption: PropTypes.func,
-
-  /** Menu placement (auto, top, bottom) */
-  menuPlacement: PropTypes.oneOf(['auto', 'top', 'bottom']),
-
-  /** Menu position (fixed, absolute) */
-  menuPosition: PropTypes.oneOf(['fixed', 'absolute'])
 };
 
 export default SearchSelect;

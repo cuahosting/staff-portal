@@ -1,20 +1,23 @@
 import React from "react";
-import { MDBDataTableV5 } from "mdbreact";
+import { DataTable } from "../form";
 
+/**
+ * Legacy Table Component (Backward Compatibility Wrapper)
+ *
+ * This component maintains backward compatibility with the old mdbreact Table component.
+ * It now uses the new DataTable component internally.
+ *
+ * @deprecated Use DataTable component directly for new implementations
+ */
 export default function Table(props) {
+  const { data, paging = true, ...otherProps } = props;
+
   return (
     <div className="table-responsive">
-      <MDBDataTableV5
-          hover
-          entriesOptions={[50, 100, 200]}
-          entries={50}
-          pagesAmount={4}
-          data={props.data}
-          paging={props.paging ?? true}
-          pagingTop
-          searchTop
-          searchBottom={false}
-          barReverse
+      <DataTable
+        data={data}
+        pagination={paging}
+        {...otherProps}
       />
     </div>
   );

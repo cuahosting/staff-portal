@@ -13,6 +13,8 @@ import { thunk as thunkMiddleware } from "redux-thunk";
 import { logger } from "redux-logger";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GOOGLE_CLIENT_ID } from "./config/googleAuth";
+import { ThemeProvider } from "@mui/material/styles";
+import customTheme from "./theme/customTheme";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 let store;
@@ -45,13 +47,15 @@ const persist = persistStore(store);
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <ErrorBoundary>
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <Provider store={store}>
-        <PersistGate persistor={persist}>
-          <App />
-        </PersistGate>
-      </Provider>
-    </GoogleOAuthProvider>
+    <ThemeProvider theme={customTheme}>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <Provider store={store}>
+          <PersistGate persistor={persist}>
+            <App />
+          </PersistGate>
+        </Provider>
+      </GoogleOAuthProvider>
+    </ThemeProvider>
   </ErrorBoundary>
 );
 

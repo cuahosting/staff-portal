@@ -65,7 +65,7 @@ export default function InventoryPurchaseOrderUpdate(props) {
                                 <rect x="7" y="6" width="4" height="4" rx="2"  fill="currentColor"/>
                             </svg>
                         </span>
-                        Order From => {props.selectedOrder.request_type}</a>
+                        Order From {'=>'} {props.selectedOrder.request_type}</a>
                     <div className="d-flex flex-column flex-grow-1 pe-8">
                         <div className="d-flex flex-wrap">
                             <div

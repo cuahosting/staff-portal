@@ -79,7 +79,6 @@ function ExamTimeTableHall(props) {
         VenueID: "",
         Capacity: "",
         maxCapacity: "",
-        ExamTakers: 0,
         InsertedBy: props.LoginDetails[0].StaffID,
         StudentsCount: 0,
         VacantSpace_: 0,

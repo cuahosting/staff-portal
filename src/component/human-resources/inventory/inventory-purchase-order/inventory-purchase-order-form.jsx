@@ -44,7 +44,7 @@ export default function InventoryPurchaseOrderForm(props) {
                             {
                                 budgetItems.map((item, index) => {
                                     return(
-                                        <option key={index} budget_Item_id={item.EntryID} budget_amount={item.Amount} budget_quantity={item.Quantity} value={item.ItemName}>{item.ItemName} => ({item.Quantity})</option>
+                                        <option key={index} budget_Item_id={item.EntryID} budget_amount={item.Amount} budget_quantity={item.Quantity} value={item.ItemName}>{item.ItemName} {'=>'} ({item.Quantity})</option>
                                     )
                                 })
                             }

@@ -18,7 +18,7 @@ import { serverLink } from "../../../resources/url";
 import { projectLogo } from "../../../resources/constants";
 
 function Header(props) {
-  const token = props.loginData[0].token
+  const token = props.loginData && props.loginData[0] ? props.loginData[0].token : null;
   const [isOpen, setIsOpen] = useState(false);
   const toggleDrawer = () => {
     setIsOpen((prevState) => !prevState);
@@ -51,12 +51,17 @@ function Header(props) {
   }, []);
 
   const getFaculty = async () => {
+    if (!token) return;
+
     await axios
       .get(`${serverLink}staff/academics/faculty/list`, token)
       .then((result) => {
         if (result.data.length > 0) {
           props.setOnFacultyList(result.data);
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching faculty:", error);
       });
 
     await axios
@@ -65,13 +70,21 @@ function Header(props) {
         if (result.data.length > 0) {
           props.setOnDepartmentList(result.data);
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching departments:", error);
       });
 
     axios.get(`${serverLink}staff/settings/dashboard/current_semester`, token)
       .then((result)=>{
-        let semester = result.data[0].SemesterCode;
-        props.setOnCurrentSemester(semester)
+        if (result.data && result.data[0]) {
+          let semester = result.data[0].SemesterCode;
+          props.setOnCurrentSemester(semester);
+        }
       })
+      .catch((error) => {
+        console.error("Error fetching current semester:", error);
+      });
   };
 
   const isMobile = width <= 768;

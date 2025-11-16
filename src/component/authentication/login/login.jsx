@@ -197,7 +197,8 @@ function Login(props)
                 </div>
 
                 <div style={{
-                  animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards'
+                  animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards',
+                  marginBottom: '1.5rem'
                 }}>
                   <Input
                     id="StaffID"
@@ -213,32 +214,10 @@ function Login(props)
                   />
                 </div>
 
-                <div className="mb-4" style={{
-                  animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s backwards'
+                <div style={{
+                  animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s backwards',
+                  marginBottom: '1.5rem'
                 }}>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span></span>
-                    <Link
-                      to={"/forgot-password"}
-                      className="text-decoration-none"
-                      style={{
-                        color: '#667eea',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.color = '#764ba2';
-                        e.target.style.textDecoration = 'underline';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.color = '#667eea';
-                        e.target.style.textDecoration = 'none';
-                      }}
-                    >
-                      Forgot Password?
-                    </Link>
-                  </div>
                   <Input
                     id="Password"
                     type="password"
@@ -306,6 +285,31 @@ function Login(props)
                       </span>
                     )}
                   </button>
+
+                  <div className="text-center mt-3" style={{
+                    animation: 'fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s backwards'
+                  }}>
+                    <Link
+                      to={"/forgot-password"}
+                      className="text-decoration-none"
+                      style={{
+                        color: '#667eea',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.color = '#764ba2';
+                        e.target.style.textDecoration = 'underline';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.color = '#667eea';
+                        e.target.style.textDecoration = 'none';
+                      }}
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
                 </div>
 
                 {/* CSS Animations */}

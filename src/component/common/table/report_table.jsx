@@ -1,26 +1,34 @@
-import MUIDataTable from "mui-datatables";
-import React, {useRef} from "react";
-import {formatDateAndTime, projectLogo} from "../../../resources/constants";
-import ReactToPrint from "react-to-print";
+import React, { useRef } from "react";
+import { DataTable } from "../form";
+import { formatDateAndTime, projectLogo } from "../../../resources/constants";
 import IconButton from "@mui/material/IconButton";
 import PrintIcon from "@mui/icons-material/Print";
 import "./report_table.css";
 
+/**
+ * ReportTable Component
+ *
+ * A specialized data table component for printable reports.
+ * Includes custom print header with logo and timestamp.
+ *
+ * @param {Object} props
+ * @param {string} props.title - Table title
+ * @param {Array} props.data - Table data (rows)
+ * @param {Array} props.columns - Table columns configuration
+ * @param {number} props.row_count - Rows per page (default: 20)
+ * @param {boolean} props.pagination - Enable pagination (default: true)
+ * @param {string} props.height - Table body height (default: '400px')
+ */
 function ReportTable(props) {
-    let componentRef = useRef();
+    const componentRef = useRef();
 
-    const options = {
+    const handlePrint = () => {
+        window.print();
+    };
+
+    const customOptions = {
         rowsPerPage: typeof props.row_count !== 'undefined' ? props.row_count : 20,
         rowsPerPageOptions: [5, 10, 20, 50, 100, 200, 500, 1000],
-        search: true,
-        download: true,
-        print: false,
-        viewColumns: true,
-        fixedHeader: false,
-        filter: true,
-        selectableRows: 'none',
-        filterType: "dropdown",
-        responsive: "standard",
         pagination: typeof props.pagination !== 'undefined' ? props.pagination : true,
         tableBodyHeight: typeof props.height !== 'undefined' ? props.height : '400px',
         downloadOptions: {
@@ -29,36 +37,44 @@ function ReportTable(props) {
         },
         draggableColumns: {
             enabled: true,
-            transitionTime:300
+            transitionTime: 300
         },
-        searchPlaceholder: 'Search table',
+        print: false, // Disable default print, use custom print button
         customToolbar: () => {
             return (
-                <ReactToPrint
-                    trigger={() => <IconButton size="large"><PrintIcon /></IconButton>}
-                    content={() => componentRef}
-                />
+                <IconButton
+                    size="large"
+                    aria-label="Print table"
+                    title="Print table"
+                    onClick={handlePrint}
+                >
+                    <PrintIcon />
+                </IconButton>
             );
         }
     };
 
-    return (
-        <>
-            <div style={{ width: `100%`}} ref={(el) => (componentRef = el)}>
-                <div className="text-center bg-secondary print-only">
-                    <img src={projectLogo} alt="Project" height="100px"/>
-                    <h1>{props.title}</h1>
-                    <h4>{formatDateAndTime(new Date(), 'date_and_time')}</h4>
-                </div>
-                <MUIDataTable
-                    title={props.title}
-                    data={props.data}
-                    columns={props.columns}
-                    options={options}
-                />
-            </div>
+    console.log(props.data)
 
-        </>
+    return (
+        <div style={{ width: '100%' }} ref={componentRef}>
+            <div className="text-center bg-secondary print-only">
+                <img src={projectLogo} alt="Project Logo" height="100px" />
+                <h1>{props.title}</h1>
+                <h4>{formatDateAndTime(new Date(), 'date_and_time')}</h4>
+            </div>
+            <DataTable
+                title={props.title}
+                data={props.data}
+                columns={props.columns}
+                options={customOptions}
+                search={true}
+                download={true}
+                viewColumns={true}
+                filter={true}
+                selectableRows="none"
+            />
+        </div>
     );
 }
 

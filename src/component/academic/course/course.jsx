@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import CourseForm from "./courseform";
 import swal from "sweetalert";
+import { Input } from "../../common/form";
 function Course(props) {
   const token = props.loginData[0].token
   const [isLoading, setIsLoading] = useState(true);
@@ -427,9 +428,33 @@ function Course(props) {
           <div className="card-header border-0 pt-6">
             <div className="card-title" />
             <div className="card-toolbar">
-              <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
-                <button type="button" className="btn btn-primary" style={{marginRight: "5px"}} data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => setCreateCourse({...createCourse, CourseName: "", CourseCode: "", Duration: "", DurationType: "", DegreeInView: "", TuitionFee: "", CourseClass: "", DepartmentCode: "", IsAwardDegree: 1, IsGens: "", ApplicationType: "", EntryID: "",})}>Add Course</button>
-                <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_general_course_code" onClick={() => {setUpdateCourseCode(initializeUpdateCourseCode)}}>Update Course Code</button>
+              <div className="d-flex justify-content-end gap-2" data-kt-customer-table-toolbar="base">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_general"
+                  onClick={() => setCreateCourse({...createCourse, CourseName: "", CourseCode: "", Duration: "", DurationType: "", DegreeInView: "", TuitionFee: "", CourseClass: "", DepartmentCode: "", IsAwardDegree: 1, IsGens: "", ApplicationType: "", EntryID: "",})}
+                >
+                  <i className="fa fa-plus d-md-none" />
+                  <span className="d-none d-md-inline">
+                    <i className="fa fa-plus me-2" />
+                    Add Course
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_general_course_code"
+                  onClick={() => {setUpdateCourseCode(initializeUpdateCourseCode)}}
+                >
+                  <i className="fa fa-edit d-md-none" />
+                  <span className="d-none d-md-inline">
+                    <i className="fa fa-edit me-2" />
+                    Update Course Code
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -449,34 +474,46 @@ function Course(props) {
 
         <Modal title={"UPDATE COURSE CODE"} id={"kt_modal_general_course_code"}>
           <div className="row">
-            <div className="col-md-6 mb-3">
-              <div className="form-group">
-                <label htmlFor="old_course_code"> Enter Old Course Code</label>
-                <input type="text" className="form-control" id="old_course_code"
-                       value={updateCourseCode.old_course_code} onChange={(e) => {
+            <div className="col-md-6">
+              <Input
+                id="old_course_code"
+                type="text"
+                value={updateCourseCode.old_course_code}
+                onChange={(e) => {
                   setUpdateCourseCode({
                     ...updateCourseCode,
                     old_course_code: e.target.value
                   })
-                }}/>
-              </div>
+                }}
+                label="Old Course Code"
+                placeholder="Enter old course code"
+                style={{ textTransform: 'uppercase' }}
+                required
+              />
             </div>
-            <div className="col-md-6 mb-3">
-              <div className="form-group">
-                <label htmlFor="new_module_code"> Enter New Course Code</label>
-                <input type="text" className="form-control" id="new_module_code"
-                       value={updateCourseCode.new_course_code} onChange={(e) => {
+            <div className="col-md-6">
+              <Input
+                id="new_module_code"
+                type="text"
+                value={updateCourseCode.new_course_code}
+                onChange={(e) => {
                   setUpdateCourseCode({
                     ...updateCourseCode,
                     new_course_code: e.target.value
                   })
-                }}/>
-              </div>
+                }}
+                label="New Course Code"
+                placeholder="Enter new course code"
+                style={{ textTransform: 'uppercase' }}
+                required
+              />
             </div>
-            <button className="btn btn-primary w-100"
-                    onClick={handleSubmitCourseCodeUpdate}>Submit
-            </button>
           </div>
+          <button className="btn btn-primary w-100"
+                  onClick={handleSubmitCourseCodeUpdate}>
+            <i className="fa fa-check me-2" />
+            Submit
+          </button>
         </Modal>
       </div>
     </div>

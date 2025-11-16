@@ -6,6 +6,7 @@ import { EmailTemplates, encryptData, projectLogo, sendEmail } from "../../../re
 import { toast } from "react-toastify";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
+import { Input } from "../../common/form";
 
 function ForgotPassword(props)
 {
@@ -74,18 +75,16 @@ function ForgotPassword(props)
                   </div>
                 </div>
 
-                <div className="fv-row mb-10">
-                  <label className="form-label fs-6 fw-bolder text-dark">
-                    Staff Email Address
-                  </label>
-
-                  <input
-                    className="form-control form-control-lg form-control-solid"
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <Input
+                    id="EmailAddress"
                     type="email"
-                    name="EmailAddress"
                     value={reset.EmailAddress}
                     onChange={onEdit}
-                    autoComplete="off"
+                    label="Staff Email Address"
+                    placeholder="Enter your email address"
+                    autoComplete="email"
+                    required
                   />
                 </div>
 
@@ -95,14 +94,18 @@ function ForgotPassword(props)
                     id="kt_sign_in_submit"
                     className="btn btn-lg btn-primary w-100 mb-5"
                   >
-                    <span className="indicator-label">Reset</span>
+                    <span className="indicator-label">Send Reset Link</span>
                     <span className="indicator-progress">
                       Please wait...
                       <span className="spinner-border spinner-border-sm align-middle ms-2" />
                     </span>
                   </button>
+                  <div className="text-center">
+                    <NavLink to={'/'} className="link-primary fw-bold">
+                      Back to Login
+                    </NavLink>
+                  </div>
                 </div>
-                <NavLink to={'/'}>Back to Login</NavLink>
               </form>
             </div>
           </div>

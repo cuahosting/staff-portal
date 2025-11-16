@@ -1,163 +1,193 @@
 import React from "react";
-import Select from "react-select";
+import { Input, SearchSelect } from "../../common/form";
 
 export default function CourseForm(props) {
     return (
         <>
-            <div className="form-group mb-4">
-                <label htmlFor="CourseName">Course Name</label>
-                <input
-                    type="text"
-                    id={"CourseName"}
-                    onChange={props.onEdit}
-                    value={props.data.CourseName}
-                    className={"form-control"}
-                    placeholder={"Enter the Course Name"}
-                />
-            </div>
-            <div className="form-group mb-4">
-                <label htmlFor="CourseCode">Course Code</label>
-                <input
-                    style={{textTransform:'uppercase'}} 
-                    type="text"
-                    id={"CourseCode"}
-                    disabled={props.data.EntryID !== "" ? true: false}
-                    onChange={props.onEdit}
-                    value={props.data.CourseCode}
-                    className={"form-control"}
-                    placeholder={"Enter the Course Code"}
-                />
-            </div>
+            <Input
+                id="CourseName"
+                type="text"
+                value={props.data.CourseName}
+                onChange={props.onEdit}
+                label="Course Name"
+                placeholder="Enter the Course Name"
+                required
+            />
+            <Input
+                id="CourseCode"
+                type="text"
+                value={props.data.CourseCode}
+                onChange={props.onEdit}
+                label="Course Code"
+                placeholder="Enter the Course Code"
+                disabled={props.data.EntryID !== ""}
+                style={{ textTransform: 'uppercase' }}
+                required
+            />
             <div className="row">
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="Duration">Duration</label>
-                    <input
+                <div className="col-md-6">
+                    <Input
+                        id="Duration"
                         type="number"
-                        id={"Duration"}
-                        onChange={props.onEdit}
                         value={props.data.Duration}
-                        className={"form-control"}
-                        placeholder={"Enter the Course Duration"}
+                        onChange={props.onEdit}
+                        label="Duration"
+                        placeholder="Enter the Course Duration"
+                        required
                     />
                 </div>
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="DurationType">Duration Type</label>
-                    <select
-                        id={"DurationType"}
-                        onChange={props.onEdit}
-                        value={props.data.DurationType}
-                        className={"form-control"}
-                    >
-                        <option>Select Duration Type</option>
-                        <option value="Months">Months</option>
-                        <option value="Years">Years</option>
-                        <option value="Semesters">Semesters</option>
-                    </select>
+                <div className="col-md-6">
+                    <SearchSelect
+                        id="DurationType"
+                        value={props.data.DurationType ? { value: props.data.DurationType, label: props.data.DurationType } : null}
+                        onChange={(selectedOption) => {
+                            const e = {
+                                target: {
+                                    id: "DurationType",
+                                    value: selectedOption?.value || ""
+                                }
+                            };
+                            props.onEdit(e);
+                        }}
+                        options={[
+                            { value: "Months", label: "Months" },
+                            { value: "Years", label: "Years" },
+                            { value: "Semesters", label: "Semesters" }
+                        ]}
+                        label="Duration Type"
+                        placeholder="Select Duration Type"
+                        required
+                    />
                 </div>
             </div>
             <div className="row">
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="DegreeInView">Degree In View</label>
-                    <input
+                <div className="col-md-6">
+                    <Input
+                        id="DegreeInView"
                         type="text"
-                        id={"DegreeInView"}
-                        onChange={props.onEdit}
                         value={props.data.DegreeInView}
-                        className={"form-control"}
-                        placeholder={"Enter the Degree In View"}
+                        onChange={props.onEdit}
+                        label="Degree In View"
+                        placeholder="Enter the Degree In View"
+                        required
                     />
                 </div>
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="IsAwardDegree">Is Award Degree </label>
-                    <select
-                        id={"IsAwardDegree"}
-                        onChange={props.onEdit}
-                        value={props.data.IsAwardDegree}
-                        className={"form-control"}
-                    >
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                    </select>
+                <div className="col-md-6">
+                    <SearchSelect
+                        id="IsAwardDegree"
+                        value={props.data.IsAwardDegree ? { value: props.data.IsAwardDegree, label: props.data.IsAwardDegree === "1" ? "Yes" : "No" } : null}
+                        onChange={(selectedOption) => {
+                            const e = {
+                                target: {
+                                    id: "IsAwardDegree",
+                                    value: selectedOption?.value || ""
+                                }
+                            };
+                            props.onEdit(e);
+                        }}
+                        options={[
+                            { value: "1", label: "Yes" },
+                            { value: "0", label: "No" }
+                        ]}
+                        label="Is Award Degree"
+                        placeholder="Select option"
+                        required
+                    />
                 </div>
             </div>
             <div className="row">
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="TuitionFee"> Tuition Fee</label>
-                    <input
+                <div className="col-md-6">
+                    <Input
+                        id="TuitionFee"
                         type="number"
-                        id={"TuitionFee"}
-                        onChange={props.onEdit}
                         value={props.data.TuitionFee}
-                        className={"form-control"}
-                        placeholder={"Enter the Tuition Fee"}
+                        onChange={props.onEdit}
+                        label="Tuition Fee"
+                        placeholder="Enter the Tuition Fee"
+                        required
                     />
                 </div>
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="CourseClass">Course Class</label>
-                    <input
+                <div className="col-md-6">
+                    <Input
+                        id="CourseClass"
                         type="text"
-                        id={"CourseClass"}
-                        onChange={props.onEdit}
                         value={props.data.CourseClass}
-                        className={"form-control"}
-                        placeholder={"Enter the Course Class"}
+                        onChange={props.onEdit}
+                        label="Course Class"
+                        placeholder="Enter the Course Class"
+                        required
                     />
                 </div>
             </div>
-            <div className="form-group mb-4">
-                <label htmlFor="DepartmentCode">Department </label>
-                {/*<Select*/}
-                {/*    id="DepartmentCode"*/}
-                {/*    name="DepartmentCode"*/}
-                {/*    data={departmentList}*/}
-                {/*    value={searchItem.SemesterCode}*/}
-                {/*    className={"form-control"}*/}
-                {/*    onSelect={props.onEdit}*/}
-                {/*    options={{*/}
-                {/*        placeholder: "Search Departments",*/}
-                {/*    }}*/}
-                {/*/>*/}
-                <select
-                    id={"DepartmentCode"}
-                    onChange={props.onEdit}
-                    value={props.data.DepartmentCode}
-                    className={"form-control"}
-                >
-                    <option>Select Department</option>
-                    {
-                        props.departmentList.length > 0 && props.departmentList.map((department, index) => {
-                            return <option key={index} value={department.DepartmentCode}>{department.DepartmentName}</option>
-                        })
-                    }
-
-                </select>
-            </div>
+            <SearchSelect
+                id="DepartmentCode"
+                value={props.data.DepartmentCode ?
+                    props.departmentList.find(dept => dept.DepartmentCode === props.data.DepartmentCode) ?
+                        { value: props.data.DepartmentCode, label: props.departmentList.find(dept => dept.DepartmentCode === props.data.DepartmentCode).DepartmentName }
+                        : null
+                    : null
+                }
+                onChange={(selectedOption) => {
+                    const e = {
+                        target: {
+                            id: "DepartmentCode",
+                            value: selectedOption?.value || ""
+                        }
+                    };
+                    props.onEdit(e);
+                }}
+                options={props.departmentList.map(dept => ({
+                    value: dept.DepartmentCode,
+                    label: dept.DepartmentName
+                }))}
+                label="Department"
+                placeholder="Select Department"
+                required
+            />
             <div className="row">
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="IsGens">Is Gens</label>
-                    <select
-                        id={"IsGens"}
-                        onChange={props.onEdit}
-                        value={props.data.IsGens}
-                        className={"form-control"}
-                    >
-                        <option>Select Option</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                    </select>
+                <div className="col-md-6">
+                    <SearchSelect
+                        id="IsGens"
+                        value={props.data.IsGens ? { value: props.data.IsGens, label: props.data.IsGens === "1" ? "Yes" : "No" } : null}
+                        onChange={(selectedOption) => {
+                            const e = {
+                                target: {
+                                    id: "IsGens",
+                                    value: selectedOption?.value || ""
+                                }
+                            };
+                            props.onEdit(e);
+                        }}
+                        options={[
+                            { value: "1", label: "Yes" },
+                            { value: "0", label: "No" }
+                        ]}
+                        label="Is Gens"
+                        placeholder="Select Option"
+                        required
+                    />
                 </div>
-                <div className="form-group mb-4 col-md-6">
-                    <label htmlFor="ApplicationType">Application Type</label>
-                    <select
-                        id={"ApplicationType"}
-                        onChange={props.onEdit}
-                        value={props.data.ApplicationType}
-                        className={"form-control"}
-                    >
-                        <option>Select Application Type</option>
-                        <option value="undergraduate">undergraduate</option>
-                        <option value="postgraduate">postgraduate</option>
-                    </select>
+                <div className="col-md-6">
+                    <SearchSelect
+                        id="ApplicationType"
+                        value={props.data.ApplicationType ? { value: props.data.ApplicationType, label: props.data.ApplicationType.charAt(0).toUpperCase() + props.data.ApplicationType.slice(1) } : null}
+                        onChange={(selectedOption) => {
+                            const e = {
+                                target: {
+                                    id: "ApplicationType",
+                                    value: selectedOption?.value || ""
+                                }
+                            };
+                            props.onEdit(e);
+                        }}
+                        options={[
+                            { value: "undergraduate", label: "Undergraduate" },
+                            { value: "postgraduate", label: "Postgraduate" }
+                        ]}
+                        label="Application Type"
+                        placeholder="Select Application Type"
+                        required
+                    />
                 </div>
             </div>
             <div className="form-group pt-2">

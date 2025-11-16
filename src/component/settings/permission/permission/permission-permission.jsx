@@ -43,7 +43,7 @@ function PermissionPermission(props) {
             .catch((err) => {
                 console.log("NETWORK NATIONALITY ERROR");
             });
-
+            console.log
         if (group_id !== '') {
             await populatePermission(group_id);
         }
@@ -61,6 +61,7 @@ function PermissionPermission(props) {
 
     const populatePermission = async (group_id) => {
         let rows = [];
+        console.log(group_id)
         if (group_id !== '') {
             await axios.get(`${serverLink}staff/settings/group/permission/${group_id}`, token)
                 .then((result) => {
@@ -80,6 +81,7 @@ function PermissionPermission(props) {
                         }
                         rows.push([(index+1), item.MenuName, item.SubMenuName, item.SubSubMenuName, inserted_by, inserted_date, action])
                     })
+                    console.log(rows)
                     setData(rows);
                 })
                 .catch((err) => {
@@ -167,6 +169,7 @@ function PermissionPermission(props) {
     );
 }
 const mapStateToProps = (state) => {
+    console.log(state)
     return {
         loginData: state.LoginDetails,
     };

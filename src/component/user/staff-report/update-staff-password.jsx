@@ -8,8 +8,8 @@ import {connect} from "react-redux";
 import { encryptData
 } from "../../../resources/constants";
 import {formatDate} from "../../../resources/constants";
-import Select from "react-select";
 import {toast} from "react-toastify";
+import { Input, SearchSelect } from "../../common/form";
 
 function UpdateStaffPassword(props) {
     const token = props.loginData[0].token;
@@ -167,14 +167,15 @@ function UpdateStaffPassword(props) {
                         </div>
                         <div className="d-flex col-md-12">
                             <div className="col-md-12 pb-3">
-                                <label htmlFor="StaffID">Select Staff</label>
-                                <Select
+                                <SearchSelect
                                     id="StaffID"
                                     name="StaffID"
                                     value={formData.StaffID2}
                                     onChange={onStaffChange}
                                     options={staff}
+                                    label="Select Staff"
                                     placeholder="Select Staff"
+                                    required
                                 />
                             </div>
                         </div>
@@ -187,26 +188,28 @@ function UpdateStaffPassword(props) {
                                         <h5>Update Password</h5>
                                         <hr />
                                         <div className="row">
-                                            <div className="form-group col-md-6 mb-4">
-                                                <label htmlFor="ConfirmPassword">New Password</label>
-                                                <input
-                                                    type="password"
+                                            <div className="col-md-6">
+                                                <Input
                                                     id="Password"
-                                                    className="form-control"
-                                                    placeholder="Password"
-                                                    onChange={onEdit}
+                                                    type="password"
                                                     value={formData.Password}
+                                                    onChange={onEdit}
+                                                    label="New Password"
+                                                    placeholder="Enter new password"
+                                                    autoComplete="new-password"
+                                                    required
                                                 />
                                             </div>
-                                            <div className="form-group col-md-6 mb-4">
-                                                <label htmlFor="ConfirmPassword">Confirm Password</label>
-                                                <input
-                                                    type="password"
+                                            <div className="col-md-6">
+                                                <Input
                                                     id="ConfirmPassword"
-                                                    className="form-control"
-                                                    placeholder="Confirm Password"
-                                                    onChange={onEdit}
+                                                    type="password"
                                                     value={formData.ConfirmPassword}
+                                                    onChange={onEdit}
+                                                    label="Confirm Password"
+                                                    placeholder="Re-enter new password"
+                                                    autoComplete="new-password"
+                                                    required
                                                 />
                                             </div>
                                         </div>
