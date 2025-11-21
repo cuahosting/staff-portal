@@ -497,179 +497,205 @@ function ManageTimetableSchedule(props) {
         items={["Academics", "Manage Timetable"]}
       />
       <div className="flex-column-fluid">
-        <div className="card">
-          <div className="card-body pt-0">
+        <div className="card card-no-border">
+          <div className="card-body p-0">
             <div className="row pt-5">
               <div className="col-md-4">
-                <label htmlFor="SemesterCode">Select School Semester</label>
-                <Select
-                    name="SemesterCode"
-                    value={item.SemesterCode2}
-                    onChange={onSemesterChange}
-                    options={semesterOptions}
-                    placeholder="select Semester"
-                />
-                {/*<select*/}
-                {/*  name="SemesterCode"*/}
-                {/*  id="SemesterCode"*/}
-                {/*  className="form-select"*/}
-                {/*  onChange={onEdit}*/}
-                {/*  value={item.SemesterCode}*/}
-                {/*>*/}
-                {/*  <option value="">Select Option</option>*/}
-                {/*  {timetableSemester.length > 0 &&*/}
-                {/*    timetableSemester.map((timetable, index) => {*/}
-                {/*      return (*/}
-                {/*        <option key={index} value={timetable.SemesterCode}>*/}
-                {/*          {timetable.SemesterName}*/}
-                {/*        </option>*/}
-                {/*      );*/}
-                {/*    })}*/}
-                {/*</select>*/}
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="SemesterCode">
+                    Select School Semester
+                  </label>
+                  <Select
+                      name="SemesterCode"
+                      value={item.SemesterCode2}
+                      onChange={onSemesterChange}
+                      options={semesterOptions}
+                      placeholder="select Semester"
+                  />
+                </div>
               </div>
 
               <div className="col-md-4">
-                <label htmlFor="ModuleCode">Select Module</label>
-                <Select2
-                  id="ModuleCode"
-                  disabled={item.SemesterCode === ""}
-                  defaultValue={item.ModuleCode}
-                  data={moduleList}
-                  onSelect={onEdit}
-                  options={{
-                    placeholder: "Search Module",
-                  }}
-                />
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="ModuleCode">
+                    Select Module
+                  </label>
+                  <Select2
+                    id="ModuleCode"
+                    disabled={item.SemesterCode === ""}
+                    defaultValue={item.ModuleCode}
+                    data={moduleList}
+                    onSelect={onEdit}
+                    options={{
+                      placeholder: "Search Module",
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="col-md-4">
-                <label htmlFor="ModuleType">Module Type</label>
-                <select
-                  name="ModuleType"
-                  id="ModuleType"
-                  className="form-select"
-                  onChange={onEdit}
-                  value={item.ModuleType}
-                >
-                  <option value="">Select Option</option>
-                  <option value="Lecture">Lecture</option>
-                  <option value="Interactive">Interactive</option>
-                  <option value="Class">Class</option>
-                  <option value="Workshop">Workshop</option>
-                  <option value="Online">Online</option>
-                  <option value="Seminar">Seminar</option>
-                </select>
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="ModuleType">
+                    Module Type
+                  </label>
+                  <div className="enhanced-input-wrapper">
+                    <select
+                      name="ModuleType"
+                      id="ModuleType"
+                      className="form-control form-control-lg form-control-solid enhanced-input"
+                      onChange={onEdit}
+                      value={item.ModuleType}
+                    >
+                      <option value="">Select Option</option>
+                      <option value="Lecture">Lecture</option>
+                      <option value="Interactive">Interactive</option>
+                      <option value="Class">Class</option>
+                      <option value="Workshop">Workshop</option>
+                      <option value="Online">Online</option>
+                      <option value="Seminar">Seminar</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="row pt-5">
+            <div className="row">
               <div className="col-md-4">
-                <label htmlFor="DayName">Day</label>
-                <select
-                  name="DayName"
-                  id="DayName"
-                  className="form-select"
-                  onChange={onEdit}
-                  value={item.DayName}
-                >
-                  <option value="">Select Option</option>
-                  <option value="Monday">Monday</option>
-                  <option value="Tuesday">Tuesday</option>
-                  <option value="Wednesday">Wednesday</option>
-                  <option value="Thursday">Thursday</option>
-                  <option value="Friday">Friday</option>
-                  <option value="Saturday">Saturday</option>
-                </select>
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="DayName">
+                    Day
+                  </label>
+                  <div className="enhanced-input-wrapper">
+                    <select
+                      name="DayName"
+                      id="DayName"
+                      className="form-control form-control-lg form-control-solid enhanced-input"
+                      onChange={onEdit}
+                      value={item.DayName}
+                    >
+                      <option value="">Select Option</option>
+                      <option value="Monday">Monday</option>
+                      <option value="Tuesday">Tuesday</option>
+                      <option value="Wednesday">Wednesday</option>
+                      <option value="Thursday">Thursday</option>
+                      <option value="Friday">Friday</option>
+                      <option value="Saturday">Saturday</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className="col-md-4">
-                <label htmlFor="StartTime">Start Time</label>
-                <select
-                  name="StartTime"
-                  id="StartTime"
-                  className="form-select"
-                  onChange={onEdit}
-                  value={item.StartTime}
-                >
-                  <option value="">Select Option</option>
-                  {schedule_time.map((start) => {
-                    return (
-                      <option key={start} value={start}>
-                        {start}:00
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              <div className="col-md-4">
-                <label htmlFor="EndTime">End Time</label>
-                <select
-                  name="EndTime"
-                  id="EndTime"
-                  className="form-select"
-                  onChange={onEdit}
-                  value={item.EndTime}
-                >
-                  <option value="">Select Option</option>
-                  {item.StartTime !== "" &&
-                    schedule_time.map((end) => {
-                      if (end > item.StartTime && end <= item.StartTime + 4) {
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="StartTime">
+                    Start Time
+                  </label>
+                  <div className="enhanced-input-wrapper">
+                    <select
+                      name="StartTime"
+                      id="StartTime"
+                      className="form-control form-control-lg form-control-solid enhanced-input"
+                      onChange={onEdit}
+                      value={item.StartTime}
+                    >
+                      <option value="">Select Option</option>
+                      {schedule_time.map((start) => {
                         return (
-                          <option key={end} value={end}>
-                            {end}:00
+                          <option key={start} value={start}>
+                            {start}:00
                           </option>
                         );
-                      }
-                    })}
-                </select>
+                      })}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-4">
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="EndTime">
+                    End Time
+                  </label>
+                  <div className="enhanced-input-wrapper">
+                    <select
+                      name="EndTime"
+                      id="EndTime"
+                      className="form-control form-control-lg form-control-solid enhanced-input"
+                      onChange={onEdit}
+                      value={item.EndTime}
+                    >
+                      <option value="">Select Option</option>
+                      {item.StartTime !== "" &&
+                        schedule_time.map((end) => {
+                          if (end > item.StartTime && end <= item.StartTime + 4) {
+                            return (
+                              <option key={end} value={end}>
+                                {end}:00
+                              </option>
+                            );
+                          }
+                        })}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="row pt-5">
+            <div className="row">
               <div className="col-md-6">
-                <label htmlFor="VenueID">Select Venue</label>
-                <Select2
-                  id="VenueID"
-                  defaultValue={item.VenueID}
-                  data={venueList}
-                  onSelect={onEdit}
-                  options={{
-                    placeholder: "Search Venue",
-                  }}
-                />
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="VenueID">
+                    Select Venue
+                  </label>
+                  <Select2
+                    id="VenueID"
+                    defaultValue={item.VenueID}
+                    data={venueList}
+                    onSelect={onEdit}
+                    options={{
+                      placeholder: "Search Venue",
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="col-md-6">
-                <label htmlFor="StaffID">Select Staff</label>
-                <Select2
-                  id="StaffID"
-                  multiple
-                  defaultValue={timetableStaff}
-                  data={staffList}
-                  onChange={onMultiEdit}
-                  options={{
-                    placeholder: "Search Staff",
-                  }}
-                />
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="StaffID">
+                    Select Staff
+                  </label>
+                  <Select2
+                    id="StaffID"
+                    multiple
+                    defaultValue={timetableStaff}
+                    data={staffList}
+                    onChange={onMultiEdit}
+                    options={{
+                      placeholder: "Search Staff",
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="row pt-5">
+            <div className="row">
               <div className="col-md-12">
-                <label htmlFor="StudentGroup">Select Groups</label>
-                <Select2
-                  id="StudentGroup"
-                  multiple
-                  defaultValue={timetableGroup}
-                  data={groupList}
-                  onChange={onMultiEdit}
-                  options={{
-                    placeholder: "Search Group",
-                  }}
-                />
+                <div className="fv-row mb-6 enhanced-form-group">
+                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="StudentGroup">
+                    Select Groups
+                  </label>
+                  <Select2
+                    id="StudentGroup"
+                    multiple
+                    defaultValue={timetableGroup}
+                    data={groupList}
+                    onChange={onMultiEdit}
+                    options={{
+                      placeholder: "Search Group",
+                    }}
+                  />
+                </div>
               </div>
-              <div className="col-md-6"></div>
             </div>
 
             <div className="pt-10">

@@ -14,7 +14,7 @@ function App(props) {
           {props.loginData.length < 1 ? <PublicRoutes /> : <PageRoutes />}
         </Router>
         <ToastContainer
-          position="top-right"
+          position="top-left"
           autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}

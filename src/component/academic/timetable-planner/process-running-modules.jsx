@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
-import ReportTable from "../../common/table/report_table";
+import AGReportTable from "../../common/table/AGReportTable";
 import { showContentAlert } from "../../common/sweetalert/sweetalert";
 
 function ProcessRunningModules(props) {
@@ -173,7 +173,7 @@ function ProcessRunningModules(props) {
             />
             <div className="flex-column-fluid">
 
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-0">
                         <div className="card-title" />
                         <div className="card-toolbar">
@@ -200,7 +200,7 @@ function ProcessRunningModules(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <div className="row col-md 12 mt-4">
                             <div className="col-md-12 mt-2 mb-2">
                                 <label htmlFor="SemesterCode">School Semester</label>
@@ -220,7 +220,7 @@ function ProcessRunningModules(props) {
                                 showTable === true &&
                                 // <Table data={datatable} />
                                 <>
-                                    <ReportTable columns={columns} data={t_data} title={"Approved Timetable Modules"} />
+                                    <AGReportTable columns={columns} data={t_data} title={"Approved Timetable Modules"} />
                                     <button disabled={data.SemesterCode === "" ? true : false} onClick={handleProcessRunningModules} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading} >
                                         <span className="indicator-label">Process Running Modules</span>
                                         <span className="indicator-progress">Please wait...

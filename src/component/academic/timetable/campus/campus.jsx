@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import Modal from "../../../common/modal/modal";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
@@ -52,7 +52,7 @@ function CampusSettings(props) {
                             Location: campus.Location,
                             action: (
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#kt_modal_general"
                                     onClick={() =>
@@ -172,7 +172,7 @@ function CampusSettings(props) {
     }, []);
 
     return (
-        <div className="card">
+        <div className="card card-no-border">
             <div className="card-header border-0 pt-6">
                 <div className="card-title" />
                 <div className="card-toolbar">
@@ -197,35 +197,45 @@ function CampusSettings(props) {
                     </div>
                 </div>
             </div>
-            <div className="card-body pt-0">
+            <div className="card-body p-0">
                 <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                    <Table data={datatable} />
+                    <AGTable data={datatable} />
                 </div>
             </div>
 
             <Modal title={"Manage Campus"} id={"kt_modal_general"}>
-                <div className="form-group">
-                    <label htmlFor="CampusID">Campus Name</label>
-                    <input
-                        type="text"
-                        id={"CampusName"}
-                        onChange={onEdit}
-                        value={createCampus.CampusName}
-                        className={"form-control"}
-                        placeholder={"Enter the Campus Name"}
-                    />
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="CampusName">
+                        Campus Name
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <input
+                            type="text"
+                            id="CampusName"
+                            onChange={onEdit}
+                            value={createCampus.CampusName}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            placeholder="Enter the Campus Name"
+                            autoComplete="off"
+                        />
+                    </div>
                 </div>
-                <br />
-                <div className="form-group">
-                    <label htmlFor="Location">Campus Location</label>
-                    <input
-                        type="text"
-                        id={"Location"}
-                        onChange={onEdit}
-                        value={createCampus.Location}
-                        className={"form-control"}
-                        placeholder={"Enter the Campus Location"}
-                    />
+
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="Location">
+                        Campus Location
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <input
+                            type="text"
+                            id="Location"
+                            onChange={onEdit}
+                            value={createCampus.Location}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            placeholder="Enter the Campus Location"
+                            autoComplete="off"
+                        />
+                    </div>
                 </div>
 
                 <div className="form-group pt-2">

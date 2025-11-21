@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import Modal from "../../../common/modal/modal";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
@@ -62,7 +62,7 @@ function BlockSettings(props) {
                             CampusID: campus_name, //getBlockName(Block.CampusID),
                             action: (
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#block"
                                     onClick={() =>
@@ -186,7 +186,7 @@ function BlockSettings(props) {
     }, [campusList]);
 
     return (
-        <div className="card">
+        <div className="card card-no-border">
             <div className="card-header border-0 pt-6">
                 <div className="card-title" />
                 <div className="card-toolbar">
@@ -211,47 +211,59 @@ function BlockSettings(props) {
                     </div>
                 </div>
             </div>
-            <div className="card-body pt-0">
+            <div className="card-body p-0">
                 <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                    <Table data={datatable} />
+                    <AGTable data={datatable} />
                 </div>
             </div>
 
             <Modal title={"Manage Block"} id={"block"} close={"block"}>
-                <div className="form-group">
-                    <label htmlFor="Location">Campus</label>
-                    <select id="CampusID" onChange={onEdit}
-                        value={createBlock.CampusID}
-                        className="form-select form-select-solid"
-                        data-kt-select2="true"
-                        data-placeholder="Select option"
-                        data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                        <option value={""}>-select Campus-</option>
-                        {props.campusList.length > 0 ?
-                            <>
-                                {props.campusList.map((x, y) => {
-                                    return (
-                                        <option key={y} value={x.EntryID}>{x.CampusName}</option>
-                                    )
-                                })}
-                            </>
-                            :
-                            <></>}
-                    </select>
-                </div>
-                <br />
-                <div className="form-group">
-                    <label htmlFor="BlockName">Block Name</label>
-                    <input
-                        type="text"
-                        id={"BlockName"}
-                        onChange={onEdit}
-                        value={createBlock.BlockName}
-                        className={"form-control"}
-                        placeholder={"Enter the Block Name"}
-                    />
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="CampusID">
+                        Campus
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <select
+                            id="CampusID"
+                            onChange={onEdit}
+                            value={createBlock.CampusID}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            data-kt-select2="true"
+                            data-placeholder="Select option"
+                            data-dropdown-parent="#kt_menu_624456606a84b"
+                            data-allow-clear="true"
+                        >
+                            <option value="">-select Campus-</option>
+                            {props.campusList.length > 0 ?
+                                <>
+                                    {props.campusList.map((x, y) => {
+                                        return (
+                                            <option key={y} value={x.EntryID}>{x.CampusName}</option>
+                                        )
+                                    })}
+                                </>
+                                :
+                                <></>}
+                        </select>
+                    </div>
                 </div>
 
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="BlockName">
+                        Block Name
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <input
+                            type="text"
+                            id="BlockName"
+                            onChange={onEdit}
+                            value={createBlock.BlockName}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            placeholder="Enter the Block Name"
+                            autoComplete="off"
+                        />
+                    </div>
+                </div>
 
                 <div className="form-group pt-2">
                     <button onClick={onSubmit} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading}>

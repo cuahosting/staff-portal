@@ -6,7 +6,7 @@ import Loader from "../../common/loader/loader";
 import { connect } from "react-redux";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 
 function SubmissionReport(props) {
   const token = props.login[0].token;
@@ -105,12 +105,12 @@ function SubmissionReport(props) {
         items={["Academics", "Timetable Planner", "Submission Report"]}
       />
       <div className="flex-column-fluid">
-        <div className="card">
+        <div className="card card-no-border">
           <div className="card-header border-0 pt-6">
             <div className="card-title" />
             <div className="card-toolbar"></div>
           </div>
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <div className="col-md-12">
               <div className="row">
                 <form onSubmit={handleSubmit}>
@@ -148,11 +148,11 @@ function SubmissionReport(props) {
             </div>
             {showData ? (
               <div className="col-12 mt-9">
-                <div className="card-body pt-0">
+                <div className="card-body p-0">
                   <div className="row">
                     <div className="col-md-12">
                       <h2>All Modules </h2>
-                      <Table data={datatable} />
+                      <AGTable data={datatable} />
                     </div>
                   </div>
                 </div>

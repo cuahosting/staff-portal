@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { formatDate, formatDateAndTime } from "../../../../resources/constants";
 import {useNavigate} from "react-router";
-import ReportTable from "../../../common/table/report_table";
+import AGReportTable from "../../../common/table/AGReportTable";
 import Select from "react-select";
 
 function TimetableReport(props) {
@@ -233,7 +233,8 @@ function TimetableReport(props) {
         items={["Academics", "Timetable", "Timetable Report"]}
       />
       <div className="flex-column-fluid">
-        <label htmlFor="SemesterCode">Select Semester</label>
+        <div className="fv-row mb-6 enhanced-form-group">
+          <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="SemesterCode">Select Semester</label>
           <Select
               name="SemesterCode"
               className="form-select w-100"
@@ -242,6 +243,7 @@ function TimetableReport(props) {
               options={semesterOptions}
               placeholder="select Semester"
           />
+        </div>
         {/*<select id="SemesterCode" className="form-select w-100" onChange={onEdit} value={selectedSemester}>*/}
         {/*  <option value="">Select Semester</option>*/}
         {/*  {*/}
@@ -253,7 +255,7 @@ function TimetableReport(props) {
         {/*</select>*/}
         {
           tableData.length > 0 &&
-          <ReportTable title={`Timetable Report for ${selectedSemester} Semester`} columns={columns} data={tableData} height={"800px"}/>
+          <AGReportTable title={`Timetable Report for ${selectedSemester} Semester`} columns={columns} data={tableData} height={"800px"}/>
         }
 
       </div>

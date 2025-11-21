@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -61,7 +61,7 @@ function ModulePrerequisites(props) {
                             PreModuleCode: preq.PreModuleCode + "-" + preqmName,
                             action: (
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#preqModule"
                                     onClick={() =>
@@ -215,7 +215,7 @@ function ModulePrerequisites(props) {
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
                         <div className="card-toolbar">
@@ -243,13 +243,13 @@ function ModulePrerequisites(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
-                        <Table data={datatable} />
+                    <div className="card-body p-0">
+                        <AGTable data={datatable} />
                     </div>
                 </div>
                 <Modal title={"Module Prerquisite"} id={"preqModule"}>
-                    <div className="form-group">
-                        <label htmlFor="ModuleCode">Module Name</label>
+                    <div className="fv-row mb-6 enhanced-form-group">
+                        <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="ModuleCode">Module Name</label>
                         <Select
                             name="ModuleCode"
                             value={createPreRequisite.ModuleCode2}
@@ -258,9 +258,8 @@ function ModulePrerequisites(props) {
                             placeholder="select Module"
                         />
                     </div>
-                    <br />
-                    <div className="form-group">
-                        <label htmlFor="PreModuleCode">Module PreRequisite</label>
+                    <div className="fv-row mb-6 enhanced-form-group">
+                        <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="PreModuleCode">Module PreRequisite</label>
                         <Select
                             name="ModuleCode"
                             value={createPreRequisite.PreModuleCode2}

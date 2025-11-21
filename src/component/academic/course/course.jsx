@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -109,7 +109,7 @@ function Course(props) {
               ApplicationType: course.ApplicationType ?? "N/A",
               action: (
                 <button
-                  className="btn btn-sm btn-primary"
+                  className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
                   data-bs-toggle="modal"
                   data-bs-target="#kt_modal_general"
                   onClick={() =>
@@ -357,7 +357,7 @@ function Course(props) {
               action: (
                 <>
                   <button
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
                     data-bs-toggle="modal"
                     data-bs-target="#kt_modal_general"
                     onClick={() =>
@@ -381,7 +381,7 @@ function Course(props) {
                     <i className="fa fa-pen" />
                   </button>
                   <button
-                    className="btn btn-sm btn-danger"
+                    className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
                     onClick={() => {
                       swal({
                         title: "Are you sure?",
@@ -421,20 +421,20 @@ function Course(props) {
     <Loader />
   ) : (
     <div className="d-flex flex-column flex-row-fluid">
-      <PageHeader title={"Manage Course"} items={["Academics", "Course"]} />
+      <PageHeader
+        title={"Manage Course"}
+        items={["Academics", "Course"]}
+        buttons={
+          <>
+            <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => setCreateCourse({...createCourse, CourseName: "", CourseCode: "", Duration: "", DurationType: "", DegreeInView: "", TuitionFee: "", CourseClass: "", DepartmentCode: "", IsAwardDegree: 1, IsGens: "", ApplicationType: "", EntryID: "",})}>Add Course</button>
+            <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_general_course_code" onClick={() => {setUpdateCourseCode(initializeUpdateCourseCode)}}>Update Course Code</button>
+          </>
+        }
+      />
       <div className="flex-column-fluid">
-        <div className="card">
-          <div className="card-header border-0 pt-6">
-            <div className="card-title" />
-            <div className="card-toolbar">
-              <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
-                <button type="button" className="btn btn-primary" style={{marginRight: "5px"}} data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => setCreateCourse({...createCourse, CourseName: "", CourseCode: "", Duration: "", DurationType: "", DegreeInView: "", TuitionFee: "", CourseClass: "", DepartmentCode: "", IsAwardDegree: 1, IsGens: "", ApplicationType: "", EntryID: "",})}>Add Course</button>
-                <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_general_course_code" onClick={() => {setUpdateCourseCode(initializeUpdateCourseCode)}}>Update Course Code</button>
-              </div>
-            </div>
-          </div>
-          <div className="card-body pt-0">
-            <Table data={datatable} />
+        <div className="card card-no-border">
+          <div className="card-body p-0">
+            <AGTable data={datatable} />
           </div>
         </div>
         <Modal title={"Manage Course"}>
@@ -449,28 +449,48 @@ function Course(props) {
 
         <Modal title={"UPDATE COURSE CODE"} id={"kt_modal_general_course_code"}>
           <div className="row">
-            <div className="col-md-6 mb-3">
-              <div className="form-group">
-                <label htmlFor="old_course_code"> Enter Old Course Code</label>
-                <input type="text" className="form-control" id="old_course_code"
-                       value={updateCourseCode.old_course_code} onChange={(e) => {
-                  setUpdateCourseCode({
-                    ...updateCourseCode,
-                    old_course_code: e.target.value
-                  })
-                }}/>
+            <div className="col-md-6">
+              <div className="fv-row mb-6 enhanced-form-group">
+                <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="old_course_code">
+                  Enter Old Course Code
+                </label>
+                <div className="enhanced-input-wrapper">
+                  <input
+                    type="text"
+                    className="form-control form-control-lg form-control-solid enhanced-input"
+                    id="old_course_code"
+                    value={updateCourseCode.old_course_code}
+                    onChange={(e) => {
+                      setUpdateCourseCode({
+                        ...updateCourseCode,
+                        old_course_code: e.target.value
+                      })
+                    }}
+                    autoComplete="off"
+                  />
+                </div>
               </div>
             </div>
-            <div className="col-md-6 mb-3">
-              <div className="form-group">
-                <label htmlFor="new_module_code"> Enter New Course Code</label>
-                <input type="text" className="form-control" id="new_module_code"
-                       value={updateCourseCode.new_course_code} onChange={(e) => {
-                  setUpdateCourseCode({
-                    ...updateCourseCode,
-                    new_course_code: e.target.value
-                  })
-                }}/>
+            <div className="col-md-6">
+              <div className="fv-row mb-6 enhanced-form-group">
+                <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="new_module_code">
+                  Enter New Course Code
+                </label>
+                <div className="enhanced-input-wrapper">
+                  <input
+                    type="text"
+                    className="form-control form-control-lg form-control-solid enhanced-input"
+                    id="new_module_code"
+                    value={updateCourseCode.new_course_code}
+                    onChange={(e) => {
+                      setUpdateCourseCode({
+                        ...updateCourseCode,
+                        new_course_code: e.target.value
+                      })
+                    }}
+                    autoComplete="off"
+                  />
+                </div>
               </div>
             </div>
             <button className="btn btn-primary w-100"

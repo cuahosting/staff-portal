@@ -6,7 +6,7 @@ import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { connect } from "react-redux";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import Select from 'react-select';
@@ -122,7 +122,7 @@ function OfficerAssignment(props) {
               action: (
                 <button
                   onClick={() => handleDelete(course.EntryID)}
-                  className="btn btn-sm btn-danger"
+                  className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
                 >
                   Delete
                 </button>
@@ -216,7 +216,7 @@ function OfficerAssignment(props) {
         items={["Academics", "Timetable Planner", "Officer Assignment"]}
       />
       <div className="flex-column-fluid">
-        <div className="card">
+        <div className="card card-no-border">
           <div className="card-header border-0 pt-6">
             <div className="card-title" />
             <div className="card-toolbar">
@@ -226,13 +226,13 @@ function OfficerAssignment(props) {
               ></div>
             </div>
           </div>
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <div className="col-md-12">
               <div className="row">
                 <form onSubmit={handleSubmit}>
                   <div className="row fv-row">
-                    <div className="col-md-4 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
+                    <div className="col-md-4 fv-row mb-6 enhanced-form-group">
+                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
                         Select Programme/Course
                       </label>
                       {/* <select
@@ -263,8 +263,8 @@ function OfficerAssignment(props) {
                         }}
                       />
                     </div>
-                    <div className="col-md-4 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
+                    <div className="col-md-4 fv-row mb-6 enhanced-form-group">
+                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
                         Select Staff
                       </label>
                       {/* <select
@@ -306,11 +306,11 @@ function OfficerAssignment(props) {
             </div>
             {officerData.length > 0 ? (
               <div className="col-12 mt-9">
-                <div className="card-body pt-0">
+                <div className="card-body p-0">
                   <div className="row">
                     <div className="col-md-12">
                       <h2>Staff Assigned to Course </h2>
-                      <Table data={datatable} />
+                      <AGTable data={datatable} />
                     </div>
                   </div>
                 </div>

@@ -5,7 +5,7 @@ import { serverLink } from "../../../resources/url";
 import { connect } from "react-redux";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import AGReportTable from "../../common/table/AGReportTable";
 import Select from "react-select";
 
 const ByCourse = (props) => {
@@ -119,8 +119,8 @@ const ByCourse = (props) => {
         items={["Academics", "Module Running", "Module Running By Course"]}
       />
       <div className="flex-column-fluid">
-        <div className="card">
-          <div className="card-body pt-2">
+        <div className="card card-no-border">
+          <div className="card-body p-0">
             <div className="col-md-12">
               <div className="row">
                 <form onSubmit={handleSubmit}>
@@ -152,7 +152,7 @@ const ByCourse = (props) => {
               <div className="row">
                 <div className="col-md-12 mt-5">
                   {
-                    <ReportTable
+                    <AGReportTable
                       title={`Module Running By Course`}
                       columns={columns}
                       data={data}

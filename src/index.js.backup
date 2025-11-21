@@ -11,6 +11,8 @@ import { PersistGate } from "redux-persist/integration/react";
 import thunkMiddleware from "redux-thunk";
 import { logger } from "redux-logger";
 import "./resources/enhanced-forms.css";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 let store;
