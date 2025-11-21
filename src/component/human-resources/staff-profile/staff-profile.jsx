@@ -172,6 +172,13 @@ function StaffProfile(props)
   });
   const [toggleQualification, setToggleQualification] = useState(false);
 
+  // STAFF PASSPORT
+  const [uploadStaffPassport, setUploadStaffPassport] = useState({
+    StaffID: staffId,
+    file: "",
+    update_passport: false,
+  });
+
   const staffQualificationForm = async (id) =>
   {
 
@@ -896,6 +903,82 @@ function StaffProfile(props)
       });
   };
 
+  const onEditPassport = (e) =>
+  {
+    if (e.target.id === "file")
+    {
+      const file = e.target.files[0];
+      
+      if (!file)
+      {
+        toast.error("Please select a file");
+        return;
+      }
+      
+      if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg")
+      {
+
+      } else
+      {
+        toast.error("Only .png, .jpg and .jpeg format allowed!");
+        return;
+      }
+      
+      if (file.size > 1000000)
+      {
+        toast.error("max file size is 1mb");
+        return;
+      }
+      
+      setUploadStaffPassport({
+        ...uploadStaffPassport,
+        file: file,
+        update_passport: true
+      });
+      
+      toast.success("File selected successfully");
+      return;
+    }
+  };
+
+  const handlePassportUpload = async () =>
+  {
+    if (uploadStaffPassport.update_passport === true)
+    {
+      toast.info("please wait...")
+      let formData = new FormData();
+      formData.append("file", uploadStaffPassport.file);
+      formData.append("StaffID", staffId)
+      await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/passport`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((res) =>
+      {
+        if (res.data.type === "success")
+        {
+          toast.success(`Passport Updated Successfully`);
+          getStaffRelatedData();
+          setUploadStaffPassport({
+            StaffID: staffId,
+            file: "",
+            update_passport: false,
+          });
+        } else
+        {
+          toast.error(`Something went wrong submitting your document!`);
+        }
+      }).catch((err) =>
+      {
+        console.error("Upload error:", err);
+        toast.error(`Error uploading passport: ${err.message}`);
+      })
+    } else
+    {
+      toast.error("please select passport")
+    }
+  };
+
   return isLoading ? (
     <Loader />
   ) : (
@@ -1143,6 +1226,15 @@ function StaffProfile(props)
                         to="#nok"
                       >
                         Next of Kin
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link
+                        className="nav-link text-active-primary pb-4"
+                        data-bs-toggle="tab"
+                        to="#passport"
+                      >
+                        Passport
                       </Link>
                     </li>
                     <li className="nav-item">
@@ -2734,6 +2826,36 @@ function StaffProfile(props)
                               </Link>
                             </div>
                           )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="tab-pane fade" id="passport" role="tabpanel">
+                      <div className="row">
+                        <div className="col-lg-4 col-md-4">
+                          <div className="form-group">
+                            <label htmlFor="Designation">Upload Passport</label>
+                            <input
+                              type="file"
+                              accept=".pdf, .jpg, .png, .jpeg"
+                              id="file"
+                              name="file"
+                              className="form-control"
+                              placeholder="file"
+                              onChange={onEditPassport}
+                            />
+                            <span className="badge bg-primary">
+                              Only .jpg, .png, .jpeg are allowed, Max of 1MB
+                            </span>
+                          </div>
+                        </div>
+                        <div className="col-lg-4 col-md-4">
+                          <div className="form-group mt-5">
+                            <label htmlFor="Designation"></label>
+                            <button className="btn btn-md btn-primary" type="button" onClick={handlePassportUpload}>
+                              Update Passport
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

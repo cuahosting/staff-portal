@@ -37,7 +37,7 @@ function Login(props)
     e.preventDefault();
     const sendData = {
       username: login.StaffID,
-      password: encryptData(login.Password),
+      password: login.Password, // Send plain text password to match backend expectation
     };
 
     if (login.StaffID === "")

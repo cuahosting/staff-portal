@@ -1,4 +1,4 @@
-export const serverStatus = "Live";
+export const serverStatus = "Dev";
 
 export const serverLink =
     serverStatus === "Dev"
