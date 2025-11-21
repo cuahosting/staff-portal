@@ -86,7 +86,6 @@ function PermissionMenus(props)
   });
   const [subMenuList, setMenuList] = useState([]);
   const [subMenuSelect, setSubMenuSelect] = useState([]);
-  const [subMenuForm, setSubMenuForm] = useState(false);
   const getRecords = async () =>
   {
     await axios
@@ -178,6 +177,8 @@ function PermissionMenus(props)
                 <div className="d-flex justify-content-between">
                   <button
                     className="btn btn-sm btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_sub_menu"
                     onClick={() => toggleUpdateSubMenu(item)}
                   >
                     <i className="fa fa-pen" />
@@ -243,6 +244,8 @@ function PermissionMenus(props)
                 <div className="d-flex justify-content-between">
                   <button
                     className="btn btn-sm btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_sub_sub_menu"
                     onClick={() => toggleUpdateSubSubMenu(item)}
                   >
                     <i className="fa fa-pen" />
@@ -320,7 +323,6 @@ function PermissionMenus(props)
       inserted_by: props.loginData[0].StaffID,
       entry_id: "",
     });
-    setSubMenuForm(true);
   };
   const toggleUpdateSubMenu = (type) =>
   {
@@ -330,7 +332,6 @@ function PermissionMenus(props)
       main_menu_id: type.MainMenuID,
       entry_id: type.EntryID,
     });
-    setSubMenuForm(true);
   };
 
   const [subSubMenuDatatable, setSubSubMenuDatatable] = useState({
@@ -384,7 +385,6 @@ function PermissionMenus(props)
     entry_id: "",
   });
   const [subSubMenuList, setSubSubMenuList] = useState([]);
-  const [subSubMenuForm, setSubSubMenuForm] = useState(false);
   const toggleAddSubSubMenu = () =>
   {
     setCreateSubSubMenu({
@@ -396,7 +396,6 @@ function PermissionMenus(props)
       inserted_by: props.loginData[0].StaffID,
       entry_id: "",
     });
-    setSubSubMenuForm(true);
   };
   const toggleUpdateSubSubMenu = async (type) =>
   {
@@ -417,7 +416,6 @@ function PermissionMenus(props)
         inserted_by: props.loginData[0].StaffID,
         entry_id: type.EntryID,
       });
-      setSubSubMenuForm(true);
     } else
     {
       await axios
@@ -466,7 +464,6 @@ function PermissionMenus(props)
               inserted_by: props.loginData[0].StaffID,
               entry_id: type.EntryID,
             });
-            setSubSubMenuForm(true);
 
           }
         })
@@ -493,8 +490,6 @@ function PermissionMenus(props)
       visibility: 1,
       entry_id: "",
     });
-    setSubMenuForm(false);
-    setSubSubMenuForm(false);
   };
 
   const onMainMenuEdit = (e) =>
@@ -613,6 +608,7 @@ function PermissionMenus(props)
           if (result.data.message === "success")
           {
             toast.success("Sub Menu Added Successfully");
+            document.getElementById("closeModalSubMenu").click();
             getRecords();
             setCreateSubMenu({
               ...createSubMenu,
@@ -651,6 +647,7 @@ function PermissionMenus(props)
           if (result.data.message === "success")
           {
             toast.success("Sub Menu Updated Successfully");
+            document.getElementById("closeModalSubMenu").click();
             getRecords();
             setCreateSubMenu({
               ...createSubMenu,
@@ -904,6 +901,8 @@ function PermissionMenus(props)
                 >
                   <button
                     type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_sub_menu"
                     className="btn btn-primary"
                     onClick={toggleAddSubMenu}
                   >
@@ -911,64 +910,6 @@ function PermissionMenus(props)
                   </button>
                 </div>
 
-                {subMenuForm && (
-                  <div className="pb-5">
-                    <div className="col-md-6 offset-3">
-                      <h3>
-                        {createSubMenu.entry_id === "" ? "Add" : "Update"} Sub
-                        Menu
-                      </h3>
-                      <div className="form-group pt-5">
-                        <label htmlFor="">Select Menu</label>
-                        <select
-                          name=""
-                          id="main_menu_id"
-                          className="form-select"
-                          onChange={onSubMenuEdit}
-                          value={createSubMenu.main_menu_id}
-                        >
-                          <option value="">Select Main Menu</option>
-                          {mainMenuList.length > 0 &&
-                            mainMenuList.map((item, index) =>
-                            {
-                              return (
-                                <option key={index} value={item.EntryID}>
-                                  {item.MenuName}
-                                </option>
-                              );
-                            })}
-                        </select>
-                      </div>
-
-                      <div className="form-group pt-5">
-                        <label htmlFor="">Sub Menu Name</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id={"sub_menu_name"}
-                          value={createSubMenu.sub_menu_name}
-                          onChange={onSubMenuEdit}
-                          placeholder={"Enter the Sub Menu Name"}
-                        />
-                      </div>
-
-                      <div className="pt-5">
-                        <button
-                          className="btn btn-danger w-50 btn-sm"
-                          onClick={closeHandler}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="btn btn-primary w-50 btn-sm"
-                          onClick={onSubmitSubMenu}
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 <Table data={subMenuDatatable} />
               </div>
@@ -980,6 +921,8 @@ function PermissionMenus(props)
                 >
                   <button
                     type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_sub_sub_menu"
                     className="btn btn-primary"
                     onClick={toggleAddSubSubMenu}
                   >
@@ -987,111 +930,6 @@ function PermissionMenus(props)
                   </button>
                 </div>
 
-                {subSubMenuForm && (
-                  <div className="pb-5">
-                    <div className="col-md-6 offset-3">
-                      <h3>
-                        {createSubSubMenu.entry_id === "" ? "Add" : "Update"}{" "}
-                        Sub Sub Menu
-                      </h3>
-                      <div className="form-group pt-5">
-                        <label htmlFor="">Select Main Menu</label>
-                        <select
-                          name=""
-                          id="main_menu_id"
-                          className="form-select"
-                          onChange={onSubSubMenuEdit}
-                          value={createSubSubMenu.main_menu_id}
-                        >
-                          <option value="">Select Main Menu</option>
-                          {mainMenuList.length > 0 &&
-                            mainMenuList.map((item, index) =>
-                            {
-                              return (
-                                <option key={index} value={item.EntryID}>
-                                  {item.MenuName}
-                                </option>
-                              );
-                            })}
-                        </select>
-                      </div>
-
-                      <div className="form-group pt-5">
-                        <label htmlFor="">Select Sub Menu</label>
-                        <select
-                          name=""
-                          id="sub_menu_id"
-                          className="form-select"
-                          onChange={onSubSubMenuEdit}
-                          value={createSubSubMenu.sub_menu_id}
-                        >
-                          <option value="">Select Sub Menu</option>
-                          {subMenuSelect.length > 0 &&
-                            subMenuSelect.map((item, index) =>
-                            {
-                              return (
-                                <option key={index} value={item.EntryID}>
-                                  {item.SubMenuName}
-                                </option>
-                              );
-                            })}
-                        </select>
-                      </div>
-
-                      <div className="form-group pt-5">
-                        <label htmlFor="">Sub Sub Menu Name</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id={"sub_sub_menu_name"}
-                          value={createSubSubMenu.sub_sub_menu_name}
-                          onChange={onSubSubMenuEdit}
-                          placeholder={"Enter the Sub Sub Menu Name"}
-                        />
-                      </div>
-
-                      <div className="form-group pt-5">
-                        <label htmlFor="">Sub Sub Menu Link</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id={"sub_sub_menu_link"}
-                          value={createSubSubMenu.sub_sub_menu_link}
-                          onChange={onSubSubMenuEdit}
-                          placeholder={"Enter the Sub Sub Menu Link"}
-                        />
-                      </div>
-                      <div className="form-group pt-5">
-                        <label htmlFor="visibility">Select Visibility</label>
-                        <select
-                          name=""
-                          id="visibility"
-                          className="form-select"
-                          onChange={onSubSubMenuEdit}
-                          value={createSubSubMenu.visibility}
-                        >
-                          <option value="1">Show</option>
-                          <option value="0">Hide</option>
-                        </select>
-                      </div>
-
-                      <div className="pt-5">
-                        <button
-                          className="btn btn-danger w-50 btn-sm"
-                          onClick={closeHandler}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="btn btn-primary w-50 btn-sm"
-                          onClick={onSubmitSubSubMenu}
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 <Table data={subSubMenuDatatable} />
               </div>
             </div>
@@ -1117,6 +955,125 @@ function PermissionMenus(props)
               className="btn btn-primary w-100"
             >
               Submit
+            </button>
+          </div>
+        </Modal>
+
+        <Modal title={`${createSubMenu.entry_id === "" ? "Add" : "Update"} Sub Menu`} id="kt_modal_sub_menu" close="closeModalSubMenu">
+          <div className="form-group">
+            <label htmlFor="main_menu_id">Select Main Menu</label>
+            <select
+              id="main_menu_id"
+              className="form-select"
+              onChange={onSubMenuEdit}
+              value={createSubMenu.main_menu_id}
+            >
+              <option value="">Select Main Menu</option>
+              {mainMenuList.length > 0 &&
+                mainMenuList.map((item, index) => (
+                  <option key={index} value={item.EntryID}>
+                    {item.MenuName}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className="form-group pt-3">
+            <label htmlFor="sub_menu_name">Sub Menu Name</label>
+            <input
+              type="text"
+              className="form-control"
+              id="sub_menu_name"
+              value={createSubMenu.sub_menu_name}
+              onChange={onSubMenuEdit}
+              placeholder="Enter the Sub Menu Name"
+            />
+          </div>
+
+          <div className="form-group pt-3">
+            <button onClick={onSubmitSubMenu} className="btn btn-primary w-100">
+              {createSubMenu.entry_id === "" ? "Add" : "Update"} Sub Menu
+            </button>
+          </div>
+        </Modal>
+
+        <Modal title={`${createSubSubMenu.entry_id === "" ? "Add" : "Update"} Sub Sub Menu`} id="kt_modal_sub_sub_menu" large={true} close="closeModalSubSubMenu">
+          <div className="form-group">
+            <label htmlFor="main_menu_id">Select Main Menu</label>
+            <select
+              id="main_menu_id"
+              className="form-select"
+              onChange={onSubSubMenuEdit}
+              value={createSubSubMenu.main_menu_id}
+            >
+              <option value="">Select Main Menu</option>
+              {mainMenuList.length > 0 &&
+                mainMenuList.map((item, index) => (
+                  <option key={index} value={item.EntryID}>
+                    {item.MenuName}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className="form-group pt-3">
+            <label htmlFor="sub_menu_id">Select Sub Menu</label>
+            <select
+              id="sub_menu_id"
+              className="form-select"
+              onChange={onSubSubMenuEdit}
+              value={createSubSubMenu.sub_menu_id}
+            >
+              <option value="">Select Sub Menu</option>
+              {subMenuSelect.length > 0 &&
+                subMenuSelect.map((item, index) => (
+                  <option key={index} value={item.EntryID}>
+                    {item.SubMenuName}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className="form-group pt-3">
+            <label htmlFor="sub_sub_menu_name">Sub Sub Menu Name</label>
+            <input
+              type="text"
+              className="form-control"
+              id="sub_sub_menu_name"
+              value={createSubSubMenu.sub_sub_menu_name}
+              onChange={onSubSubMenuEdit}
+              placeholder="Enter the Sub Sub Menu Name"
+            />
+          </div>
+
+          <div className="form-group pt-3">
+            <label htmlFor="sub_sub_menu_link">Sub Sub Menu Link</label>
+            <input
+              type="text"
+              className="form-control"
+              id="sub_sub_menu_link"
+              value={createSubSubMenu.sub_sub_menu_link}
+              onChange={onSubSubMenuEdit}
+              placeholder="Enter the Sub Sub Menu Link"
+            />
+          </div>
+
+          <div className="form-group pt-3">
+            <label htmlFor="visibility">Select Visibility</label>
+            <select
+              id="visibility"
+              className="form-select"
+              onChange={onSubSubMenuEdit}
+              value={createSubSubMenu.visibility}
+            >
+              <option value="1">Show</option>
+              <option value="0">Hide</option>
+            </select>
+          </div>
+
+          <div className="form-group pt-3">
+            <button onClick={onSubmitSubSubMenu} className="btn btn-primary w-100">
+              {createSubSubMenu.entry_id === "" ? "Add" : "Update"} Sub Sub Menu
             </button>
           </div>
         </Modal>
