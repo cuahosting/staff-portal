@@ -10,7 +10,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
-function EXAMSEXAMSCASettings(props) {
+function EXAMSCASettings(props) {
     const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(true);
 

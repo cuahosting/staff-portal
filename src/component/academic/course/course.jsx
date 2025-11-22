@@ -404,7 +404,6 @@ n  // Step-by-step validation function
                     className="btn btn-link p-0 text-danger"  title="Delete"
                     onClick={() => {
                       swal({
-            onStepValidation={onStepValidation}
                         title: "Are you sure?",
                         text: "Once deleted, you will not be able to recover it!",
                         icon: "warning",
