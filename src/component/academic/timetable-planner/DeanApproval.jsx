@@ -187,7 +187,7 @@ function DeanApproval(props) {
               Status: module.Status === 0 ? <span className="badge badge-secondary">Not Approved</span>
                 : module.Status === 1 ? <span className="badge badge-info">Approved by HOD</span>
                   : <span className="badge badge-success">Approved by Dean</span>,
-              Action: <button className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit" onClick={() => { onApproveSingle(module) }}>
+              Action: <button className="btn btn-link p-0 text-primary" style={{ fontSize: '22px' }} title="Edit" onClick={() => { onApproveSingle(module) }}>
                 <i className="fa fa-arrow-right" />
               </button>
             });

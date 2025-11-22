@@ -109,7 +109,7 @@ function Course(props) {
               ApplicationType: course.ApplicationType ?? "N/A",
               action: (
                 <button
-                  className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                  className="btn btn-link p-0 text-primary" style={{ fontSize: '22px' }} title="Edit"
                   data-bs-toggle="modal"
                   data-bs-target="#kt_modal_general"
                   onClick={() =>
@@ -130,7 +130,7 @@ function Course(props) {
                     })
                   }
                 >
-                  <i className="fa fa-pen" />
+                  <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                 </button>
               ),
             });
@@ -157,51 +157,66 @@ function Course(props) {
     });
   };
 
-  const onSubmit = async () => {
-    if (createCourse.CourseName.trim() === "") {
-      showAlert("EMPTY FIELD", "Please enter the course name", "error");
-      return false;
+n  // Step-by-step validation function
+  const onStepValidation = (stepIndex) => {
+    // Step 0: Basic Information - Validate Course Name, Course Code, Department
+    if (stepIndex === 0) {
+      if (createCourse.CourseName.trim() === "") {
+        showAlert("EMPTY FIELD", "Please enter the course name", "error");
+        return false;
+      }
+      if (createCourse.CourseCode.trim() === "") {
+        showAlert("EMPTY FIELD", "Please enter the course code", "error");
+        return false;
+      }
+      if (createCourse.DepartmentCode.trim() === "") {
+        showAlert("EMPTY FIELD", "Please select the department code", "error");
+        return false;
+      }
+      return true;
     }
-    if (createCourse.CourseCode.trim() === "") {
-      showAlert("EMPTY FIELD", "Please enter the course code", "error");
-      return false;
+
+    // Step 1: Academic Details - Validate Duration, Duration Type, Degree In View, Application Type
+    if (stepIndex === 1) {
+      if (createCourse.Duration.trim() === "") {
+        showAlert("EMPTY FIELD", "Please enter the course duration", "error");
+        return false;
+      }
+      if (createCourse.DurationType.trim() === "") {
+        showAlert("EMPTY FIELD", "Please select the course duration type", "error");
+        return false;
+      }
+      if (createCourse.DegreeInView.trim() === "") {
+        showAlert("EMPTY FIELD", "Please enter the degree in view", "error");
+        return false;
+      }
+      if (createCourse.ApplicationType.trim() === "") {
+        showAlert("EMPTY FIELD", "Please select the application type", "error");
+        return false;
+      }
+      return true;
     }
-    if (createCourse.Duration.trim() === "") {
-      showAlert("EMPTY FIELD", "Please enter the course duration", "error");
-      return false;
+
+    // Step 2: Financial & Classification - Validate Tuition Fee, Course Class, IsGens
+    if (stepIndex === 2) {
+      if (createCourse.TuitionFee === "") {
+        showAlert("EMPTY FIELD", "Please enter the course tuition", "error");
+        return false;
+      }
+      if (createCourse.CourseClass.trim() === "") {
+        showAlert("EMPTY FIELD", "Please enter the course class", "error");
+        return false;
+      }
+      if (createCourse.IsGens.trim() === "") {
+        showAlert("EMPTY FIELD", "Please select the IsGens option", "error");
+        return false;
+      }
+      return true;
     }
-    if (createCourse.DurationType.trim() === "") {
-      showAlert(
-        "EMPTY FIELD",
-        "Please select the course duration type",
-        "error"
-      );
-      return false;
-    }
-    if (createCourse.DegreeInView.trim() === "") {
-      showAlert("EMPTY FIELD", "Please enter the degree in view", "error");
-      return false;
-    }
-    if (createCourse.TuitionFee === "") {
-      showAlert("EMPTY FIELD", "Please enter the course tuition", "error");
-      return false;
-    }
-    if (createCourse.CourseClass.trim() === "") {
-      showAlert("EMPTY FIELD", "Please enter the course class", "error");
-      return false;
-    }
-    if (createCourse.DepartmentCode.trim() === "") {
-      showAlert("EMPTY FIELD", "Please select the department code", "error");
-      return false;
-    }
-    if (createCourse.IsGens.trim() === "") {
-      showAlert("EMPTY FIELD", "Please select the IsGens option", "error");
-      return false;
-    }
-    if (createCourse.ApplicationType.trim() === "") {
-      showAlert("EMPTY FIELD", "Please select the application type", "error");
-      return false;
-    }
+
+    return true;
+  };
+
 
     if (createCourse.EntryID === "") {
       setIsFormLoading("on");
@@ -357,7 +372,7 @@ function Course(props) {
               action: (
                 <>
                   <button
-                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                    className="btn btn-link p-0 text-primary" style={{marginRight:15}}  title="Edit"
                     data-bs-toggle="modal"
                     data-bs-target="#kt_modal_general"
                     onClick={() =>
@@ -378,12 +393,13 @@ function Course(props) {
                       })
                     }
                   >
-                    <i className="fa fa-pen" />
+                    <i style={{ fontSize: '15px',color:"blue" }} className="fa fa-pen color-blue" />
                   </button>
                   <button
-                    className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
+                    className="btn btn-link p-0 text-danger"  title="Delete"
                     onClick={() => {
                       swal({
+            onStepValidation={onStepValidation}
                         title: "Are you sure?",
                         text: "Once deleted, you will not be able to recover it!",
                         icon: "warning",
@@ -396,7 +412,7 @@ function Course(props) {
                       });
                     }}
                   >
-                    <i className="fa fa-trash" />
+                    <i style={{ fontSize: '15px',color:"red" }} className="fa fa-trash" />
                   </button>
                 </>
               ),

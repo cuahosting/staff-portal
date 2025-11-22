@@ -111,7 +111,7 @@ function TimetableReport(props) {
                                         data-bs-toggle="modal"
                                         data-bs-target="#kt_modal_general"
                                         onClick={() => navigate(`/academics/timetable/update-schedule/${data.EntryID}`)}
-                                    ><i className="fa fa-pen" /></button>,
+                                    ><i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" /></button>,
                                     <button
                                         className={"btn btn-sm btn-danger"}
                                         data-bs-toggle="modal"
@@ -201,7 +201,7 @@ function TimetableReport(props) {
   //                                 data-bs-toggle="modal"
   //                                 data-bs-target="#kt_modal_general"
   //                                 onClick={() => navigate(`/academics/timetable/update-schedule/${data.EntryID}`)}
-  //                             ><i className="fa fa-pen" /></button>
+  //                             ><i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" /></button>
   //                         ]
   //                     )
   //                 })

@@ -113,7 +113,7 @@ function LecturerAssignment(props) {
                 }
                 }
               >
-                <i className="fa fa-pen" />
+                <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
               </button>,
               item.MainLecturerName,
               item.AlternateLecturerName,

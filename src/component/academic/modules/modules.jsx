@@ -138,7 +138,7 @@ function Modules(props) {
                             action: (
                                 <>
                                     <button
-                                        className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                                        className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                         data-bs-toggle="modal"
                                         data-bs-target="#kt_modal_general"
                                         onClick={() => {
@@ -158,10 +158,10 @@ function Modules(props) {
                                             });
                                         }}
                                     >
-                                        <i className="fa fa-pen"/>
+                                        <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                     </button>
                                     <button
-                                        className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
+                                        className="btn btn-link p-0 text-danger" title="Delete"
                                         onClick={() => {
                                             swal({
                                                 title: "Are you sure?",
@@ -176,7 +176,7 @@ function Modules(props) {
                                             });
                                         }}
                                     >
-                                        <i className="fa fa-trash"/>
+                                        <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                                     </button>
                                 </>
                             ),

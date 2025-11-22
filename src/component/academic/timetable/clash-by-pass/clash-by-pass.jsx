@@ -50,13 +50,13 @@ function ClashByPass(props) {
                             FacultyName: facultyList.filter(x => x.FacultyCode.toString().toLowerCase() === val.FacultyCode.toString().toLowerCase())[0].FacultyName,
                             action: (
                                 <button
-                                    className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
+                                    className="btn btn-link p-0 text-danger" title="Delete"
                                     onClick={() => {
                                         removebyPass(val.FacultyCode)
                                     }
                                     }
                                 >
-                                    <i className="fa fa-trash" />
+                                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                                 </button>
                             ),
                         });

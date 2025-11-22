@@ -188,7 +188,7 @@ const ModuleAssignment = (props) => {
 
                                 </label>,
                                 (<button className="btn btns-m btn-danger" onClick={() => { removeCourse(item.EntryID) }}>
-                                    <i className="fa fa-trash" />
+                                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                                 </button>)
                             ])
                         })

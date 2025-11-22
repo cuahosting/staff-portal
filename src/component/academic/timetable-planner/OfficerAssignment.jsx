@@ -122,7 +122,7 @@ function OfficerAssignment(props) {
               action: (
                 <button
                   onClick={() => handleDelete(course.EntryID)}
-                  className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
+                  className="btn btn-link p-0 text-danger" style={{ fontSize: '22px' }} title="Delete"
                 >
                   Delete
                 </button>

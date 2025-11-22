@@ -10,6 +10,64 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
 import swal from "sweetalert";
 import Select from "react-select";
+// Custom styles for react-select to match login input styling
+const customSelectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    border: '2px solid #e8e8e8',
+    backgroundColor: state.isFocused ? '#ffffff' : '#f8f9fa',
+    padding: '0.25rem 0.5rem',
+    fontSize: '1rem',
+    borderRadius: '0.5rem',
+    outline: 'none',
+    boxShadow: state.isFocused
+      ? '0 6px 20px rgba(13, 110, 253, 0.15)'
+      : provided.boxShadow,
+    borderColor: state.isFocused ? '#0d6efd' : '#e8e8e8',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transform: state.isFocused ? 'translateY(-2px)' : 'none',
+    '&:hover': {
+      borderColor: state.isFocused ? '#0d6efd' : '#d0d0d0',
+      backgroundColor: '#ffffff',
+      transform: 'translateY(-1px)',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+    }
+  }),
+  menu: (provided) => ({
+    ...provided,
+    zIndex: 9999,
+    borderRadius: '0.5rem',
+    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
+    border: '2px solid #e8e8e8',
+  }),
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: 9999,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? '#0d6efd'
+      : state.isFocused
+        ? '#e3f2fd'
+        : '#ffffff',
+    color: state.isSelected ? '#ffffff' : '#2c3e50',
+    padding: '0.75rem 1.25rem',
+    cursor: 'pointer',
+    fontSize: '1rem',
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#a0a0a0',
+    fontSize: '0.95rem',
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: '#2c3e50',
+    fontSize: '1rem',
+  }),
+};
+
 function Department(props) {
   const token = props.LoginDetails[0].token
   const [isLoading, setIsLoading] = useState(true);
@@ -128,7 +186,7 @@ function Department(props) {
               action: (
                 <>
                   <button
-                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                     data-bs-toggle="modal"
                     data-bs-target="#kt_modal_general"
                     onClick={() => {
@@ -154,10 +212,10 @@ function Department(props) {
                       });
                     }}
                   >
-                    <i className="fa fa-pen" />
+                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                   </button>
                   <button
-                    className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
+                    className="btn btn-link p-0 text-danger" title="Delete"
                     onClick={() => {
                       swal({
                         title: "Are you sure?",
@@ -172,7 +230,7 @@ function Department(props) {
                       });
                     }}
                   >
-                    <i className="fa fa-trash" />
+                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                   </button>
                 </>
               ),
@@ -384,6 +442,7 @@ function Department(props) {
                 onChange={onFacultyChange}
                 options={facultyList}
                 placeholder="select Faculty"
+                styles={customSelectStyles}
               />
             </div>
 
@@ -481,6 +540,7 @@ function Department(props) {
                 onChange={onStaffChange}
                 options={staff}
                 placeholder="select Department Head"
+                styles={customSelectStyles}
               />
             </div>
           </div>

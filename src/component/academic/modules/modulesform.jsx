@@ -1,5 +1,63 @@
 import React from "react";
 import Select from "react-select";
+// Custom styles for react-select to match login input styling
+const customSelectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    border: '2px solid #e8e8e8',
+    backgroundColor: state.isFocused ? '#ffffff' : '#f8f9fa',
+    padding: '0.25rem 0.5rem',
+    fontSize: '1rem',
+    borderRadius: '0.5rem',
+    outline: 'none',
+    boxShadow: state.isFocused
+      ? '0 6px 20px rgba(13, 110, 253, 0.15)'
+      : provided.boxShadow,
+    borderColor: state.isFocused ? '#0d6efd' : '#e8e8e8',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transform: state.isFocused ? 'translateY(-2px)' : 'none',
+    '&:hover': {
+      borderColor: state.isFocused ? '#0d6efd' : '#d0d0d0',
+      backgroundColor: '#ffffff',
+      transform: 'translateY(-1px)',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+    }
+  }),
+  menu: (provided) => ({
+    ...provided,
+    zIndex: 9999,
+    borderRadius: '0.5rem',
+    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
+    border: '2px solid #e8e8e8',
+  }),
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: 9999,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? '#0d6efd'
+      : state.isFocused
+        ? '#e3f2fd'
+        : '#ffffff',
+    color: state.isSelected ? '#ffffff' : '#2c3e50',
+    padding: '0.75rem 1.25rem',
+    cursor: 'pointer',
+    fontSize: '1rem',
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#a0a0a0',
+    fontSize: '0.95rem',
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: '#2c3e50',
+    fontSize: '1rem',
+  }),
+};
+
 
 export const ModulesForm = (props) => {
 
@@ -86,6 +144,7 @@ export const ModulesForm = (props) => {
                         onChange={props.onDepartmentChange}
                         options={props.departmentOptions}
                         placeholder="select Course"
+                        styles={customSelectStyles}
                     />
                 </div>
 

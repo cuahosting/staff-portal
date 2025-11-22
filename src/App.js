@@ -24,8 +24,6 @@ function App(props) {
           draggable
           pauseOnHover
         />
-        {/* Same as */}
-        <ToastContainer />
       </div>
     </GoogleOAuthProvider>
   );

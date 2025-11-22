@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { ModuleRegistry, AllCommunityModule, themeQuartz } from 'ag-grid-community';
 
@@ -82,8 +82,8 @@ export default function AGTable({ data, paging = true }) {
       sortable: true,
       filter: true,
       resizable: true,
-      wrapText: true,
-      autoHeight: true,
+      wrapText: false,
+      cellStyle: { whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip' },
       // Handle JSX elements (like action buttons)
       cellRenderer: (params) => {
         if (React.isValidElement(params.value)) {
@@ -95,7 +95,7 @@ export default function AGTable({ data, paging = true }) {
       ...(col.field === 'sn' && {
         maxWidth: 80,
         flex: 0,
-        cellStyle: { fontWeight: '500', color: '#64748b' }
+        cellStyle: { fontWeight: '500', color: '#64748b', whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip' }
       }),
       // Disable sorting/filtering for action columns with increased spacing
       ...(col.field === 'action' && {
@@ -110,7 +110,7 @@ export default function AGTable({ data, paging = true }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '12px'
+          gap: '15px'
         }
       }),
     }));
@@ -180,6 +180,11 @@ export default function AGTable({ data, paging = true }) {
     filter: true,
     resizable: true,
   }), []);
+
+  // Auto-size columns to full content width (enables horizontal scroll)
+  const onGridReady = useCallback((params) => {
+    params.api.autoSizeAllColumns();
+  }, []);
 
   return (
     <div style={{ 
@@ -278,6 +283,7 @@ export default function AGTable({ data, paging = true }) {
           rowData={rowData}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
+          onGridReady={onGridReady}
           pagination={paging}
           paginationPageSize={50}
           paginationPageSizeSelector={[50, 100, 200]}

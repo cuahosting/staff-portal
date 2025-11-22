@@ -83,8 +83,6 @@ export default function AGReportTable({
       sortable: true,
       filter: true,
       resizable: true,
-      flex: 1,
-      minWidth: 100,
       // Handle JSX elements (like action buttons)
       cellRenderer: (params) => {
         if (React.isValidElement(params.value)) {

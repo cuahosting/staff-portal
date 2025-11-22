@@ -115,7 +115,7 @@ function ModuleAssignment2(props) {
                   onClick={() => {
                     handleAdd(item, fdata)
                   }}
-                  className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                  className="btn btn-link p-0 text-primary" style={{ fontSize: '22px' }} title="Edit"
                 >
                   Add
                 </button>
@@ -188,7 +188,7 @@ function ModuleAssignment2(props) {
                   onClick={() => {
                     handleRemove({ EntryID: module.EntryID })
                   }}
-                  className="btn btn-link p-0 text-danger" style={{ fontSize: '18px' }} title="Delete"
+                  className="btn btn-link p-0 text-danger" style={{ fontSize: '22px' }} title="Delete"
                 >
                   Remove
                 </button>

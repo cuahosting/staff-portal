@@ -72,7 +72,7 @@ function VenueSettings(props) {
                             Capacity: venue.Capacity,
                             action: (
                                 <button
-                                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#Venue"
                                     onClick={() =>
@@ -92,7 +92,7 @@ function VenueSettings(props) {
                                         }
                                     }
                                 >
-                                    <i className="fa fa-pen" />
+                                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                 </button>
                             ),
                         });

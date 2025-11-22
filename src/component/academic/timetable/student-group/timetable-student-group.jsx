@@ -88,7 +88,7 @@ function TimetableStudentGroup(props) {
                             CourseSemester: group.CourseSemester ?? "N/A",
                             action: (
                                 <button
-                                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#kt_modal_general"
                                     onClick={() =>
@@ -103,7 +103,7 @@ function TimetableStudentGroup(props) {
                                         })
                                     }
                                 >
-                                    <i className="fa fa-pen" />
+                                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                 </button>
                             ),
                         });
@@ -249,7 +249,7 @@ function TimetableStudentGroup(props) {
                             CourseSemester: group.CourseSemester ?? "N/A",
                             action: (
                                 <button
-                                    className="btn btn-link p-0 text-primary" style={{ fontSize: '18px' }} title="Edit"
+                                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#kt_modal_general"
                                     onClick={() =>
@@ -264,7 +264,7 @@ function TimetableStudentGroup(props) {
                                         })
                                     }
                                 >
-                                    <i className="fa fa-pen" />
+                                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                 </button>
                             ),
                         });
