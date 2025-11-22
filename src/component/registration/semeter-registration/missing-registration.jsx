@@ -249,7 +249,7 @@ function MissingRegistrationModule(props) {
             />
             <div className="flex-column-fluid">
                 <div className="card">
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <div className="row col-md 12 mt-4">
                             <div className="col-md-4 mt-2 mb-2">
                                 <label htmlFor="StudentID">Student</label>

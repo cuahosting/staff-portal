@@ -367,7 +367,7 @@ function ExamTimeTableSchedule(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <div className="col-md-12">
                             {semesterList.length > 0 &&
                                 <div className="col-md-12 mb-4 form-group">

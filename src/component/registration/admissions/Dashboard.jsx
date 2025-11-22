@@ -574,7 +574,7 @@ function RegistrationDashboard(props) {
               </>
 
             }
-            <div className="card-body pt-0">
+            <div className="card-body p-0">
               {
                 showForm === true ? <Table data={datatable} />
                   :

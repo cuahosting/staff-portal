@@ -280,7 +280,7 @@ function SemesterRegistrationSettings(props) {
               </div>
             </div>
           </div>
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <Table data={registrationSettingsRecordDatatable} />
           </div>
         </div>

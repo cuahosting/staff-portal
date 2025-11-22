@@ -361,7 +361,7 @@ const StaffLeaveApply = (props) => {
 
 
 
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <div>
                             {
                                 leaveCategory.length > 0 &&

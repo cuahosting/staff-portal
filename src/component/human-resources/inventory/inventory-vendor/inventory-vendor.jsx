@@ -194,7 +194,7 @@ function InventoryVendor(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <ReportTable title={"Inventory Vendor"} columns={columns} data={tableData} />
                     </div>
                 </div>

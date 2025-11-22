@@ -691,7 +691,7 @@ function HrSalaryManagement(props) {
                         </div>
                     </div>
 
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <ReportTable
                             title="Staff Salary Management"
                             columns={columns}

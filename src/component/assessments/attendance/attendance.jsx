@@ -207,7 +207,7 @@ function GenerateAttendance(props)
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0 hideFooter">
+                    <div className="card-body p-0 hideFooter">
                         <AGTable data={datatable} />
                     </div>
 

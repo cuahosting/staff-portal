@@ -57,7 +57,7 @@ function StaffDistribution(props) {
           <div className="card-header border-0 pt-6">
             <div className="card-title" />
           </div>
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <Chart
               chartType="PieChart"
               data={data}

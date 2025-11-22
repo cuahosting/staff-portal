@@ -134,7 +134,7 @@ const StaffLeaveCategories = (props) => {
                 </div>
             </div>
 
-            <div className="card-body pt-0">
+            <div className="card-body p-0">
                 <div className="col-md-12" style={{ overflowX: 'auto' }}>
                     <ReportTable data={data} columns={columns} height="700px" />
                 </div>

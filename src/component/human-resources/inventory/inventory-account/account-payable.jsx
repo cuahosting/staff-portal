@@ -303,7 +303,7 @@ function AccountPayable(props) {
                         <div className="card-title" />
 
                     </div>
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <ReportTable title={"Inventory Finance"} columns={columns} data={tableData} height={"700px"}  />
                     </div>
                 </div>

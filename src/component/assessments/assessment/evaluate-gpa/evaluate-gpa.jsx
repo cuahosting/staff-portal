@@ -213,7 +213,7 @@ function EvaluateGPA(props) {
 
             <div className="flex-column-fluid">
                 <div className="card">
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <div className="col-md-12 fv-row pt-10">
                             <label className="required fs-6 fw-bold mb-2">
                                 Select Semester

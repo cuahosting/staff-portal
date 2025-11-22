@@ -1228,7 +1228,7 @@ function InventorySettings(props)
             <PageHeader title={"Inventory Settings"} items={["Human Resources", "Inventory", "Inventory Settings"]} />
             <div className="flex-column-fluid">
                 <div className="card">
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <ul className="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-bold mb-8">
 
                             <li className="nav-item">

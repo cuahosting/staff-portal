@@ -52,7 +52,7 @@ function InventoryList(props) {
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
                     </div>
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <ReportTable title={"Inventory List"} columns={columns} data={tableData} />
                     </div>
                 </div>

@@ -99,7 +99,7 @@ function LoginToStudentPortal(props)
       />
       <div className="flex-column-fluid">
         <div className="card">
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <form onSubmit={handleSubmit(loginToPortal)}>
               <div className="row">
                 <div className="col">

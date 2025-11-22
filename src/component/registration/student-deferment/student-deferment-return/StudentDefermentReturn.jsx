@@ -115,7 +115,7 @@ function StudentDefermentReturn(props) {
               </div>
             </div>
           </div>
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <ReportTable columns={columns} data={generalDatatable} />
             {/* <Table data={generalDatatable} /> */}
           </div>

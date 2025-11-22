@@ -174,7 +174,7 @@ function PermissionPermission(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <div className="flex-column-fluid">
                 <div className="card">
-                    <div className="card-body pt-0 w-100">
+                    <div className="card-body p-0 w-100">
                         <div className="d-flex pb-5" data-kt-customer-table-toolbar="base">
                             <select id="select_group_name" onChange={handleGroupChange} value={createItem.group_id} className="form-select w-100">
                                 <option value="">Select Group</option>
