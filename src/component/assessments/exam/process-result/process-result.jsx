@@ -250,7 +250,7 @@ function ProcessResult(props)
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Process Result"} items={["Assessment", "Exams & Records", "Process Result"]} />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-md-4">

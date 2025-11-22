@@ -203,7 +203,7 @@ function HRDesignations(props) {
                 items={["Human Resources", "Others", "Designations"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
                         <div className="card-toolbar">

@@ -178,7 +178,7 @@ function TuitionFee(props)
                 items={["Registraion", "Admissions", "Tuition Fees"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6 mb-4">
                         <div className="card-title" >
                             <h2>Tuition Fees</h2>

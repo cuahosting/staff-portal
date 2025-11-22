@@ -93,7 +93,7 @@ function DeleteResult(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Delete Result"} items={["Assessment", "Exams & Records", "Delete Result"]}/>
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-md-11">

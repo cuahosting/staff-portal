@@ -143,7 +143,7 @@ function ApproveResult(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Approve Result"} items={["Assessment", "Exams & Records", "Approve Result"]}/>
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-md-6">

@@ -154,7 +154,7 @@ function SemesterProgression(props)
             />
 
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-md-4 Remaining"><b style={{ fontSize: '150px' }}>{counter}</b>

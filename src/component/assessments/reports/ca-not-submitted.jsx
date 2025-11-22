@@ -145,7 +145,7 @@ function CANotSubmitted(props) {
                 items={["Assessment", "Report", "CA Not Submitted"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body pt-2">
                         <div className="col-md-12">
                             {semesterList.length > 0 &&

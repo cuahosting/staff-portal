@@ -118,7 +118,7 @@ const LogComplain = (props) => {
                 items={["Users", "Service Desk", "Log Complain"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body pt-5">
                         <div className="row col-md-12" >
                             <div className="col-md-6 mb-5">

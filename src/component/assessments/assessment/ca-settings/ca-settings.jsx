@@ -432,7 +432,7 @@ function CASettings(props) {
                 }
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body p-0">
                         <AGTable data={caSettingsRecordDatatable} />
                     </div>

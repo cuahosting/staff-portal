@@ -84,7 +84,7 @@ function ChangeofCourseReport(props) {
                 items={["Registration", "Change of Course", "Report"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body p-0">
                         <div className="col-md-12" style={{ overflowX: 'auto' }}>
                             <ReportTable columns={columns} data={tableData} title={"Guardian Approval"} />

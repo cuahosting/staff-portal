@@ -74,7 +74,7 @@ function ResultActivityTracker(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Result Activity Tracker"} items={["Assessment", "Exams Reports", "Result Activity Tracker"]}/>
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-md-12">

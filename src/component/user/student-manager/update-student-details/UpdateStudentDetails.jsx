@@ -196,7 +196,7 @@ function UpdateStudentDetails(props) {
                 items={["Users", "Student Manager", "Update Student Details"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body p-0">
                         <form onSubmit={handleSubmit(updateStudentDetail)}>
                             <div className="form-group">

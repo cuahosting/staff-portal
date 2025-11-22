@@ -188,7 +188,6 @@ export default function AGTable({ data, paging = true }) {
 
   return (
     <div style={{ 
-      padding: '16px',
       backgroundColor: '#ffffff',
     }}>
       {/* Export buttons */}

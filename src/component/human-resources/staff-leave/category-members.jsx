@@ -157,7 +157,7 @@ const StaffLeaveCategoryMembers = (props) => {
                 items={["Human Resources", "Staff Leave", "Settings"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body pt-5">
                         <div className="row col-md-12">
                             <div className="form-group">

@@ -229,7 +229,7 @@ function ExamResultBulkUpload(props) {
             />
 
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body p-0">
                         <div className="row pt-5">
                             <div className="col-md-6">

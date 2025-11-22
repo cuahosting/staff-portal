@@ -158,7 +158,7 @@ function AttendanceList(props)
                 items={["Assessment", "Attendance", "Mark Attendance"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
                     </div>
