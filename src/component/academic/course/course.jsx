@@ -217,6 +217,11 @@ n  // Step-by-step validation function
     return true;
   };
 
+  const onSubmit = async () => {
+    if (!onStepValidation(0) || !onStepValidation(1) || !onStepValidation(2)) {
+      return;
+    }
+
 
     if (createCourse.EntryID === "") {
       setIsFormLoading("on");

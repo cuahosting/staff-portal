@@ -10,7 +10,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
-function EXAMSCASettings(props) {
+function EXAMSEXAMSCASettings(props) {
     const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(true);
 
@@ -64,7 +64,7 @@ function EXAMSCASettings(props) {
     };
 
     const [caSettingsRecordDatatable,
-        setCASettingsRecordDatatable,
+        setEXAMSCASettingsRecordDatatable,
     ] = useState({
         columns: [
             {
@@ -128,7 +128,7 @@ function EXAMSCASettings(props) {
     };
 
 
-    const [createCASettings, setCreateCASettings] =
+    const [createEXAMSCASettings, setCreateEXAMSCASettings] =
         useState({
             EntryID: "",
             CAName: "",
@@ -142,7 +142,7 @@ function EXAMSCASettings(props) {
             InsertedBy: props.loginData[0].StaffID,
         });
 
-    const getCASettingsRecords = async () => {
+    const getEXAMSCASettingsRecords = async () => {
         await axios
             .get(`${serverLink}staff/assessments/settings/${props.loginData[0].StaffID}/`, token)
             .then((result) => {
@@ -172,7 +172,7 @@ function EXAMSCASettings(props) {
                                         data-bs-target="#kt_modal_general"
                                         disabled={settings.CAPerCon > 0 && true}
                                         onClick={() =>
-                                            setCreateCASettings({
+                                            setCreateEXAMSCASettings({
                                                 EntryID: settings.EntryID,
                                                 CAName: settings.CAName,
                                                 CADescription: settings.CADescription,
@@ -205,7 +205,7 @@ function EXAMSCASettings(props) {
                         });
                     });
 
-                    setCASettingsRecordDatatable({
+                    setEXAMSCASettingsRecordDatatable({
                         ...caSettingsRecordDatatable,
                         columns: caSettingsRecordDatatable.columns,
                         rows: rows,
@@ -234,7 +234,7 @@ function EXAMSCASettings(props) {
                 .then((result) => {
                     if (result.data.message === "success") {
                         toast.success("CA Setting deleted successfully");
-                        getCASettingsRecords();
+                        getEXAMSCASettingsRecords();
                     } else {
                         showAlert(
                             "ERROR",
@@ -254,24 +254,24 @@ function EXAMSCASettings(props) {
     };
 
     const onEdit = (e) => {
-        setCreateCASettings({
-            ...createCASettings,
+        setCreateEXAMSCASettings({
+            ...createEXAMSCASettings,
             [e.target.id]: e.target.value,
         });
     };
 
     const onModuleChange = (selectedOption) => {
-        setCreateCASettings({
-            ...createCASettings,
+        setCreateEXAMSCASettings({
+            ...createEXAMSCASettings,
             ModuleCode: selectedOption ? selectedOption.value : "",
             ModuleCode2: selectedOption,
         });
     };
 
     const onSubmit = async () => {
-        for (let key in createCASettings) {
+        for (let key in createEXAMSCASettings) {
             if (
-                createCASettings.hasOwnProperty(key) &&
+                createEXAMSCASettings.hasOwnProperty(key) &&
                 key !== "EntryID" &&
                 key !== "InsertedOn" &&
                 key !== "SemesterCode" &&
@@ -279,23 +279,23 @@ function EXAMSCASettings(props) {
                 key !== "InsertedBy" &&
                 key !== "ModuleCode2"
             ) {
-                if (createCASettings[key] === "") {
+                if (createEXAMSCASettings[key] === "") {
                     await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
                     return false;
                 }
             }
         }
 
-        if (createCASettings.EntryID === "") {
+        if (createEXAMSCASettings.EntryID === "") {
             toast.info("Submitting. Please wait...");
 
             const cASettingsSubmission = {
-                EntryID: createCASettings.EntryID,
-                CAName: createCASettings.CAName,
-                CADescription: createCASettings.CADescription,
-                ModuleCode: createCASettings.ModuleCode,
+                EntryID: createEXAMSCASettings.EntryID,
+                CAName: createEXAMSCASettings.CAName,
+                CADescription: createEXAMSCASettings.CADescription,
+                ModuleCode: createEXAMSCASettings.ModuleCode,
                 SemesterCode: props.currentSemester,
-                CAMarked: createCASettings.CAMarked,
+                CAMarked: createEXAMSCASettings.CAMarked,
                 InsertedBy: props.loginData[0].StaffID,
             }
             await axios
@@ -306,11 +306,11 @@ function EXAMSCASettings(props) {
                 .then((result) => {
                     if (result.data.message === "success") {
                         toast.success("Settings submitted successfully");
-                        getCASettingsRecords();
+                        getEXAMSCASettingsRecords();
                         getRunningModule();
                         document.getElementById("closeModal").click()
-                        setCreateCASettings({
-                            ...createCASettings,
+                        setCreateEXAMSCASettings({
+                            ...createEXAMSCASettings,
                             EntryID: "",
                             CAName: "",
                             CADescription: "",
@@ -342,12 +342,12 @@ function EXAMSCASettings(props) {
         } else {
             toast.info("Updating. Please wait...");
             const cASettingsSubmission = {
-                EntryID: createCASettings.EntryID,
-                CAName: createCASettings.CAName,
-                CADescription: createCASettings.CADescription,
-                ModuleCode: createCASettings.ModuleCode,
+                EntryID: createEXAMSCASettings.EntryID,
+                CAName: createEXAMSCASettings.CAName,
+                CADescription: createEXAMSCASettings.CADescription,
+                ModuleCode: createEXAMSCASettings.ModuleCode,
                 SemesterCode: props.currentSemester,
-                CAMarked: createCASettings.CAMarked,
+                CAMarked: createEXAMSCASettings.CAMarked,
                 InsertedBy: props.loginData[0].StaffID,
             }
 
@@ -359,11 +359,11 @@ function EXAMSCASettings(props) {
                 .then((result) => {
                     if (result.data.message === "success") {
                         toast.success("Settings updated successfully");
-                        getCASettingsRecords();
+                        getEXAMSCASettingsRecords();
                         getRunningModule();
                         document.getElementById("closeModal").click()
-                        setCreateCASettings({
-                            ...createCASettings,
+                        setCreateEXAMSCASettings({
+                            ...createEXAMSCASettings,
                             EntryID: "",
                             CAName: "",
                             CADescription: "",
@@ -394,7 +394,7 @@ function EXAMSCASettings(props) {
     };
 
     useEffect(() => {
-        getCASettingsRecords().then((r) => {});
+        getEXAMSCASettingsRecords().then((r) => {});
         getRunningModule().then((r) => {});
     }, []);
 
@@ -412,8 +412,8 @@ function EXAMSCASettings(props) {
                         data-bs-toggle="modal"
                         data-bs-target="#kt_modal_general"
                         onClick={() =>
-                            setCreateCASettings({
-                                ...createCASettings,
+                            setCreateEXAMSCASettings({
+                                ...createEXAMSCASettings,
                                 EntryID: "",
                                 CAName: "",
                                 CADescription: "",
@@ -443,7 +443,7 @@ function EXAMSCASettings(props) {
                             <label htmlFor="ModuleCode">Module</label>
                             <Select
                                 options={moduleOptions}
-                                value={createCASettings.ModuleCode2}
+                                value={createEXAMSCASettings.ModuleCode2}
                                 onChange={onModuleChange}
                                 styles={customSelectStyles}
                                 placeholder="Select Module"
@@ -460,7 +460,7 @@ function EXAMSCASettings(props) {
                                 id="CAName"
                                 className="form-control"
                                 placeholder="CAName"
-                                value={createCASettings.CAName}
+                                value={createEXAMSCASettings.CAName}
                                 onChange={onEdit}
                             />
                         </div>
@@ -473,7 +473,7 @@ function EXAMSCASettings(props) {
                                 id="CADescription"
                                 className="form-control"
                                 placeholder="CADescription"
-                                value={createCASettings.CADescription}
+                                value={createEXAMSCASettings.CADescription}
                                 onChange={onEdit}
                             />
                         </div>
@@ -486,7 +486,7 @@ function EXAMSCASettings(props) {
                                 id="CAMarked"
                                 className="form-control"
                                 placeholder="CAMarked"
-                                value={createCASettings.CAMarked}
+                                value={createEXAMSCASettings.CAMarked}
                                 onChange={onEdit}
                             />
                         </div>
@@ -510,4 +510,4 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps, null)(CASettings);
+export default connect(mapStateToProps, null)(EXAMSCASettings);
