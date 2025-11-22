@@ -157,7 +157,7 @@ function Course(props) {
     });
   };
 
-n  // Step-by-step validation function
+  // Step-by-step validation function
   const onStepValidation = (stepIndex) => {
     // Step 0: Basic Information - Validate Course Name, Course Code, Department
     if (stepIndex === 0) {
