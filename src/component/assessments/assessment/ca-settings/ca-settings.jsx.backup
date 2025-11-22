@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import AGTable from "../../../common/table/AGTable";
-import Select from "react-select";
+import Table from "../../../common/table/table";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -13,67 +12,13 @@ import { connect } from "react-redux";
 function CASettings(props) {
     const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(true);
-
-    // Custom Select Styles
-    const customSelectStyles = {
-        control: (provided, state) => ({
-            ...provided,
-            border: '2px solid #e8e8e8',
-            backgroundColor: state.isFocused ? '#ffffff' : '#f8f9fa',
-            padding: '0.25rem 0.5rem',
-            fontSize: '1rem',
-            borderRadius: '0.5rem',
-            boxShadow: state.isFocused ? '0 6px 20px rgba(13, 110, 253, 0.15)' : provided.boxShadow,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: state.isFocused ? 'translateY(-2px)' : 'none',
-            '&:hover': {
-                borderColor: '#0d6efd',
-                transform: 'translateY(-1px)',
-            }
-        }),
-        option: (provided, state) => ({
-            ...provided,
-            backgroundColor: state.isSelected ? '#0d6efd' : state.isFocused ? '#e7f3ff' : 'white',
-            color: state.isSelected ? 'white' : '#212529',
-            padding: '0.75rem 1rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            '&:active': {
-                backgroundColor: '#0d6efd',
-            }
-        }),
-        menu: (provided) => ({
-            ...provided,
-            zIndex: 9999,
-            borderRadius: '0.5rem',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-            overflow: 'hidden',
-        }),
-        menuList: (provided) => ({
-            ...provided,
-            padding: 0,
-        }),
-        placeholder: (provided) => ({
-            ...provided,
-            color: '#6c757d',
-        }),
-        singleValue: (provided) => ({
-            ...provided,
-            color: '#212529',
-        }),
-    };
-
-    const [caSettingsRecordDatatable,
+    const [caSettingsRecordDatatable, 
         setCASettingsRecordDatatable,
     ] = useState({
         columns: [
             {
                 label: "S/N",
                 field: "sn",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
             {
                 label: "CA Name",
@@ -98,28 +43,24 @@ function CASettings(props) {
             {
                 label: "CA Marked",
                 field: "CAMarked",
-            },
-            {
+            },{
                 label: "CA PerCon",
                 field: "CAPerCon",
+            },
+            {
+                label: "Action",
+                field: "action",
             },
         ],
         rows: [],
     });
     const [runningModule, setRunningModule] = useState([]);
-    const [moduleOptions, setModuleOptions] = useState([]);
 
     const getRunningModule = async () => {
         await axios
             .get(`${serverLink}staff/assessments/staff/running/module/list/${props.loginData[0].StaffID}`, token)
             .then((response) => {
                 setRunningModule(response.data);
-                // Convert to React-Select options
-                const options = response.data.map(item => ({
-                    value: item.ModuleCode,
-                    label: `${item.ModuleName} (${item.ModuleCode})`
-                }));
-                setModuleOptions(options);
                 setIsLoading(false);
             })
             .catch((err) => {
@@ -134,7 +75,6 @@ function CASettings(props) {
             CAName: "",
             CADescription: "",
             ModuleCode: "",
-            ModuleCode2: null,
             SemesterCode: props.currentSemester,
             CAMarked: "",
             CAPerCon: "",
@@ -164,43 +104,27 @@ function CASettings(props) {
                             InsertedBy: `${props.loginData[0].StaffID}`,
 
                             action: (
-                                <>
-                                    <button
-                                        className="btn btn-link p-0 text-primary"
-                                        style={{ marginRight: 15 }}
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        disabled={settings.CAPerCon > 0 && true}
-                                        onClick={() =>
-                                            setCreateCASettings({
-                                                EntryID: settings.EntryID,
-                                                CAName: settings.CAName,
-                                                CADescription: settings.CADescription,
-                                                ModuleCode: settings.ModuleCode,
-                                                ModuleCode2: {
-                                                    value: settings.ModuleCode,
-                                                    label: `${settings.ModuleName} (${settings.ModuleCode})`
-                                                },
-                                                SemesterCode: settings.SemesterCode,
-                                                CAMarked: settings.CAMarked,
-                                                CAPerCon: settings.CAPerCon,
-                                                InsertedOn: settings.InsertedOn,
-                                                InsertedBy: `${props.loginData[0].StaffID}`,
-                                            })
-                                        }
-                                        title="Edit"
-                                    >
-                                        <i style={{ fontSize: '15px', color: "blue" }} className="fa fa-pen" />
-                                    </button>
-                                    <button
-                                        className="btn btn-link p-0 text-danger"
-                                        disabled={settings.CAPerCon > 0 && true}
-                                        onClick={() => handleDelete(settings.EntryID)}
-                                        title="Delete"
-                                    >
-                                        <i style={{ fontSize: '15px', color: "red" }} className="fa fa-trash" />
-                                    </button>
-                                </>
+                                <button
+                                    className="btn btn-sm btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#kt_modal_general"
+                                    disabled={settings.CAPerCon > 0 && true}
+                                    onClick={() =>
+                                        setCreateCASettings({
+                                            EntryID: settings.EntryID,
+                                            CAName: settings.CAName,
+                                            CADescription: settings.CADescription,
+                                            ModuleCode: settings.ModuleCode,
+                                            SemesterCode: settings.SemesterCode,
+                                            CAMarked: settings.CAMarked,
+                                            CAPerCon: settings.CAPerCon,
+                                            InsertedOn: settings.InsertedOn,
+                                            InsertedBy: `${props.loginData[0].StaffID}`,
+                                        })
+                                    }
+                                >
+                                    <i className="fa fa-pen" />
+                                </button>
                             ),
                         });
                     });
@@ -219,52 +143,10 @@ function CASettings(props) {
             });
     };
 
-    const handleDelete = async (entryID) => {
-        const result = await showAlert(
-            "DELETE CONFIRMATION",
-            "Are you sure you want to delete this CA Setting?",
-            "warning",
-            true
-        );
-
-        if (result.isConfirmed) {
-            toast.info("Deleting. Please wait...");
-            await axios
-                .delete(`${serverLink}staff/assessments/delete/settings/${entryID}`, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("CA Setting deleted successfully");
-                        getCASettingsRecords();
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-        }
-    };
-
     const onEdit = (e) => {
         setCreateCASettings({
             ...createCASettings,
             [e.target.id]: e.target.value,
-        });
-    };
-
-    const onModuleChange = (selectedOption) => {
-        setCreateCASettings({
-            ...createCASettings,
-            ModuleCode: selectedOption ? selectedOption.value : "",
-            ModuleCode2: selectedOption,
         });
     };
 
@@ -276,8 +158,7 @@ function CASettings(props) {
                 key !== "InsertedOn" &&
                 key !== "SemesterCode" &&
                 key !== "CAPerCon" &&
-                key !== "InsertedBy" &&
-                key !== "ModuleCode2"
+                key !== "InsertedBy"
             ) {
                 if (createCASettings[key] === "") {
                     await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
@@ -315,7 +196,6 @@ function CASettings(props) {
                             CAName: "",
                             CADescription: "",
                             ModuleCode: "",
-                            ModuleCode2: null,
                             SemesterCode: "",
                             CAMarked: "",
                             CAPerCon: "",
@@ -368,7 +248,6 @@ function CASettings(props) {
                             CAName: "",
                             CADescription: "",
                             ModuleCode: "",
-                            ModuleCode2: null,
                             SemesterCode: "",
                             CAMarked: "",
                             CAPerCon: "",
@@ -405,51 +284,71 @@ function CASettings(props) {
             <PageHeader
                 title={"Lecturer CA Settings"}
                 items={["Assessment", "Assessment", "Lecturer CA Settings"]}
-                buttons={
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_general"
-                        onClick={() =>
-                            setCreateCASettings({
-                                ...createCASettings,
-                                EntryID: "",
-                                CAName: "",
-                                CADescription: "",
-                                ModuleCode: "",
-                                ModuleCode2: null,
-                                SemesterCode: "",
-                                CAMarked: "",
-                                CAPerCon: "",
-                                InsertedOn: "",
-                                InsertedBy: "",
-                            })
-                        }
-                    >
-                        Add CA Settings
-                    </button>
-                }
             />
             <div className="flex-column-fluid">
                 <div className="card">
+                    <div className="card-header border-0 pt-6">
+                        <div className="card-title" />
+                        <div className="card-toolbar">
+                            <div
+                                className="d-flex justify-content-end"
+                                data-kt-customer-table-toolbar="base"
+                            >
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#kt_modal_general"
+                                    onClick={() =>
+                                        setCreateCASettings({
+                                            ...createCASettings,
+                                            EntryID: "",
+                                            CAName: "",
+                                            CADescription: "",
+                                            ModuleCode: "",
+                                            SemesterCode: "",
+                                            CAMarked: "",
+                                            CAPerCon: "",
+                                            InsertedOn: "",
+                                            InsertedBy: "",
+                                        })
+                                    }
+                                >
+                                    Add CA Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="card-body pt-0">
-                        <AGTable data={caSettingsRecordDatatable} />
+                        <Table data={caSettingsRecordDatatable} />
                     </div>
                 </div>
                 <Modal title={"Continuous Assessment Settings"}>
                     <div className="col-lg-12 col-md-12 pt-5">
                         <div className="form-group">
                             <label htmlFor="ModuleCode">Module</label>
-                            <Select
-                                options={moduleOptions}
-                                value={createCASettings.ModuleCode2}
-                                onChange={onModuleChange}
-                                styles={customSelectStyles}
-                                placeholder="Select Module"
-                                isSearchable
-                                isClearable
-                            />
+                            <select
+                                id="ModuleCode"
+                                className="form-control"
+                                required
+                                value={createCASettings.ModuleCode}
+                                onChange={onEdit}
+                            >
+                                <option value="">Select Option</option>
+                                {runningModule.length > 0 ? (
+                                    <>
+                                        {runningModule.map((item, index) => {
+                                            return (
+                                                <option key={index} value={item.ModuleCode}>
+                                                    {`${item.ModuleName} (${item.ModuleCode}) `}
+                                                </option>
+                                            );
+                                        })}
+                                    </>
+                                ) : (
+                                    ""
+                                )}
+                            </select>
                         </div>
                     </div>
                     <div className="col-lg-12 col-md-12 pt-5">

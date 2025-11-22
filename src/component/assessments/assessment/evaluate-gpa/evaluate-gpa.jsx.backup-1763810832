@@ -6,7 +6,7 @@ import axios from "axios";
 import {serverLink} from "../../../../resources/url";
 import {toast} from "react-toastify";
 import 'react-circular-progressbar/dist/styles.css';
-import AgReportTable from "../../../common/table/AGReportTable";
+import ReportTable from "../../../common/table/report_table";
 import {shortCode} from "../../../../resources/constants";
 
 

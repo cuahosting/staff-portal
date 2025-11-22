@@ -5,7 +5,7 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AGTable from "../../common/table/table";
+import Table from "../../common/table/table";
 import Select from 'react-select';
 
 function CASubmitted(props) {
@@ -165,7 +165,7 @@ function CASubmitted(props) {
                         {
                             showBody === true &&
                             <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                                <AGTable data={datatable} />
+                                <Table data={datatable} />
                             </div>
                         }
                     </div>

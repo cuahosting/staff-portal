@@ -5,10 +5,10 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AGTable from "../../common/table/table";
+import Table from "../../common/table/table";
 import Select from 'react-select';
 
-function CASubmitted(props) {
+function CANotSubmitted(props) {
     const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
@@ -80,7 +80,7 @@ function CASubmitted(props) {
 
     const getTimetable =async(semester)=>{
         setIsLoading(true)
-        await axios.get(`${serverLink}staff/assessment/exam/ca-submitted/${semester}`, token)
+        await axios.get(`${serverLink}staff/assessment/exam/ca-not-submitted/${semester}`, token)
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
@@ -141,8 +141,8 @@ function CASubmitted(props) {
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
-                title={"CA Submitted"}
-                items={["Assessment", "Report", "CA Submitted"]}
+                title={"CA Not Submitted"}
+                items={["Assessment", "Report", "CA Not Submitted"]}
             />
             <div className="flex-column-fluid">
                 <div className="card">
@@ -165,7 +165,7 @@ function CASubmitted(props) {
                         {
                             showBody === true &&
                             <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                                <AGTable data={datatable} />
+                                <Table data={datatable} />
                             </div>
                         }
                     </div>
@@ -181,4 +181,4 @@ const mapStateToProps = (state) => {
         FacultyList: state.FacultyList
     };
 };
-export default connect(mapStateToProps, null)(CASubmitted);
+export default connect(mapStateToProps, null)(CANotSubmitted);

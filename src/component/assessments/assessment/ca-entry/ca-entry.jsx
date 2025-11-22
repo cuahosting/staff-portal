@@ -7,7 +7,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import Select2 from "react-select2-wrapper";
-import ReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/AGReportTable";
 import CATemplate from "./CA_template.csv"
 
 function CAEntry(props)
@@ -363,7 +363,7 @@ function CAEntry(props)
                 <Loader />
             ) : (
                 <div className="table-responsive pt-10">
-                    <ReportTable columns={columns} data={students} />
+                    <AgReportTable columns={columns} data={students} />
                 </div>
 
             )}

@@ -6,7 +6,7 @@ import axios from "axios";
 import {serverLink} from "../../../resources/url";
 import {toast} from "react-toastify";
 import "react-select2-wrapper/css/select2.css";
-import AgReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/report_table";
 import { showConfirm } from "../../common/sweetalert/sweetalert";
 import Select2 from "react-select2-wrapper";
 import {formatDateAndTime} from "../../../resources/constants";
@@ -99,7 +99,7 @@ function ResultActivityTracker(props) {
                         {
                             tableData.length > 0 &&
                             <div className="row pt-5">
-                                <AgReportTable title={"Result Activity Tracker"} columns={columns} data={tableData} height={'800px'} />
+                                <ReportTable title={"Result Activity Tracker"} columns={columns} data={tableData} height={'800px'} />
                             </div>
                         }
 

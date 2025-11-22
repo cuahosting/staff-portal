@@ -4,22 +4,25 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AgReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/report_table";
 import { toast } from "react-toastify";
 import Select from "react-select";
 
-function AcademicResultByDepartment(props) {
+function AcademicResultByCourse(props) {
     const token = props.LoginDetails[0].token;
-    const depart = props.LoginDetails[0].DepartmentCode;
 
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "StudentID", "Student", "Module", "Level", "Semester", "Grade", "CAs", "Exams", "Total"];
     const [data, setData] = useState([]);
     const [semesterList, setSemesterList] = useState([]);
     const [semesterOptions, setSemesterOptions] = useState([]);
+    const [departmentsList, setDepartments] = useState([]);
+    const [departmentOptions, setDepartmentsOptions] = useState([]);
     const [semester, setSemeter] = useState({
         SemesterCode: "",
         SemesterCode2: "",
+        DepartmentCode: "",
+        DepartmentCode2: "",
     })
 
     const getSemesters = async () => {
@@ -42,9 +45,24 @@ function AcademicResultByDepartment(props) {
 
     }
 
-    const getData = async (semester, department) => {
+    const getCourses = async () => {
+        await axios
+            .get(`${serverLink}staff/academics/course/list`, token)
+            .then((result) => {
+                let rows = [];
+                if (result.data.length > 0) {
+                    result.data.map((row) => {
+                        rows.push({ value: row.CourseCode, label: row.CourseName })
+                    });
+                    setDepartmentsOptions(rows)
+                    setDepartments(result.data);
+                }
+            });
+    };
+
+    const getData = async (semester, course) => {
         setIsLoading(true)
-        await axios.get(`${serverLink}staff/assessment/exam/result/by/department/${semester}/${department}`, token)
+        await axios.get(`${serverLink}staff/assessment/exam/result/by/course/${semester}/${course}`, token)
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
@@ -84,8 +102,9 @@ function AcademicResultByDepartment(props) {
                 SemesterCode: e.value,
                 SemesterCode2: e
             })
-                getData(e.value,depart);
-
+            if (semester.DepartmentCode !== ""){
+                getData(e.value,semester.DepartmentCode);
+            }
         }else{
             setSemeter({
                 ...semester,
@@ -96,9 +115,20 @@ function AcademicResultByDepartment(props) {
         }
     }
 
+    const onDepartmentChange = (e) => {
+        setSemeter({
+            ...semester,
+            DepartmentCode: e.value,
+            DepartmentCode2: e,
+        })
+
+        getData( semester.SemesterCode,e.value);
+    }
+
 
     useEffect(() => {
         getSemesters();
+        getCourses();
     }, [""]);
 
     return isLoading ? (
@@ -106,12 +136,12 @@ function AcademicResultByDepartment(props) {
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
-                title={"ACADEMIC RESULT BY DEPARTMENT"}
-                items={["Assessment", "ACADEMIC RESULT", " BY DEPARTMENT"]}
+                title={"ACADEMIC RESULT BY COURSE"}
+                items={["Assessment", "ACADEMIC RESULT", " BY COURSE"]}
             />
             <div className="row">
                 {semesterList.length > 0 &&
-                <div className="col-md-12 mb-4 form-group">
+                <div className="col-md-6 mb-4 form-group">
                     <label htmlFor="_Semester">Select Semester</label>
                     <Select
                         id="_Semester"
@@ -122,7 +152,21 @@ function AcademicResultByDepartment(props) {
                         placeholder="select Semester"
                     />
                 </div>}
-
+                {
+                    semester.SemesterCode !== "" ?
+                        <div className="col-md-6 mb-4 form-group">
+                            <label htmlFor="_Semester">Select Course</label>
+                            <Select
+                                name="DepartmentCode"
+                                className="form-select form-select"
+                                value={semester.DepartmentCode2}
+                                onChange={onDepartmentChange}
+                                options={departmentOptions}
+                                placeholder="select Course"
+                            />
+                        </div>
+                        : <></>
+                }
 
             </div>
             <div className="flex-column-fluid mb-2">
@@ -130,7 +174,7 @@ function AcademicResultByDepartment(props) {
                     {
                         <div className="mt-4">
                             {data.length > 0 &&
-                            <AgReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY DEPARTMENT"} />
+                            <ReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY COURSE"} />
                             }
                         </div>
                     }
@@ -145,4 +189,4 @@ const mapStateToProps = (state) => {
         LoginDetails: state.LoginDetails,
     };
 };
-export default connect(mapStateToProps, null)(AcademicResultByDepartment);
+export default connect(mapStateToProps, null)(AcademicResultByCourse);

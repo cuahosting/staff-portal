@@ -5,13 +5,12 @@ import {serverLink} from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import {connect} from "react-redux";
 import Select2 from "react-select2-wrapper";
-import AgReportTable from "../../../common/table/AGReportTable";
+import ReportTable from "../../../common/table/report_table";
 import {toast} from "react-toastify";
 import {showAlert} from "../../../common/sweetalert/sweetalert";
 
-function EXAMCAFinalSubmission(props) {
+function CAFinalSubmission(props) {
     const token = props.loginData[0].token;
-
     const [isLoading, setIsLoading] = useState(false);
     const [runningModules, setRunningModules] = useState([]);
     const [caSubmissionDataTable, setCASubmissionDataTable] = useState([]);
@@ -23,7 +22,7 @@ function EXAMCAFinalSubmission(props) {
 
     const getRunningModules = async () => {
         await axios
-            .get(`${serverLink}staff/assessments/staff/running/module/list`, token)
+            .get(`${serverLink}staff/assessments/staff/running/module/list/${props.loginData[0].StaffID}`, token)
             .then((response) => {
                 let rows = [];
                 response.data.length > 0 &&
@@ -184,10 +183,9 @@ function EXAMCAFinalSubmission(props) {
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
-                title={"Exam Final CA Submission"}
-                items={["Assessment", "Assessment", "Exam Final CA Submission"]}
+                title={"Lecturer's Final CA Submission"}
+                items={["Assessment", "Assessment", "Lecturer's Final CA Submission"]}
             />
-
             <div className="row">
                 <div className="row pt-5">
                     <div className="col-lg-12 col-md-4 pt-5">
@@ -209,7 +207,7 @@ function EXAMCAFinalSubmission(props) {
             ) : (
                 <>
                     <div className="table-responsive pt-10">
-                        <AgReportTable columns={columns} data={caSubmissionDataTable} height={tableHeight} pagination={false} />
+                        <ReportTable columns={columns} data={caSubmissionDataTable} height={tableHeight} pagination={false} />
                     </div>
                     {caSubmissionDataTable.length > 0 && <button className="btn btn-primary w-100" onClick={handleSubmit}>Submit</button>}
                 </>
@@ -225,4 +223,4 @@ const mapStateToProps = (state) => {
     };
 };
 
-export default connect(mapStateToProps, null)(EXAMCAFinalSubmission);
+export default connect(mapStateToProps, null)(CAFinalSubmission);

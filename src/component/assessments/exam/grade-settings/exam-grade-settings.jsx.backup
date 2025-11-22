@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import {serverLink} from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import AgReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/report_table";
 import {formatDateAndTime} from "../../../../resources/constants";
 
 function ExamGradeSettings(props) {
@@ -190,7 +190,7 @@ function ExamGradeSettings(props) {
                         </div>
                     </div>
                     <div className="card-body pt-0">
-                        <AgReportTable columns={columns} data={gradeList}/>
+                        <ReportTable columns={columns} data={gradeList}/>
                     </div>
                 </div>
 

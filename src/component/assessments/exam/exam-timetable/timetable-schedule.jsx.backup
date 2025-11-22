@@ -7,7 +7,7 @@ import axios from "axios";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Modal from "../../../common/modal/modal";
-import AGTable from "../../../common/table/table";
+import Table from "../../../common/table/table";
 import Select from 'react-select';
 import { formatDate, formatDateAndTime, TimeTablePeriods } from "../../../../resources/constants";
 
@@ -386,7 +386,7 @@ function ExamTimeTableSchedule(props) {
                       {
                         showBody === true &&
                         <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                        <AGTable data={datatable} />
+                        <Table data={datatable} />
                     </div>
                       }
                     </div>
