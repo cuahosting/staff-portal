@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { setDashboardData, setLoginDetails, setPermissionDetails } from "../../../actions/setactiondetails";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Audit, decryptData, EmailTemplates, encryptData, projectLogo, sendEmail } from "../../../resources/constants";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -12,6 +13,7 @@ import "./auth-animations.css";
 
 function Login(props)
 {
+  const navigate = useNavigate();
   const [login, setLogin] = useState({
     StaffID: "",
     Password: "",
@@ -64,6 +66,7 @@ function Login(props)
           toast.success("Login successful");
           props.setOnPermissionDetails(result.data.permissionData);
           props.setOnLoginDetails(result.data.userData);
+          navigate("/");
         } else
         {
           showAlert(
@@ -104,6 +107,7 @@ function Login(props)
             toast.success("Login successful");
             props.setOnPermissionDetails(result.data.permissionData);
             props.setOnLoginDetails(result.data.userData);
+            navigate("/");
           } else
           {
             showAlert(

@@ -15,6 +15,8 @@ import { Button } from "@mui/material";
 function StaffProfile(props)
 {
   const token = props.loginData[0].token;
+  const canEditSocial = isAdmin || props.loginData[0]?.StaffID === staffId;
+  const isAdmin = String(props.loginData?.[0]?.IsAdmin || "0") === "1";
 
   const [isLoading, setIsLoading] = useState(true);
   const { staffId } = useParams();
@@ -171,22 +173,39 @@ function StaffProfile(props)
     Year: "",
   });
   const [toggleQualification, setToggleQualification] = useState(false);
+  const [isNewQualification, setIsNewQualification] = useState(false);
 
   const staffQualificationForm = async (id) =>
   {
 
-    if (staffInformation.qualifications.length > 0 && staffInformation.qualifications[0]?.EntryID === id)
+    const match = staffInformation.qualifications.find((q) => q.EntryID === id);
+    if (match)
     {
+      setIsNewQualification(false);
       setEditStaffQualification({
-        EntryID: staffInformation.qualifications[0]?.EntryID,
-        StaffID: staffInformation.qualifications[0]?.StaffID,
-        QualificationID: staffInformation.qualifications[0]?.QualificationID,
-        Discipline: staffInformation.qualifications[0]?.Discipline,
-        InstitutionName: staffInformation.qualifications[0]?.InstitutionName,
-        Year: staffInformation.qualifications[0]?.Year,
+        EntryID: match.EntryID,
+        StaffID: match.StaffID,
+        QualificationID: match.QualificationID,
+        Discipline: match.Discipline,
+        InstitutionName: match.InstitutionName,
+        Year: match.Year,
       });
       setToggleQualification(true);
     }
+  };
+
+  const startNewQualification = () =>
+  {
+    setIsNewQualification(true);
+    setEditStaffQualification({
+      EntryID: "",
+      StaffID: staffId,
+      QualificationID: "",
+      Discipline: "",
+      InstitutionName: "",
+      Year: "",
+    });
+    setToggleQualification(true);
   };
 
   // STAFF INFORMATION
@@ -498,6 +517,56 @@ function StaffProfile(props)
   {
     e.preventDefault();
 
+    if (!isAdmin)
+    {
+      if (!canEditSocial)
+      {
+        showAlert("UNAUTHORIZED", "You can only update your own social profile.", "error");
+        return;
+      }
+
+      toast.info("Updating profile. Please wait..");
+      const socialPayload = {
+        EntryID: editStaffInformation.EntryID,
+        Biography: editStaffInformation.Biography,
+        Research: editStaffInformation.Research,
+        Facebook: editStaffInformation.Facebook,
+        Linkedin: editStaffInformation.Linkedin,
+        Twitter: editStaffInformation.Twitter,
+        Scholar: editStaffInformation.Scholar,
+        Researchgate: editStaffInformation.Researchgate,
+        Academia: editStaffInformation.Academia,
+        Orcid: editStaffInformation.Orcid,
+        EmailAddress: editStaffInformation.EmailAddress,
+        UpdatedBy: props.loginData[0].StaffID,
+      };
+
+      await axios
+        .patch(
+          `${serverLink}staff/hr/staff-management/update/staff/profile/`,
+          socialPayload,
+          token
+        )
+        .then((result) =>
+        {
+          if (result.data.message === "success")
+          {
+            toast.success("Profile updated");
+            getStaffRelatedData().then((r) => { });
+            closeHandler();
+          } else
+          {
+            showAlert("ERROR", "Unable to update profile. Please try again!", "error");
+          }
+        })
+        .catch(() =>
+        {
+          showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+        });
+
+      return;
+    }
+
     for (let key in editStaffInformation)
     {
       if (
@@ -641,6 +710,7 @@ function StaffProfile(props)
       Year: "",
     });
     setToggleQualification(false);
+    setIsNewQualification(false);
 
     setEditStaffInformation({
       EntryID: "",
@@ -841,44 +911,37 @@ function StaffProfile(props)
   const onSubmitStaffQualification = async (e) =>
   {
     e.preventDefault();
-    for (let key in editStaffQualification)
+    const requiredFields = ["StaffID", "QualificationID", "Discipline", "InstitutionName", "Year"];
+    for (let key of requiredFields)
     {
-      if (editStaffQualification.hasOwnProperty(key) && key !== "EntryID")
+      if (!editStaffQualification[key])
       {
-        if (editStaffQualification[key] === "")
-        {
-          await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
-          return false;
-        }
+        await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
+        return;
       }
     }
 
-    toast.info(`Updating... Please wait!`);
-    axios
-      .patch(
-        `${serverLink}staff/hr/staff-management/update/staff/qualification/`,
+    toast.info(`${isNewQualification ? "Adding" : "Updating"} qualification... Please wait!`);
+    const request = isNewQualification || !editStaffQualification.EntryID
+      ? axios.post(
+        `${serverLink}staff/hr/staff-management/staff/qualifications`,
         editStaffQualification, token
       )
-      .then((result) =>
-      {
-        if (result.data.message === "success")
-        {
-          toast.success("Qualification Updated Successfully");
-          getStaffRelatedData().then((r) => { });
-          getData().then((r) => { });
-          getStaff().then((r) => { });
-          closeHandler();
-        }
-      });
+      : axios.patch(
+        `${serverLink}staff/hr/staff-management/update/staff/qualification/`,
+        editStaffQualification, token
+      );
 
-    setEditStaffQualification({
-      ...editStaffQualification,
-      EntryID: "",
-      StaffID: "",
-      QualificationID: "",
-      Discipline: "",
-      InstitutionName: "",
-      Year: "",
+    request.then((result) =>
+    {
+      if (result.data.message === "success")
+      {
+        toast.success(`Qualification ${isNewQualification ? "Added" : "Updated"} Successfully`);
+        getStaffRelatedData().then((r) => { });
+        getData().then((r) => { });
+        getStaff().then((r) => { });
+        closeHandler();
+      }
     });
   };
 
@@ -1180,6 +1243,7 @@ function StaffProfile(props)
                       {toggleInformation && (
                         <form onSubmit={onSubmitStaffInformation} >
                           <div className="row">
+                            <fieldset disabled={!isAdmin}>
                             <div className="row">
                               <h5>Basic Information</h5>
                               <hr />
@@ -1757,6 +1821,9 @@ function StaffProfile(props)
                                   </div>
                                 </div>
 
+                              </div>
+                            </div>
+                            </fieldset>
                                 <h5 className="pt-10">
                                   Social Networks (optional section)
                                 </h5>
@@ -1935,8 +2002,7 @@ function StaffProfile(props)
                                   Save
                                 </button>
                               </div>
-                            </div>
-                          </div>
+                            
                         </form>
                       )}
 
@@ -2043,6 +2109,15 @@ function StaffProfile(props)
                       id="education"
                       role="tabpanel"
                     >
+                      <div className="d-flex justify-content-end mb-4">
+                        <button
+                          className="btn btn-primary"
+                          onClick={startNewQualification}
+                          type="button"
+                        >
+                          Add Education
+                        </button>
+                      </div>
                       {toggleQualification && (
                         <div className="row">
                           <div className="row">
@@ -2209,6 +2284,14 @@ function StaffProfile(props)
                       id="publications"
                       role="tabpanel"
                     >
+                      <div className="d-flex justify-content-end mb-4">
+                        <a
+                          className="btn btn-primary"
+                          href={`/users/publication-manager?st=${encryptData(staffId)}`}
+                        >
+                          Add Publication
+                        </a>
+                      </div>
                       <div className="card">
                         <div
                           id="kt_referred_users_tab_content"

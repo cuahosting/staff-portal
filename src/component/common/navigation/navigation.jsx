@@ -16,23 +16,29 @@ function Navigation(props) {
 
   useEffect(() => {
     if (props.permissionData.length > 0) {
-      const menu_list = [
-        ...new Set(props.permissionData.map((item) => item.MenuName)),
-      ];
-      console.log(menu_list)
+      const cleanedMenuList = props.permissionData
+        .map((item) => item?.MenuName)
+        .filter(
+          (menuName) => typeof menuName === "string" && menuName.trim().length
+        );
+      const menu_list = [...new Set(cleanedMenuList)];
+     
       setMainMenu(menu_list.sort());
-      let sub_menu_array = [];
+      const sub_menu_array = [];
       if (menu_list.length > 0) {
-        menu_list.map((menu) => {
-          let menu_item_array = [];
-          permissionList
-            .filter((i) => i.MenuName === menu)
-            .map((perm) => {
-              menu_item_array.push(perm);
-            });
+        menu_list.forEach((menu) => {
+          if (typeof menu !== "string") return;
+          const menu_item_array = permissionList.filter(
+            (i) => i.MenuName === menu
+          );
           sub_menu_array[menu] = [
             ...new Set(
-              menu_item_array.map((item) => item.MenuName && item.SubMenuName)
+              menu_item_array
+                .map((item) => item?.SubMenuName)
+                .filter(
+                  (subName) =>
+                    typeof subName === "string" && subName.trim().length
+                )
             ),
           ];
         });
@@ -62,9 +68,12 @@ function Navigation(props) {
           <ul className="nav nav-stretch flex-nowrap w-100 h-100">
             {mainMenu.length > 0 &&
               mainMenu.map((menu, index) => {
+                if (typeof menu !== "string") return null;
+                const safeMenu = menu.trim();
+                if (!safeMenu.length) return null;
                 console.log(menu)
                 let is_active =
-                  currentTab.toLowerCase() === menu.toLowerCase()
+                  (currentTab || "").toLowerCase() === safeMenu.toLowerCase()
                     ? "active"
                     : "";
                 return (
@@ -72,12 +81,12 @@ function Navigation(props) {
                     <a
                       className={`nav-link d-flex flex-column text-nowrap flex-center w-100 ${is_active}`}
                       data-bs-toggle="tab"
-                      href={`#kt_header_navs_tab_${menu
+                      href={`#kt_header_navs_tab_${safeMenu
                         .replace(" ", "_")
                         .toLowerCase()}`}
                     >
                       <span className="text-uppercase text-dark fw-bolder fs-6 fs-lg-5">
-                        {menu}
+                        {safeMenu}
                       </span>
                     </a>
                   </li>
@@ -114,8 +123,11 @@ function Navigation(props) {
             >
               {mainMenu.length > 0 &&
                 mainMenu.map((menu, index) => {
+                  if (typeof menu !== "string") return null;
+                  const safeMenu = menu.trim();
+                  if (!safeMenu.length) return null;
                   let is_active =
-                    currentTab.toLowerCase() === menu.toLowerCase()
+                    (currentTab || "").toLowerCase() === safeMenu.toLowerCase()
                       ? "active show"
                       : "";
 
@@ -123,13 +135,14 @@ function Navigation(props) {
                     <div
                       key={index}
                       className={`tab-pane fade ${is_active}`}
-                      id={`kt_header_navs_tab_${menu
+                      id={`kt_header_navs_tab_${safeMenu
                         .replace(" ", "_")
                         .toLowerCase()}`}
                     >
                       <div className="header-menu d-flex flex-column align-items-start flex-lg-row">
-                        {subMenu[menu].length > 0 &&
-                          subMenu[menu].map((sub_menu, index) => {
+                        {(subMenu[safeMenu] || []).length > 0 &&
+                          (subMenu[safeMenu] || []).map((sub_menu, index) => {
+                            if (typeof sub_menu !== "string") return null;
                             return (
                               <Nav key={index}>
                                 <NavDropdown
@@ -141,13 +154,13 @@ function Navigation(props) {
                                 >
                                     {permissionList.filter(
                                             (item) =>
-                                                item.MenuName === menu &&
+                                                item.MenuName === safeMenu &&
                                                 item.SubMenuName === sub_menu
                                         ).length > 0 &&
                                         permissionList
                                             .filter(
                                                 (item) =>
-                                                    item.MenuName === menu &&
+                                                    item.MenuName === safeMenu &&
                                                     item.SubMenuName === sub_menu
                                             )
                                             .map((sub_sub_menu, index) => {

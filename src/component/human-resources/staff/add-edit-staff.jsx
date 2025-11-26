@@ -19,6 +19,7 @@ import SimpleFileUpload from "react-simple-file-upload";
 function AddEditStaff(props)
 {
   const token = props.loginData[0].token;
+  const isAdmin = String(props.loginData?.[0]?.IsAdmin || "0") === "1";
 
   const [isLoading, setIsLoading] = useState(true);
   const currentYear = new Date().getFullYear();
@@ -471,6 +472,55 @@ function AddEditStaff(props)
   const onSubmit = async (e) =>
   {
     e.preventDefault();
+    // Non-admins can only edit social info on their own profile
+    if (!isAdmin)
+    {
+      if (!createStaff.EntryID || createStaff.StaffID !== props.loginData[0].StaffID)
+      {
+        showAlert("UNAUTHORIZED", "You can only update your social profile.", "error");
+        return;
+      }
+
+      toast.info("Updating profile. Please wait..");
+      const socialPayload = {
+        EntryID: createStaff.EntryID,
+        Biography: createStaff.Biography,
+        Research: createStaff.Research,
+        Facebook: createStaff.Facebook,
+        Linkedin: createStaff.Linkedin,
+        Twitter: createStaff.Twitter,
+        Scholar: createStaff.Scholar,
+        Researchgate: createStaff.Researchgate,
+        Academia: createStaff.Academia,
+        Orcid: createStaff.Orcid,
+        EmailAddress: createStaff.EmailAddress,
+        UpdatedBy: props.loginData[0].StaffID,
+      };
+
+      await axios
+        .patch(
+          `${serverLink}staff/hr/staff-management/update/staff/profile/`,
+          socialPayload,
+          token
+        )
+        .then((result) =>
+        {
+          if (result.data.message === "success")
+          {
+            toast.success("Profile updated");
+            getStaff();
+          } else
+          {
+            showAlert("ERROR", "Unable to update profile. Please try again!", "error");
+          }
+        })
+        .catch(() =>
+        {
+          showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+        });
+
+      return;
+    }
     for (let key in createStaff)
     {
       if (
@@ -799,6 +849,7 @@ function AddEditStaff(props)
                 <button
                   type="button"
                   className="btn btn-primary"
+                  disabled={!isAdmin}
                   data-bs-toggle="modal"
                   data-bs-target="#kt_modal_general"
                   onClick={() =>
@@ -868,6 +919,7 @@ function AddEditStaff(props)
           }}
         >
           <form onSubmit={onSubmit} >
+            <fieldset disabled={!isAdmin}>
             <h5>Basic Information</h5>
             <hr />
 
@@ -1401,8 +1453,10 @@ function AddEditStaff(props)
                 </div>
               </div>
 
-              <h5 className="pt-10">Social Networks (optional section)</h5>
-              <hr />
+            </div>
+            </fieldset>
+            <h5 className="pt-10">Social Networks (optional section)</h5>
+            <hr />
 
               <div className="col-lg-4 pt-5">
                 <div className="form-group">
@@ -1664,7 +1718,7 @@ function AddEditStaff(props)
                   </select>
                 </div>
               </div>
-            </div>
+            
 
             <div className="form-group pt-10">
               <button type="submit" className="btn btn-primary w-100">
