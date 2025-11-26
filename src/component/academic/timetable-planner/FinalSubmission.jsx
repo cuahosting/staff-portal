@@ -6,7 +6,7 @@ import Loader from "../../common/loader/loader";
 import { connect } from "react-redux";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import Select from "react-select";
 
 function FinalSubmission(props) {
@@ -196,7 +196,7 @@ function FinalSubmission(props) {
               Status: module.Status === 0 ? <span className="badge badge-secondary">Not Submitted</span>
                 : module.Status === 1 ? <span className="badge badge-success">Submitted by HOD</span>
                   : <span className="badge badge-success">Approved by Dean</span>,
-              Action: <button className="btn btn-sm btn-primary" onClick={() => {onApproveSingle(module)}}>
+              Action: <button className="btn btn-link p-0 text-primary" style={{ fontSize: '22px' }} title="Edit" onClick={() => {onApproveSingle(module)}}>
                 <i className="fa fa-arrow-right" />
               </button>
             });
@@ -281,14 +281,14 @@ function FinalSubmission(props) {
         items={["Academics", "Timetable Planner", "HOD Submission"]}
       />
       <div className="flex-column-fluid">
-        <div className="card pt-5">
-          <div className="card-body pt-0">
+        <div className="card card-no-border pt-5">
+          <div className="card-body p-0">
             <div className="col-md-12">
               <div className="row">
                 <form onSubmit={handleSubmit}>
                   <div className="row fv-row">
-                    <div className="col-md-4 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
+                    <div className="col-md-4 fv-row mb-6 enhanced-form-group">
+                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
                         Select Programme/Course
                       </label>
                       <Select
@@ -314,8 +314,8 @@ function FinalSubmission(props) {
                       {/*  ))}*/}
                       {/*</select>*/}
                     </div>
-                    <div className="col-md-4 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
+                    <div className="col-md-4 fv-row mb-6 enhanced-form-group">
+                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
                         Select School Semester
                       </label>
                       <Select
@@ -354,11 +354,11 @@ function FinalSubmission(props) {
             </div>
             {moduleList.length > 0 ? (
               <div className="col-12 mt-9">
-                <div className="card-body pt-0">
+                <div className="card-body p-0">
                   <div className="row">
                     <div className="col-md-12">
                       <h2>All Modules </h2>
-                      <Table data={datatable} />
+                      <AGTable data={datatable} />
                       <div
                         className="d-flex justify-content-end mt-5"
                         data-kt-customer-table-toolbar="base"

@@ -208,7 +208,7 @@ const ComplainsAssignedToMe = (props) => {
                 items={["Users", "Service Desk", "complains assigned to me"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body pt-5">
                         <div className="row col-md-12 mb-5 mt-5">
                             <div className="form-group">

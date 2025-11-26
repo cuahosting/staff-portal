@@ -618,7 +618,7 @@ function HostelAllocations(props) {
                 </div>
               </div>
             </div>
-            <div className="card-body pt-0">
+            <div className="card-body p-0">
               <h3>Hostel Applications</h3>
               <ReportTable columns={columns} data={hostelAllocationLists} />
             </div>

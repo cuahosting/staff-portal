@@ -85,8 +85,8 @@ function GuardianApprovalForm(props) {
                 items={["Registration", "Change of Course", "Guardian Approval"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
-                    <div className="card-body pt-0 mt-10">
+                <div className="card card-no-border">
+                    <div className="card-body p-0 mt-10">
                         <div className=" row col-md-12">
                             <h4>Welcome!</h4>
                             <h5>Your ward have indicated interes to change his course from <span className="text-success">{data.CourseName}</span> to <span className="text-danger">{data.RequestedCourseName}</span>. <br />

@@ -104,7 +104,7 @@ const RegistrationClearanceReport = (props) => {
                 items={["Users", "Finance Report", "Registration clearance by semester"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body pt-2">
                         <div className="col-md-12">
                             <div className="row">

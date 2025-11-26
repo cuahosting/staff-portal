@@ -7,7 +7,7 @@ export const serverLink =
         // : "https://gargatechapi.com.ng:5007/" // BABA AHMED
         //   : "https://gargatechapi.com.ng:5006/" // AL-ANSAR
         // : "https://smartsourcingapi.com:5004/" // OLIVIA
-        : "https://gargatechapi.com.ng:5008/" //COSMOPOLITAN
+        : "https://backend.cosmopolitan.edu.ng:4480/" //COSMOPOLITAN
 
 export const simpleFileUploadAPIKey = "305e0ddf925a3fc5dd34d314f8230349";
 //

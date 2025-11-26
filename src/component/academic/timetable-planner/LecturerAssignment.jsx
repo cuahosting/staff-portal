@@ -8,7 +8,7 @@ import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux/es/exports";
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
-import ReportTable from "../../common/table/report_table";
+import AGReportTable from "../../common/table/AGReportTable";
 import Select from 'react-select';
 
 
@@ -113,7 +113,7 @@ function LecturerAssignment(props) {
                 }
                 }
               >
-                <i className="fa fa-pen" />
+                <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
               </button>,
               item.MainLecturerName,
               item.AlternateLecturerName,
@@ -216,8 +216,8 @@ function LecturerAssignment(props) {
       <div className="flex-column-fluid">
         <div className="col-md-12">
           {semesterList.length > 0 &&
-            <div className="col-md-12 mb-4 form-group">
-              <label htmlFor="_Semester">Select Semester</label>
+            <div className="fv-row mb-6 enhanced-form-group">
+              <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="_Semester">Select Semester</label>
               <Select
                   id="_Semester"
                   className="form-select form-select"
@@ -248,7 +248,7 @@ function LecturerAssignment(props) {
         </div>
         {
           data.length > 0 ?
-            <> <ReportTable columns={columns} data={data} title={"Modules to Lecturer Assignment"} />
+            <> <AGReportTable columns={columns} data={data} title={"Modules to Lecturer Assignment"} />
             </>
             : <></>
         }
@@ -265,8 +265,8 @@ function LecturerAssignment(props) {
                 {
                   staffList.length > 0 &&
                   <>
-                    <div className="col-md-12 mb-3 mt-5">
-                      <label className="required fs-6 fw-bold mb-2">
+                    <div className="fv-row mb-6 enhanced-form-group mt-5">
+                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
                         Main Lecturer
                       </label>
                       <Select
@@ -276,8 +276,8 @@ function LecturerAssignment(props) {
                         options={staff}
                       />
                     </div>
-                    <div className="col-md-12 mb-3">
-                      <label className="required fs-6 fw-bold mb-2">Supporting Lecturer 1</label>
+                    <div className="fv-row mb-6 enhanced-form-group">
+                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">Supporting Lecturer 1</label>
                       <Select
                         name="AlternateLecturer"
                         value={selectedModule.AlternateLecturer}
@@ -285,8 +285,8 @@ function LecturerAssignment(props) {
                         options={staff}
                       />
                     </div>
-                    <div className="col-md-12">
-                      <label className="required fs-6 fw-bold mb-2">Supporting Lecturer 2</label>
+                    <div className="fv-row mb-6 enhanced-form-group">
+                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">Supporting Lecturer 2</label>
                       <Select
                         name="AlternateLecturer2"
                         value={selectedModule.AlternateLecturer2}

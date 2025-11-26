@@ -9,7 +9,7 @@ import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
-import ReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/report_table";
 const randomToken = require('random-token');
 
 
@@ -143,7 +143,7 @@ function ApproveResult(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Approve Result"} items={["Assessment", "Exams & Records", "Approve Result"]}/>
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-md-6">
@@ -211,7 +211,7 @@ function ApproveResult(props) {
                         {
                             tableData.length > 0 &&
                             <div className="row pt-5">
-                                <ReportTable columns={columns} data={tableData} height={'800px'} />
+                                <AgReportTable columns={columns} data={tableData} height={'800px'} />
                             </div>
                         }
 

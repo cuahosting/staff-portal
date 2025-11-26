@@ -206,8 +206,8 @@ function ChangeOfCourseAdmissionOfficeApproval(props) {
                 items={["Registration", "Change of Course", "Amission Officer Approval"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
-                    <div className="card-body pt-0">
+                <div className="card card-no-border">
+                    <div className="card-body p-0">
                         <div className="col-md-12" style={{ overflowX: 'auto' }}>
                             <ReportTable columns={columns} data={tableData} title={"Admission Approval"} />
 

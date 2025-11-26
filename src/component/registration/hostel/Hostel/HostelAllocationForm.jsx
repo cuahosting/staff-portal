@@ -157,7 +157,7 @@ function HostelAllocationForm(props) {
               ></div>
             </div>
           </div>
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <div>
               <div className="form-gdroup">
                 <label htmlFor="hostelFor">Select Student</label>

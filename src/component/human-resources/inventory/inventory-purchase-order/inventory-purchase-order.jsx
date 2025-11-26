@@ -760,7 +760,7 @@ function InventoryPurchaseOrder(props)
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Inventory Purchase Order"} items={["Inventory", "Inventory Purchase Order"]} />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
                         <div className="card-toolbar">
@@ -785,7 +785,7 @@ function InventoryPurchaseOrder(props)
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <ReportTable title={"Inventory Purchase Order"} columns={columns} data={tableData} />
                     </div>
                 </div>

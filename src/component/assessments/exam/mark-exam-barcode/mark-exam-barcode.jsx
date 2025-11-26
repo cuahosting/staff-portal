@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/report_table";
 import { TimeTablePeriods, dynamicSort, formatDate } from "../../../../resources/constants";
 import Select from "react-select";
 import CsvDownloadButton from 'react-json-to-csv'
@@ -359,7 +359,7 @@ function MarkExamBarcode(props) {
                 <Loader />
             ) : (
                 <div className="table-responsive pt-10">
-                    <ReportTable columns={columns} data={data} height="700px" />
+                    <AgReportTable columns={columns} data={data} height="700px" />
                 </div>
 
             )}

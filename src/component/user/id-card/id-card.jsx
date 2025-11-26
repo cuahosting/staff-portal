@@ -162,7 +162,7 @@ function GenerateIDCard(props) {
 
             <div className="flex-column-fluid h-500px">
                 <div className="card">
-                    <div className="card-body pt-0 h-500px">
+                    <div className="card-body p-0 h-500px">
                         <div className="col-md-12">
                             <div className="row col-md-12">
                                 <div className="col-md-3">

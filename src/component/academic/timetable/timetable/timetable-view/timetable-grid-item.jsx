@@ -5,7 +5,7 @@ const TimeTableGridItem = (props) => {
         <div className="h-100" style={{ backgroundColor: `${props.color}`, color: 'white' }}>
             <div className="d-flex flex-column px-3 pt-3 pb-4">
                 <div className="fw-bolder mb-0 text-lg-start">
-                    <span className="font-weight-bold" style={{ fontSize: '18px', fontWeight: 'bold' }}>{props.course}</span>
+                    <span className="font-weight-bold" style={{ fontSize: '22px', fontWeight: 'bold' }}>{props.course}</span>
                     {/*<span className="float-end">{props.key_id}</span>*/}
                 </div>
 

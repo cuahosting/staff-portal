@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import Modal from "../../../common/modal/modal";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
@@ -50,13 +50,13 @@ function ClashByPass(props) {
                             FacultyName: facultyList.filter(x => x.FacultyCode.toString().toLowerCase() === val.FacultyCode.toString().toLowerCase())[0].FacultyName,
                             action: (
                                 <button
-                                    className="btn btn-sm btn-danger"
+                                    className="btn btn-link p-0 text-danger" title="Delete"
                                     onClick={() => {
                                         removebyPass(val.FacultyCode)
                                     }
                                     }
                                 >
-                                    <i className="fa fa-trash" />
+                                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                                 </button>
                             ),
                         });
@@ -146,7 +146,7 @@ function ClashByPass(props) {
                 title={"Timetable Clash Bypass"}
                 items={["Academics", " Timetable bypass"]}
             />
-        <div className="card" style={{ width: '100%' }}>
+        <div className="card card-no-border" style={{ width: '100%' }}>
             <div className="card-header border-0 pt-6">
                 <div className="card-title" />
                 <div className="card-toolbar">
@@ -170,9 +170,9 @@ function ClashByPass(props) {
                     </div>
                 </div>
             </div>
-            <div className="card-body pt-0" >
+            <div className="card-body p-0" >
                 <div className="col-md-12" >
-                    <Table data={datatable} />
+                    <AGTable data={datatable} />
                 </div>
             </div>
 

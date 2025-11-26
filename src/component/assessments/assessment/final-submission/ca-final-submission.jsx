@@ -5,7 +5,7 @@ import {serverLink} from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import {connect} from "react-redux";
 import Select2 from "react-select2-wrapper";
-import ReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/AGReportTable";
 import {toast} from "react-toastify";
 import {showAlert} from "../../../common/sweetalert/sweetalert";
 
@@ -207,7 +207,7 @@ function CAFinalSubmission(props) {
             ) : (
                 <>
                     <div className="table-responsive pt-10">
-                        <ReportTable columns={columns} data={caSubmissionDataTable} height={tableHeight} pagination={false} />
+                        <AgReportTable columns={columns} data={caSubmissionDataTable} height={tableHeight} pagination={false} />
                     </div>
                     {caSubmissionDataTable.length > 0 && <button className="btn btn-primary w-100" onClick={handleSubmit}>Submit</button>}
                 </>

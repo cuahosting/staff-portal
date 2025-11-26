@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import {useNavigate} from "react-router";
-import ReportTable from "../../../common/table/report_table";
+import AGReportTable from "../../../common/table/AGReportTable";
 import Select from "react-select";
 import {showAlert} from "../../../common/sweetalert/sweetalert";
 

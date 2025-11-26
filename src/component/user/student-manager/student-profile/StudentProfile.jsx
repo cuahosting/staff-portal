@@ -83,7 +83,7 @@ function StudentProfile(props) {
       <div className="flex-column-fluid">
       <NewStudentEnrolmentReport hideTitle={true}/>
         <div className="card">
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
           
             {/* <ReportTable columns={columns} data={studentList} /> */}
           </div>

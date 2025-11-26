@@ -222,8 +222,8 @@ function ChangeOfCourseRegistrarOfficeApproval(props) {
                 items={["Registration", "Change of Course", "Registrar Office Approval"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
-                    <div className="card-body pt-0">
+                <div className="card card-no-border">
+                    <div className="card-body p-0">
                         <div className="col-md-12" style={{ overflowX: 'auto' }}>
                             <ReportTable columns={columns} data={tableData} title={"Registrar Approval"} />
 

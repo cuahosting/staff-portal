@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import AGReportTable from "../../common/table/AGReportTable";
 import Select from "react-select";
 
 const ByUniversity = (props) => {
@@ -123,8 +123,8 @@ const ByUniversity = (props) => {
         items={["Academics", "Module Running", "Module Running By University"]}
       />
       <div className="flex-column-fluid">
-        <div className="card">
-          <div className="card-body pt-2">
+        <div className="card card-no-border">
+          <div className="card-body p-0">
             <div className="col-md-12">
               <div className="row">
                 <form onSubmit={handleSubmit}>
@@ -156,7 +156,7 @@ const ByUniversity = (props) => {
               <div className="row">
                 <div className="col-md-12 mt-5">
                   {
-                    <ReportTable
+                    <AGReportTable
                       title={`Module Running By University`}
                       columns={columns}
                       data={data}

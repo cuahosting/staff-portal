@@ -135,7 +135,7 @@ const ComplainTypes = (props) => {
                 </div>
             </div>
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body pt-5">
                         <ReportTable columns={columns} data={complainTypes} />
                         <Modal >

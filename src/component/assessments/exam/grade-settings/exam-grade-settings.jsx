@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import {serverLink} from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import ReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/report_table";
 import {formatDateAndTime} from "../../../../resources/constants";
 
 function ExamGradeSettings(props) {
@@ -169,7 +169,7 @@ function ExamGradeSettings(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Grade Settings"} items={["Assessment", "Exams & Records", "Grade Settings"]}/>
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title"/>
                         <div className="card-toolbar">
@@ -189,8 +189,8 @@ function ExamGradeSettings(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
-                        <ReportTable columns={columns} data={gradeList}/>
+                    <div className="card-body p-0">
+                        <AgReportTable columns={columns} data={gradeList}/>
                     </div>
                 </div>
 

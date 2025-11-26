@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -10,6 +10,64 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
 import swal from "sweetalert";
 import Select from "react-select";
+// Custom styles for react-select to match login input styling
+const customSelectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    border: '2px solid #e8e8e8',
+    backgroundColor: state.isFocused ? '#ffffff' : '#f8f9fa',
+    padding: '0.25rem 0.5rem',
+    fontSize: '1rem',
+    borderRadius: '0.5rem',
+    outline: 'none',
+    boxShadow: state.isFocused
+      ? '0 6px 20px rgba(13, 110, 253, 0.15)'
+      : provided.boxShadow,
+    borderColor: state.isFocused ? '#0d6efd' : '#e8e8e8',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transform: state.isFocused ? 'translateY(-2px)' : 'none',
+    '&:hover': {
+      borderColor: state.isFocused ? '#0d6efd' : '#d0d0d0',
+      backgroundColor: '#ffffff',
+      transform: 'translateY(-1px)',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+    }
+  }),
+  menu: (provided) => ({
+    ...provided,
+    zIndex: 9999,
+    borderRadius: '0.5rem',
+    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
+    border: '2px solid #e8e8e8',
+  }),
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: 9999,
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? '#0d6efd'
+      : state.isFocused
+        ? '#e3f2fd'
+        : '#ffffff',
+    color: state.isSelected ? '#ffffff' : '#2c3e50',
+    padding: '0.75rem 1.25rem',
+    cursor: 'pointer',
+    fontSize: '1rem',
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#a0a0a0',
+    fontSize: '0.95rem',
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: '#2c3e50',
+    fontSize: '1rem',
+  }),
+};
+
 function Department(props) {
   const token = props.LoginDetails[0].token
   const [isLoading, setIsLoading] = useState(true);
@@ -128,7 +186,7 @@ function Department(props) {
               action: (
                 <>
                   <button
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                     data-bs-toggle="modal"
                     data-bs-target="#kt_modal_general"
                     onClick={() => {
@@ -154,10 +212,10 @@ function Department(props) {
                       });
                     }}
                   >
-                    <i className="fa fa-pen" />
+                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                   </button>
                   <button
-                    className="btn btn-sm btn-danger"
+                    className="btn btn-link p-0 text-danger" title="Delete"
                     onClick={() => {
                       swal({
                         title: "Are you sure?",
@@ -172,7 +230,7 @@ function Department(props) {
                       });
                     }}
                   >
-                    <i className="fa fa-trash" />
+                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                   </button>
                 </>
               ),
@@ -337,135 +395,152 @@ function Department(props) {
       <PageHeader
         title={"Department"}
         items={["Academics", "Department", "Manage department"]}
+        buttons={
+          <button
+            type="button"
+            className="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#kt_modal_general"
+            onClick={() =>
+              setCreateDepartment({
+                ...createDepartment,
+                EntryID: "",
+                DepartmentCode: "",
+                DepartmentName: "",
+                FacultyCode: "",
+                FacultyDean2: { value: '', label: '' },
+                DepartmentHead2: { value: '', label: '' },
+                FacultyCode2 : { value: '', label: '' },
+                IsAwardDegree: "",
+                IsAcademic: "",
+                DepartmentHead: "",
+                InsertedBy: props.LoginDetails[0].StaffID,
+              })
+            }
+          >
+            Add Department
+          </button>
+        }
       />
       <div className="flex-column-fluid">
-        <div className="card">
-          <div className="card-header border-0 pt-6">
-            <div className="card-title" />
-            <div className="card-toolbar">
-              <div
-                className="d-flex justify-content-end"
-                data-kt-customer-table-toolbar="base"
-              >
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateDepartment({
-                      ...createDepartment,
-                      EntryID: "",
-                      DepartmentCode: "",
-                      DepartmentName: "",
-                      FacultyCode: "",
-                      FacultyDean2: { value: '', label: '' },
-                      DepartmentHead2: { value: '', label: '' },
-                      FacultyCode2 : { value: '', label: '' },
-                      IsAwardDegree: "",
-                      IsAcademic: "",
-                      DepartmentHead: "",
-                      InsertedBy: props.LoginDetails[0].StaffID,
-                    })
-                  }
-                >
-                  Add Department
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="card-body pt-0">
+        <div className="card card-no-border">
+          <div className="card-body p-0">
             <div className="col-md-12" style={{ overflowX: "auto" }}>
-              <Table data={datatable} />
+              <AGTable data={datatable} />
             </div>
           </div>
         </div>
         <Modal title={"Department Form"}>
           <div className="row">
-            <div className="form-group">
-              <label htmlFor="FacultyCode">Faculty</label>
+            <div className="fv-row mb-6 enhanced-form-group">
+              <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="FacultyCode">
+                Faculty
+              </label>
               <Select
                 name="FacultyCode"
                 value={createDepartment.FacultyCode2}
                 onChange={onFacultyChange}
                 options={facultyList}
                 placeholder="select Faculty"
-              />
-
-            </div>
-
-            <div className="form-group mt-4">
-              <label htmlFor="DepartmentName">Department Name</label>
-              <input
-                type="text"
-                id={"DepartmentName"}
-                onChange={onEdit}
-                value={createDepartment.DepartmentName}
-                className={"form-control"}
-                placeholder={"Enter the Department Name"}
+                styles={customSelectStyles}
               />
             </div>
 
-            <div className="form-group mt-4">
-              <label htmlFor="DepartmentCode">Department Code</label>
-              <input
-                type="text"
-                id={"DepartmentCode"}
-                disabled={createDepartment.EntryID !== "" ? true : false}
-                onChange={onEdit}
-                value={createDepartment.DepartmentCode}
-                className={"form-control"}
-                style={{ textTransform: "uppercase" }}
-                placeholder={"Enter the Department Code"}
-              />
+            <div className="fv-row mb-6 enhanced-form-group">
+              <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="DepartmentName">
+                Department Name
+              </label>
+              <div className="enhanced-input-wrapper">
+                <input
+                  type="text"
+                  id="DepartmentName"
+                  onChange={onEdit}
+                  value={createDepartment.DepartmentName}
+                  className="form-control form-control-lg form-control-solid enhanced-input"
+                  placeholder="Enter the Department Name"
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+
+            <div className="fv-row mb-6 enhanced-form-group">
+              <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="DepartmentCode">
+                Department Code
+              </label>
+              <div className="enhanced-input-wrapper">
+                <input
+                  type="text"
+                  id="DepartmentCode"
+                  disabled={createDepartment.EntryID !== "" ? true : false}
+                  onChange={onEdit}
+                  value={createDepartment.DepartmentCode}
+                  className="form-control form-control-lg form-control-solid enhanced-input"
+                  style={{ textTransform: "uppercase" }}
+                  placeholder="Enter the Department Code"
+                  autoComplete="off"
+                />
+              </div>
             </div>
 
             <div className="col-md-6">
-              <div className="form-group mt-4">
-                <label htmlFor="IsAcademic">Is Academic?</label>
-                <select
-                  id="IsAcademic"
-                  onChange={onEdit}
-                  value={createDepartment.IsAcademic.toString()}
-                  className="form-select form-select-solid"
-                  data-kt-select2="true"
-                  data-placeholder="Select option"
-                  data-dropdown-parent="#kt_menu_624456606a84b"
-                  data-allow-clear="true"
-                >
-                  <option value={""}>-select type-</option>
-                  <option value={"1"}>YES</option>
-                  <option value={"0"}>NO</option>
-                </select>
+              <div className="fv-row mb-6 enhanced-form-group">
+                <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="IsAcademic">
+                  Is Academic?
+                </label>
+                <div className="enhanced-input-wrapper">
+                  <select
+                    id="IsAcademic"
+                    onChange={onEdit}
+                    value={createDepartment.IsAcademic.toString()}
+                    className="form-control form-control-lg form-control-solid enhanced-input"
+                    data-kt-select2="true"
+                    data-placeholder="Select option"
+                    data-dropdown-parent="#kt_menu_624456606a84b"
+                    data-allow-clear="true"
+                  >
+                    <option value="">-select type-</option>
+                    <option value="1">YES</option>
+                    <option value="0">NO</option>
+                  </select>
+                </div>
               </div>
             </div>
+
             <div className="col-md-6">
-              <div className="form-group mt-4">
-                <label htmlFor="IsAwardDegree"> Is Awarding Degree ?</label>
-                <select
-                  id="IsAwardDegree"
-                  onChange={onEdit}
-                  value={createDepartment.IsAwardDegree.toString()}
-                  className="form-select form-select-solid"
-                  data-kt-select2="true"
-                  data-placeholder="Select option"
-                  data-dropdown-parent="#kt_menu_624456606a84b"
-                  data-allow-clear="true"
-                >
-                  <option value={""}>-select type-</option>
-                  <option value={"1"}>YES</option>
-                  <option value={"0"}>NO</option>
-                </select>
+              <div className="fv-row mb-6 enhanced-form-group">
+                <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="IsAwardDegree">
+                  Is Awarding Degree?
+                </label>
+                <div className="enhanced-input-wrapper">
+                  <select
+                    id="IsAwardDegree"
+                    onChange={onEdit}
+                    value={createDepartment.IsAwardDegree.toString()}
+                    className="form-control form-control-lg form-control-solid enhanced-input"
+                    data-kt-select2="true"
+                    data-placeholder="Select option"
+                    data-dropdown-parent="#kt_menu_624456606a84b"
+                    data-allow-clear="true"
+                  >
+                    <option value="">-select type-</option>
+                    <option value="1">YES</option>
+                    <option value="0">NO</option>
+                  </select>
+                </div>
               </div>
             </div>
-            <div className="form-group mt-4">
-              <label htmlFor="DepartmentHead">Department Head</label>
+
+            <div className="fv-row mb-6 enhanced-form-group">
+              <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="DepartmentHead">
+                Department Head
+              </label>
               <Select
                 name="DepartmentHead"
                 value={createDepartment.DepartmentHead2}
                 onChange={onStaffChange}
                 options={staff}
                 placeholder="select Department Head"
+                styles={customSelectStyles}
               />
             </div>
           </div>

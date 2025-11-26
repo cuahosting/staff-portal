@@ -9,6 +9,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
 import { connect } from "react-redux";
+import Select from "react-select";
 
 function FinanceSettings(props) {
     const token = props.loginData[0].token;
@@ -17,6 +18,7 @@ function FinanceSettings(props) {
     const [courseList, setCourseList] = useState([]);
     const [scholarshipList, setScholarshipList] = useState([]);
     const [studentList, setStudentList] = useState([]);
+    const [studentOptions, setStudentOptions] = useState([]);
     const [tuitionDatatable, setTuitionDatatable] = useState({
         columns: [
             {
@@ -427,7 +429,21 @@ function FinanceSettings(props) {
         await axios.get(`${serverLink}staff/student-manager/student/active`, token)
             .then((result) => {
                 if (result.data.length > 0) {
-                    setStudentList(result.data)
+                    // Sort students alphabetically by full name
+                    const sortedStudents = result.data.sort((a, b) => {
+                        const nameA = `${a.FirstName} ${a.MiddleName} ${a.Surname}`.toUpperCase();
+                        const nameB = `${b.FirstName} ${b.MiddleName} ${b.Surname}`.toUpperCase();
+                        return nameA.localeCompare(nameB);
+                    });
+
+                    // Create options for react-select
+                    const options = sortedStudents.map((student, index) => ({
+                        value: student.StudentID,
+                        label: `${index + 1}. ${student.FirstName} ${student.MiddleName} ${student.Surname} (${student.StudentID})`
+                    }));
+
+                    setStudentList(sortedStudents);
+                    setStudentOptions(options);
                 }
             }).catch((err) => {
                 console.log("NETWORK ERROR");
@@ -459,6 +475,13 @@ function FinanceSettings(props) {
         setEnrolmentFormData({
             ...enrolmentFormData,
             [e.target.id]: e.target.value,
+        });
+    };
+
+    const onStudentSelect = (selectedOption) => {
+        setEnrolmentFormData({
+            ...enrolmentFormData,
+            StudentID: selectedOption ? selectedOption.value : "",
         });
     };
 
@@ -878,8 +901,8 @@ function FinanceSettings(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Finance Settings"} items={["Human Resources", "Finance", "Finance Settings"]} />
             <div className="flex-column-fluid">
-                <div className="card">
-                    <div className="card-body pt-0">
+                <div className="card card-no-border">
+                    <div className="card-body p-0">
                         <ul className="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-bold mb-8">
 
                             <li className="nav-item">
@@ -975,20 +998,14 @@ function FinanceSettings(props) {
                                 <div className={"row"}>
                                     <div className="form-group col-md-5 mb-4">
                                         <label htmlFor="StudentID">Student</label>
-                                        <select
-                                            id={"StudentID"}
-                                            onChange={onEnrolmentEdit}
-                                            value={enrolmentFormData.StudentID}
-                                            className={"form-control"}
-                                        >
-                                            <option>Select Student</option>
-                                            {
-                                                studentList.length > 0 && studentList.map((item, index) => {
-                                                    return <option key={index} value={item.StudentID}>{item.FirstName} {item.MiddleName} {item.Surname} ({item.StudentID})</option>
-                                                })
-                                            }
-
-                                        </select>
+                                        <Select
+                                            options={studentOptions}
+                                            onChange={onStudentSelect}
+                                            value={studentOptions.find(option => option.value === enrolmentFormData.StudentID) || null}
+                                            placeholder="Search and select student..."
+                                            isClearable
+                                            isSearchable
+                                        />
                                     </div>
                                     <div className="form-group col-md-5 mb-4">
                                         <label htmlFor="ScholarshipID">Scholarship</label>

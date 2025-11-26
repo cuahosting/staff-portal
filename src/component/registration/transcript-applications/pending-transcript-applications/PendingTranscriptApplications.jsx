@@ -134,7 +134,7 @@ function AllTranscriptApplications(props) {
       />
       <div className="flex-column-fluid">
         <div className="card">
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             {" "}
             {tableData.length > 0 ? (
               <ReportTable columns={columns} data={tableData} />

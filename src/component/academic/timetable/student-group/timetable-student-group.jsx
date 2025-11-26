@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -88,7 +88,7 @@ function TimetableStudentGroup(props) {
                             CourseSemester: group.CourseSemester ?? "N/A",
                             action: (
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#kt_modal_general"
                                     onClick={() =>
@@ -103,7 +103,7 @@ function TimetableStudentGroup(props) {
                                         })
                                     }
                                 >
-                                    <i className="fa fa-pen" />
+                                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                 </button>
                             ),
                         });
@@ -249,7 +249,7 @@ function TimetableStudentGroup(props) {
                             CourseSemester: group.CourseSemester ?? "N/A",
                             action: (
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#kt_modal_general"
                                     onClick={() =>
@@ -264,7 +264,7 @@ function TimetableStudentGroup(props) {
                                         })
                                     }
                                 >
-                                    <i className="fa fa-pen" />
+                                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                 </button>
                             ),
                         });
@@ -293,7 +293,7 @@ function TimetableStudentGroup(props) {
                 items={["Academics", "Timetable", "Student Group"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
                         <div className="card-toolbar">
@@ -323,8 +323,8 @@ function TimetableStudentGroup(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
-                        <Table data={datatable} />
+                    <div className="card-body p-0">
+                        <AGTable data={datatable} />
                     </div>
                 </div>
                 <Modal title={"Manage Student Group"}>

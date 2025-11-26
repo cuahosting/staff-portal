@@ -297,7 +297,7 @@ function HrPayrollPostSchedule(props) {
                 items={["Human Resources", "Payroll", "Post Schedule"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <h4 className={"alert alert-danger"}>You can only run salary once per month</h4>

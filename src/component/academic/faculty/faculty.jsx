@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -138,7 +138,7 @@ function Faculty(props)
               action: (
                 <>
                   <button
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                     data-bs-toggle="modal"
                     data-bs-target="#kt_modal_general"
                     onClick={() =>
@@ -166,10 +166,10 @@ function Faculty(props)
 
                     }
                   >
-                    <i className="fa fa-pen" />
+                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                   </button>
                   <button
-                    className="btn btn-sm btn-danger"
+                    className="btn btn-link p-0 text-danger" title="Delete"
                     onClick={() =>
                     {
                       swal({
@@ -187,7 +187,7 @@ function Faculty(props)
                       });
                     }}
                   >
-                    <i className="fa fa-trash" />
+                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                   </button>
                 </>
               ),
@@ -353,44 +353,39 @@ function Faculty(props)
     <Loader />
   ) : (
     <div className="d-flex flex-column flex-row-fluid">
-      <PageHeader title={"Manage Faculty"} items={["Academics", "Faculty"]} />
+      <PageHeader
+        title={"Manage Faculty"}
+        items={["Academics", "Faculty"]}
+        buttons={
+          <button
+            type="button"
+            className="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#kt_modal_general"
+            onClick={() =>
+              setCreateFaculty({
+                ...createFaculty,
+                FacultyName: "",
+                FacultyCode: "",
+                FacultyDean: "",
+                FacultyDeputyDean: "",
+                FacultyDean2: { value: '', label: '' },
+                FacultyDeputyDean2: { value: '', label: '' },
+                IsAcademic: 1,
+                IsAwardDegree: 1,
+                EntryID: "",
+                IsEdit: "0",
+              })
+            }
+          >
+            Add Faculty
+          </button>
+        }
+      />
       <div className="flex-column-fluid">
-        <div className="card">
-          <div className="card-header border-0 pt-6">
-            <div className="card-title" />
-            <div className="card-toolbar">
-              <div
-                className="d-flex justify-content-end"
-                data-kt-customer-table-toolbar="base"
-              >
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateFaculty({
-                      ...createFaculty,
-                      FacultyName: "",
-                      FacultyCode: "",
-                      FacultyDean: "",
-                      FacultyDeputyDean: "",
-                      FacultyDean2: { value: '', label: '' },
-                      FacultyDeputyDean2: { value: '', label: '' },
-                      IsAcademic: 1,
-                      IsAwardDegree: 1,
-                      EntryID: "",
-                      IsEdit: "0",
-                    })
-                  }
-                >
-                  Add Faculty
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="card-body pt-0">
-            <Table data={datatable} />
+        <div className="card card-no-border">
+          <div className="card-body p-0">
+            <AGTable data={datatable} />
           </div>
         </div>
         <Modal title={createFaculty.EntryID === "" ? "Add Faculty" : "Edit Faculty"}>
