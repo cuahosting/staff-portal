@@ -1,0 +1,22 @@
+/* Hide elements not meant for printing */
+@media screen {
+.no-print {
+        display: none;
+    }
+}
+
+/* Print-specific styles */
+@media print {
+    /* Set page margins and ensure elements fit within print area */
+@page {
+        margin: 1cm;
+    }
+
+    /*    .margin-up {*/
+    /*    margin-top: -10px;*/
+    /*}*/
+
+    .no-print {
+        display: none;
+    }
+}

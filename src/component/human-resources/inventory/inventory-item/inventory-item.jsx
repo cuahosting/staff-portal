@@ -14,7 +14,7 @@ function InventoryItem(props) {
     let token = props.loginData[0].token
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState(false);
-    const initialValue = { item_id: '', item_name: '', manufacturer_id: '', manufacturer_id2: '', vendor_id: '', vendor_id2: '', category_id: '', category_id2: '', sub_category_id: '', sub_category_id2: '', SubmittedBy: '', UpdatedBy: '' }
+    const initialValue = { item_id: '', item_name: '', manufacturer_id: '', manufacturer_id2: '', vendor_id: '', vendor_id2: '', category_id: '', category_id2: '', sub_category_id: '', sub_category_id2: '', quantity_available: 0, SubmittedBy: '', UpdatedBy: '' }
     const [formData, setFormData] = useState(initialValue);
     const [manufacturer, setManufacturer] = useState({  manufacturer_name: "", manufacturer_id: "" })
     const [vendor, setVendor] = useState({  vendor_name: "", vendor_id: "" })

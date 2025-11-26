@@ -118,7 +118,7 @@ export default function InventoryPurchaseOrderUpdate(props) {
                             <th>Relevant Budget Item</th>
                             <th>Quantity</th>
                             <th>Unit Price</th>
-                            <th>Active</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -130,7 +130,11 @@ export default function InventoryPurchaseOrderUpdate(props) {
                                             <td>{index+1}</td>
                                             <td>{item.item_name}</td>
                                             <td>{item.budget_item_name}</td>
-                                            <td><input type="number" id={`quantity-${item.item_id}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="quantity form-control" name="quantity" min={1} defaultValue={item.quantity} style={{width: '80px', height: '30px'}}/></td>
+                                            <td>
+                                            <input type="number" hidden id={`budget-${item.budget_item_id}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="budget form-control" name="budget" min={1} defaultValue={item.budget_item_id} style={{width: '80px', height: '30px'}}/>
+                                                <input type="number" id={`quantity-${item.item_id}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="quantity form-control" name="quantity" min={1} defaultValue={item.quantity} style={{width: '80px', height: '30px'}}/></td>
+                                                <input type="number" hidden id={`budget-${item.budget_item_id}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="budget form-control" name="budget" min={1} defaultValue={item.budget_item_id} style={{width: '80px', height: '30px'}}/>
+                                                <input type="text" hidden id={`budget_name-${item.budget_item_name}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="budget_name form-control" name="budget_name" min={1} defaultValue={item.budget_item_name} style={{width: '80px', height: '30px'}}/>
                                             <td><input type="number" id={`amount-${item.item_id}`} item_id={item.item_id} request_id={item.request_id} quantity={item.quantity}  quantity_received={item.quantity_received} className="amount form-control" name="amount" min={1} defaultValue={item.amount} style={{width: '150px', height: '30px'}}/></td>
                                             <td>
                                                 <i className="fa fa-trash-alt text-danger" onClick={()=>handleDelete(item)}/>

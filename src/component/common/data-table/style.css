@@ -1,0 +1,78 @@
+/*.table{*/
+/*    display: block !important;*/
+/*    overflow-x: auto !important;*/
+/*    width: 100% !important;*/
+/*}*/
+#table {
+    border: 0.5px solid #000000;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 0.775rem;
+
+}
+
+#table tbody tr {
+    border: 0.5px solid #000000;
+}
+
+#table tbody td {
+    border: 0.5px solid #000000;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: left;
+    align-items: flex-start; /* Align items to the top */
+}
+
+.flex-item {
+    width: 350px;
+    /*height: 100px;*/
+    /*background-color: lightblue;*/
+    /*margin: 5px;*/
+    align-items: start;
+    justify-content: left;
+}
+
+.flex-item2 {
+    width: 600px;
+    /*height: 100px;*/
+    /*background-color: lightblue;*/
+    /*margin: 5px;*/
+    align-items: start;
+    justify-content: left;
+}
+
+.flex-item3 {
+    width: 400px;
+    /*height: 100px;*/
+    /*background-color: lightblue;*/
+    /*margin: 5px;*/
+    align-items: start;
+    justify-content: left;
+}
+
+
+.total-section {
+    display: flex;
+    justify-content: right;
+    align-items: flex-start; /* Align items to the top */
+}
+.hidden-on-print {
+    display: none !important; /* Hide the specified section on print */
+}
+@media print {
+    @page {
+        size: auto;
+    }
+    .hidden-on-print {
+        display: none !important; /* Hide the specified section on print */
+    }
+    .landscape-print-only {
+        page: landscape;
+    }
+}
+
+. mgb {
+    padding: 15px !important;
+}

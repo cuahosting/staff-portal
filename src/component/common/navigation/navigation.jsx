@@ -22,6 +22,7 @@ function Navigation(props) {
           (menuName) => typeof menuName === "string" && menuName.trim().length
         );
       const menu_list = [...new Set(cleanedMenuList)];
+     
       setMainMenu(menu_list.sort());
       const sub_menu_array = [];
       if (menu_list.length > 0) {
@@ -70,6 +71,7 @@ function Navigation(props) {
                 if (typeof menu !== "string") return null;
                 const safeMenu = menu.trim();
                 if (!safeMenu.length) return null;
+                console.log(menu)
                 let is_active =
                   (currentTab || "").toLowerCase() === safeMenu.toLowerCase()
                     ? "active"
