@@ -22,7 +22,7 @@ const StaffLeaveApply = (props) => {
 
     const editorRef = React.createRef();
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["SN", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Relief Staff", "Stage", "Status", "Begin", "End"];
+    const columns = ["SN", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage", "Action"];
     const [data, setData] = useState([]);
     const [StaffList, setStaffList] = useState([]);
     // Hardcode available leave types for now
@@ -80,14 +80,15 @@ const StaffLeaveApply = (props) => {
                         setDaysTakenByType(taken);
 
                         result.data.map((item, index) => {
+                            const staffLabel = item.ReliefStaffID ? `${item.ReliefStaffID}` : props.loginDetails[0].StaffID;
                             rows.push([
                                 index + 1,
+                                staffLabel,
                                 item.LeaveType,
                                 formatDateAndTime(item.StartDate, "date"),
                                 formatDateAndTime(item.EndDate, "date"),
                                 item.DaysTaken,
                                 formatDateAndTime(item.ResumptionDate, "date"),
-                                item.ReliefStaffID,
                                 <label className={item.ActionStage === 0 ? "badge badge-secondary"
                                     : item.ActionStage === 1 ? "badge badge-primary"
                                         : item.ActionStage === 2 ? "badge badge-info"
@@ -95,13 +96,6 @@ const StaffLeaveApply = (props) => {
                                                 : "badge badge-danger"}>
                                     {
                                         item.ActionStage === 0 ? "Pending Approval" : item.ActionStage === 1 ? "Approved" : item.ActionStage === 2 ? "Started" : item.ActionStage === 3 ? "Completed" : "Denied"
-                                    }
-                                </label>,
-                                <label className={item.ApplicationStatus === 0 ? "badge badge-secondary"
-                                    : item.ApplicationStatus === 1 ? "badge badge-success"
-                                        : "badge badge-danger"}>
-                                    {
-                                        item.ApplicationStatus === 0 ? "Pending" : item.ApplicationStatus === 1 ? "Approved" : "Denied"
                                     }
                                 </label>,
                                 (

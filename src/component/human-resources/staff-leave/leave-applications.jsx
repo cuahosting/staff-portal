@@ -24,7 +24,7 @@ const StaffLeaveApplications = (props) => {
 
     const editorRef = React.createRef();
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["SN", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage", "Status", "Action"];
+    const columns = ["SN", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage", "Action"];
     const [data, setData] = useState([]);
     let [leaveForm, setLeaveForm] = useState(false)
     const [leaveCategory, setLeaveCategory] = useState([]);
@@ -83,13 +83,6 @@ const StaffLeaveApplications = (props) => {
                                                 : "badge badge-danger"}>
                                     {
                                         item.ActionStage === 0 ? "Pending Approval" : item.ActionStage === 1 ? "Approved" : item.ActionStage === 2 ? "Started" : item.ActionStage === 3 ? "Completed" : "Denied"
-                                    }
-                                </label>,
-                                <label className={item.ApplicationStatus === 0 ? "badge badge-secondary"
-                                    : item.ApplicationStatus === 1 ? "badge badge-success"
-                                        : "badge badge-danger"}>
-                                    {
-                                        item.ApplicationStatus === 0 ? "Pending" : item.ApplicationStatus === 1 ? "Approved" : "Denied"
                                     }
                                 </label>,
                                 <button className="btn btn-sm btn-primary"
