@@ -1,8 +1,8 @@
-export const serverStatus = "Live";
+export const serverStatus = "Dev";
 
 export const serverLink =
     serverStatus === "Dev"
-        ? "http://localhost:4480/"
+        ? "http://localhost:8889/"
         // : "https://smartsourcingapi.com:5001/" //LUX MUNDI
         // : "https://gargatechapi.com.ng:5007/" // BABA AHMED
         //   : "https://gargatechapi.com.ng:5006/" // AL-ANSAR
