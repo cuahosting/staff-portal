@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import AGReportTable from "../../common/table/AGReportTable";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Select from "react-select";
@@ -119,8 +119,8 @@ const ByFaculty = (props) => {
         items={["Academics", "Module Running", "Module Running By Faculty"]}
       />
       <div className="flex-column-fluid">
-        <div className="card">
-          <div className="card-body pt-2">
+        <div className="card card-no-border">
+          <div className="card-body p-0">
             <form onSubmit={handleSubmit}>
               <div className="row fv-row">
                 <div className="col-md-9 fv-row">
@@ -148,7 +148,7 @@ const ByFaculty = (props) => {
               <div className="row">
                 <div className="col-md-12 mt-5">
                   {
-                    <ReportTable
+                    <AGReportTable
                       title={`Module Running By Faculty`}
                       columns={columns}
                       data={data}

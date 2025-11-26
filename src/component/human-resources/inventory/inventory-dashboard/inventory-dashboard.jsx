@@ -304,7 +304,7 @@ function InventoryDashboard(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Inventory Dashboard"} items={["Inventory", "Dashboard"]} />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
 
                     <div className="card-body pt-1 mt-2">
                         <Table data={datatable} />

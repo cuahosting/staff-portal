@@ -6,7 +6,7 @@ import axios from "axios";
 import {serverLink} from "../../../resources/url";
 import {toast} from "react-toastify";
 import "react-select2-wrapper/css/select2.css";
-import ReportTable from "../../common/table/report_table";
+import AgReportTable from "../../common/table/report_table";
 import { showConfirm } from "../../common/sweetalert/sweetalert";
 import Select2 from "react-select2-wrapper";
 import {formatDateAndTime} from "../../../resources/constants";
@@ -74,7 +74,7 @@ function ResultActivityTracker(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Result Activity Tracker"} items={["Assessment", "Exams Reports", "Result Activity Tracker"]}/>
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-md-12">
@@ -99,7 +99,7 @@ function ResultActivityTracker(props) {
                         {
                             tableData.length > 0 &&
                             <div className="row pt-5">
-                                <ReportTable title={"Result Activity Tracker"} columns={columns} data={tableData} height={'800px'} />
+                                <AgReportTable title={"Result Activity Tracker"} columns={columns} data={tableData} height={'800px'} />
                             </div>
                         }
 

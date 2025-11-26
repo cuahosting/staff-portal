@@ -15,7 +15,7 @@ function PermissionPermission(props) {
     const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
-    const column = ["S/N", "Menu Name", "Sub Menu Name", "Page Name", "Added By", "Added On", "Action"];
+    const column = ["S/N", "Sub Sub Menu", "Menu/Sub Menu", "Visibility", "Menu Link", "Updated By/Updated Date", "Edit", "Delete"];
     const [data, setData] = useState([]);
     const [createItem, setCreateItem] = useState({
         group_id: "",
@@ -69,17 +69,46 @@ function PermissionPermission(props) {
                     permissionList.map((item, index) => {
                         let inserted_by = '';
                         let inserted_date = '';
-                        let action = (<button className="btn btn-sm btn-success" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'add', '')} ><i className="fa fa-check" /></button>);
+                        let editBtn = (<button className="btn btn-sm btn-success" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'add', '')} ><i className="fa fa-check" /></button>);
+                        let deleteBtn = null;
 
                         const check = group_permission.filter(i => i.SubSubMenuID === item.SubSubMenuID);
 
                         if (check.length > 0) {
                             inserted_by = check[0].InsertedBy;
                             inserted_date = formatDateAndTime(check[0].InsertedDate, 'date');
-                            action = (<button className="btn btn-sm btn-danger" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'remove', check[0].EntryID)} ><i className="fa fa-trash" /></button>);
+                            editBtn = null;
+                            deleteBtn = (<button className="btn btn-sm btn-danger" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'remove', check[0].EntryID)} ><i className="fa fa-trash" /></button>);
                         }
-                        rows.push([(index+1), item.MenuName, item.SubMenuName, item.SubSubMenuName, inserted_by, inserted_date, action])
+
+                        const menuSubMenu = (
+                            <div>
+                                <div>{item.MenuName}</div>
+                                <div className="text-muted small">{item.SubMenuName}</div>
+                            </div>
+                        );
+
+                        const updatedByDate = (
+                            <div>
+                                <div>{inserted_by}</div>
+                                <div className="text-muted small">{inserted_date}</div>
+                            </div>
+                        );
+
+                        const visibility = item.Visibility === 1 ? "show" : "hide";
+
+                        rows.push([
+                            (index+1),
+                            item.SubSubMenuName,
+                            menuSubMenu,
+                            visibility,
+                            item.SubSubMenuLink || '-',
+                            updatedByDate,
+                            editBtn,
+                            deleteBtn
+                        ])
                     })
+
                     setData(rows);
                 })
                 .catch((err) => {
@@ -144,8 +173,8 @@ function PermissionPermission(props) {
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <div className="flex-column-fluid">
-                <div className="card">
-                    <div className="card-body pt-0 w-100">
+                <div className="card card-no-border">
+                    <div className="card-body p-0 w-100">
                         <div className="d-flex pb-5" data-kt-customer-table-toolbar="base">
                             <select id="select_group_name" onChange={handleGroupChange} value={createItem.group_id} className="form-select w-100">
                                 <option value="">Select Group</option>

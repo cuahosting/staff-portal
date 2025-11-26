@@ -5,8 +5,8 @@ import { connect } from "react-redux";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Loader from "../../../common/loader/loader";
 import { serverLink } from "../../../../resources/url";
-import ReportTable from "../../../common/table/report_table";
 import Select from "react-select";
+import AGReportTable from "../../../common/table/AGReportTable";
 
 function TimeTableByBlock(props) {
   const token = props.login[0].token;
@@ -152,11 +152,11 @@ function TimeTableByBlock(props) {
         items={["Academic", "Timetable", "Timetable By Block"]}
       />
       <div className="flex-column-fluid">
-        <div className="card">
+        <div className="card card-no-border">
           <div className="card-header border-0 pt-6">
             <div className="card-title" />
           </div>
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <div className="col-md-12">
               <div className="row">
                 <form onSubmit={handleSubmit}>
@@ -224,7 +224,7 @@ function TimeTableByBlock(props) {
               <div className="row">
                 <div className="col-md-12 mt-5">
                   {
-                    <ReportTable
+                    <AGReportTable
                       title={`Timetable By Block`}
                       columns={columns}
                       data={data}

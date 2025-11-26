@@ -1,0 +1,119 @@
+import React, {useEffect, useState} from "react";
+import {connect} from "react-redux";
+import Loader from "../../common/loader/loader";
+import PageHeader from "../../common/pageheader/pageheader";
+import axios from "axios";
+import {serverLink} from "../../../resources/url";
+import {toast} from "react-toastify";
+import "react-select2-wrapper/css/select2.css";
+import ReportTable from "../../common/table/report_table";
+import { showConfirm } from "../../common/sweetalert/sweetalert";
+import Select2 from "react-select2-wrapper";
+import {formatDateAndTime} from "../../../resources/constants";
+
+function ResultActivityTracker(props) {
+    const token = props.loginData.token;
+
+    const [isLoading,setIsLoading] = useState(true);
+    const [semesterList, setSemesterList] = useState([]);
+    const [semesterCode, setSemesterCode] = useState("");
+    const [resultList, setResultList] = useState([]);
+    const columns = ["S/N", "Student ID", "Module Code", "Module Title", "O CA", "N CA", "O Exam", "N Exam", "O Total", "N Total", "O Grade", "N Grade", "Action By", "Action Date"]
+    const [tableData, setTableData] = useState([]);
+
+    const getRecords = async () => {
+        await axios.get(`${serverLink}staff/timetable/timetable/semester`, token)
+            .then(res => {
+                const data = res.data;
+                let rows = [];
+                if (data.length > 0) {
+                    data.map(item => {
+                        rows.push({id: item.SemesterCode, text: item.SemesterName})
+                    })
+                }
+                setIsLoading(false)
+                setSemesterList(rows);
+            })
+            .catch(err => {
+                console.log("NETWORK ERROR")
+            });
+    }
+
+    const searchResult = async (e) => {
+        setSemesterCode(e.target.value);
+        setIsLoading(true);
+
+        await axios.get(`${serverLink}staff/assessment/exam/result/activity/log/${e.target.value}`, token)
+            .then(res => {
+                const data = res.data;
+                if (data.message === 'success') {
+                    let rows = [];
+                    if (data.data.length > 0) {
+                        data.data.map((row, index) => {
+                            rows.push([
+                                (index+1), row.StudentID, row.ModuleCode, row.ModuleTitle, row.PrevCAScore, row.CurCAScore, row.PrevExamScore, row.CurExamScore,
+                                row.PrevTotal, row.CurTotal, row.PrevGrade, row.CurGrade, row.ActionBy, formatDateAndTime(row.ActionDate, 'date_and_time')])
+                        })
+                    } else {
+                        toast.error("No result activity found for the selected semester")
+                    }
+                    setTableData(rows);
+                    setIsLoading(false)
+                } else {
+                    toast.error("Error fetching processing data")
+                }
+            })
+            .catch(err => {
+                toast.error("NETWORK ERROR")
+            })
+    }
+
+    useEffect(() => {getRecords()},[]);
+
+    return isLoading ? <Loader/> : (
+        <div className="d-flex flex-column flex-row-fluid">
+            <PageHeader title={"Result Activity Tracker"} items={["Assessment", "Exams Reports", "Result Activity Tracker"]}/>
+            <div className="flex-column-fluid">
+                <div className="card card-no-border">
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col-md-12">
+                                <div className="form-group">
+                                    <label htmlFor="SemesterCode">Select Semester</label>
+                                    <Select2
+                                        id="SemesterCode"
+                                        name="SemesterCode"
+                                        data={semesterList}
+                                        value={semesterCode}
+                                        className={"form-control"}
+                                        onSelect={searchResult}
+                                        options={{
+                                            placeholder: "Search Semester",
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {
+                            tableData.length > 0 &&
+                            <div className="row pt-5">
+                                <ReportTable title={"Result Activity Tracker"} columns={columns} data={tableData} height={'800px'} />
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const mapStateToProps = (state) => {
+    return {
+        loginData: state.LoginDetails[0],
+    };
+};
+
+export default connect(mapStateToProps, null)(ResultActivityTracker);

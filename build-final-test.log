@@ -1,0 +1,23 @@
+
+> euniversity_staff@0.1.0 build
+> react-scripts build
+
+(node:12488) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Failed to compile.
+
+[eslint] 
+src\component\academic\course\course.jsx
+  Line 160:1:  Expected an assignment or function call and instead saw an expression  no-unused-expressions
+  Line 160:1:  'n' is not defined                                                     no-undef
+
+Search for the keywords to learn more about each error.
+
+

@@ -6,7 +6,7 @@ import axios from "axios";
 import {serverLink} from "../../../../resources/url";
 import {toast} from "react-toastify";
 import 'react-circular-progressbar/dist/styles.css';
-import ReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/AGReportTable";
 import {shortCode} from "../../../../resources/constants";
 
 
@@ -212,8 +212,8 @@ function EvaluateGPA(props) {
             />
 
             <div className="flex-column-fluid">
-                <div className="card">
-                    <div className="card-body pt-0">
+                <div className="card card-no-border">
+                    <div className="card-body p-0">
                         <div className="col-md-12 fv-row pt-10">
                             <label className="required fs-6 fw-bold mb-2">
                                 Select Semester

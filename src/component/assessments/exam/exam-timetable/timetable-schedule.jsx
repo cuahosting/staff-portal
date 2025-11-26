@@ -7,7 +7,7 @@ import axios from "axios";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Modal from "../../../common/modal/modal";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/table";
 import Select from 'react-select';
 import { formatDate, formatDateAndTime, TimeTablePeriods } from "../../../../resources/constants";
 
@@ -335,7 +335,7 @@ function ExamTimeTableSchedule(props) {
                 items={["Assessment", "Exam Timetable", "Timetable"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
                         <div className="card-toolbar">
@@ -367,7 +367,7 @@ function ExamTimeTableSchedule(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <div className="col-md-12">
                             {semesterList.length > 0 &&
                                 <div className="col-md-12 mb-4 form-group">
@@ -386,7 +386,7 @@ function ExamTimeTableSchedule(props) {
                       {
                         showBody === true &&
                         <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                        <Table data={datatable} />
+                        <AGTable data={datatable} />
                     </div>
                       }
                     </div>

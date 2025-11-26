@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import Modal from "../../../common/modal/modal";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import Loader from "../../../common/loader/loader";
-import ReportTable from "../../../common/table/report_table";
+import AGReportTable from "../../../common/table/AGReportTable";
 import { connect } from "react-redux";
 
 function VenueSettings(props) {
@@ -72,7 +72,7 @@ function VenueSettings(props) {
                             Capacity: venue.Capacity,
                             action: (
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                     data-bs-toggle="modal"
                                     data-bs-target="#Venue"
                                     onClick={() =>
@@ -92,7 +92,7 @@ function VenueSettings(props) {
                                         }
                                     }
                                 >
-                                    <i className="fa fa-pen" />
+                                    <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                 </button>
                             ),
                         });
@@ -213,7 +213,7 @@ function VenueSettings(props) {
     ) : 
     (
         <>
-        <div className="card">
+        <div className="card card-no-border">
             <div className="card-header border-0 pt-6">
                 <div className="card-title" />
                 <div className="card-toolbar">
@@ -241,80 +241,107 @@ function VenueSettings(props) {
                     </div>
                 </div>
             </div>
-            <div className="card-body pt-0">
+            <div className="card-body p-0">
                 <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                    <Table data={datatable} />
+                    <AGTable data={datatable} />
                 </div>
             </div>
 
             <Modal title={"Manage Venue"} id={"Venue"} close={"Venue"}>
-                <div className="form-group">
-                    <label htmlFor="CampusID">Campus</label>
-                    <select id="CampusID" onChange={onEdit}
-                        value={createVenue.CampusID}
-                        className="form-select form-select-solid"
-                        data-kt-select2="true"
-                        data-placeholder="Select option"
-                        data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                        <option value={""}>-select Block-</option>
-                        {props.campusList.length > 0 ?
-                            <>
-                                {props.campusList.map((x, y) => {
-                                    return (
-                                        <option key={y} value={x.EntryID}>{x.CampusName}</option>
-                                    )
-                                })}
-                            </>
-                            :
-                            <></>}
-                    </select>
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="CampusID">
+                        Campus
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <select
+                            id="CampusID"
+                            onChange={onEdit}
+                            value={createVenue.CampusID}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            data-kt-select2="true"
+                            data-placeholder="Select option"
+                            data-dropdown-parent="#kt_menu_624456606a84b"
+                            data-allow-clear="true"
+                        >
+                            <option value="">-select Campus-</option>
+                            {props.campusList.length > 0 ?
+                                <>
+                                    {props.campusList.map((x, y) => {
+                                        return (
+                                            <option key={y} value={x.EntryID}>{x.CampusName}</option>
+                                        )
+                                    })}
+                                </>
+                                :
+                                <></>}
+                        </select>
+                    </div>
                 </div>
-                <br/>
-                <div className="form-group">
-                    <label htmlFor="Location">Block</label>
-                    <select id="BlockID" onChange={onEdit}
-                        value={createVenue.BlockID}
-                        className="form-select form-select-solid"
-                        data-kt-select2="true"
-                        data-placeholder="Select option"
-                        data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                        <option value={""}>-select Block-</option>
-                        {BlockList.length > 0 ?
-                            <>
-                                {BlockList.map((x, y) => {
-                                    return (
-                                        <option key={y} value={x.EntryID}>{x.BlockName}</option>
-                                    )
-                                })}
-                            </>
-                            :
-                            <></>}
-                    </select>
+
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="BlockID">
+                        Block
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <select
+                            id="BlockID"
+                            onChange={onEdit}
+                            value={createVenue.BlockID}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            data-kt-select2="true"
+                            data-placeholder="Select option"
+                            data-dropdown-parent="#kt_menu_624456606a84b"
+                            data-allow-clear="true"
+                        >
+                            <option value="">-select Block-</option>
+                            {BlockList.length > 0 ?
+                                <>
+                                    {BlockList.map((x, y) => {
+                                        return (
+                                            <option key={y} value={x.EntryID}>{x.BlockName}</option>
+                                        )
+                                    })}
+                                </>
+                                :
+                                <></>}
+                        </select>
+                    </div>
                 </div>
-                <br />
-                <div className="form-group">
-                    <label htmlFor="VenueName">Venue Name</label>
-                    <input
-                        type="text"
-                        id={"VenueName"}
-                        onChange={onEdit}
-                        value={createVenue.VenueName}
-                        className={"form-control"}
-                        placeholder={"Enter the Venue Name"}
-                    />
+
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="VenueName">
+                        Venue Name
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <input
+                            type="text"
+                            id="VenueName"
+                            onChange={onEdit}
+                            value={createVenue.VenueName}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            placeholder="Enter the Venue Name"
+                            autoComplete="off"
+                        />
+                    </div>
                 </div>
-                <br />
-                <div className="form-group">
-                    <label htmlFor="Capacity">Capacity</label>
-                    <input
-                        type="text"
-                        id={"Capacity"}
-                        onChange={onEdit}
-                        value={createVenue.Capacity}
-                        className={"form-control"}
-                        placeholder={"Enter the Venue Capacity"}
-                    />
+
+                <div className="fv-row mb-6 enhanced-form-group">
+                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="Capacity">
+                        Capacity
+                    </label>
+                    <div className="enhanced-input-wrapper">
+                        <input
+                            type="text"
+                            id="Capacity"
+                            onChange={onEdit}
+                            value={createVenue.Capacity}
+                            className="form-control form-control-lg form-control-solid enhanced-input"
+                            placeholder="Enter the Venue Capacity"
+                            autoComplete="off"
+                        />
+                    </div>
                 </div>
+
                 <div className="form-group pt-2">
                     <button onClick={onSubmit} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading}>
                     <span className="indicator-label">Submit</span>

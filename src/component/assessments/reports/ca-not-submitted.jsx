@@ -5,7 +5,7 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/table";
 import Select from 'react-select';
 
 function CANotSubmitted(props) {
@@ -145,7 +145,7 @@ function CANotSubmitted(props) {
                 items={["Assessment", "Report", "CA Not Submitted"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-body pt-2">
                         <div className="col-md-12">
                             {semesterList.length > 0 &&
@@ -165,7 +165,7 @@ function CANotSubmitted(props) {
                         {
                             showBody === true &&
                             <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                                <Table data={datatable} />
+                                <AGTable data={datatable} />
                             </div>
                         }
                     </div>

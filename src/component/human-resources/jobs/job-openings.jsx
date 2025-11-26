@@ -373,7 +373,7 @@ function JobOpenings(props)
                                 </div>
                             </div>
                         </div>
-                        <div className="card-body pt-0">
+                        <div className="card-body p-0">
                             <div className="col-md-12" style={{ overflowX: 'auto' }}>
                                 <ReportTable columns={columns} data={data} title={"Job Openings"} />
                             </div>

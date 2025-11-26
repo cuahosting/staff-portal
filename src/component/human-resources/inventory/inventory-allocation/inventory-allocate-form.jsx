@@ -79,7 +79,7 @@ export default function InventoryAllocateForm(props) {
                                 </div>
                             </div>
                             <hr/>
-                            <div className="card-body pt-0">
+                            <div className="card-body p-0">
                                 <div className="d-flex flex-column gap-10">
 
                                     <div className="table-responsive-md">
@@ -187,7 +187,7 @@ export default function InventoryAllocateForm(props) {
                                     <h2>Select Staff</h2>
                                 </div>
                             </div>
-                            <div className="card-body pt-0">
+                            <div className="card-body p-0">
                                 <div className="d-flex flex-column gap-10">
                                     <div className="col-md-12 pb-3">
                                         <label htmlFor="employee_id">Select Staff</label>

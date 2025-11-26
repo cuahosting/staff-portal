@@ -10,7 +10,7 @@ import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import LinearProgressWithLabel from "../../../common/linear-progress-bar/linear-progress-bar";
 import Box from "@mui/material/Box";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/table";
 import Select from 'react-select';
 import { formatDateAndTime } from "../../../../resources/constants";
 import { useReactToPrint } from 'react-to-print';
@@ -519,7 +519,7 @@ function ExamBarcode(props) {
                                                 </Box>
                                                 : <></>
                                         }
-                                        <Table data={generalDatatable}/>
+                                        <AGTable data={generalDatatable}/>
                                     </div>
                                     <div className="tab-pane fade" id="module" role="tabpanel">
                                         <div className={"row"}>
@@ -565,7 +565,7 @@ function ExamBarcode(props) {
                                                 </Box>
                                                 : <></>
                                         }
-                                        <Table data={generalDatatable}/>
+                                        <AGTable data={generalDatatable}/>
                                     </div>
                                     <div className="tab-pane fade" id="student" role="tabpanel">
                                         <div className={"row"}>
@@ -624,7 +624,7 @@ function ExamBarcode(props) {
                                                 </Box>
                                                 : <></>
                                         }
-                                        <Table data={generalDatatable}/>
+                                        <AGTable data={generalDatatable}/>
                                     </div>
                                 </div>
                             </div>

@@ -351,8 +351,8 @@ function PostExamResultByLecturer(props) {
             />
 
             <div className="flex-column-fluid">
-                <div className="card">
-                    <div className="card-body pt-0">
+                <div className="card card-no-border">
+                    <div className="card-body p-0">
                         <div className="col-md-12">
                             <div className="row pt-5">
                                 <div className="col-md-3">

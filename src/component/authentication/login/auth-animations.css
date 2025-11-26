@@ -1,0 +1,419 @@
+/* Fade in animation for the entire page */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card entrance animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo pulse animation */
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Gradient background animation */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Auth page container */
+.auth-page {
+  animation: fadeIn 0.6s ease-out;
+  min-height: 100vh;
+}
+
+/* Animated background */
+.auth-background {
+  background: linear-gradient(-45deg, #f8f9fa, #e3f2fd, #f3e5f5, #fff3e0);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+/* Auth card styling and animation */
+.auth-card {
+  animation: slideUp 0.8s ease-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #ffffff !important;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(10px);
+}
+
+.auth-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12) !important;
+  border-color: #d0d0d0;
+}
+
+/* Logo animation */
+.auth-logo {
+  animation: logoPulse 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+.auth-logo:hover {
+  animation: none;
+  transform: scale(1.1);
+}
+
+/* Form input styling and animations */
+.auth-input {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid #e8e8e8 !important;
+  background-color: #f8f9fa !important;
+  padding: 0.875rem 1.25rem !important;
+  font-size: 1rem !important;
+  border-radius: 0.5rem !important;
+  outline: none;
+  position: relative;
+}
+
+.auth-input::placeholder {
+  color: #a0a0a0;
+  font-size: 0.95rem;
+  transition: opacity 0.3s ease;
+}
+
+.auth-input:hover:not(:focus) {
+  border-color: #d0d0d0 !important;
+  background-color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.auth-input:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.15);
+  border-color: #0d6efd !important;
+  background-color: #ffffff !important;
+}
+
+.auth-input:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* Invalid input state */
+.auth-input.is-invalid {
+  border-color: #dc3545 !important;
+  background-color: #fff5f5 !important;
+}
+
+.auth-input.is-invalid:focus {
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.15);
+}
+
+/* Valid input state */
+.auth-input.is-valid {
+  border-color: #28a745 !important;
+  background-color: #f0fff4 !important;
+}
+
+.auth-input.is-valid:focus {
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.15);
+}
+
+/* Button styling and animations */
+.auth-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.95rem !important;
+  padding: 0.875rem 2rem !important;
+  border-radius: 0.5rem !important;
+  border: none !important;
+  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%) !important;
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+}
+
+.auth-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.auth-button:hover::before {
+  width: 350px;
+  height: 350px;
+}
+
+.auth-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(13, 110, 253, 0.4);
+  background: linear-gradient(135deg, #0b5ed7 0%, #0aa2c0 100%) !important;
+}
+
+.auth-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Button loading state */
+.auth-button .indicator-label,
+.auth-button .indicator-progress {
+  position: relative;
+  z-index: 1;
+}
+
+/* Google button custom styling */
+.google-login-wrapper {
+  animation: fadeIn 1s ease-out 0.3s both;
+}
+
+/* Link styling and hover animation */
+.auth-link {
+  position: relative;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+  color: #0d6efd !important;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.auth-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+
+.auth-link:hover::after {
+  width: 100%;
+}
+
+.auth-link:hover {
+  color: #0b5ed7 !important;
+  transform: translateX(3px);
+}
+
+.auth-link:active {
+  transform: translateX(1px);
+}
+
+/* Separator styling and animation */
+.auth-separator {
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.8s ease-out 0.2s both;
+  margin: 1.5rem 0 !important;
+}
+
+.auth-separator span {
+  background: #ffffff;
+  padding: 0 1rem;
+  color: #6c757d !important;
+  font-size: 0.875rem !important;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-separator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #dee2e6, transparent);
+  transform: translateY(-50%);
+}
+
+/* Title styling and animation */
+.auth-title {
+  animation: fadeIn 0.8s ease-out 0.1s both;
+  font-weight: 700 !important;
+  font-size: 1.75rem !important;
+  color: #1a1a1a !important;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+/* Subtitle/Description styling */
+.auth-description {
+  animation: fadeIn 0.8s ease-out 0.15s both;
+  color: #6c757d !important;
+  font-size: 1rem !important;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+/* Label styling and animation */
+.auth-label {
+  transition: all 0.3s ease;
+  display: inline-block;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  color: #2c3e50 !important;
+  margin-bottom: 0.5rem !important;
+  letter-spacing: 0.3px;
+}
+
+.auth-form-group:focus-within .auth-label {
+  color: #0d6efd !important;
+  transform: translateX(3px);
+}
+
+/* Form group styling and animation */
+.auth-form-group {
+  animation: fadeIn 0.6s ease-out both;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.auth-form-group:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.auth-form-group:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.auth-form-group:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.auth-form-group:nth-child(4) {
+  animation-delay: 0.5s;
+}
+
+/* Input wrapper for icon support */
+.auth-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.auth-input-wrapper .auth-input {
+  width: 100%;
+}
+
+/* Input focus indicator */
+.auth-input-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+}
+
+.auth-form-group:focus-within .auth-input-wrapper::after {
+  width: 100%;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Floating animation for decorative elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.auth-floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Responsive animations - reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .auth-card {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .auth-card:hover {
+    transform: none;
+  }
+}

@@ -4,7 +4,7 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import AgReportTable from "../../common/table/report_table";
 import { toast } from "react-toastify";
 import Select from "react-select";
 
@@ -132,7 +132,7 @@ function AcademicResultByFaculty(props) {
                     {
                         <div className="mt-4">
                             {data.length > 0 &&
-                            <ReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY FACULTY"} />
+                            <AgReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY FACULTY"} />
                             }
                         </div>
                     }

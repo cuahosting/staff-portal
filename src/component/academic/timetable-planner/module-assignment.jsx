@@ -9,7 +9,7 @@ import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import Select from 'react-select'
 import { toast } from "react-toastify";
-import ReportTable from "../../common/table/report_table";
+import AGReportTable from "../../common/table/AGReportTable";
 
 const ModuleAssignment = (props) => {
     const token = props.loginDetails[0].token;
@@ -188,7 +188,7 @@ const ModuleAssignment = (props) => {
 
                                 </label>,
                                 (<button className="btn btns-m btn-danger" onClick={() => { removeCourse(item.EntryID) }}>
-                                    <i className="fa fa-trash" />
+                                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                                 </button>)
                             ])
                         })
@@ -215,72 +215,117 @@ const ModuleAssignment = (props) => {
                 items={["Academics", "Timetable Planner", "Module Assignment"]}
             />
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="row col-md-12 m-3 p-3">
                         <div className="col-md-3">
-                            <label htmlFor="Level" className="required fs-6 fw-bold mb-2">Module Level</label>
-                            <select className="form-select" id="Level" data-placeholder="Select option"
-                                onChange={onEdit} >
-                                <option value="">Select option</option>
-                                <option value="100">100 Level</option>
-                                <option value="200">200 Level</option>
-                                <option value="300">300 Level</option>
-                                <option value="400">400 Level</option>
-                                <option value="500">500 Level</option>
-                                <option value="600">600 Level</option>
-                                <option value="700">700 Level</option>
-                                <option value="800">800 Level</option>
-                                <option value="900">900 Level</option>
-                            </select>
+                            <div className="fv-row mb-6 enhanced-form-group">
+                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="Level">
+                                    Module Level
+                                </label>
+                                <div className="enhanced-input-wrapper">
+                                    <select
+                                        className="form-control form-control-lg form-control-solid enhanced-input"
+                                        id="Level"
+                                        data-placeholder="Select option"
+                                        onChange={onEdit}
+                                    >
+                                        <option value="">Select option</option>
+                                        <option value="100">100 Level</option>
+                                        <option value="200">200 Level</option>
+                                        <option value="300">300 Level</option>
+                                        <option value="400">400 Level</option>
+                                        <option value="500">500 Level</option>
+                                        <option value="600">600 Level</option>
+                                        <option value="700">700 Level</option>
+                                        <option value="800">800 Level</option>
+                                        <option value="900">900 Level</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div className="col-md-3">
-                            <label className="required fs-6 fw-bold mb-2" htmlFor="ModuleSemester">Module Semester</label>
-                            <select className="form-select" data-placeholder="Select Semester" id="ModuleSemester" onChange={onEdit} >
-                                <option value="">Select option</option>
-                                <option value="First">First Semester</option>
-                                <option value="Second">Second Semester</option>
-                            </select>
+                            <div className="fv-row mb-6 enhanced-form-group">
+                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="ModuleSemester">
+                                    Module Semester
+                                </label>
+                                <div className="enhanced-input-wrapper">
+                                    <select
+                                        className="form-control form-control-lg form-control-solid enhanced-input"
+                                        data-placeholder="Select Semester"
+                                        id="ModuleSemester"
+                                        onChange={onEdit}
+                                    >
+                                        <option value="">Select option</option>
+                                        <option value="First">First Semester</option>
+                                        <option value="Second">Second Semester</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div className="col-md-3">
-                            <label className="required fs-6 fw-bold mb-2" htmlFor="ModuleType">
-                                Module Type
-                            </label>
-                            <select className="form-select" data-placeholder="Select Semester" id="ModuleType" onChange={onEdit} >
-                                <option value="">Select option</option>
-                                <option value="Lecture">Lecture</option>
-                                <option value="Interactive">Interactive</option>
-                                <option value="Class">Class</option>
-                                <option value="Workshop">Workshop</option>
-                                <option value="Online">Online</option>
-                                <option value="Seminar">Seminar</option>
-                                <option value="Core">Core</option>
-                            </select>
+                            <div className="fv-row mb-6 enhanced-form-group">
+                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="ModuleType">
+                                    Module Type
+                                </label>
+                                <div className="enhanced-input-wrapper">
+                                    <select
+                                        className="form-control form-control-lg form-control-solid enhanced-input"
+                                        data-placeholder="Select Semester"
+                                        id="ModuleType"
+                                        onChange={onEdit}
+                                    >
+                                        <option value="">Select option</option>
+                                        <option value="Lecture">Lecture</option>
+                                        <option value="Interactive">Interactive</option>
+                                        <option value="Class">Class</option>
+                                        <option value="Workshop">Workshop</option>
+                                        <option value="Online">Online</option>
+                                        <option value="Seminar">Seminar</option>
+                                        <option value="Core">Core</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div className="col-md-3">
-                            <label className="required fs-6 fw-bold mb-2" htmlFor="SchoolSemester">School Semester</label>
-                            <select className="form-select" data-placeholder="Select Semester" id="SchoolSemester" onChange={onEdit} >
-                                <option value="">Select option</option>
-                                {
-                                    semesterList.length > 0 &&
-                                    semesterList.map((x, y) => {
-                                        return (
-                                            <option value={x.SemesterCode} key={y}>{x.SemesterName} -- {x.SemesterCode}</option>
-                                        )
-                                    })
-                                }
-                            </select>
+                            <div className="fv-row mb-6 enhanced-form-group">
+                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="SchoolSemester">
+                                    School Semester
+                                </label>
+                                <div className="enhanced-input-wrapper">
+                                    <select
+                                        className="form-control form-control-lg form-control-solid enhanced-input"
+                                        data-placeholder="Select Semester"
+                                        id="SchoolSemester"
+                                        onChange={onEdit}
+                                    >
+                                        <option value="">Select option</option>
+                                        {
+                                            semesterList.length > 0 &&
+                                            semesterList.map((x, y) => {
+                                                return (
+                                                    <option value={x.SemesterCode} key={y}>{x.SemesterName} -- {x.SemesterCode}</option>
+                                                )
+                                            })
+                                        }
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="card-body pt-5">
-                        <label htmlFor="CourseCode" className="required fs-6 fw-bold mb-2">Course</label>
-                        <div className="col-md-12">
-                            <Select
-                            isDisabled={assign.Level === "" || assign.ModuleSemester === "" || assign.SchoolSemester === "" || assign.ModuleType === "" ? true : false}
-                                options={courses}
-                                onChange={onCourseChange}
-                                value={assign.Course}
-                            />
+                    <div className="card-body p-0">
+                        <div className="fv-row mb-6 enhanced-form-group">
+                            <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="CourseCode">
+                                Course
+                            </label>
+                            <div className="col-md-12">
+                                <Select
+                                isDisabled={assign.Level === "" || assign.ModuleSemester === "" || assign.SchoolSemester === "" || assign.ModuleType === "" ? true : false}
+                                    options={courses}
+                                    onChange={onCourseChange}
+                                    value={assign.Course}
+                                />
+                            </div>
                         </div>
 
                         {
@@ -313,7 +358,7 @@ const ModuleAssignment = (props) => {
                         <h2 className="mt-2 mb-2">
                             {assign.Level} Level {assign.ModuleSemester} {assign.CourseName} Modules
                         </h2>
-                        <ReportTable columns={columns} data={assignedModulesData} /></>
+                        <AGReportTable columns={columns} data={assignedModulesData} /></>
                 }
             </div>
         </div>

@@ -115,7 +115,7 @@ function AddStudentPortal(props) {
       />
       <div className="flex-column-fluid">
         <div className="card">
-          <div className="card-body pt-0">
+          <div className="card-body p-0">
             <form onSubmit={handleSubmit(addStudentPortalClick)}>
               <div className="form-group pt-5">
                 <label htmlFor="roomNumber">Student ID</label>

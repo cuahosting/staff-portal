@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import {serverLink} from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -138,7 +138,7 @@ function Modules(props) {
                             action: (
                                 <>
                                     <button
-                                        className="btn btn-sm btn-primary"
+                                        className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
                                         data-bs-toggle="modal"
                                         data-bs-target="#kt_modal_general"
                                         onClick={() => {
@@ -158,10 +158,10 @@ function Modules(props) {
                                             });
                                         }}
                                     >
-                                        <i className="fa fa-pen"/>
+                                        <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                     </button>
                                     <button
-                                        className="btn btn-sm btn-danger"
+                                        className="btn btn-link p-0 text-danger" title="Delete"
                                         onClick={() => {
                                             swal({
                                                 title: "Are you sure?",
@@ -176,7 +176,7 @@ function Modules(props) {
                                             });
                                         }}
                                     >
-                                        <i className="fa fa-trash"/>
+                                        <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
                                     </button>
                                 </>
                             ),
@@ -445,6 +445,33 @@ function Modules(props) {
             <PageHeader
                 title={"Modules"}
                 items={["Academics", "Modules", "Manage modules"]}
+                buttons={
+                    <>
+                        <button type="button" className="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#bulk_modal">Bulk Upload
+                        </button>
+                        <button type="button" className="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() => setcreateModule({
+                                    ...createModule,
+                                    EntryID: "",
+                                    ModuleCode: "",
+                                    ModuleName: "",
+                                    ModuleType: "",
+                                    CreditUnit: "",
+                                    CAPerCon: "",
+                                    ExamPerCon: "",
+                                    InsertedBy: props.LoginDetails[0].StaffID,
+                                })}>Add a Module
+                        </button>
+                        <button type="button" className="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general_module_code" onClick={() => {
+                            setUpdateModuleCode(initializeUpdateModuleCode)
+                        }}>
+                            Update Module Code
+                        </button>
+                    </>
+                }
             />
 
             <div
@@ -485,42 +512,10 @@ function Modules(props) {
                 >
                     <div className="tab-pane fade active show" id="kt_tabs_tab_1">
                         <div className="flex-column-fluid">
-                            <div className="card">
-                                <div className="card-header border-0 pt-6">
-                                    <div className="card-title"/>
-                                    <div className="card-toolbar">
-                                        <div className="d-flex justify-content-end"
-                                             data-kt-customer-table-toolbar="base">
-                                            <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#bulk_modal" style={{marginRight: "5px"}}>Bulk
-                                                Upload
-                                            </button>
-                                            <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#kt_modal_general" style={{marginRight: "5px"}}
-                                                    onClick={() => setcreateModule({
-                                                        ...createModule,
-                                                        EntryID: "",
-                                                        ModuleCode: "",
-                                                        ModuleName: "",
-                                                        ModuleType: "",
-                                                        CreditUnit: "",
-                                                        CAPerCon: "",
-                                                        ExamPerCon: "",
-                                                        InsertedBy: props.LoginDetails[0].StaffID,
-                                                    })}>Add a Module
-                                            </button>
-                                            <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                                    data-bs-target="#kt_modal_general_module_code" onClick={() => {
-                                                setUpdateModuleCode(initializeUpdateModuleCode)
-                                            }}>
-                                                Update Module Code
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="card-body pt-0">
+                            <div className="card card-no-border">
+                                <div className="card-body p-0">
                                     <div className="col-md-12" style={{overflowX: "auto"}}>
-                                        <Table data={datatable}/>
+                                        <AGTable data={datatable}/>
                                     </div>
                                 </div>
                             </div>
@@ -543,10 +538,22 @@ function Modules(props) {
                                             Click here to download the bulk upload template
                                         </a>
                                     </div>
-                                    <div className="form-group">
-                                        <label htmlFor="Designation">File </label>
-                                        <input type="file" accept=".csv" id="file" name="file" className="form-control"
-                                               placeholder="File Name" required onChange={onEditFile}/>
+                                    <div className="fv-row mb-6 enhanced-form-group">
+                                        <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="file">
+                                            File
+                                        </label>
+                                        <div className="enhanced-input-wrapper">
+                                            <input
+                                                type="file"
+                                                accept=".csv"
+                                                id="file"
+                                                name="file"
+                                                className="form-control form-control-lg form-control-solid enhanced-input"
+                                                placeholder="File Name"
+                                                required
+                                                onChange={onEditFile}
+                                            />
+                                        </div>
                                         <span className="badge bg-danger mt-1">
                       Only .csv is allowed
                     </span>
@@ -569,27 +576,47 @@ function Modules(props) {
                                 <div className="row">
 
                                     <div className="col-md-6 mb-3">
-                                        <div className="form-group">
-                                            <label htmlFor="old_module_code"> Enter Old Module Code</label>
-                                            <input type="text" className="form-control" id="old_module_code"
-                                                   value={updateModuleCode.old_module_code} onChange={(e) => {
-                                                setUpdateModuleCode({
-                                                    ...updateModuleCode,
-                                                    old_module_code: e.target.value
-                                                })
-                                            }}/>
+                                        <div className="fv-row mb-6 enhanced-form-group">
+                                            <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="old_module_code">
+                                                Enter Old Module Code
+                                            </label>
+                                            <div className="enhanced-input-wrapper">
+                                                <input
+                                                    type="text"
+                                                    className="form-control form-control-lg form-control-solid enhanced-input"
+                                                    id="old_module_code"
+                                                    value={updateModuleCode.old_module_code}
+                                                    onChange={(e) => {
+                                                        setUpdateModuleCode({
+                                                            ...updateModuleCode,
+                                                            old_module_code: e.target.value
+                                                        })
+                                                    }}
+                                                    autoComplete="off"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <div className="form-group">
-                                            <label htmlFor="new_module_code"> Enter New Module Code</label>
-                                            <input type="text" className="form-control" id="new_module_code"
-                                                   value={updateModuleCode.new_module_code} onChange={(e) => {
-                                                setUpdateModuleCode({
-                                                    ...updateModuleCode,
-                                                    new_module_code: e.target.value
-                                                })
-                                            }}/>
+                                        <div className="fv-row mb-6 enhanced-form-group">
+                                            <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="new_module_code">
+                                                Enter New Module Code
+                                            </label>
+                                            <div className="enhanced-input-wrapper">
+                                                <input
+                                                    type="text"
+                                                    className="form-control form-control-lg form-control-solid enhanced-input"
+                                                    id="new_module_code"
+                                                    value={updateModuleCode.new_module_code}
+                                                    onChange={(e) => {
+                                                        setUpdateModuleCode({
+                                                            ...updateModuleCode,
+                                                            new_module_code: e.target.value
+                                                        })
+                                                    }}
+                                                    autoComplete="off"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                     <button className="btn btn-primary w-100"

@@ -297,14 +297,14 @@ const StaffLeaveApplications = (props) => {
             />
 
             <div className="flex-column-fluid">
-                <div className="card">
+                <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" ><h2>Leave Application</h2></div>
                     </div>
 
 
 
-                    <div className="card-body pt-0">
+                    <div className="card-body p-0">
                         <div className="col-md-12" style={{ overflowX: 'auto' }}>
                             <ReportTable data={data} columns={columns} height="700px" />
                         </div>

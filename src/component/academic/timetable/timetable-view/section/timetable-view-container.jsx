@@ -4,7 +4,7 @@ import TimeTableGridItem from "../../timetable/timetable-view/timetable-grid-ite
 function TimetableViewContainer(props) {
     const data = props.data;
     return (
-        <div className="card mb-5 mt-5">
+        <div className="card card-no-border mb-5 mt-5">
             <div className="table-responsive">
                 <div className="p-3">
                     <h2>{props.sub_title}</h2>
