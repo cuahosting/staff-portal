@@ -1,0 +1,22 @@
+/*.table{*/
+/*    display: block !important;*/
+/*    overflow-x: auto !important;*/
+/*    width: 100% !important;*/
+/*}*/
+
+#table {
+    border: 1px solid #cccccc;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 0.775rem;
+
+}
+
+#table tbody tr {
+    border: 1px solid #eeeeee;
+}
+
+#table tbody td {
+    border: 1px solid #eeeeee;
+}
+

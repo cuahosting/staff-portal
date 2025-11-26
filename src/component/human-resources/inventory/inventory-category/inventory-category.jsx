@@ -360,7 +360,7 @@ function InventoryCategory(props) {
                 <Modal title={"Add Category"}>
                     <InventoryCategoryForm value = {formData}  isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
                 </Modal>
-                <Modal title={"Other Fee Form"} id="sub_cat">
+                <Modal title={"Sub Category Form"} id="sub_cat">
                     <InventorySubCategoryForm value = {formData2} categoryList={categoryList}  isFormLoading={isFormLoading} onChange={handleFormValueChange2} onSubmit={onFormSubmit2} />
                 </Modal>
             </div>

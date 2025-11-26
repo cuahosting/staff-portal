@@ -432,6 +432,27 @@ export const EmailTemplates = (type, interview) =>
   }
 };
 
+export const moneyFormat = (amount) => {
+  // Check if the provided amount is a number
+  if (typeof amount !== 'number') {
+    return 'Invalid input';
+  }
+
+  // Format the number with two decimal places and commas as thousand separators
+  return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+};
+
+export const generate_token = (length) => {
+  //edit the token allowed characters
+  let a = "1234567890".split("");
+  let b = [];
+  for (let i = 0; i < length; i++) {
+    let j = (Math.random() * (a.length - 1)).toFixed(0);
+    b[i] = a[j];
+  }
+  return b.join("");
+}
+
 export const InventoryEmailTemplates = (type, data) =>
 {
   let total = 0;

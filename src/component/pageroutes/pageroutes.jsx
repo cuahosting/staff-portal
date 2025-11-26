@@ -243,6 +243,12 @@ import AcademicResultByUniversity from "../assessments/academic-result/academic-
 import StudentResultSlip from "../assessments/reports/student-result-slip";
 import ExamBulkUpload from "../assessments/exam/post-exam-lecturer/exam-bulk-upload";
 import ExamResultBulkUpload from "../assessments/exam/post-exam-lecturer/exam-bulk-upload";
+import BankReport from "../human-resources/salary-report/bank-report";
+import PaySlip from "../human-resources/salary-report/pay-slip";
+import PensionScheduleReport from "../human-resources/salary-report/pension-report";
+import SalarySummaryReport from "../human-resources/salary-report/salary-summary-report";
+import NSITFReport from "../human-resources/salary-report/nsitf-report";
+import ITFReport from "../human-resources/salary-report/itf-report";
 
 export default function PageRoutes()
 {
@@ -1166,6 +1172,14 @@ export default function PageRoutes()
                 <Route exact path={"/human-resources/inventory/generate-purchase-order"} element={<InventoryPurchaseOrder />} />
                 <Route exact path={"/human-resources/inventory/finance"} element={<AccountPayable />} />
                 {/*end::Inventory*/}
+
+
+                <Route path="/human-resources/salary-report/bank-report" element={<BankReport />}/>
+                <Route path="/human-resources/salary-report/pay-slip" element={<PaySlip />}/>
+                <Route path="/human-resources/salary-report/pension-report" element={<PensionScheduleReport />}/>
+                <Route path="/human-resources/salary-report/salary-summary" element={<SalarySummaryReport />}/>
+                <Route path="/human-resources/salary-report/nsitf-report" element={<NSITFReport />}/>
+                <Route path="/human-resources/salary-report/itf-report" element={<ITFReport />}/>
 
 
                 <Route path="*" element={<Dashboard />} />

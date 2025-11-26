@@ -436,6 +436,9 @@ function InventoryPurchaseOrder(props)
         let amount_paid = document.getElementById("amount_paid").value;
         let input = document.getElementsByClassName("amount");
         let qtr_input = document.getElementsByClassName("quantity");
+        let budget_input = document.getElementsByClassName("budget");
+        let budget_name_input = document.getElementsByClassName("budget_name");
+
         for (let i = 0; i < input.length; i++)
         {
             if (input[i].value.toString() === "")
@@ -448,14 +451,33 @@ function InventoryPurchaseOrder(props)
             let request_id = +input[i].getAttribute("request_id");
             let item_id = +input[i].getAttribute("item_id");
             let quantity_received = +input[i].getAttribute("quantity_received");
+            
             let quantity2 = +qtr_input[i].value;
             let amount_paid = parseFloat(input[i].value);
+            let budget_item_id = parseFloat(budget_input[i].value);
+            let budget_item_name = budget_name_input[i].value;
+
             let total_amount = amount_paid * quantity2;
             total_amount_paid += +total_amount;
+            const budget_item_amount = budgetItems.filter(e=> e.EntryID === budget_item_id);
+            console.log(budget_item_amount)
+
+            if (!budget_item_amount.length || typeof budget_item_amount[0].Total !== "number") {
+                showAlert("Error", `Budget item "${budget_item_name}" not found or has invalid amount`, "error");
+                return false;
+            }
+
+            if (amount_paid > budget_item_amount[0].Total) {
+                showAlert(
+                    "Empty Field",
+                    `Item amount is greater than ${budget_item_name} available amount ${currencyConverter(budget_item_amount[0].Balance)}`,
+                    "error"
+                );
+                return false;
+            }
 
             // let payment_status = balance < 1 ? "paid" : "unpaid";
-            send_data.push({ amount: amount_paid, total: total_amount, request_id: request_id, quantity: quantity2, quantity_received: quantity_received, item_id: item_id })
-        }
+            send_data.push({ amount: amount_paid, total: total_amount, request_id: request_id, quantity: quantity2, quantity_received: quantity_received, item_id: item_id , budget_item_id: budget_item_id , budget_item_name: budget_item_name })        }
         let balance = total_amount_paid - amount_paid;
         let sendData = {
             ...selectedOrder,

@@ -19,6 +19,7 @@ function Navigation(props) {
       const menu_list = [
         ...new Set(props.permissionData.map((item) => item.MenuName)),
       ];
+      console.log(menu_list)
       setMainMenu(menu_list.sort());
       let sub_menu_array = [];
       if (menu_list.length > 0) {
@@ -61,6 +62,7 @@ function Navigation(props) {
           <ul className="nav nav-stretch flex-nowrap w-100 h-100">
             {mainMenu.length > 0 &&
               mainMenu.map((menu, index) => {
+                console.log(menu)
                 let is_active =
                   currentTab.toLowerCase() === menu.toLowerCase()
                     ? "active"
