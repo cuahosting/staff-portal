@@ -1,4 +1,5 @@
-export const serverStatus = "Dev";
+// Point to the deployed backend; use "Dev" only when running the API locally.
+export const serverStatus = "Prod";
 
 export const serverLink =
     serverStatus === "Dev"
