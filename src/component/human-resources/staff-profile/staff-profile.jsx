@@ -15,8 +15,8 @@ import { Button } from "@mui/material";
 function StaffProfile(props)
 {
   const token = props.loginData[0].token;
-  const canEditSocial = isAdmin || props.loginData[0]?.StaffID === staffId;
   const isAdmin = String(props.loginData?.[0]?.IsAdmin || "0") === "1";
+  const canEditSocial = isAdmin || props.loginData[0]?.StaffID === staffId;
 
   const [isLoading, setIsLoading] = useState(true);
   const { staffId } = useParams();

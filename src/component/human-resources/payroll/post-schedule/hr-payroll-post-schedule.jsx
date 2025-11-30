@@ -107,6 +107,65 @@ function HrPayrollPostSchedule(props) {
             });
     };
 
+
+    const calcSalaryPayee = (annualSalary) => {
+        let tax = 0;
+        let remainder = annualSalary;
+        
+        // First 300,000 @ 7%
+        if (remainder > 300000) {
+            tax += 300000 * 0.07;
+            remainder -= 300000;
+        } else {
+            tax += remainder * 0.07;
+            return Math.round((tax / 12) * 100) / 100;
+        }
+        
+        // Next 300,000 @ 11%
+        if (remainder > 300000) {
+            tax += 300000 * 0.11;
+            remainder -= 300000;
+        } else {
+            tax += remainder * 0.11;
+            return Math.round((tax / 12) * 100) / 100;
+        }
+        
+        // Next 500,000 @ 15%
+        if (remainder > 500000) {
+            tax += 500000 * 0.15;
+            remainder -= 500000;
+        } else {
+            tax += remainder * 0.15;
+            return Math.round((tax / 12) * 100) / 100;
+        }
+        
+        // Next 500,000 @ 19%
+        if (remainder > 500000) {
+            tax += 500000 * 0.19;
+            remainder -= 500000;
+        } else {
+            tax += remainder * 0.19;
+            return Math.round((tax / 12) * 100) / 100;
+        }
+        
+        // Next 1,600,000 @ 21%
+        if (remainder > 1600000) {
+            tax += 1600000 * 0.21;
+            remainder -= 1600000;
+        } else {
+            tax += remainder * 0.21;
+            return Math.round((tax / 12) * 100) / 100;
+        }
+        
+        // Above 3,200,000 @ 24%
+        if (remainder > 0) {
+            tax += remainder * 0.24;
+        }
+        
+        return Math.round((tax / 12) * 100) / 100;
+    }
+    
+   
     const onSubmit = () => {
         setCanSubmit(false)
         if (pensionSetting.length === 0) {
@@ -133,7 +192,8 @@ function HrPayrollPostSchedule(props) {
                 const fringe = (salarySetting[0].Fringe / 100) * gross;
                 const medical = (salarySetting[0].Medical / 100) * gross;
                 const wardrobe = (salarySetting[0].Wardrobe / 100) * gross;
-                const payee = (salarySetting[0].Payee / 100) * gross;
+                const payee = calcSalaryPayee(gross);
+                // const payee = (salarySetting[0].Payee / 100) * gross;
                 itemList.push(
                     {
                         staff_id: item.StaffID,

@@ -45,10 +45,10 @@ function HrSalarySettings(props) {
         label: "Wardrobe (%)",
         field: "wardrobe",
       },
-      {
-        label: "Payee (%)",
-        field: "payee",
-      },
+      // {
+      //   label: "Payee (%)",
+      //   field: "payee",
+      // },
       {
         label: "Inserted By",
         field: "inserted_by",
@@ -56,6 +56,10 @@ function HrSalarySettings(props) {
       {
         label: "Inserted Date",
         field: "inserted_date",
+      },
+      {
+        label: "Actions",
+        field: "actions",
       },
     ],
     rows: [],
@@ -74,6 +78,34 @@ function HrSalarySettings(props) {
     entry_id: "",
   });
   const [total, setTotal] = useState(0);
+
+  const handleDelete = async (entryId) => {
+    showAlert(
+      'DELETE CONFIRMATION',
+      'Are you sure you want to delete this salary setting? This action cannot be undone.',
+      'warning',
+      true,
+      true
+    ).then(async (result) => {
+      if (result) {
+        await axios
+          .post(`${serverLink}staff/hr/payroll/salary/settings/delete`, { entry_id: entryId }, token)
+          .then((response) => {
+            if (response.data.message === "success") {
+              toast.success("Salary Setting Deleted Successfully");
+              getRecords();
+            } else {
+              showAlert("ERROR", "Failed to delete salary setting. Please try again!", "error");
+            }
+          })
+          .catch((error) => {
+            showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+          });
+      }else{
+        console.log(result)
+      }
+    });
+  };
 
   const getRecords = async () => {
     await axios
@@ -94,6 +126,14 @@ function HrSalarySettings(props) {
               inserted_by: data.InsertedBy,
               inserted_date: formatDateAndTime(data.InsertedDate.split('T')[0], 'date'),
               entry_id: data.EntryID,
+              actions: (
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => handleDelete(data.EntryID)}
+                >
+                  <i className="fa fa-trash"></i> Delete
+                </button>
+              ),
             });
           });
 
@@ -101,6 +141,12 @@ function HrSalarySettings(props) {
             ...datatable,
             columns: datatable.columns,
             rows: rows,
+          });
+        } else {
+          setDatatable({
+            ...datatable,
+            columns: datatable.columns,
+            rows: [],
           });
         }
 
@@ -218,6 +264,14 @@ function HrSalarySettings(props) {
                 inserted_by: data.InsertedBy,
                 inserted_date: formatDateAndTime(data.InsertedDate.split('T')[0], 'date'),
                 entry_id: data.EntryID,
+                actions: (
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => handleDelete(data.EntryID)}
+                  >
+                    <i className="fa fa-trash"></i> Delete
+                  </button>
+                ),
               });
             });
 
@@ -225,6 +279,12 @@ function HrSalarySettings(props) {
               ...datatable,
               columns: datatable.columns,
               rows: rows,
+            });
+          } else {
+            setDatatable({
+              ...datatable,
+              columns: datatable.columns,
+              rows: [],
             });
           }
 
@@ -243,35 +303,44 @@ function HrSalarySettings(props) {
       <div className="flex-column-fluid">
         <div className="card">
           <div className="card-header border-0 pt-6">
-            <div className="card-title" />
+            <div className="card-title">
+              {datatable.rows.length > 0 && (
+                <div className="alert alert-info d-flex align-items-center mb-0">
+                  <i className="fa fa-info-circle me-2"></i>
+                  <span>Salary settings already configured. Delete the existing setting to add a new one.</span>
+                </div>
+              )}
+            </div>
             <div className="card-toolbar">
               <div
                 className="d-flex justify-content-end"
                 data-kt-customer-table-toolbar="base"
               >
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateSettings({
-                      ...createSettings,
-                      basic: 0,
-                      housing: 0,
-                      transport: 0,
-                      fringe: 0,
-                      medical: 0,
-                      wardrobe: 0,
-                      payee: 0,
-                      inserted_by: props.loginData[0].StaffID,
-                      inserted_date: "",
-                      entry_id: "",
-                    })
-                  }
-                >
-                  Add Salary Settings
-                </button>
+                {datatable.rows.length === 0 && (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_general"
+                    onClick={() =>
+                      setCreateSettings({
+                        ...createSettings,
+                        basic: 0,
+                        housing: 0,
+                        transport: 0,
+                        fringe: 0,
+                        medical: 0,
+                        wardrobe: 0,
+                        payee: 0,
+                        inserted_by: props.loginData[0].StaffID,
+                        inserted_date: "",
+                        entry_id: "",
+                      })
+                    }
+                  >
+                    Add Salary Settings
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -370,7 +439,7 @@ function HrSalarySettings(props) {
               />
             </div>
           </div>
-          <hr/>
+          {/* <hr/>
           <h5>Section 2: Payee Settings</h5>
           <div className="form-group pb-5">
             <label htmlFor="payee">Payee (Percentage)</label>
@@ -384,7 +453,7 @@ function HrSalarySettings(props) {
               className={"form-control"}
               placeholder={"Enter the Payee (Percentage)"}
             />
-          </div>
+          </div> */}
 
           <div className="form-group pt-2">
             <button onClick={onSubmit} className="btn btn-primary w-100">
