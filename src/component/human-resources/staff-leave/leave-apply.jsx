@@ -22,18 +22,24 @@ const StaffLeaveApply = (props) => {
 
     const editorRef = React.createRef();
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["SN", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Relief Staff", "Stage", "Status", "Begin", "End"];
+    const columns = ["SN", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage", "Action"];
     const [data, setData] = useState([]);
     const [StaffList, setStaffList] = useState([]);
-    const [leaveCategory, setLeaveCategory] = useState([]);
-    const [applications, setApplications] = useState([]);
+    // Hardcode available leave types for now
+    const leaveCategory = [
+        { Name: "Main", LeaveDaysAllowed: 30 },
+        { Name: "Casual", LeaveDaysAllowed: 10 },
+        { Name: "Sick", LeaveDaysAllowed: 14 },
+        { Name: "Maternity", LeaveDaysAllowed: 90 },
+        { Name: "Paternity", LeaveDaysAllowed: 10 },
+        { Name: "Study", LeaveDaysAllowed: 30 },
+    ];
     let [leaveForm, setLeaveForm] = useState(false)
     const [notCompleted, setNotCompleted] = useState([]);
+    const [daysTakenByType, setDaysTakenByType] = useState({});
 
     const staff_id = props.loginDetails[0].StaffID
     const [leave, setLeave] = useState({
-        CasualDaysTaken: 0,
-        AnnualDaysTaken: 0,
         LeaveType: "",
         StartDate: "",
         EndDate: "",
@@ -56,35 +62,33 @@ const StaffLeaveApply = (props) => {
             //         }
             //     })
 
-            await axios.get(`${serverLink}staff/human-resources/staff-leave/leave-categories/${staff_id}`, token)
-                .then((result) => {
-                    if (result.data.length > 0) {
-                        setLeaveCategory(result.data)
-                    }
-                })
-
             await axios.get(`${serverLink}staff/human-resources/staff-leave/leave-applications/${staff_id}`, token)
                 .then((result) => {
                     let rows = [];
                     if (result.data.length > 0) {
                         let not_completed = result.data.filter(x => x.ActionStage === 0 || x.ActionStage === 1 || x.ActionStage === 2);
                         setNotCompleted(not_completed)
-                        let causal = result.data.filter(x => x.LeaveType === 'Casual' && x.ApplicationStatus === 1).map(x => x.DaysTaken).reduce((a, b) => a + b, 0);
-                        let annual = result.data.filter(x => x.LeaveType === 'Main' && x.ApplicationStatus === 1).map(x => x.DaysTaken).reduce((a, b) => a + b, 0)
-                        setLeave({
-                            ...leave,
-                            CasualDaysTaken: causal,
-                            AnnualDaysTaken: annual
-                        });
+
+                        // calculate days taken per leave type (approved only)
+                        const taken = {};
+                        result.data
+                            .filter(x => x.ApplicationStatus === 1)
+                            .forEach((x) =>
+                            {
+                                taken[x.LeaveType] = (taken[x.LeaveType] || 0) + Number(x.DaysTaken || 0);
+                            });
+                        setDaysTakenByType(taken);
+
                         result.data.map((item, index) => {
+                            const staffLabel = item.ReliefStaffID ? `${item.ReliefStaffID}` : props.loginDetails[0].StaffID;
                             rows.push([
                                 index + 1,
+                                staffLabel,
                                 item.LeaveType,
                                 formatDateAndTime(item.StartDate, "date"),
                                 formatDateAndTime(item.EndDate, "date"),
                                 item.DaysTaken,
                                 formatDateAndTime(item.ResumptionDate, "date"),
-                                item.ReliefStaffID,
                                 <label className={item.ActionStage === 0 ? "badge badge-secondary"
                                     : item.ActionStage === 1 ? "badge badge-primary"
                                         : item.ActionStage === 2 ? "badge badge-info"
@@ -92,13 +96,6 @@ const StaffLeaveApply = (props) => {
                                                 : "badge badge-danger"}>
                                     {
                                         item.ActionStage === 0 ? "Pending Approval" : item.ActionStage === 1 ? "Approved" : item.ActionStage === 2 ? "Started" : item.ActionStage === 3 ? "Completed" : "Denied"
-                                    }
-                                </label>,
-                                <label className={item.ApplicationStatus === 0 ? "badge badge-secondary"
-                                    : item.ApplicationStatus === 1 ? "badge badge-success"
-                                        : "badge badge-danger"}>
-                                    {
-                                        item.ApplicationStatus === 0 ? "Pending" : item.ApplicationStatus === 1 ? "Approved" : "Denied"
                                     }
                                 </label>,
                                 (
@@ -166,30 +163,30 @@ const StaffLeaveApply = (props) => {
     }, []);
 
     const onEdit = (e) => {
-        setLeave({
+        const { id, value } = e.target;
+        const updated = {
             ...leave,
-            [e.target.id]: e.target.value
-        })
+            [id]: value
+        };
 
-        if (e.target.id === "EndDate" && leave.StartDate !== "") {
-            let start = new Date(leave.StartDate);
-            let end = new Date(e.target.value);
-            var time_diff = end.getTime() - start.getTime();
-            var days_dif = time_diff / (1000 * 3600 * 24);
-            let newDate = addDays(new Date(e.target.value), 1);
-            setLeave({
-                ...leave,
-                [e.target.id]: e.target.value,
-                DaysTaken: days_dif,
-                ResumptionDate: formatDate(newDate)
-            })
+        const startVal = id === "StartDate" ? value : leave.StartDate;
+        const endVal = id === "EndDate" ? value : leave.EndDate;
+
+        if (startVal && endVal) {
+            const start = new Date(startVal);
+            const end = new Date(endVal);
+            const days = getBusinessDays(start, end);
+            updated.DaysTaken = days;
+            updated.ResumptionDate = formatDate(nextBusinessDay(end));
         }
+
+        setLeave(updated);
     }
     const onStaffChange = async (e) => {
         setLeave({
             ...leave,
             ReliefStaffID2: e,
-            ReliefStaffID: e.value
+            ReliefStaffID: e?.value || ""
         })
     }
 
@@ -231,9 +228,31 @@ const StaffLeaveApply = (props) => {
             })
     }
 
-    const addDays = (date, days) => {
-        return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
-    }
+    // Business-day helpers
+    const isWeekend = (d) => {
+        const day = d.getDay();
+        return day === 0 || day === 6;
+    };
+
+    const getBusinessDays = (start, end) => {
+        if (!start || !end || end < start) return 0;
+        let count = 0;
+        const cursor = new Date(start);
+        while (cursor <= end) {
+            if (!isWeekend(cursor)) count++;
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        return count;
+    };
+
+    const nextBusinessDay = (date) => {
+        const d = new Date(date);
+        d.setDate(d.getDate() + 1);
+        while (isWeekend(d)) {
+            d.setDate(d.getDate() + 1);
+        }
+        return d;
+    };
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -249,31 +268,27 @@ const StaffLeaveApply = (props) => {
             showAlert("Error", "please select EndDate", "error");
             return;
         }
-        if (leave.LeaveType === "Main") {
-            if (parseInt(leave.DaysTaken) > parseInt(leaveCategory[0].LeaveDaysAllowed)) {
-                showAlert("Error", `Sorry, you cannot apply for more than ${parseInt(leaveCategory[0].LeaveDaysAllowed)} days for annual leave`, "error");
-                return;
-            }
-            let no_days = parseInt(leave.AnnualDaysTaken) + parseInt(leave.DaysTaken);
-            if (no_days > parseInt(leaveCategory[0].LeaveDaysAllowed)) {
-                showAlert("Error", "You do not have days left in your Annual Leave days", "error");
-                return;
-            }
-            applyLeave();
+        const selectedCategory = leaveCategory.find((c) => c.Name === leave.LeaveType);
+        if (!selectedCategory) {
+            showAlert("Error", "Invalid leave type selected", "error");
+            return;
         }
-        if (leave.LeaveType === "Casual") {
-            if (parseInt(leave.DaysTaken) > parseInt(leaveCategory[0].CasualDaysAllowed)) {
-                showAlert("Error", `Sorry, you cannot apply for more than ${parseInt(leaveCategory[0].CasualDaysAllowed)} days for casual leave`, "error");
-                return;
-            }
-            let no_days = parseInt(leave.CasualDaysTaken) + parseInt(leave.DaysTaken);
-            if (no_days > parseInt(leaveCategory[0].CasualDaysAllowed)) {
-                showAlert("Error", "You do not have days left in your Casual Leave days", "error");
-                return;
-            }
-            applyLeave();
 
+        const allowed = parseInt(selectedCategory.LeaveDaysAllowed || 0);
+        const alreadyTaken = parseInt(daysTakenByType[leave.LeaveType] || 0);
+        const requested = parseInt(leave.DaysTaken || 0);
+
+        if (requested > allowed) {
+            showAlert("Error", `Sorry, you cannot apply for more than ${allowed} days for ${leave.LeaveType} leave`, "error");
+            return;
         }
+
+        if (alreadyTaken + requested > allowed) {
+            showAlert("Error", "You do not have days left in this leave category", "error");
+            return;
+        }
+
+        applyLeave();
 
     }
 
@@ -366,38 +381,18 @@ const StaffLeaveApply = (props) => {
                             {
                                 leaveCategory.length > 0 &&
                                 <div className="row col-md-12">
-                                    <div className="d-flex flex-column flex-grow-1 pe-8">
-                                        <div className="d-flex flex-wrap">
-                                            <div className="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                                    <div className="d-flex flex-wrap">
+                                        {leaveCategory.map((cat, idx) => (
+                                            <div key={idx} className="border border-gray-300 border-dashed rounded min-w-175px py-3 px-4 me-6 mb-3">
                                                 <div className="d-flex align-items-center">
-                                                    <div className="fs-2x fw-bold counted" data-kt-countup="true" data-kt-countup-value={4500} data-kt-countup-prefix="$" data-kt-initialized={1}>
-                                                        {leaveCategory[0].LeaveDaysAllowed}
+                                                    <div className="fs-2x fw-bold counted">
+                                                        {cat.LeaveDaysAllowed}
                                                     </div>
                                                 </div>
-                                                <div className="fw-semibold fs-6 text-gray-600">Annual Days Allowed</div>
+                                                <div className="fw-semibold fs-6 text-gray-600">{cat.Name} Days Allowed</div>
+                                                <div className="text-gray-600">Taken: {daysTakenByType[cat.Name] || 0}</div>
                                             </div>
-                                            <div className="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
-                                                <div className="d-flex align-items-center">
-                                                    <div className="fs-2x fw-bold counted" data-kt-countup="true" data-kt-countup-value={75} data-kt-initialized={1}>{leave.AnnualDaysTaken}</div>
-                                                </div>
-
-                                                <div className="fw-semibold fs-6 text-gray-600">Annual Days Taken</div>
-                                            </div>
-                                            <div className="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
-                                                <div className="d-flex align-items-center">
-                                                    <div className="fs-2x fw-bold counted" data-kt-countup="true" data-kt-countup-value={75} data-kt-initialized={1}>{leaveCategory[0].CasualDaysAllowed}</div>
-                                                </div>
-
-                                                <div className="fw-semibold fs-6 text-gray-600">Casual Days Allowed</div>
-                                            </div>
-                                            <div className="border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
-                                                <div className="d-flex align-items-center">
-                                                    <div className="fs-2x fw-bold counted" data-kt-countup="true" data-kt-countup-value={75} data-kt-initialized={1}>{leave.CasualDaysTaken}</div>
-                                                </div>
-
-                                                <div className="fw-semibold fs-6 text-gray-600">Casual Days Taken</div>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
                             }
@@ -408,8 +403,9 @@ const StaffLeaveApply = (props) => {
                                         <label htmlFor="LeaveType">LeaveType</label>
                                         <select className="form-select" id="LeaveType" onChange={onEdit} value={leave.LeaveType}>
                                             <option value={""}>-select leave type-</option>
-                                            <option value={"Main"}>Main</option>
-                                            <option value={"Casual"}>Casual</option>
+                                            {leaveCategory.map((cat, idx) => (
+                                                <option key={idx} value={cat.Name}>{cat.Name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <br />
