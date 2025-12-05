@@ -2,7 +2,7 @@ import MUIDataTable from "mui-datatables";
 import React, {useRef} from "react";
 import {formatDateAndTime, projectLogo} from "../../../resources/constants";
 import ReactToPrint from "react-to-print";
-import IconButton from "@material-ui/core/IconButton";
+import IconButton from "@mui/material/IconButton";
 import PrintIcon from "@mui/icons-material/Print";
 import "./report_table.css";
 
