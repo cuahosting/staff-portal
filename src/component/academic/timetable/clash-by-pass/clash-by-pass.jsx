@@ -10,8 +10,10 @@ import PageHeader from "../../../common/pageheader/pageheader";
 
 function ClashByPass(props) {
     const token = props.LoginDetails[0].token;
+    // eslint-disable-next-line no-unused-vars
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState('off')
+    // eslint-disable-next-line no-unused-vars
     const [facultyList, setFacultyList] = useState(
         props.FacultyList.length > 0 ? props.FacultyList : []
     )
@@ -44,7 +46,7 @@ function ClashByPass(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((val, index) => {
+                    result.data.forEach((val, index) => {
                         rows.push({
                             FacultyCode: val.FacultyCode,
                             FacultyName: facultyList.filter(x => x.FacultyCode.toString().toLowerCase() === val.FacultyCode.toString().toLowerCase())[0].FacultyName,
@@ -138,6 +140,7 @@ function ClashByPass(props) {
 
     useEffect(() => {
         getClashes();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

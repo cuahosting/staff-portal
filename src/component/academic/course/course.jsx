@@ -94,7 +94,7 @@ function Course(props) {
       .then((result) => {
         if (result.data.length > 0) {
           let rows = [];
-          result.data.map((course, index) => {
+          result.data.forEach((course, index) => {
             rows.push({
               sn: index + 1,
               CourseName: course.CourseName ?? "N/A",
@@ -353,6 +353,7 @@ function Course(props) {
 
   useEffect(() => {
     getDepartments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -361,7 +362,7 @@ function Course(props) {
       .then((result) => {
         if (result.data.length > 0) {
           let rows = [];
-          result.data.map((course, index) => {
+          result.data.forEach((course, index) => {
             rows.push({
               sn: index + 1,
               CourseName: course.CourseName ?? "N/A",
@@ -435,6 +436,7 @@ function Course(props) {
       .catch((err) => {
         console.log("NETWORK ERROR");
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (

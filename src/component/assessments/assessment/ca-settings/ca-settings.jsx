@@ -106,6 +106,7 @@ function CASettings(props) {
         ],
         rows: [],
     });
+    // eslint-disable-next-line no-unused-vars
     const [runningModule, setRunningModule] = useState([]);
     const [moduleOptions, setModuleOptions] = useState([]);
 
@@ -149,7 +150,7 @@ function CASettings(props) {
 
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((settings, index) => {
+                    result.data.forEach((settings, index) => {
                         rows.push({
                             sn: index + 1,
                             EntryID: settings.EntryID,
@@ -394,8 +395,9 @@ function CASettings(props) {
     };
 
     useEffect(() => {
-        getCASettingsRecords().then((r) => {});
-        getRunningModule().then((r) => {});
+        getCASettingsRecords().then(() => {});
+        getRunningModule().then(() => {});
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

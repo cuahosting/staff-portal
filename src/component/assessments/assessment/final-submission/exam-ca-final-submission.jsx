@@ -27,7 +27,7 @@ function EXAMCAFinalSubmission(props) {
             .then((response) => {
                 let rows = [];
                 response.data.length > 0 &&
-                response.data.map((row) => {
+                response.data.forEach((row) => {
                     rows.push({text: `${row.ModuleName} (${row.ModuleCode})`, id: row.ModuleCode});
                 });
 
@@ -61,7 +61,7 @@ function EXAMCAFinalSubmission(props) {
                     let rows = [];
                     if (data.length > 0) {
                         setCASettingList(data)
-                        data.map((item, index) => {
+                        data.forEach((item, index) => {
                             let ca_score_field = <input type="number" step={0.01} className="form-control"
                                                         placeholder="Enter CA Contribution"
                                                         onChange={onEdit}
@@ -115,7 +115,7 @@ function EXAMCAFinalSubmission(props) {
         }
 
         let setting_data = [];
-        caSettingsList.map(item => {
+        caSettingsList.forEach(item => {
             const filter_record = output.filter(i => i.entry_id === item.EntryID);
             if (filter_record.length > 0) {
                 setting_data.push(filter_record[0])
@@ -133,7 +133,7 @@ function EXAMCAFinalSubmission(props) {
         }
 
         let total_contribution = 0;
-        setting_data.map(item => {
+        setting_data.forEach(item => {
             total_contribution += item.score
         });
 
@@ -174,8 +174,9 @@ function EXAMCAFinalSubmission(props) {
     }
 
     useEffect(() => {
-        getRunningModules().then((r) => {
+        getRunningModules().then(() => {
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 

@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
+import AGTable from "../../common/table/AGTable";
 import
   {
     formatDateAndTime,
@@ -35,6 +36,53 @@ function ProcessApplicationPG(props)
   const [courses, setCourses] = useState([]);
   const [approved, setApproved] = useState(false);
   const [paymentHistory, setPaymentHistory] = useState([]);
+
+  // Datatable states for AG Grid
+  const [qualificationTable, setQualificationTable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Awarding Institution", field: "AwardingInstitution" },
+      { label: "Qualification Name", field: "QualificationName" },
+      { label: "Qualification Title", field: "QualificationTitle" },
+      { label: "Grade Obtained", field: "GradeObtained" },
+      { label: "Date Awarded", field: "DateAwarded" },
+    ],
+    rows: [],
+  });
+
+  const [employmentTable, setEmploymentTable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Employer", field: "Employer" },
+      { label: "Employer Address", field: "EmployerAddress" },
+      { label: "Designation", field: "Designation" },
+      { label: "Start Date", field: "StartDate" },
+      { label: "End Date", field: "EndDate" },
+    ],
+    rows: [],
+  });
+
+  const [documentsTable, setDocumentsTable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Document Name", field: "DocumentType" },
+      { label: "Action", field: "action" },
+    ],
+    rows: [],
+  });
+
+  const [paymentTable, setPaymentTable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Description", field: "Description" },
+      { label: "Amount", field: "AmountPaid" },
+      { label: "Reference", field: "PaymentReference" },
+      { label: "Payment Document", field: "PaymentDocument" },
+      { label: "Date Paid", field: "DatePaid" },
+      { label: "Action", field: "action" },
+    ],
+    rows: [],
+  });
   const decisionStaff = props.login;
   if (applicant === "")
   {
@@ -71,6 +119,7 @@ function ProcessApplicationPG(props)
         });
     };
     getSemesters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() =>
@@ -89,6 +138,7 @@ function ProcessApplicationPG(props)
         });
     };
     getCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getApplicantData = async () =>
@@ -97,7 +147,36 @@ function ProcessApplicationPG(props)
       .get(`${serverLink}registration/admissions/payment/list/${applicant}/${app_type}`, token)
       .then((response) =>
       {
-        setPaymentHistory(response.data)
+        setPaymentHistory(response.data);
+
+        // Populate payment table
+        if (response.data.length > 0) {
+          let rows = [];
+          response.data.forEach((j, index) => {
+            const disabled = j.Status.toString() !== "2";
+            const visible = j.Description.toLocaleLowerCase().includes('tuition') === true ? "block" : "none";
+            rows.push({
+              sn: index + 1,
+              Description: j.Description,
+              AmountPaid: j.AmountPaid,
+              PaymentReference: j.PaymentReference,
+              PaymentDocument: (
+                <a className="btn btn-sm btn-primary" target="_blank" href={`${serverLink}public/uploads/${shortCode}/application/document/${j.FilePath}`}>View Document</a>
+              ),
+              DatePaid: formatDateAndTime(j.InsertedDate, "date"),
+              action: (
+                <button disabled={disabled} style={{ display: `${visible}` }} className="btn btn-sm btn-primary"
+                  onClick={allowEnrolment}>
+                  Allow Enrolment
+                </button>
+              ),
+            });
+          });
+          setPaymentTable({
+            ...paymentTable,
+            rows: rows,
+          });
+        }
       });
 
     await axios
@@ -105,6 +184,68 @@ function ProcessApplicationPG(props)
       .then((response) =>
       {
         setAppInfo(response.data);
+
+        // Populate qualification table
+        if (response.data.qualification && response.data.qualification.length > 0) {
+          let rows = [];
+          response.data.qualification.forEach((q, index) => {
+            rows.push({
+              sn: index + 1,
+              AwardingInstitution: q.AwardingInstitution,
+              QualificationName: q.QualificationName,
+              QualificationTitle: q.QualificationTitle,
+              GradeObtained: q.GradeObtained,
+              DateAwarded: formatDateAndTime(q.DateAwarded, "date"),
+            });
+          });
+          setQualificationTable({
+            ...qualificationTable,
+            rows: rows,
+          });
+        }
+
+        // Populate employment table
+        if (response.data.employment && response.data.employment.length > 0) {
+          let rows = [];
+          response.data.employment.forEach((e, index) => {
+            rows.push({
+              sn: index + 1,
+              Employer: e.Employer,
+              EmployerAddress: e.EmployerAddress,
+              Designation: e.Designation,
+              StartDate: formatDateAndTime(e.StartDate, "date"),
+              EndDate: e.EndDate ? formatDateAndTime(e.EndDate, "date") : "Present",
+            });
+          });
+          setEmploymentTable({
+            ...employmentTable,
+            rows: rows,
+          });
+        }
+
+        // Populate documents table
+        if (response.data.documents && response.data.documents.length > 0) {
+          let rows = [];
+          response.data.documents.forEach((doc, index) => {
+            rows.push({
+              sn: index + 1,
+              DocumentType: doc.DocumentType,
+              action: (
+                <a
+                  href={`${serverLink}public/uploads/${shortCode}/application/document/${doc.FileName}`}
+                  target="_blank"
+                  className="btn btn-primary"
+                >
+                  View
+                </a>
+              ),
+            });
+          });
+          setDocumentsTable({
+            ...documentsTable,
+            rows: rows,
+          });
+        }
       });
     setIsLoading(false);
   };
@@ -305,131 +446,26 @@ function ProcessApplicationPG(props)
         <hr />
         {
           <>
-            <table className="table table-row-dashed">
-              <thead>
-                <tr>
-                  <th className="fw-bolder">Awarding Institution</th>
-                  <th className="fw-bolder">Qualification Name</th>
-                  <th className="fw-bolder">Qualification Title</th>
-                  <th className="fw-bolder">Grade Obtained</th>
-                  <th className="fw-bolder">Date Awarded</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appInfo.qualification.map((q, index) => (
-                  <tr key={index}>
-                    <td>{q.AwardingInstitution}</td>
-                    <td>{q.QualificationName}</td>
-                    <td>{q.QualificationTitle}</td>
-                    <td>{q.GradeObtained}</td>
-                    <td>{formatDateAndTime(q.DateAwarded, "date")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <AGTable data={qualificationTable} />
             <hr />
             <h3>Employment History </h3>
             <hr />
-            <table className="table table-row-dashed">
-              <thead>
-                <tr>
-                  <th className="fw-bolder">Employer</th>
-                  <th className="fw-bolder">Employer Address</th>
-                  <th className="fw-bolder">Designation</th>
-                  <th className="fw-bolder">Start Date</th>
-                  <th className="fw-bolder">End Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appInfo.employment.map((e, index) => (
-                  <tr key={index}>
-                    <td>{e.Employer}</td>
-                    <td>{e.EmployerAddress}</td>
-                    <td>{e.Designation}</td>
-                    <td>{formatDateAndTime(e.StartDate, "date")}</td>
-                    <td>{e.EndDate ? formatDateAndTime(e.EndDate, "date") : "Present"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <AGTable data={employmentTable} />
             <hr />
             <h3>Supporting Documents</h3>
             <hr />
-            <table className="table table-row-dashed">
-              <thead>
-                <tr>
-                  <th className="fw-bolder">Document Name</th>
-                  <th className="fw-bolder">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appInfo.documents.map((doc, index) => (
-                  <tr key={index}>
-                    <td>{doc.DocumentType}</td>
-                    <td>
-                      <a
-                        href={`${serverLink}public/uploads/${shortCode}/application/document/${doc.FileName}`}
-                        target="_blank"
-                        className="btn btn-primary"
-                      >
-                        View
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <AGTable data={documentsTable} />
 
             <>
               <h3>Payment History</h3>
-              <table className="table table-row-dashed">
-                <thead>
-                  <tr>
-                    <th className="fw-bolder">Description</th>
-                    <th className="fw-bolder">Amount</th>
-                    <th className="fw-bolder">Reference</th>
-                    <th className="fw-bolder">Payment Document</th>
-                    <th className="fw-bolder">Date Paid</th>
-                    <th className="fw-bolder">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-
-                  {
-                    paymentHistory.length > 0 ?
-                      <>
-                        {
-                          paymentHistory.map((j, index) =>
-                          {
-                            const disabled = j.Status.toString() !== "2";
-                            const visible = j.Description.toLocaleLowerCase().includes('tuition') === true ? "block" : "none"
-                            return (
-                              <tr key={index}>
-                                <td>{j.Description}</td>
-                                <td>{j.AmountPaid}</td>
-                                <td>{j.PaymentReference}</td>
-                                <td><a className="btn btn-sm btn-primary" target="_blank" href={`${serverLink}public/uploads/${shortCode}/application/document/${j.FilePath}`}>View Document</a></td>
-                                <td>{formatDateAndTime(j.InsertedDate, "date")}</td>
-                                <td>
-                                  <button disabled={disabled} style={{ display: `${visible}` }} className="btn btn-sm btn-primary"
-                                    onClick={allowEnrolment}>
-                                    Allow Enrolment
-                                  </button></td>
-                              </tr>
-                            )
-                          })
-                        }
-                      </>
-                      :
-                      <>
-                        <tr>
-                          <td><h3>No Payment made</h3></td>
-                        </tr>
-                      </>
-                  }
-
-                </tbody>
-              </table>
+              {
+                paymentHistory.length > 0 ?
+                  <AGTable data={paymentTable} />
+                  :
+                  <div className="alert alert-warning">
+                    <h3>No Payment made</h3>
+                  </div>
+              }
               <hr />
             </>
           </>

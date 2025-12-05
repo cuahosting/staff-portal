@@ -16,6 +16,7 @@ function AcademicResultByCourse(props) {
     const [data, setData] = useState([]);
     const [semesterList, setSemesterList] = useState([]);
     const [semesterOptions, setSemesterOptions] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [departmentsList, setDepartments] = useState([]);
     const [departmentOptions, setDepartmentsOptions] = useState([]);
     const [semester, setSemeter] = useState({
@@ -31,7 +32,7 @@ function AcademicResultByCourse(props) {
                 .then((result) => {
                     let rows = []
                     if (result.data.length > 0) {
-                        result.data.map((row) => {
+                        result.data.forEach((row) => {
                             rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
                         });
                         setSemesterList(result.data);
@@ -51,7 +52,7 @@ function AcademicResultByCourse(props) {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((row) => {
+                    result.data.forEach((row) => {
                         rows.push({ value: row.CourseCode, label: row.CourseName })
                     });
                     setDepartmentsOptions(rows)
@@ -66,7 +67,7 @@ function AcademicResultByCourse(props) {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((exam, index) => {
+                    result.data.forEach((exam, index) => {
                         rows.push([
                             index + 1,
                             exam.StudentID,
@@ -129,7 +130,8 @@ function AcademicResultByCourse(props) {
     useEffect(() => {
         getSemesters();
         getCourses();
-    }, [""]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return isLoading ? (
         <Loader />

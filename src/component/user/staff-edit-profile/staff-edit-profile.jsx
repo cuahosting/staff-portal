@@ -1,24 +1,21 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
-import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
 import axios from "axios";
-import { projectName, serverLink, simpleFileUploadAPIKey } from "../../../resources/url";
+import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { encryptData, formatDate, formatDateAndTime, projectCode, shortCode } from "../../../resources/constants";
+import { Link, useNavigate } from "react-router-dom";
+import { encryptData, shortCode } from "../../../resources/constants";
 import { connect } from "react-redux";
-import { Button } from "@mui/material";
 import
 {
     setLoginDetails,
     setPermissionDetails
 } from "../../../actions/setactiondetails";
 import JoditEditor from "jodit-react";
-import SimpleFileUpload from "react-simple-file-upload";
-import DOMPurify, { sanitize } from "dompurify";
+import DOMPurify from "dompurify";
+import AGTable from "../../common/table/AGTable";
 
 function EditStaffProfile(props)
 {
@@ -30,6 +27,45 @@ function EditStaffProfile(props)
     const navigate = useNavigate();
     const currentYear = new Date().getFullYear();
     const [qualifications, setQualifications] = useState([]);
+
+    const [qualificationsDatatable, setQualificationsDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Qualification", field: "qualification" },
+            { label: "Discipline", field: "discipline" },
+            { label: "Institution", field: "institution" },
+            { label: "Year", field: "year" },
+            { label: "Action", field: "action" },
+        ],
+        rows: [],
+    });
+
+    const [nokDatatable, setNokDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Full Name", field: "fullName" },
+            { label: "Relationship", field: "relationship" },
+            { label: "Phone Number", field: "phoneNumber" },
+            { label: "Email", field: "email" },
+            { label: "Address", field: "address" },
+            { label: "Action", field: "action" },
+        ],
+        rows: [],
+    });
+
+    const [publicationsDatatable, setPublicationsDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Paper Title", field: "paperTitle" },
+            { label: "Author(s)", field: "authors" },
+            { label: "Work Title", field: "workTitle" },
+            { label: "Year", field: "year" },
+            { label: "Views", field: "views" },
+            { label: "Downloads", field: "downloads" },
+            { label: "Action", field: "action" },
+        ],
+        rows: [],
+    });
 
 
     const [staffInformation, setStaffInformation] = useState({
@@ -103,7 +139,7 @@ function EditStaffProfile(props)
 
     const [toggleInformation, setToggleInformation] = useState(false);
 
-    const [toggleChangePassword, setToggleChangePassword] = useState(true);
+    const [, setToggleChangePassword] = useState(true);
 
     const [addStaffDocument, setAddStaffDocument] = useState({
         StaffID: props.loginData[0]?.StaffID,
@@ -163,6 +199,7 @@ function EditStaffProfile(props)
         }
         getQualification().then((r) => { });
         getStaffRelatedData().then((r) => { });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const getStaffRelatedData = async () =>
@@ -172,12 +209,83 @@ function EditStaffProfile(props)
             .then((response) =>
             {
                 setStaffInformation(response.data);
+                updateQualificationsDatatable(response.data.qualifications);
+                updateNokDatatable(response.data.nok);
+                updatePublicationsDatatable(response.data.publications || []);
             })
             .catch((error) =>
             {
                 console.log("NETWORK ERROR", error);
             });
         setIsLoading(false);
+    };
+
+    const updateQualificationsDatatable = (qualifications) => {
+        const rows = qualifications.map((qualification, index) => ({
+            sn: index + 1,
+            qualification: qualification.QualificationTitle || 'N/A',
+            discipline: qualification.Discipline || 'N/A',
+            institution: qualification.InstitutionName || 'N/A',
+            year: qualification.Year || 'N/A',
+            action: (
+                <button
+                    className="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
+                    onClick={() => onDeleteStaffQualification(qualification.EntryID)}
+                    title="Delete Qualification"
+                >
+                    <i className="bi bi-trash fs-4"></i>
+                </button>
+            ),
+        }));
+        setQualificationsDatatable({
+            ...qualificationsDatatable,
+            rows: rows,
+        });
+    };
+
+    const updateNokDatatable = (nok) => {
+        const rows = nok.map((nokItem, index) => ({
+            sn: index + 1,
+            fullName: `${nokItem.FirstName} ${nokItem.MiddleName ? nokItem.MiddleName + ' ' : ''}${nokItem.Surname}`,
+            relationship: nokItem.Relationship || 'N/A',
+            phoneNumber: nokItem.PhoneNumber || 'N/A',
+            email: nokItem.EmailAddress || 'N/A',
+            address: nokItem.Address ? (nokItem.Address.length > 40 ? nokItem.Address.substring(0, 40) + '...' : nokItem.Address) : 'N/A',
+            action: (
+                <button
+                    className="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
+                    onClick={() => onDeleteStaffNOK(nokItem.EntryID)}
+                    title="Delete Next of Kin"
+                >
+                    <i className="bi bi-trash fs-4"></i>
+                </button>
+            ),
+        }));
+        setNokDatatable({
+            ...nokDatatable,
+            rows: rows,
+        });
+    };
+
+    const updatePublicationsDatatable = (publications) => {
+        const rows = publications.map((publication, index) => ({
+            sn: index + 1,
+            paperTitle: publication.PaperTitle || 'N/A',
+            authors: publication.Authors || 'N/A',
+            workTitle: publication.WorkTitle || 'N/A',
+            year: publication.PublishedYear || 'N/A',
+            views: publication.ViewCount || 0,
+            downloads: publication.DownloadCount || 0,
+            action: (
+                <button className="btn btn-light btn-sm btn-active-light-primary">
+                    Download
+                </button>
+            ),
+        }));
+        setPublicationsDatatable({
+            ...publicationsDatatable,
+            rows: rows,
+        });
     };
 
     const onEditInformation = (e) =>
@@ -829,7 +937,7 @@ function EditStaffProfile(props)
                                                 ? staffInformation.staff[0].Image.includes("simplefileupload.com") ? staffInformation.staff[0].Image : `${serverLink}public/uploads/${shortCode}/hr/document/${staffInformation.staff[0].Image}`
                                                 : "https://via.placeholder.com/150"
                                         }
-                                        alt="Staff Picture"
+                                        alt="Staff"
                                     />
                                     <div className="position-absolute translate-middle bottom-0 start-100 mb-6 bg-success rounded-circle border border-4 border-white h-20px w-20px"></div>
                                 </div>
@@ -1267,61 +1375,8 @@ function EditStaffProfile(props)
                                                     role="tabpanel"
                                                 >
                                                     <div className="table-responsive">
-                                                        {staffInformation.publications.length > 0 ? (
-                                                            <table className="table table-flush align-middle table-row-bordered table-row-solid gy-4 gs-9">
-                                                                <thead className="border-gray-200 fs-5 fw-bold bg-lighten">
-                                                                    <tr>
-                                                                        <th className="min-w-175px ps-9">
-                                                                            Paper Title
-                                                                        </th>
-                                                                        <th className="min-w-150px px-0">
-                                                                            Author(s)
-                                                                        </th>
-                                                                        <th className="min-w-50px px-0">
-                                                                            Work Title
-                                                                        </th>
-                                                                        <th className="min-w-150px px-0">Year</th>
-                                                                        <th className="min-w-50px px-0">View</th>
-                                                                        <th className="min-w-50px px-0">
-                                                                            Download
-                                                                        </th>
-                                                                        <th className="min-w-150px px-5">
-                                                                            Action
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody className="fs-6 fw-bold text-gray-600">
-                                                                    {staffInformation.publications.map(
-                                                                        (publication, index) => (
-                                                                            <tr key={index}>
-                                                                                <td className="ps-9">
-                                                                                    {publication.PaperTitle}
-                                                                                </td>
-                                                                                <td className="ps-0">
-                                                                                    {publication.Authors}
-                                                                                </td>
-                                                                                <td className="ps-0">
-                                                                                    {publication.WorkTitle}
-                                                                                </td>
-                                                                                <td className="ps-0">
-                                                                                    {publication.PublishedYear}
-                                                                                </td>
-                                                                                <td className="ps-0">
-                                                                                    {publication.ViewCount}
-                                                                                </td>
-                                                                                <td className="ps-0">
-                                                                                    {publication.DownloadCount}
-                                                                                </td>
-                                                                                <td>
-                                                                                    <button className="btn btn-light btn-sm btn-active-light-primary">
-                                                                                        Download
-                                                                                    </button>
-                                                                                </td>
-                                                                            </tr>
-                                                                        )
-                                                                    )}
-                                                                </tbody>
-                                                            </table>
+                                                        {staffInformation.publications && staffInformation.publications.length > 0 ? (
+                                                            <AGTable data={publicationsDatatable} />
                                                         ) : (
                                                             <div className="alert alert-info">
                                                                 There is no record added.{" "}
@@ -1354,60 +1409,7 @@ function EditStaffProfile(props)
         </div>
         <div className="card-body">
             {staffInformation.qualifications && staffInformation.qualifications.length > 0 ? (
-                <div className="table-responsive">
-                    <table className="table table-hover table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
-                        <thead>
-                            <tr className="fw-bold text-muted bg-light">
-                                <th className="ps-4 min-w-50px rounded-start">#</th>
-                                <th className="min-w-200px">Qualification</th>
-                                <th className="min-w-200px">Discipline</th>
-                                <th className="min-w-200px">Institution</th>
-                                <th className="min-w-100px">Year</th>
-                                <th className="min-w-100px text-end rounded-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {staffInformation.qualifications.map((qualification, index) => (
-                                <tr key={index}>
-                                    <td className="ps-4">
-                                        <span className="text-dark fw-bold d-block fs-6">
-                                            {index + 1}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="text-dark fw-bold d-block fs-6">
-                                            {qualification.QualificationTitle || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="text-gray-800 d-block fs-6">
-                                            {qualification.Discipline || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="text-gray-800 d-block fs-6">
-                                            {qualification.InstitutionName || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="badge badge-light-primary fs-7 fw-bold">
-                                            {qualification.Year || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td className="text-end pe-4">
-                                        <button
-                                            className="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
-                                            onClick={() => onDeleteStaffQualification(qualification.EntryID)}
-                                            title="Delete Qualification"
-                                        >
-                                            <i className="bi bi-trash fs-4"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <AGTable data={qualificationsDatatable} />
             ) : (
                 <div className="text-center py-10">
                     <div className="mb-5">
@@ -1450,68 +1452,7 @@ function EditStaffProfile(props)
         </div>
         <div className="card-body">
             {staffInformation.nok && staffInformation.nok.length > 0 ? (
-                <div className="table-responsive">
-                    <table className="table table-hover table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
-                        <thead>
-                            <tr className="fw-bold text-muted bg-light">
-                                <th className="ps-4 min-w-50px rounded-start">#</th>
-                                <th className="min-w-150px">Full Name</th>
-                                <th className="min-w-120px">Relationship</th>
-                                <th className="min-w-120px">Phone Number</th>
-                                <th className="min-w-150px">Email</th>
-                                <th className="min-w-200px">Address</th>
-                                <th className="min-w-100px text-end rounded-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {staffInformation.nok.map((nok, index) => (
-                                <tr key={index}>
-                                    <td className="ps-4">
-                                        <span className="text-dark fw-bold d-block fs-6">
-                                            {index + 1}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="d-flex flex-column">
-                                            <span className="text-dark fw-bold d-block fs-6">
-                                                {`${nok.FirstName} ${nok.MiddleName ? nok.MiddleName + ' ' : ''}${nok.Surname}`}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className="badge badge-light-info fs-7 fw-bold">
-                                            {nok.Relationship || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="text-gray-800 d-block fs-6">
-                                            {nok.PhoneNumber || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="text-gray-800 d-block fs-6">
-                                            {nok.EmailAddress || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="text-gray-600 d-block fs-7" title={nok.Address}>
-                                            {nok.Address ? (nok.Address.length > 40 ? nok.Address.substring(0, 40) + '...' : nok.Address) : 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td className="text-end pe-4">
-                                        <button
-                                            className="btn btn-icon btn-bg-light btn-active-color-danger btn-sm"
-                                            onClick={() => onDeleteStaffNOK(nok.EntryID)}
-                                            title="Delete Next of Kin"
-                                        >
-                                            <i className="bi bi-trash fs-4"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <AGTable data={nokDatatable} />
             ) : (
                 <div className="text-center py-10">
                     <div className="mb-5">

@@ -14,6 +14,7 @@ const ByCourse = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [courseList, setCourseList] = useState([]);
   const [course, setCourse] = useState({
     code: "",
@@ -36,6 +37,7 @@ const ByCourse = (props) => {
     "Module Type",
   ];
 
+  // eslint-disable-next-line no-unused-vars
   const handleChange = (e) => {
     setCourse({
       ...course,
@@ -58,7 +60,7 @@ const ByCourse = (props) => {
         .then((response) => {
           let rows = []
           if (response.data.length > 0) {
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ value: row.CourseCode, label: row.CourseName })
             });
             setCourseOptions(rows)
@@ -71,6 +73,7 @@ const ByCourse = (props) => {
         });
     };
     getCourse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e) => {
@@ -82,7 +85,7 @@ const ByCourse = (props) => {
         const result = res.data;
         if (result.length > 0) {
           let rows = [];
-          result.map((item, index) => {
+          result.forEach((item, index) => {
             rows.push([
               index + 1,
               item.FacultyName,

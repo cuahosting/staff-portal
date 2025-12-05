@@ -7,7 +7,7 @@ import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import {currencyConverter, decryptData, encryptData, formatDateAndTime} from "../../../resources/constants";
+import {decryptData, encryptData} from "../../../resources/constants";
 import {connect} from "react-redux";
 import BlogForm from "./blog-form";
 import BookForm from "./book-form";
@@ -360,14 +360,14 @@ function PublicationManager(props) {
 
                     if (blog.length > 0) {
                         let rows = [];
-                        blog.map((item, index) => {
+                        blog.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 WorkTitle: item.WorkTitle,
                                 Authors: item.Authors,
                                 PublishedYear: item.PublishedYear,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" >Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <a href="" target="_blank" >File</a>),
+                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
                                 action: (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -402,7 +402,7 @@ function PublicationManager(props) {
 
                     if (book.length > 0) {
                         let rows = [];
-                        book.map((item, index) => {
+                        book.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 WorkTitle: item.WorkTitle,
@@ -411,8 +411,8 @@ function PublicationManager(props) {
                                 Publisher: item.Publisher,
                                 PlaceOfPublication: item.PlaceOfPublication,
                                 Edition: item.Edition,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" >Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <a href="" target="_blank" >File</a>),
+                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
                                 action: (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -449,7 +449,7 @@ function PublicationManager(props) {
 
                     if (book_chapter.length > 0) {
                         let rows = [];
-                        book_chapter.map((item, index) => {
+                        book_chapter.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 WorkTitle: item.WorkTitle,
@@ -460,7 +460,7 @@ function PublicationManager(props) {
                                 ChapterTitle: item.ChapterTitle,
                                 ChapterNumber: item.ChapterNumber,
                                 EditorName: item.EditorName,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" >Link</a>),
+                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
                                 action: (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -498,7 +498,7 @@ function PublicationManager(props) {
 
                     if (conference.length > 0) {
                         let rows = [];
-                        conference.map((item, index) => {
+                        conference.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 WorkTitle: item.WorkTitle,
@@ -509,8 +509,8 @@ function PublicationManager(props) {
                                 Publisher: item.Publisher,
                                 PlaceOfPublication: item.PlaceOfPublication,
                                 Organiser: item.Organiser,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" >Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <a href="" target="_blank" >File</a>),
+                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
                                 action: (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -548,7 +548,7 @@ function PublicationManager(props) {
 
                     if (journal.length > 0) {
                         let rows = [];
-                        journal.map((item, index) => {
+                        journal.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 WorkTitle: item.WorkTitle,
@@ -560,8 +560,8 @@ function PublicationManager(props) {
                                 PageRange: item.PageRange,
                                 DOI: item.DOI,
                                 DatabaseName: item.DatabaseName,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" >Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <a href="" target="_blank" >File</a>),
+                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
                                 action: (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -599,15 +599,15 @@ function PublicationManager(props) {
 
                     if (newspaper.length > 0) {
                         let rows = [];
-                        newspaper.map((item, index) => {
+                        newspaper.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 WorkTitle: item.WorkTitle,
                                 PaperTitle: item.PaperTitle,
                                 Authors: item.Authors,
                                 PublishedYear: item.PublishedYear,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" >Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <a href="" target="_blank" >File</a>),
+                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
                                 action: (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -641,7 +641,7 @@ function PublicationManager(props) {
 
                     if (patent.length > 0) {
                         let rows = [];
-                        patent.map((item, index) => {
+                        patent.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 WorkTitle: item.WorkTitle,
@@ -651,8 +651,8 @@ function PublicationManager(props) {
                                 Assignee: item.Assignee,
                                 PatentNumber: item.PatentNumber,
                                 DatabaseName: item.DatabaseName,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" >Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <a href="" target="_blank" >File</a>),
+                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
                                 action: (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -840,6 +840,7 @@ function PublicationManager(props) {
 
     useEffect(() => {
         getRecords();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(()=>{
@@ -871,7 +872,9 @@ function PublicationManager(props) {
             BlogName: "",
             UploadFile: "",
             EntryID: "",
-        });    }, [change])
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [change])
 
     return isLoading ? (
         <Loader />

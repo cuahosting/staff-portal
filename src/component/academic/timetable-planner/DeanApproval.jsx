@@ -11,12 +11,15 @@ import Select from "react-select";
 
 function DeanApproval(props) {
   const token = props.login[0].token;
+  // eslint-disable-next-line no-unused-vars
   const [moduleData, setModuleData] = useState({
     moduleCode: "",
     insertedBy: props.login[0].StaffID,
     insertedOn: new Date().toISOString().slice(0, 19).replace("T", " "),
   });
+  // eslint-disable-next-line no-unused-vars
   const [courseList, setCourseList] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [allSemester, setAllSemester] = useState([]);
   const [semesterOptions, setSemesterOptions] = useState([]);
   const [allModulesByCourse, setAllModulesByCourse] = useState([]);
@@ -90,7 +93,7 @@ function DeanApproval(props) {
         .then((response) => {
           let rows = []
           if (response.data.length > 0) {
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ value: row.CourseCode, label: row.CourseName })
             });
             setCourseOptions(rows)
@@ -102,6 +105,7 @@ function DeanApproval(props) {
         });
     };
     getAllModulesByCourse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -111,7 +115,7 @@ function DeanApproval(props) {
         .then((response) => {
           let rows = []
           if (response.data.length > 0) {
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
             });
             setAllSemester(response.data);
@@ -124,8 +128,10 @@ function DeanApproval(props) {
         });
     };
     getSchoolSemester();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
   const handleChange = (e) => {
     setCourseCode({
       ...courseCode,
@@ -171,7 +177,7 @@ function DeanApproval(props) {
           setModuleList(response.data);
           setAllModulesByCourse(response.data);
           let rows = [];
-          response.data.map((module, index) => {
+          response.data.forEach((module, index) => {
             const l1 = module.Lecturers.split(" ,")[0] === "No Name" ? "--" : module.Lecturers.split(" ,")[0];
             const l2 = module.Lecturers.split(" ,")[1] === "No Name" ? "--" : module.Lecturers.split(" ,")[1];
             const l3 = module.Lecturers.split(" ,")[2] === "No Name" ? "--" : module.Lecturers.split(" ,")[2];

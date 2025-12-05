@@ -10,6 +10,7 @@ import { connect } from "react-redux";
 function CampusSettings(props) {
     const token = props.loginData[0].token;
 
+    // eslint-disable-next-line no-unused-vars
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState('off')
     const [datatable, setDatatable] = useState({
@@ -45,7 +46,7 @@ function CampusSettings(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((campus, index) => {
+                    result.data.forEach((campus, index) => {
                         rows.push({
                             CampusID: campus.EntryID,
                             CampusName: campus.CampusName,
@@ -169,6 +170,7 @@ function CampusSettings(props) {
 
     useEffect(() => {
         getCampus();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

@@ -12,7 +12,9 @@ import TimetableView from "../../timetable-view/timetable-view";
 const ViewTimeTableGrid = (props) => {
     const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [facultyList, setFacultyList] = useState(props.FacultyList)
+    // eslint-disable-next-line no-unused-vars
     const [departmentList, setDepartmentList] = useState(props.DepartmentList);
     const [groupList, setGroupList] = useState([]);
     const [courseList, setCoursesList] = useState([]);
@@ -172,6 +174,7 @@ const ViewTimeTableGrid = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     return isLoading ? (
         <Loader />

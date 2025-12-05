@@ -15,12 +15,12 @@ import {
     projectEmail,
     projectPhone,
 } from "../../../resources/url";
-import ReportTable from "../../common/table/report_table";
+import AGTable from "../../common/table/AGTable";
 import {showAlert} from "../../common/sweetalert/sweetalert";
 
 function ExaminationReports(props) {
     const token = props.loginData.token;
-    
+
     const [isLoading, setIsLoading] = useState(false);
     const [canSeeReport, setCanSeeReport] = useState(false);
     const [semesterList, setSemesterList] = useState([]);
@@ -29,17 +29,18 @@ function ExaminationReports(props) {
     const componentRef = useRef();
     const printAllComponentRef = useRef();
     const [selectedStudent, setSelectedStudent] = useState([]);
-    const [generalDatatable, setGeneralDatatable] = useState([]);
-    const columns = [
-        "S/N",
-        "Student ID",
-        "Module Code",
-        "Module Title",
-        "Total",
-        "Student Grade",
-        "Decision",
-        // "Action"
-    ];
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Student ID", field: "StudentID" },
+            { label: "Module Code", field: "ModuleCode" },
+            { label: "Module Title", field: "ModuleTitle" },
+            { label: "Total", field: "Total" },
+            { label: "Student Grade", field: "StudentGrade" },
+            { label: "Decision", field: "Decision" }
+        ],
+        rows: []
+    });
 
     const [createReport, setCreateReport] = useState({
         ReportType: "",
@@ -115,45 +116,21 @@ function ExaminationReports(props) {
                         if (data.length > 0) {
                             setData(data);
                             data.map((item, index) => {
-                                rows.push([
-                                    index + 1,
-                                    item.StudentID,
-                                    item.ModuleCode,
-                                    item.ModuleTitle,
-                                    item.Total,
-                                    item.StudentGrade,
-                                    item.Decision,
-                                    (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="btn btn-sm btn-primary"
-                                                onClick={() => {
-                                                    setCanSeeReport(true);
-                                                    setTimeout(() => {
-                                                        print();
-                                                        setCanSeeReport(false);
-                                                    }, 10);
-                                                }}
-                                            >
-                                                <i className="fa fa-print" />
-                                            </button>
-
-                                        </>
-                                    ),
-                                ]);
-                                rows.push([
-                                    index + 1,
-                                    item.StudentID,
-                                    item.ModuleCode,
-                                    item.ModuleTitle,
-                                    item.Total,
-                                    item.StudentGrade,
-                                    item.Decision,
-                                ]);
+                                rows.push({
+                                    sn: index + 1,
+                                    StudentID: item.StudentID || 'N/A',
+                                    ModuleCode: item.ModuleCode || 'N/A',
+                                    ModuleTitle: item.ModuleTitle || 'N/A',
+                                    Total: item.Total || 0,
+                                    StudentGrade: item.StudentGrade || 'N/A',
+                                    Decision: item.Decision || 'N/A'
+                                });
                             });
                         }
-                        setGeneralDatatable(rows);
+                        setDatatable({
+                            ...datatable,
+                            rows: rows
+                        });
                         setIsLoading(false);
                     })
                     .catch((err) => {
@@ -173,65 +150,21 @@ function ExaminationReports(props) {
                         if (data.length > 0) {
                             setData(data);
                             data.map((item, index) => {
-                                rows.push([
-                                    index + 1,
-                                    item.StudentID,
-                                    item.ModuleCode,
-                                    item.ModuleTitle,
-                                    item.Total,
-                                    item.StudentGrade,
-                                    item.Decision,
-                                    (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="btn btn-sm btn-primary"
-                                                onClick={() => {
-                                                    setCanSeeReport(true);
-                                                    setTimeout(() => {
-                                                        print();
-                                                        setCanSeeReport(false);
-                                                    }, 10);
-                                                }}
-                                            >
-                                                <i className="fa fa-print" />
-                                            </button>
-
-                                        </>
-                                    ),
-                                ]);
-                                rows.push([
-                                    index + 1,
-                                    item.StudentID,
-                                    item.ModuleCode,
-                                    item.ModuleTitle,
-                                    item.Total,
-                                    item.StudentGrade,
-                                    item.Decision,
-                                    // (
-                                    //     <>
-                                    //         <button
-                                    //             type="button"
-                                    //             className="btn btn-sm btn-primary"
-                                    //             onClick={() => {
-                                    //                 setCanSeeReport(true);
-                                    //                 setTimeout(() => {
-                                    //                     print();
-                                    //                     setCanSeeReport(false);
-                                    //                 }, 10);
-                                    //                 setSelectedStudent(item.StudentID);
-                                    //             }}
-                                    //
-                                    //         >
-                                    //             <i className="fa fa-print" />
-                                    //         </button>
-                                    //
-                                    //     </>
-                                    // ),
-                                ]);
+                                rows.push({
+                                    sn: index + 1,
+                                    StudentID: item.StudentID || 'N/A',
+                                    ModuleCode: item.ModuleCode || 'N/A',
+                                    ModuleTitle: item.ModuleTitle || 'N/A',
+                                    Total: item.Total || 0,
+                                    StudentGrade: item.StudentGrade || 'N/A',
+                                    Decision: item.Decision || 'N/A'
+                                });
                             });
                         }
-                        setGeneralDatatable(rows);
+                        setDatatable({
+                            ...datatable,
+                            rows: rows
+                        });
                         setIsLoading(false);
                     })
                     .catch((err) => {
@@ -289,114 +222,14 @@ function ExaminationReports(props) {
                 </div>
                 <br />
 
-                <ReportTable title={"Students Approved Result"} columns={columns} data={generalDatatable} />
+                {datatable.rows.length > 0 && (
+                    <div className="card card-no-border">
+                        <div className="card-body p-0">
+                            <AGTable data={datatable} />
+                        </div>
+                    </div>
+                )}
 
-                {/*{createReport.SemesterCode && createReport.ReportType && generalDatatable.length > 0 && (*/}
-                {/*    <>*/}
-                {/*        <div className="col-md-12 pt-5">*/}
-                {/*            <button className="btn btn-primary w-100"*/}
-                {/*                    onClick={() => {*/}
-                {/*                        setCanSeeReport(true);*/}
-                {/*                        setTimeout(() => {*/}
-                {/*                            printAll();*/}
-                {/*                            setCanSeeReport(false);*/}
-                {/*                        }, 10);*/}
-                {/*                    }}>Print All*/}
-                {/*            </button>*/}
-                {/*        </div>*/}
-
-                {/*        {canSeeReport === true && (*/}
-                {/*            <div className="table-responsive">*/}
-                {/*                <div className="p-5" ref={printAllComponentRef}>*/}
-                {/*                    /!*HEADER START*!/*/}
-                {/*                    <div style={{ textSize: "100%" }}>*/}
-                {/*                        <div className="pt-3">*/}
-                {/*                            <div className="header" style={{backgroundColor: "#e0e0e0", color: "black",}}>*/}
-                {/*                                <div style={{textAlign: "center", padding: "12px", color: "black",}}>*/}
-                {/*                                    <h5*/}
-                {/*                                        style={{*/}
-                {/*                                            textAlign: "center",*/}
-                {/*                                            color: "black",*/}
-                {/*                                        }}*/}
-                {/*                                    >*/}
-                {/*                                        <img*/}
-                {/*                                            alt="Logo"*/}
-                {/*                                            src={projectLogo}*/}
-                {/*                                            style={{*/}
-                {/*                                                height: "70px",*/}
-                {/*                                                alignText: "center",*/}
-                {/*                                            }}*/}
-                {/*                                        />*/}
-                {/*                                        <br />*/}
-                {/*                                        <p></p>*/}
-                {/*                                        {projectName}*/}
-                {/*                                    </h5>*/}
-                {/*                                    <p*/}
-                {/*                                        style={{*/}
-                {/*                                            textAlign: "center",*/}
-                {/*                                            color: "black",*/}
-                {/*                                            marginButton: "50px",*/}
-                {/*                                            lineHeight: "1.6",*/}
-                {/*                                        }}*/}
-                {/*                                    >*/}
-                {/*                                        {projectAddress}<br />*/}
-                {/*                                        {new Date().toLocaleString().replace(",", "")}*/}
-                {/*                                    </p>*/}
-                {/*                                </div>*/}
-                {/*                            </div>*/}
-                {/*                        </div>*/}
-                {/*                    </div>*/}
-                {/*                    /!*HEADER END*!/*/}
-
-                {/*                    <h4 className="pt-5">*/}
-                {/*                        {createReport.ReportType} Results for {createReport.SemesterCode} Semester Examination*/}
-                {/*                    </h4>*/}
-
-                {/*                    <table className="table table-striped p-5">*/}
-                {/*                        <thead>*/}
-                {/*                        <tr>*/}
-                {/*                            <th>S/N</th>*/}
-                {/*                            <th>StudentID</th>*/}
-                {/*                            <th>Names</th>*/}
-                {/*                            <th>Module Code</th>*/}
-                {/*                            <th>Module Title</th>*/}
-                {/*                            <th>Total</th>*/}
-                {/*                            <th>Student Grade</th>*/}
-                {/*                            <th>Decision</th>*/}
-                {/*                        </tr>*/}
-                {/*                        </thead>*/}
-
-                {/*                        <tbody>*/}
-                {/*                            {data.length > 0 && (*/}
-                {/*                                <>*/}
-                {/*                                    {data.map((item, index) => (*/}
-                {/*                                        <tr key={index}>*/}
-                {/*                                            <td>{index+1}</td>*/}
-                {/*                                            <td>{item.StudentID}</td>*/}
-                {/*                                            <td>*/}
-                {/*                                                {students.length > 0 &&*/}
-                {/*                                                students*/}
-                {/*                                                    .filter(*/}
-                {/*                                                        (i) => i.StudentID === item.StudentID*/}
-                {/*                                                    )*/}
-                {/*                                                    .map((r) => r.FirstName)}*/}
-                {/*                                            </td>*/}
-                {/*                                            <td>{item.ModuleCode}</td>*/}
-                {/*                                            <td>{item.ModuleTitle}</td>*/}
-                {/*                                            <td>{item.Total}</td>*/}
-                {/*                                            <td>{item.StudentGrade}</td>*/}
-                {/*                                            <td>{item.Decision}</td>*/}
-                {/*                                        </tr>*/}
-                {/*                                    ))}*/}
-                {/*                                </>*/}
-                {/*                            )}*/}
-                {/*                        </tbody>*/}
-                {/*                    </table>*/}
-                {/*                </div>*/}
-                {/*            </div>*/}
-                {/*        )}*/}
-                {/*    </>*/}
-                {/*)}*/}
             </div>
         </div>
     );

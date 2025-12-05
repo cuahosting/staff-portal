@@ -1,41 +1,48 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import Select from "react-select";
+import AGTable from "../../../../common/table/AGTable";
 
 
 export default function ItemAllocationForm(props) {
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "Field", field: "field" },
+            { label: "Value", field: "value" }
+        ],
+        rows: [],
+    });
+
+    useEffect(() => {
+        if (props.data.show === 1) {
+            const rows = [
+                { field: "ITEM NAME", value: props.data.ItemName || "N/A" },
+                { field: "Manufacturer", value: props.data.ManufacturerName || "N/A" },
+                { field: "Category", value: props.data.CategoryName || "N/A" },
+                { field: "Sub Category", value: props.data.SubCategoryName || "N/A" },
+                { field: "AVAILABLE QUANTITY", value: props.data.QuantityAvailable || "N/A" },
+                {
+                    field: "Photo",
+                    value: props.data.Photo ? <img src={props.data.Photo} width={100} height={100} alt="Item" /> : "N/A"
+                }
+            ];
+            setDatatable({
+                ...datatable,
+                rows: rows,
+            });
+        } else {
+            setDatatable({
+                ...datatable,
+                rows: [],
+            });
+        }
+    }, [props.data]);
+
     return (
         <>
             {
                 props.data.show === 1 ?
                     <div className="form-group mb-4 col-md-12">
-                        <table className="table table-bordered table-striped fs-xl-4">
-                            <thead>
-                            <tr>
-                                <th className="fw-bold text-uppercase" style={{width: '50%'}}>ITEM NAME</th>
-                                <td>{props.data.ItemName}</td>
-                            </tr>
-                            <tr>
-                                <th className="fw-bold text-uppercase">Manufacturer</th>
-                                <td>{props.data.ManufacturerName}</td>
-                            </tr>
-                            <tr>
-                                <th className="fw-bold text-uppercase">Category</th>
-                                <td>{props.data.CategoryName}</td>
-                            </tr>
-                            <tr>
-                                <th className="fw-bold text-uppercase">Sub Category</th>
-                                <td>{props.data.SubCategoryName}</td>
-                            </tr>
-                            <tr>
-                                <th className="fw-bold text-uppercase">AVAILABLE QUANTITY</th>
-                                <td>{props.data.QuantityAvailable}</td>
-                            </tr>
-                            <tr>
-                                <th className="fw-bold text-uppercase">Photo</th>
-                                <td><img src={props.data.Photo} width={100} height={100}/></td>
-                            </tr>
-                            </thead>
-                        </table>
+                        <AGTable data={datatable} paging={false} />
                         <hr/>
                     </div>
                     : <></>

@@ -3,6 +3,7 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
+// eslint-disable-next-line no-unused-vars
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import ReportTable from "../../../common/table/report_table";
@@ -27,7 +28,7 @@ function CAEntryReport(props)
             {
                 let rows = [];
                 response.data.length > 0 &&
-                    response.data.map((row) =>
+                    response.data.forEach((row) =>
                     {
                         rows.push({ label: `${row.CAName} (${row.ModuleCode} -- ${row.SemesterCode})`, value: row.EntryID, marked: row.CAMarked });
                     });
@@ -52,7 +53,7 @@ function CAEntryReport(props)
                 let rows = [];
                 if (data.length > 0)
                 {
-                    data.map((item, index) =>
+                    data.forEach((item, index) =>
                     {
                         rows.push([(index + 1), item.StudentID, item.StudentName, item.CAScore, setting.marked, item.InsertedBy])
                     })
@@ -71,9 +72,10 @@ function CAEntryReport(props)
 
     useEffect(() =>
     {
-        getCASettings().then((r) =>
+        getCASettings().then(() =>
         {
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 

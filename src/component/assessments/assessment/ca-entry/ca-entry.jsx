@@ -36,7 +36,7 @@ function CAEntry(props)
             {
                 let rows = [];
                 response.data.length > 0 &&
-                    response.data.map((row) =>
+                    response.data.forEach((row) =>
                     {
                         rows.push({ text: `${row.ModuleName} (${row.ModuleCode})`, id: row.ModuleCode });
                     });
@@ -114,7 +114,7 @@ function CAEntry(props)
                     let rows = [];
                     if (data.student_list.length > 0)
                     {
-                        data.student_list.map((item, index) =>
+                        data.student_list.forEach((item, index) =>
                         {
                             let ca_score_field = <input type="number" step={0.01} className="form-control"
                                 placeholder="Enter the score and press enter" max={ca_marked}
@@ -206,9 +206,10 @@ function CAEntry(props)
 
     useEffect(() =>
     {
-        getRunningModules().then((r) =>
+        getRunningModules().then(() =>
         {
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onFileChange = (e) =>
@@ -350,7 +351,7 @@ function CAEntry(props)
                         </div>
                     </div>
                     <div className="col-lg-6 col-md-4 pt-5">
-                        <label htmlFor="ModuleCode">Upload File (<small><a className="text-primary italic" target="_blank" href={CATemplate}>Click to donwload template</a></small>)</label>
+                        <label htmlFor="ModuleCode">Upload File (<small><a className="text-primary italic" target="_blank" rel="noopener noreferrer" href={CATemplate}>Click to donwload template</a></small>)</label>
                         <input className="form-control" type="file" id="CAFile" onChange={onFileChange} />
                     </div>
                     <div className="col-lg-6 col-md-4 pt-5">

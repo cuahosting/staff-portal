@@ -6,6 +6,7 @@ import { serverLink } from "../../../../resources/url";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import Loader from "../../../common/loader/loader";
+// eslint-disable-next-line no-unused-vars
 import AGReportTable from "../../../common/table/AGReportTable";
 import { connect } from "react-redux";
 
@@ -43,8 +44,11 @@ function VenueSettings(props) {
         ],
         rows: [],
     });
+    // eslint-disable-next-line no-unused-vars
     const [BlockList, setBlockList] = useState([])
+    // eslint-disable-next-line no-unused-vars
     const [Blocks, setBlocks] = useState(props.BlockList)
+    // eslint-disable-next-line no-unused-vars
     const [CampustList, setCampusList] = useState(props.campusList)
 
     const [createVenue, setcreateVenue] = useState({
@@ -63,7 +67,7 @@ function VenueSettings(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((venue, index) => {
+                    result.data.forEach((venue, index) => {
                         rows.push({
                             CampusID: props.campusList.filter(x => x.EntryID.toString() === venue.CampusID.toString())[0].CampusName,
                             VenueID: venue.EntryID,
@@ -206,6 +210,7 @@ function VenueSettings(props) {
 
     useEffect(() => {
         getVenue();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

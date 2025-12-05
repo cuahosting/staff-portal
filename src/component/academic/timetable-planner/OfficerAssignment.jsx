@@ -9,6 +9,7 @@ import { connect } from "react-redux";
 import AGTable from "../../common/table/AGTable";
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
+// eslint-disable-next-line no-unused-vars
 import Select from 'react-select';
 
 function OfficerAssignment(props) {
@@ -16,6 +17,7 @@ function OfficerAssignment(props) {
 
   const [staffList, setStaffList] = useState([]);
   const [courseList, setCourseList] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [item, setItem] = useState({
     StaffID: "",
     StaffName: "",
@@ -27,6 +29,7 @@ function OfficerAssignment(props) {
     courseCode: "",
     insertedBy: props.login[0].StaffID,
   });
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [officerData, setOfficerData] = useState([]);
@@ -68,7 +71,7 @@ function OfficerAssignment(props) {
         .then((response) => {
           let rows = [];
           response.data.length > 0 &&
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ text: row.FirstName + " " + row.MiddleName + " " + row.Surname, id: row.StaffID });
             });
           //setStaff(rows)
@@ -81,6 +84,7 @@ function OfficerAssignment(props) {
         });
     };
     getStaffList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -90,7 +94,7 @@ function OfficerAssignment(props) {
         .then((response) => {
           let rows = [];
           response.data.length > 0 &&
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ text: row.CourseName, id: row.CourseCode });
             });
           //setCourses(rows)
@@ -103,6 +107,7 @@ function OfficerAssignment(props) {
         });
     };
     getAllModulesByCourse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getOfficers = async () => {
@@ -112,7 +117,7 @@ function OfficerAssignment(props) {
         let rows = [];
         if (response.data.length > 0) {
           setOfficerData(response.data);
-          response.data.map((course, index) => {
+          response.data.forEach((course, index) => {
             rows.push({
               sn: index + 1,
               staffID: course.StaffID,
@@ -149,6 +154,7 @@ function OfficerAssignment(props) {
 
   useEffect(() => {
     getOfficers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 

@@ -72,6 +72,7 @@ function Department(props) {
   const token = props.LoginDetails[0].token
   const [isLoading, setIsLoading] = useState(true);
   const [isFormLoading, setisFormLoading] = useState("off");
+  // eslint-disable-next-line no-unused-vars
   const [department, setDepartment] = useState([]);
   const [staff, setStaff] = useState([]);
   const [datatable, setDatatable] = useState({
@@ -126,6 +127,7 @@ function Department(props) {
   });
 
   const [facultyList, setFacultyList] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [academicStaff, setAcademicStaff] = useState([]);
   async function deleteDepartment(departmentCode_ln) {
     await axios
@@ -148,10 +150,11 @@ function Department(props) {
   useEffect(() => {
     let rows = []
     props.FacultyList.length > 0 &&
-      props.FacultyList.map((x, i) => {
+      props.FacultyList.forEach((x) => {
         rows.push({label : x.FacultyName, value: x.FacultyCode})
       })
     setFacultyList(rows)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const getDepartments = async () => {
 
@@ -162,7 +165,7 @@ function Department(props) {
         if (result.data.length > 0) {
           staff = result.data
           setAcademicStaff(result.data);
-          result.data.map((row) => {
+          result.data.forEach((row) => {
             rows.push({ value: row.StaffID, label: row.StaffName + " - (" + row.StaffID + ")" })
           });
           setStaff(rows)
@@ -173,7 +176,7 @@ function Department(props) {
       .then((result) => {
         if (result.data.length > 0) {
           let rows = [];
-          result.data.map((department, index) => {
+          result.data.forEach((department, index) => {
             rows.push({
               sn: index + 1,
               EntryID: department.EntryID,
@@ -386,6 +389,7 @@ function Department(props) {
 
   useEffect(() => {
     getDepartments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (

@@ -7,6 +7,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
+// eslint-disable-next-line no-unused-vars
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import Select from 'react-select';
@@ -78,7 +79,7 @@ function ModuleAssignment2(props) {
         .then((response) => {
           let rows = [];
           response.data.length > 0 &&
-            response.data.map((item, index) => {
+            response.data.forEach((item) => {
               rows.push({ value: item.CourseCode, label: item.CourseName })
             })
           setCourseList(response.data);
@@ -105,7 +106,7 @@ function ModuleAssignment2(props) {
       .then((result) => {
         let rows = [];
         if (result.data.length > 0) {
-          result.data.map((item, index) => {
+          result.data.forEach((item, index) => {
             rows.push({
               sn: index + 1,
               ModuleName: item.ModuleName,
@@ -177,7 +178,7 @@ function ModuleAssignment2(props) {
         let rows = [];
         if (result.data.length > 0) {
           setShowAssignedModules(true);
-          result.data.map((module, index) => {
+          result.data.forEach((module, index) => {
             rows.push({
               sn: index + 1,
               ModuleName: module.ModuleName,
@@ -254,6 +255,7 @@ function ModuleAssignment2(props) {
 
   useEffect(() => {
     getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (
@@ -397,7 +399,7 @@ function ModuleAssignment2(props) {
                   <div className="col-md-6">
 
                     {
-                      showAssignedModules == true &&
+                      showAssignedModules === true &&
                       <>
                         <h3>Assigned Modules</h3>
                         <AGTable data={assignedModuleList} />

@@ -72,7 +72,7 @@ function TimetableSemester(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((semester, index) => {
+                    result.data.forEach((semester, index) => {
                         rows.push({
                             sn: index + 1,
                             SemesterName: semester.SemesterName ?? "N/A",
@@ -235,7 +235,7 @@ function TimetableSemester(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((semester, index) => {
+                    result.data.forEach((semester, index) => {
                         rows.push({
                             sn: index + 1,
                             SemesterName: semester.SemesterName ?? "N/A",
@@ -280,6 +280,7 @@ function TimetableSemester(props) {
             .catch((err) => {
                 console.log("NETWORK ERROR");
             });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

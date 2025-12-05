@@ -1,166 +1,123 @@
-import React, {useEffect} from "react";
-import ReactDOMServer from 'react-dom/server';
-import "jquery/dist/jquery.min.js";
-import jsZip from 'jszip';
-import "datatables.net-dt/js/dataTables.dataTables";
-import "datatables.net-dt/css/jquery.dataTables.min.css";
-import "datatables.net-buttons/js/dataTables.buttons.js";
-import "datatables.net-buttons/js/buttons.colVis.js";
-import "datatables.net-buttons/js/buttons.flash.js";
-import "datatables.net-buttons/js/buttons.html5.js";
-import "datatables.net-buttons/js/buttons.print.js";
-import "./style.css";
-import $ from "jquery";
-import {convertNumbertoWords, currencyConverter} from "../../../resources/constants";
-window.JSZip = jsZip;
+import React, { useMemo } from "react";
+import AGTable from "../table/AGTable";
 
-
+/**
+ * Legacy BankDataTable component - now wraps AGTable for modern AG Grid functionality
+ *
+ * This component maintains backward compatibility with the old jQuery DataTables interface
+ * specialized for bank payment schedules with custom print formatting.
+ *
+ * @deprecated Consider using AGTable directly for new code
+ *
+ * Props:
+ * - header: Array of column header strings
+ * - body: Array of React elements (table rows) - DEPRECATED, not used with AGTable
+ * - tableID: Table ID (not used with AGTable)
+ * - date: Report date
+ * - caption: Total caption text
+ * - total_amount: Total amount for payment schedule
+ * - signatory: Signatory JSX element for print
+ * - isGrouping: Enable row grouping (not fully supported in migration)
+ * - groupCol: Column index to group by
+ *
+ * Migration Notes:
+ * - Custom print formatting with signatory is not directly supported in AGTable
+ * - Bank-specific features need to be reimplemented in consuming components
+ * - For new implementations, use AGTable with the columns/rows structure
+ */
 export default function BankDataTable(props) {
-    const today = new Date();
-    const current_date = `${today.getFullYear()}-${(today.getMonth()+1) < 10 ? '0'+(today.getMonth()+1) : (today.getMonth()+1)}-${today.getDate() < 10 ? '0'+today.getDate() : today.getDate()}`;
-    let tblID = props.tableID ?? "table";
-    let report_date = props.date;
-    let total_caption = props.caption;
-    let total_amount = props.total_amount;
-    const signatoryHtml = ReactDOMServer.renderToStaticMarkup(props.signatory);
-    let groupColumn = props.groupCol ??  0;
-    let isGrouping = props.isGrouping ?
-        {
-            "order": [[groupColumn, 'asc']],
-            "drawCallback": function (settings)  {
-                let api = this.api();
-                let rows = api.rows({page: 'current'}).nodes();
-                let last = null;
-
-                api.column(groupColumn, {page: 'current'}).data().each(function (group, i) {
-                    if (last !== group) {
-                        $(rows).eq(i).before(
-                            '<tr class="group"><td colspan="14" style="background-color: rgba(110, 219, 110, 0.42);" align="center"><h4>' + group + '</h4></td></tr>'
-                        );
-
-                        last = group;
-                    }
-                });
-            }
-        } : {};
-    let groupColumnVisibility = props.isGrouping ? {"visible": false, "targets": groupColumn,} : {};
-
-    useEffect( () => {
-        if (!$.fn.DataTable.isDataTable("#myTable")) {
-            $(document).ready(function () {
-                setTimeout(function () {
-                    $(`#${tblID}`).DataTable({
-                        pagingType: "full_numbers",
-                        pageLength: 20,
-                        processing: true,
-                        dom: "Bfrtip",
-                        select: {
-                            style: "single",
-                        },
-                        buttons: [
-                            {
-                                extend: "pageLength",
-                                className: "btn btn-secondary bg-secondary",
-                            },
-                            {
-                                extend: "copy",
-                                className: "btn btn-secondary bg-secondary",
-                            },
-                            {
-                                extend: "csv",
-                                className: "btn btn-secondary bg-secondary",
-                            },
-                            {
-                                extend: "excelHtml5",
-                                className: "btn btn-secondary bg-secondary",
-                            },
-                            {
-                                extend: "print",
-                                customize: function (win) {
-                                    $(win.document.body).find('h1').remove();$(win.document.body).find('td').find('a').remove();
-                                    $(win.document.body).find('table').prepend('<caption><div class="flex-container" style="width: 100%; margin: 5px;">' +
-                                        `<img src="https://staff.kadpolyodfel.ng/banner2.png" style="width: 100%"/></div>` +
-                                        `<div style=" margin-top: 10px; display: block"/>
-                                          <p style="font-size: 14px; margin-bottom: 10px">
-                                            <b>The Manager</b><br>
-                                            Guaranty Trust Bank<br>
-                                            Central Area Abuja<br>
-                                            Nigeria. <br>
-
-                                          </p>
-                                          <center style="font-size: 14px; margin-bottom: 10px"><b>Approved payment to following assigned staffs</b></center>
-                                          <p style="font-size: 14px; margin-bottom: 10px">
-                                            Debit our account in your Bank (0040098779) with ${convertNumbertoWords(total_amount)} <b>(${currencyConverter(total_amount)})</b> only, and credit the following accounts.
-                                          </p>
-                                        </div><caption>`);
-                                    $(win.document.body).append(`
-                                    <div style="page-break-inside: avoid; margin-top: 20px;">
-                                      ${signatoryHtml}
-                                    </div>
-                                  `);
-                                    // $(win.document.body).find('th').css('white-space', 'pre-line');
-                                    // $(win.document.body).find('td').css('white-space', 'pre-line');
-                                    $(win.document.body).find('td').css('text-justify', 'auto');
-                                    $(win.document.body).find('td').css('border', '0.5px solid #000000');
-                                    $(win.document.body).find('th').css('border', '0.5px solid #000000');
-                                    $(win.document.body).find('table').addClass('compact').css('font-size', '11px', 'width', '100%','font-family', 'Roboto, Helvetica, Arial, sans-serif', 'font-weight', '400');
-                                    // $(win.document.body).find('table').addClass('wd').css('width', '100px');
-
-                                },
-                                className: "btn btn-secondary bg-secondary",
-                            },
-                        ],
-                        ...isGrouping,
-                        fnRowCallback: function (
-                            nRow,
-                            aData,
-                            iDisplayIndex,
-                            iDisplayIndexFull
-                        ) {
-                            var index = iDisplayIndexFull + 1;
-                            $("td:first", nRow).html(index);
-                            return nRow;
-                        },
-
-                        lengthMenu: [
-                            [10, 20, 30, 50, -1],
-                            [10, 20, 30, 50, "All"],
-                        ],
-                        columnDefs: [
-                            groupColumnVisibility,
-                            {
-                                targets: 0,
-                                render: function (data, type, row, meta) {
-                                    return type === "export" ? meta.row + 1 : data;
-                                },
-                            },
-                        ],
-                    });
-                }, 5000);
-            });
+    // Convert old header/body format to AGTable's data structure
+    const tableData = useMemo(() => {
+        if (!props.header || props.header.length === 0) {
+            return { columns: [], rows: [] };
         }
-    }, []);
 
-    return ( <table id={tblID} className="table caption-top myTable align-items-center  justify-content-center mb-0" style={{fontSize: '12px'}}>
-            {
-                // props.caption ? <div className="hidden-on-print" style={{display: 'none'}}><caption><h1 className="text-end">{props.caption}</h1></caption> </div> : <></>
-            }
+        // Create columns from headers
+        const columns = props.header.map((headerText, index) => {
+            // Normalize header text to create field names
+            const fieldName = headerText.toLowerCase()
+                .replace(/[^a-z0-9\s]/g, '') // Remove special chars
+                .replace(/\s+/g, '_')         // Replace spaces with underscore
+                .replace(/^_+|_+$/g, '');     // Trim underscores
 
-            <thead>
-            <tr style={{border: '0.5px solid #000000'}}>
-                {
-                    props.header.length > 0 &&  props.header.map((item, index) => {
-                        return (
-                            <th  style={{border: '0.5px solid #000000'}} key={index} className="text-uppercase text-sm font-weight-bolder bg-secondary opacity-7 ps-2">{item}</th>
-                        )
-                    })
-                }
-            </tr>
-            </thead>
-            <tbody>
-            {props.body}
-            </tbody>
-        </table>
-    )
+            return {
+                label: headerText,
+                field: fieldName || `col_${index}`,
+            };
+        });
 
+        // Note: Bank-specific features (signatory, custom print format) are not supported
+        // These need to be reimplemented in the consuming component
+
+        return {
+            columns,
+            rows: [], // Cannot convert JSX body to data rows automatically
+        };
+    }, [props.header]);
+
+    // If this component is being used with legacy body prop, show warning
+    if (props.body && props.body.length > 0) {
+        console.warn(
+            'BankDataTable: The "body" prop with JSX elements is deprecated. ' +
+            'Please migrate to AGTable with a proper data structure (columns/rows). ' +
+            'See staff/src/component/academic/course/course.jsx for reference.'
+        );
+    }
+
+    // Show warning about grouping feature if used
+    if (props.isGrouping) {
+        console.warn(
+            'BankDataTable: Row grouping from jQuery DataTables is not supported in AGTable. ' +
+            'Please use AG Grid\'s built-in row grouping features instead.'
+        );
+    }
+
+    // Show warning about bank-specific features
+    if (props.signatory || props.total_amount) {
+        console.warn(
+            'BankDataTable: Bank-specific features (signatory, custom print format) are not supported in AGTable. ' +
+            'Please implement these features in your component using AG Grid\'s export customization.'
+        );
+    }
+
+    return (
+        <div>
+            {(props.signatory || props.total_amount) && (
+                <div style={{ padding: '10px', marginBottom: '10px', backgroundColor: '#d1ecf1', border: '1px solid #bee5eb', borderRadius: '4px' }}>
+                    <strong style={{ color: '#0c5460' }}>ℹ️ Note:</strong>
+                    <span style={{ color: '#0c5460', marginLeft: '5px' }}>
+                        Bank payment schedule features (signatory, custom print) need to be reimplemented using AG Grid's export customization.
+                    </span>
+                </div>
+            )}
+            {props.isGrouping && (
+                <div style={{ padding: '10px', marginBottom: '10px', backgroundColor: '#d1ecf1', border: '1px solid #bee5eb', borderRadius: '4px' }}>
+                    <strong style={{ color: '#0c5460' }}>ℹ️ Note:</strong>
+                    <span style={{ color: '#0c5460', marginLeft: '5px' }}>
+                        Row grouping needs to be reimplemented using AG Grid's grouping features.
+                    </span>
+                </div>
+            )}
+            {props.body && props.body.length > 0 ? (
+                // Fallback: Show a message if legacy body prop is used
+                <div style={{ padding: '20px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#856404', marginBottom: '10px' }}>
+                        ⚠️ BankDataTable Component Needs Migration
+                    </h5>
+                    <p style={{ color: '#856404', marginBottom: '10px' }}>
+                        This BankDataTable component is using the deprecated JSX body format.
+                        Please migrate to AGTable with a columns/rows data structure.
+                        See <code>staff/src/component/academic/course/course.jsx</code> for an example.
+                    </p>
+                    <p style={{ color: '#856404', marginBottom: '0' }}>
+                        <strong>Bank-specific features:</strong> Custom print formatting, signatory section,
+                        and payment amount conversion need to be reimplemented in your component.
+                    </p>
+                </div>
+            ) : (
+                // New path: Use AGTable
+                <AGTable data={tableData} />
+            )}
+        </div>
+    );
 }

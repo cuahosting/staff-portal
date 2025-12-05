@@ -35,7 +35,7 @@ function TimetableViewContainer(props) {
                         {
                             data.map((x, y) => {
                                 let staff_data = "";
-                                x.StaffList.map((staff, index) => {
+                                x.StaffList.forEach((staff, index) => {
                                     staff_data += `<div className="text-default me-2">${staff.StaffName}</div>`
                                 })
                                 if (x.DayName === 'Monday') {
@@ -62,7 +62,7 @@ function TimetableViewContainer(props) {
                         {
                             data.map((x, y) => {
                                 let staff_data = "";
-                                x.StaffList.map((staff, index) => {
+                                x.StaffList.forEach((staff, index) => {
                                     staff_data += `<div key="${index}" className="text-default me-2">${staff.StaffName}</div>`
                                 })
                                 if (x.DayName === 'Tuesday') {
@@ -88,7 +88,7 @@ function TimetableViewContainer(props) {
                         {
                             data.map((x, y) => {
                                 let staff_data = "";
-                                x.StaffList.map((staff, index) => {
+                                x.StaffList.forEach((staff, index) => {
                                     staff_data += `<div key="${index}" className="text-default me-2">${staff.StaffName}</div>`
                                 })
                                 if (x.DayName === 'Wednesday') {
@@ -114,7 +114,7 @@ function TimetableViewContainer(props) {
                         {
                             data.map((x, y) => {
                                 let staff_data = "";
-                                x.StaffList.map((staff, index) => {
+                                x.StaffList.forEach((staff, index) => {
                                     staff_data += `<div key="${index}" className="text-default me-2">${staff.StaffName}</div>`
                                 })
                                 if (x.DayName === 'Thursday') {
@@ -140,7 +140,7 @@ function TimetableViewContainer(props) {
                         {
                             data.map((x, y) => {
                                 let staff_data = "";
-                                x.StaffList.map((staff, index) => {
+                                x.StaffList.forEach((staff, index) => {
                                     staff_data += `<div key="${index}" className="text-default me-2">${staff.StaffName}</div>`
                                 })
                                 if (x.DayName === 'Friday') {
@@ -166,7 +166,7 @@ function TimetableViewContainer(props) {
                         {
                             data.map((x, y) => {
                                 let staff_data = "";
-                                x.StaffList.map((staff, index) => {
+                                x.StaffList.forEach((staff, index) => {
                                     staff_data += `<div key="${index}" className="text-default me-2">${staff.StaffName}</div>`
                                 })
                                 if (x.DayName === 'Saturday') {

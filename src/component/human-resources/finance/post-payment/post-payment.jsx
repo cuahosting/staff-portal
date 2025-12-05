@@ -8,7 +8,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert, showConfirm } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import { currencyConverter, encryptData, projectCode } from "../../../../resources/constants";
 import { Link } from "react-router-dom";
 
@@ -1265,17 +1265,17 @@ function PostPayment(props)
 
                                     <div className="tab-pane fade active show" id="tuition_fee" role="tabpanel">
                                         <div className="" data-kt-customer-table-toolbar="base">
-                                            <Table data={tuitionDatatable} pagingTop={false} paging={false} />
+                                            <AGTable data={tuitionDatatable} paging={false} />
                                         </div>
                                     </div>
                                     <div className="tab-pane fade" id="other_fee_tab" role="tabpanel">
                                         <div className="" data-kt-customer-table-toolbar="base">
-                                            <Table data={otherFeeDatatable} pagingTop={false} paging={false} />
+                                            <AGTable data={otherFeeDatatable} paging={false} />
                                         </div>
                                     </div>
                                     <div className="tab-pane fade " id="payment_history" role="tabpanel">
                                         <div className="" data-kt-customer-table-toolbar="base">
-                                            <Table data={paymentHistoryDatatable} pagingTop={false} paging={false} />
+                                            <AGTable data={paymentHistoryDatatable} paging={false} />
                                         </div>
                                     </div>
                                 </div>

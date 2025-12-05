@@ -44,7 +44,7 @@ const ModuleAssignment = (props) => {
                 .then((result) => {
                     let rows = []
                     if (result.data.length > 0) {
-                        result.data.map((x) => {
+                        result.data.forEach((x) => {
                             rows.push({ value: x.CourseCode, label: x.CourseName })
                         })
                     }
@@ -78,7 +78,7 @@ const ModuleAssignment = (props) => {
         //     toast.error('no modules for this course...')
         // }
         if (allModules.length > 0) {
-            allModules.map((item, index) => {
+            allModules.forEach((item) => {
                 rows.push({ value: item.ModuleCode+"-"+item.CreditUnit, label: item.ModuleCode + " -- " + item.ModuleName })
             })
         } else {
@@ -174,7 +174,7 @@ const ModuleAssignment = (props) => {
                 .then((result) => {
                     let rows = [];
                     if (result.data.length > 0) {
-                        result.data.map((item, index) => {
+                        result.data.forEach((item, index) => {
                             rows.push([
                                 index + 1,
                                 item.ModuleCode,
@@ -206,6 +206,7 @@ const ModuleAssignment = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return isLoading ? (<Loader />) : (

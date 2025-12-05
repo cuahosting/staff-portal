@@ -1,48 +1,53 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {toast} from "react-toastify";
 import {currencyConverter} from "../../../../resources/constants";
+import AGTable from "../../../common/table/AGTable";
 
 
 export default function InventoryPurchaseOrderUpdate(props) {
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Item", field: "item_name" },
+            { label: "Relevant Budget Item", field: "budget_item_name" },
+            { label: "Quantity", field: "quantity" },
+            { label: "Unit Price", field: "unit_price" },
+            { label: "Action", field: "action" }
+        ],
+        rows: [],
+    });
 
-    const onItemChange = (itemData) => {
-        const row = [];
-        if (itemData.length > 0) {
-            return  itemData.map((r, i) => {
-                return (
-                    <tr  key={i}>
-                        <td>{i+1}</td>
-                        <td>{r.item_name}</td>
-                        <td><input type="number" id={`quantity-${r.item_id}`} item_id={r.item_id} className="quantity form-control" name="quantity" min={1} defaultValue={1}  style={{width: '90px', height: '30px'}}/></td>
-                        <td><input type="button" id="checkItem" item_id={r.item_id}  data={JSON.stringify(r)} className="btn btn-sm btn-primary checkItem" name="checkItem" value={"Add"} onClick={(e)=>{ onCheck(e)  }} /></td>
-                    </tr>
+    useEffect(() => {
+        if (props.selectedOrderItems && props.selectedOrderItems.length > 0) {
+            const rows = props.selectedOrderItems.map((item, index) => ({
+                sn: index + 1,
+                item_name: item.item_name,
+                budget_item_name: item.budget_item_name,
+                quantity: (
+                    <>
+                        <input type="number" hidden id={`budget-${item.budget_item_id}`} item_id={item.item_id} request_id={item.request_id} amount_paid={item.request_id} className="budget form-control" name="budget" min={1} defaultValue={item.budget_item_id} style={{width: '80px', height: '30px'}}/>
+                        <input type="number" id={`quantity-${item.item_id}`} item_id={item.item_id} request_id={item.request_id} amount_paid={item.request_id} className="quantity form-control" name="quantity" min={1} defaultValue={item.quantity} style={{width: '80px', height: '30px'}}/>
+                        <input type="text" hidden id={`budget_name-${item.budget_item_name}`} item_id={item.item_id} request_id={item.request_id} amount_paid={item.request_id} className="budget_name form-control" name="budget_name" min={1} defaultValue={item.budget_item_name} style={{width: '80px', height: '30px'}}/>
+                    </>
+                ),
+                unit_price: <input type="number" id={`amount-${item.item_id}`} item_id={item.item_id} request_id={item.request_id} quantity={item.quantity} quantity_received={item.quantity_received} className="amount form-control" name="amount" min={1} defaultValue={item.amount} style={{width: '150px', height: '30px'}}/>,
+                action: (
+                    <button className="btn btn-link p-0 text-danger" title="Delete" onClick={() => handleDelete(item)}>
+                        <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
+                    </button>
                 )
-            })
-        }else{
-            return (
-                <tr>
-                    <td className="text-center" colSpan={4}>No Record Found</td>
-                </tr>
-            )
+            }));
+            setDatatable({
+                ...datatable,
+                rows: rows,
+            });
+        } else {
+            setDatatable({
+                ...datatable,
+                rows: [],
+            });
         }
-    }
-
-    const onCheck = (e) => {
-        let itemString = e.target.getAttribute("data");
-        let itemSet = JSON.parse(itemString);
-        let item_id = e.target.getAttribute("item_id");
-        let quantity = document.getElementById(`quantity-${item_id}`).value;
-        let itemData = {item_id: itemSet.item_id,  item_name: itemSet.item_name, quantity: parseInt(quantity) }
-
-        if (quantity === "" || parseInt(quantity) === 0) {
-            e.target.checked = false;
-            toast.error("Quantity cannot be less than 1");
-            return false;
-        }
-
-        props.setCart(prevState => [...prevState.filter(e=>e.item_id.toString() !== item_id.toString()), itemData])
-        props._cart2.filter(e=>e.item_id.toString() !== item_id.toString()).push(itemData)
-    }
+    }, [props.selectedOrderItems]);
 
     const handleDelete = async (item) => {
 
@@ -110,47 +115,7 @@ export default function InventoryPurchaseOrderUpdate(props) {
                     <hr/>
                     <h2>Purchase Order Items</h2>
                     <hr/>
-                    <table className="table table-striped ">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Item</th>
-                            <th>Relevant Budget Item</th>
-                            <th>Quantity</th>
-                            <th>Unit Price</th>
-                            <th>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {
-                            props.selectedOrderItems.length > 0 ?
-                                props.selectedOrderItems.map((item, index)=> {
-                                    return(
-                                        <tr key={index}>
-                                            <td>{index+1}</td>
-                                            <td>{item.item_name}</td>
-                                            <td>{item.budget_item_name}</td>
-                                            <td>
-                                            <input type="number" hidden id={`budget-${item.budget_item_id}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="budget form-control" name="budget" min={1} defaultValue={item.budget_item_id} style={{width: '80px', height: '30px'}}/>
-                                                <input type="number" id={`quantity-${item.item_id}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="quantity form-control" name="quantity" min={1} defaultValue={item.quantity} style={{width: '80px', height: '30px'}}/></td>
-                                                <input type="number" hidden id={`budget-${item.budget_item_id}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="budget form-control" name="budget" min={1} defaultValue={item.budget_item_id} style={{width: '80px', height: '30px'}}/>
-                                                <input type="text" hidden id={`budget_name-${item.budget_item_name}`} item_id={item.item_id} request_id={item.request_id}   amount_paid={item.request_id}  className="budget_name form-control" name="budget_name" min={1} defaultValue={item.budget_item_name} style={{width: '80px', height: '30px'}}/>
-                                            <td><input type="number" id={`amount-${item.item_id}`} item_id={item.item_id} request_id={item.request_id} quantity={item.quantity}  quantity_received={item.quantity_received} className="amount form-control" name="amount" min={1} defaultValue={item.amount} style={{width: '150px', height: '30px'}}/></td>
-                                            <td>
-                                                <i className="fa fa-trash-alt text-danger" onClick={()=>handleDelete(item)}/>
-                                            </td>
-                                        </tr>
-                                    )
-                                })
-                                :
-                                <tr>
-                                    <td colSpan={6} className="text-center alert alert-danger"><b>No item selected, please select item.</b></td>
-                                </tr>
-
-                        }
-
-                        </tbody>
-                    </table>
+                    <AGTable data={datatable} paging={false} />
                     <input type="hidden" id="amount_paid" value={+props.selectedOrder.amount_paid} hidden/>
                 </div>
                 <hr/>

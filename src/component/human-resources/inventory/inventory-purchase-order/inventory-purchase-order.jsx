@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import AGTable from "../../../common/table/AGTable";
 import InventoryPurchaseOrderForm from "./inventory-purchase-order-form";
 import InventoryPurchaseOrderProcessing from "./inventory-purchase-order-processing";
 import InventoryPurchaseOrderUpdate from "./inventory-purchase-order-update";
@@ -53,8 +53,22 @@ function InventoryPurchaseOrder(props)
     const [manufacturer, setManufacturer] = useState({ manufacturer_name: "", manufacturer_id: "" })
     const [vendor, setVendor] = useState({ vendor_name: "", vendor_id: "" })
 
-    const columns = ["S/N", "Request From", "Request From ID", "Amount Expected", "Amount Paid", "Balance", "Status", "Payment", "Items", "Update", "Received Item"];
-    const [tableData, setTableData] = useState([]);
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Request From", field: "request_type" },
+            { label: "Request From ID", field: "requested_from" },
+            { label: "Amount Expected", field: "amount_expected" },
+            { label: "Amount Paid", field: "amount_paid" },
+            { label: "Balance", field: "balance" },
+            { label: "Status", field: "status" },
+            { label: "Payment", field: "payment_status" },
+            { label: "Items", field: "items" },
+            { label: "Update", field: "update" },
+            { label: "Received Item", field: "received_item" }
+        ],
+        rows: [],
+    });
     const [cart, setCart] = useState([])
     let _items2 = [];
     let _cart2 = [];
@@ -104,125 +118,140 @@ function InventoryPurchaseOrder(props)
                     }
 
 
-                    const row = [];
+                    const rows = [];
                     if (res.data.ItemView.length > 0)
                     {
                         res.data.ItemView.map((r, i) =>
                         {
                             let selected_order = purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString());
-                            row.push([i + 1, r.request_type, r.requested_from, currencyConverter(r.amount_expected), currencyConverter(r.amount_paid), currencyConverter(r.balance), r.status, r.payment_status,
-                            (
-                                purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).length === 0 ? '--' :
-                                    <table className={"table table-bordered table-row-bordered table-striped"} style={{ border: '1px solid #eeeeee' }}>
-                                        <thead>
-                                            <tr>
-                                                <th style={{ border: '1px solid #cccccc' }}>Item</th>
-                                                <th style={{ border: '1px solid #cccccc' }}>Relevant Budget Item</th>
-                                                <th style={{ border: '1px solid #cccccc' }}>Unit Price</th>
-                                                <th style={{ border: '1px solid #cccccc' }}>Qty</th>
-                                                <th style={{ border: '1px solid #cccccc' }}>Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
+
+                            // Create nested items table as JSX
+                            const itemsTable = purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).length === 0 ? '--' :
+                                <table className={"table table-bordered table-row-bordered table-striped"} style={{ border: '1px solid #eeeeee' }}>
+                                    <thead>
+                                        <tr>
+                                            <th style={{ border: '1px solid #cccccc' }}>Item</th>
+                                            <th style={{ border: '1px solid #cccccc' }}>Relevant Budget Item</th>
+                                            <th style={{ border: '1px solid #cccccc' }}>Unit Price</th>
+                                            <th style={{ border: '1px solid #cccccc' }}>Qty</th>
+                                            <th style={{ border: '1px solid #cccccc' }}>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).map((d, p) =>
                                             {
-                                                purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).map((d, p) =>
+                                                return (
+                                                    <tr key={p}>
+                                                        <td style={{ border: '1px solid #cccccc' }}>{d.item_name}</td>
+                                                        <td style={{ border: '1px solid #cccccc' }}>{d.budget_item_name}</td>
+                                                        <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.amount)}</td>
+                                                        <td style={{ border: '1px solid #cccccc' }}>{d.quantity}</td>
+                                                        <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.total)}</td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
+                                    </tbody>
+                                </table>;
+
+                            rows.push({
+                                sn: i + 1,
+                                request_type: r.request_type,
+                                requested_from: r.requested_from,
+                                amount_expected: currencyConverter(r.amount_expected),
+                                amount_paid: currencyConverter(r.amount_paid),
+                                balance: currencyConverter(r.balance),
+                                status: r.status,
+                                payment_status: r.payment_status,
+                                items: itemsTable,
+                                update: r.status === "pending" ? (
+                                    <button
+                                        className="btn btn-link p-0 text-primary"
+                                        title="Edit"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#kt_modal_general"
+                                        onClick={() =>
+                                        {
+                                            if (r.request_type === "Manufacturer")
+                                            {
+                                                if (_manufacturer.length > 0)
                                                 {
-                                                    return (
-                                                        <tr key={p}>
-                                                            <td style={{ border: '1px solid #cccccc' }}>{d.item_name}</td>
-                                                            <td style={{ border: '1px solid #cccccc' }}>{d.budget_item_name}</td>
-                                                            <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.amount)}</td>
-                                                            <td style={{ border: '1px solid #cccccc' }}>{d.quantity}</td>
-                                                            <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.total)}</td>
-                                                        </tr>
-                                                    )
-                                                })
-                                            }
-                                        </tbody>
-                                    </table>
-                            ),
-                            r.status === "pending" ? (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                    {
-                                        if (r.request_type === "Manufacturer")
-                                        {
-                                            if (_manufacturer.length > 0)
+                                                    requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
+                                                }
+                                            } else
                                             {
-                                                requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
+                                                if (_vendor.length > 0)
+                                                {
+                                                    requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
+                                                }
                                             }
-                                        } else
-                                        {
-                                            if (_vendor.length > 0)
-                                            {
-                                                requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
-                                            }
+                                            setFormType("Update Inventory Purchase Order Form");
+                                            setSelectedOrderItems(selected_order)
+                                            setSelectedOrderItems2(selected_order)
+                                            setSelectedOrder({
+                                                ...selectedOrder,
+                                                request_id: r.request_id,
+                                                request_type: r.request_type,
+                                                requested_from: r.requested_from,
+                                                requested_from_name: requested_from_name,
+                                                amount_expected: r.amount_expected,
+                                                amount_paid: r.amount_paid,
+                                                balance: r.balance,
+                                                status: r.status,
+                                            })
                                         }
-                                        setFormType("Update Inventory Purchase Order Form");
-                                        setSelectedOrderItems(selected_order)
-                                        setSelectedOrderItems2(selected_order)
-                                        setSelectedOrder({
-                                            ...selectedOrder,
-                                            request_id: r.request_id,
-                                            request_type: r.request_type,
-                                            requested_from: r.requested_from,
-                                            requested_from_name: requested_from_name,
-                                            amount_expected: r.amount_expected,
-                                            amount_paid: r.amount_paid,
-                                            balance: r.balance,
-                                            status: r.status,
-                                        })
-                                    }
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ) : "--",
-                            r.status === "pending" ? (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                    {
-                                        if (r.request_type === "Manufacturer")
-                                        {
-                                            if (_manufacturer.length > 0)
-                                            {
-                                                requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
-                                            }
-                                        } else
-                                        {
-                                            if (_vendor.length > 0)
-                                            {
-                                                requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
-                                            }
                                         }
-                                        setFormType("Receive Inventory Purchase Order Form");
-                                        setSelectedOrderItems(selected_order)
-                                        setSelectedOrder({
-                                            ...selectedOrder,
-                                            request_id: r.request_id,
-                                            request_type: r.request_type,
-                                            requested_from: r.requested_from,
-                                            amount_expected: r.amount_expected,
-                                            requested_from_name: requested_from_name,
-                                            amount_paid: r.amount_paid,
-                                            balance: r.balance,
-                                            status: r.status,
-                                        })
-                                    }
-                                    }
-                                >
-                                    <i className="fa fa-arrow-circle-down" />
-                                </button>
-                            ) : "--"
-                            ])
+                                    >
+                                        <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen" />
+                                    </button>
+                                ) : "--",
+                                received_item: r.status === "pending" ? (
+                                    <button
+                                        className="btn btn-link p-0 text-primary"
+                                        title="Receive"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#kt_modal_general"
+                                        onClick={() =>
+                                        {
+                                            if (r.request_type === "Manufacturer")
+                                            {
+                                                if (_manufacturer.length > 0)
+                                                {
+                                                    requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
+                                                }
+                                            } else
+                                            {
+                                                if (_vendor.length > 0)
+                                                {
+                                                    requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
+                                                }
+                                            }
+                                            setFormType("Receive Inventory Purchase Order Form");
+                                            setSelectedOrderItems(selected_order)
+                                            setSelectedOrder({
+                                                ...selectedOrder,
+                                                request_id: r.request_id,
+                                                request_type: r.request_type,
+                                                requested_from: r.requested_from,
+                                                amount_expected: r.amount_expected,
+                                                requested_from_name: requested_from_name,
+                                                amount_paid: r.amount_paid,
+                                                balance: r.balance,
+                                                status: r.status,
+                                            })
+                                        }
+                                        }
+                                    >
+                                        <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-arrow-circle-down" />
+                                    </button>
+                                ) : "--"
+                            })
                         })
-                        setTableData(row)
+                        setDatatable({
+                            ...datatable,
+                            rows: rows,
+                        });
                     }
                 } else
                 {
@@ -808,7 +837,7 @@ function InventoryPurchaseOrder(props)
                         </div>
                     </div>
                     <div className="card-body p-0">
-                        <ReportTable title={"Inventory Purchase Order"} columns={columns} data={tableData} />
+                        <AGTable data={datatable} />
                     </div>
                 </div>
                 <Modal large title={formType}>

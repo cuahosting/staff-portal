@@ -16,9 +16,12 @@ function AcademicResultSummaryByCourse(props) {
     const [data, setData] = useState([]);
     const [semesterList, setSemesterList] = useState([]);
     const [semesterOptions, setSemesterOptions] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [departmentsList, setDepartments] = useState([]);
     const [departmentOptions, setDepartmentsOptions] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [levelOptions, setLevelOptions] = useState([{value: "100", label: "100"}, {value: "200", label: "200"}, {value: "300", label: "300"}, {value: "400", label: "400"}, {value: "500", label: "500"}]);
+    // eslint-disable-next-line no-unused-vars
     const [courseSemesterOptions, setCourseSemesterOptions] = useState([{value: "First", label: "First"}, {value: "Second", label: "Second"}]);
     const [semester, setSemeter] = useState({
         SemesterCode: "",
@@ -37,7 +40,7 @@ function AcademicResultSummaryByCourse(props) {
                 .then((result) => {
                     let rows = []
                     if (result.data.length > 0) {
-                        result.data.map((row) => {
+                        result.data.forEach((row) => {
                             rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
                         });
                         setSemesterList(result.data);
@@ -57,7 +60,7 @@ function AcademicResultSummaryByCourse(props) {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((row) => {
+                    result.data.forEach((row) => {
                         rows.push({ value: row.CourseCode, label: row.CourseName })
                     });
                     setDepartmentsOptions(rows)
@@ -105,22 +108,24 @@ function AcademicResultSummaryByCourse(props) {
             await axios.post(`${serverLink}staff/assessment/exam/result/summary/by-course`, sendData, token)
                 .then((result) => {
                     const students = result.data.students; const modules = result.data.modules; const results = result.data.results;
+                    // eslint-disable-next-line no-unused-vars
                     let row = []; let rows = []; let cols = ["S/N", "StudentID", "Student"]; let place_holder = [];
                     const distinctModuleCodes = [...new Set(modules.map(obj => obj.ModuleCode))];
-                    distinctModuleCodes.map((e, k)=> cols.push(e))
+                    distinctModuleCodes.forEach((e)=> cols.push(e))
                     cols.push(...["Total", "GPA", "Carry Over(S)", "Remark"])
-                    distinctModuleCodes.map(e=>place_holder.push(" "))
+                    distinctModuleCodes.forEach(()=>place_holder.push(" "))
                     if (students.length > 0) {
-                        students.map((student, index) => {
+                        students.forEach((student, index) => {
+                            // eslint-disable-next-line no-unused-vars
                             let result_rows = [];  let gp = 0;  let registered_cu = 0; let student_carry_overs = []; let remark = "";
-                            distinctModuleCodes.map((module, int)=> {
+                            distinctModuleCodes.forEach((module)=> {
                                 let cu = 0;
                                 if (modules.filter(e=>e.ModuleCode === module && e.StudentID === student.StudentID).length > 0){
-                                    modules.filter(e=>e.ModuleCode === module && e.StudentID === student.StudentID).map((element, x)=>{
+                                    modules.filter(e=>e.ModuleCode === module && e.StudentID === student.StudentID).forEach((element)=>{
                                         registered_cu += parseInt(element.CreditUnit);
                                         cu = parseInt(element.CreditUnit);
                                         if (results.filter(e=>e.ModuleCode === element.ModuleCode && e.StudentID === student.StudentID).length > 0){
-                                            results.filter(e=>e.ModuleCode === element.ModuleCode && e.StudentID === student.StudentID).map((item, i)=> {
+                                            results.filter(e=>e.ModuleCode === element.ModuleCode && e.StudentID === student.StudentID).forEach((item)=> {
                                                 gp += cu * getTotal(item.StudentGrade);
                                                 result_rows.push(item.StudentGrade)
                                                 if (item.StudentGrade === "F") student_carry_overs.push(item.ModuleCode);
@@ -140,7 +145,7 @@ function AcademicResultSummaryByCourse(props) {
                         rows.push(["", "", "", ...place_holder, "", "", "", "",]);
                         rows.push(["", "", "", ...place_holder, "", "", "", "",]);
                         rows.push(["", "", "KEYS:", ...place_holder, "", "", "", "",]);
-                        distinctModuleCodes.map((item, index)=>{
+                        distinctModuleCodes.forEach((item)=>{
                             rows.push(["", "",  "", item, getModuleName(modules, item), "", "", "", "",]);
                         })
                         rows.push(["", "", "", ...place_holder, "", "", "", "",]);
@@ -219,7 +224,8 @@ function AcademicResultSummaryByCourse(props) {
     useEffect(() => {
         getSemesters();
         getCourses();
-    }, [""]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return isLoading ? (
         <Loader />

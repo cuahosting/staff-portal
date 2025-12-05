@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+// eslint-disable-next-line no-unused-vars
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -49,6 +50,7 @@ function SubmissionReport(props) {
         });
     };
     getSchoolSemester();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (e) => {
@@ -69,7 +71,7 @@ function SubmissionReport(props) {
           setShowData(true);
           setErrors(null);
           let rows = [];
-          response.data.map((course, index) => {
+          response.data.forEach((course, index) => {
             rows.push({
               sn: index + 1,
               course: course.CourseName,

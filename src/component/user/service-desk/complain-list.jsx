@@ -58,7 +58,7 @@ const ComplainList = (props) => {
                 .then((result) => {
                     let rows_ = []
                     if (result.data.length > 0) {
-                        result.data.map((row) => {
+                        result.data.forEach((row) => {
                             rows_.push({ value: row.StaffID, label: row.StaffID+" - "+row.FirstName + " " + row.MiddleName + " " + row.Surname },)
                         });
                     }
@@ -86,7 +86,7 @@ const ComplainList = (props) => {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((item, index) => {
+                    result.data.forEach((item, index) => {
                         rows.push([
                             index + 1,
                             item.UserType === "staff" ? item.StaffName : item.StudentName,
@@ -103,7 +103,7 @@ const ComplainList = (props) => {
                                 }}>
                                 Description
                             </button>,
-                            <a className="btn btn-link" target={"_blank"} href={`${serverLink}public/uploads/${shortCode}/service-desk/${item.FilePath}`} >View File</a>,
+                            <a className="btn btn-link" target={"_blank"} rel="noreferrer" href={`${serverLink}public/uploads/${shortCode}/service-desk/${item.FilePath}`} >View File</a>,
                             <span className={item.Status === "Submitted" ? "badge badge-secondary"
                                 : item.Status === "1" ? "badge badge-info"
                                     : item.Status === "2" ? "badge badge-info"
@@ -199,6 +199,7 @@ const ComplainList = (props) => {
     }
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return isLoading ? (<Loader />) : (

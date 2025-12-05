@@ -9,6 +9,7 @@ import Select2 from "react-select2-wrapper";
 import { toast } from "react-toastify";
 import ExamTemplate from "./Exam_template.csv"
 import papa from 'papaparse'
+import AGTable from "../../../common/table/AGTable";
 
 
 const randomToken = require('random-token');
@@ -26,7 +27,15 @@ function ExamResultBulkUpload(props) {
         ModuleCode: "", ModuleName: "", ModuleType: "", CreditUnit: "", CAPerCon: "", ExamPerCon: ""
     })
     const [chosenModule, setChosenModule] = useState()
-    const [notProcessed, setNotProcessed] = useState([{ StudentID: '1', Comment: '1111' }])
+    const [notProcessed, setNotProcessed] = useState([])
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Student ID", field: "StudentID" },
+            { label: "Comment", field: "Comment" }
+        ],
+        rows: []
+    });
     const [searchItem, setSearchItem] = useState({
         SemesterCode: '',
         ModuleCode: '',
@@ -40,6 +49,10 @@ function ExamResultBulkUpload(props) {
 
     const resetItem = () => {
         setProcessing(0);
+        setDatatable({
+            ...datatable,
+            rows: []
+        });
     }
 
     const getRecord = async () => {
@@ -151,6 +164,23 @@ function ExamResultBulkUpload(props) {
                         const data = res.data;
                         if (data.message === 'success' && data.to_score > 0) {
                             setNotProcessed(data.issues)
+
+                            // Update table with issues
+                            let rows = [];
+                            if (data.issues && data.issues.length > 0) {
+                                data.issues.forEach((issue, index) => {
+                                    rows.push({
+                                        sn: index + 1,
+                                        StudentID: issue.StudentID || 'N/A',
+                                        Comment: issue.Comment || 'N/A'
+                                    });
+                                });
+                            }
+                            setDatatable({
+                                ...datatable,
+                                rows: rows
+                            });
+
                             setTimeout(() => {
                                 toast.success('processed successfully')
                                 setProcessing(2)
@@ -323,25 +353,11 @@ function ExamResultBulkUpload(props) {
                                                         <div className="fs-6 text-gray-700">
                                                             Result upload completed successfully
                                                             {
-                                                                notProcessed.length > 0 &&
-                                                                <div className="row col-md-12">
+                                                                datatable.rows.length > 0 &&
+                                                                <div className="row col-md-12 pt-5">
                                                                     However, the following issues were found.
-                                                                    <table className="table table-bordered">
-                                                                        <tbody>
-                                                                            {
-                                                                                notProcessed.map((x, i) => {
-                                                                                    return (
-                                                                                        <tr key={i}>
-                                                                                            <td>{x.StudentID}</td>
-                                                                                            <td>{x.Comment}</td>
-                                                                                        </tr>
-                                                                                    )
-                                                                                })
-                                                                            }
-                                                                        </tbody>
-
-                                                                    </table>
-                                                                </div >
+                                                                    <AGTable data={datatable} />
+                                                                </div>
                                                             }
                                                         </div>
                                                     </div>

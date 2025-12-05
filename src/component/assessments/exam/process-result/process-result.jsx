@@ -9,7 +9,7 @@ import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
-import AgReportTable from "../../../common/table/report_table";
+import AGTable from "../../../common/table/AGTable";
 const randomToken = require('random-token');
 
 
@@ -29,8 +29,18 @@ function ProcessResult(props)
     const [moduleCode, setModuleCode] = useState([]);
     const [gradeSetting, setGradeSetting] = useState('');
     const [counter, setCounter] = useState(0);
-    const columns = ["S/N", "Student ID", "Module Code", "Module Name", "CA Score", "Exam Score", "Total"]
-    const [tableData, setTableData] = useState([]);
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Student ID", field: "StudentID" },
+            { label: "Module Code", field: "ModuleCode" },
+            { label: "Module Name", field: "ModuleName" },
+            { label: "CA Score", field: "CAScore" },
+            { label: "Exam Score", field: "ExamScore" },
+            { label: "Total", field: "Total" }
+        ],
+        rows: []
+    });
 
     const getRecord = async () =>
     {
@@ -102,13 +112,17 @@ function ProcessResult(props)
             setGradeSetting(value);
 
         setResultFilter([])
+        setDatatable({
+            ...datatable,
+            rows: []
+        });
     }
 
     const handleModuleChange = (e) =>
     {
 
         let rows = [];
-        let table_data = [];
+        let table_rows = [];
         if (e.length > 0)
         {
             e.map(r =>
@@ -129,14 +143,25 @@ function ProcessResult(props)
                 {
                     filter.map((p, index) =>
                     {
-                        table_data.push([(index_counter), p.StudentID, p.ModuleCode, p.ModuleTitle, p.CAScore, p.ExamScore, p.Total])
+                        table_rows.push({
+                            sn: index_counter,
+                            StudentID: p.StudentID || 'N/A',
+                            ModuleCode: p.ModuleCode || 'N/A',
+                            ModuleName: p.ModuleTitle || 'N/A',
+                            CAScore: p.CAScore || 0,
+                            ExamScore: p.ExamScore || 0,
+                            Total: p.Total || 0
+                        })
                         filter_results.push(p)
                         index_counter += 1;
                     })
                 }
             })
         }
-        setTableData(table_data);
+        setDatatable({
+            ...datatable,
+            rows: table_rows
+        });
         setResultFilter(filter_results)
     }
 
@@ -366,9 +391,9 @@ function ProcessResult(props)
                         }
 
                         {
-                            tableData.length > 0 &&
+                            datatable.rows.length > 0 &&
                             <div className="row pt-5">
-                                <AgReportTable columns={columns} data={tableData} height={'800px'} />
+                                <AGTable data={datatable} />
                             </div>
                         }
 

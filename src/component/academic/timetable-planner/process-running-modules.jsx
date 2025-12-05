@@ -3,12 +3,14 @@ import PageHeader from "../../common/pageheader/pageheader";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
+// eslint-disable-next-line no-unused-vars
 import { showAlert, showConfirm, showConfirmAndContinue } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import AGReportTable from "../../common/table/AGReportTable";
+// eslint-disable-next-line no-unused-vars
 import { showContentAlert } from "../../common/sweetalert/sweetalert";
 
 function ProcessRunningModules(props) {
@@ -33,7 +35,7 @@ function ProcessRunningModules(props) {
             .then((res) => {
                 let rows = [];
                 res.data.length > 0 &&
-                    res.data.map((row) => {
+                    res.data.forEach((row) => {
                         rows.push({ text: row.SemesterName, id: row.SemesterCode });
                     });
                 setSemesterList(rows);
@@ -55,7 +57,7 @@ function ProcessRunningModules(props) {
                 setIsLoading(false)
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((item, index) => {
+                    result.data.forEach((item, index) => {
                         rows.push([
                             index + 1,
                             item.ModuleCode,
@@ -87,17 +89,18 @@ function ProcessRunningModules(props) {
         setisFormLoading('on')
         let existing = [];
         if (existingModules.length > 0) {
-            existingModules.map((item, index) => {
+            existingModules.forEach((item) => {
                 existing.push(item.ModuleCode)
             });
         }
         let newrecords = [];
         if (moduleList.length > 0) {
-            moduleList.map((item, index) => {
+            moduleList.forEach((item) => {
                 newrecords.push(item.ModuleCode)
             })
         }
 
+        // eslint-disable-next-line no-unused-vars
         let send_to_db = [];
         let pop_display = [];
         if (newrecords.some(item => existing.includes(item))) {
@@ -161,6 +164,7 @@ function ProcessRunningModules(props) {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

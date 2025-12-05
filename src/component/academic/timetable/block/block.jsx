@@ -10,6 +10,7 @@ import { connect } from "react-redux";
 function BlockSettings(props) {
     const token = props.loginData[0].token;
 
+    // eslint-disable-next-line no-unused-vars
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState('off')
     const [datatable, setDatatable] = useState({
@@ -33,6 +34,7 @@ function BlockSettings(props) {
         ],
         rows: [],
     });
+    // eslint-disable-next-line no-unused-vars
     const [campusList, setCampus] = useState(props.campusList)
     const [createBlock, setcreateBlock] = useState({
         BlockName: "",
@@ -40,6 +42,7 @@ function BlockSettings(props) {
         EntryID: ""
     });
 
+    // eslint-disable-next-line no-unused-vars
     const getBlockName = (campusID)=>{
          if (campusID !== "" ){
             const blockname = props.campusList.length > 0 && props.campusList.filter(x => x.EntryID.toString() === campusID.toString())[0].CampusName;
@@ -54,7 +57,7 @@ function BlockSettings(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((Block, index) => {
+                    result.data.forEach((Block, index) => {
                         const campus_name  = props.campusList.length > 0 ? props.campusList.filter(x => x.EntryID === Block.CampusID)[0].CampusName : ''
                         rows.push({
                             BlockID: Block.EntryID,
@@ -183,6 +186,7 @@ function BlockSettings(props) {
 
     useEffect(() => {
         getBlock();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [campusList]);
 
     return (

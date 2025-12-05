@@ -23,7 +23,7 @@ function StaffActivity(props) {
 
                     const row = [];
                     if (res.data.data.length > 0) {
-                        res.data.data.map((r, i) => {
+                        res.data.data.forEach((r, i) => {
                             row.push([i+1, r.StaffID, r.StaffName, r.Designation, r.Department, r.PageVisited,
                                 (
                                     <button
@@ -60,6 +60,7 @@ function StaffActivity(props) {
 
     useEffect(() => {
         fetchData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
 

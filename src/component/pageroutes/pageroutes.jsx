@@ -39,7 +39,9 @@ import JobApplicationDetails from "../human-resources/jobs/applicant-details/job
 import StaffProfile from "../human-resources/staff-profile/staff-profile";
 import HRPayrollRunAllowanceAndDeduction from "../human-resources/payroll/run-allowance-and-deduction/hr-payroll-run-allowance-and-deduction";
 import HrPayrollPostSchedule from "../human-resources/payroll/post-schedule/hr-payroll-post-schedule";
+import HrPayrollSendPayslips from "../human-resources/payroll/send-payslips/hr-payroll-send-payslips";
 import HrSalarySettings from "../human-resources/payroll/salary-settings/hr-salary-settings";
+import HrGrossPayManagement from "../human-resources/payroll/gross-pay-management/hr-gross-pay-management";
 import PermissionMenus from "../settings/permission/menus/permission-menu";
 import PermissionGroup from "../settings/permission/group/permission-group";
 import PermissionPermission from "../settings/permission/permission/permission-permission";
@@ -247,6 +249,7 @@ import BankReport from "../human-resources/salary-report/bank-report";
 import PaySlip from "../human-resources/salary-report/pay-slip";
 import PensionScheduleReport from "../human-resources/salary-report/pension-report";
 import SalarySummaryReport from "../human-resources/salary-report/salary-summary-report";
+import SalaryBreakdownReport from "../human-resources/salary-report/salary-breakdown-report";
 import NSITFReport from "../human-resources/salary-report/nsitf-report";
 import ITFReport from "../human-resources/salary-report/itf-report";
 
@@ -392,6 +395,14 @@ export default function PageRoutes()
                 <Route
                   path="/human-resources/payroll/post-schedule"
                   element={<HrPayrollPostSchedule />}
+                />
+                <Route
+                  path="/human-resources/payroll/send-payslips"
+                  element={<HrPayrollSendPayslips />}
+                />
+                <Route
+                  path="/human-resources/payroll/gross-pay-management"
+                  element={<HrGrossPayManagement />}
                 />
                 <Route
                   path="/human-resources/finance-report/all-payment"
@@ -1178,6 +1189,7 @@ export default function PageRoutes()
                 <Route path="/human-resources/salary-report/pay-slip" element={<PaySlip />}/>
                 <Route path="/human-resources/salary-report/pension-report" element={<PensionScheduleReport />}/>
                 <Route path="/human-resources/salary-report/salary-summary" element={<SalarySummaryReport />}/>
+                <Route path="/human-resources/salary-report/salary-breakdown" element={<SalaryBreakdownReport />}/>
                 <Route path="/human-resources/salary-report/nsitf-report" element={<NSITFReport />}/>
                 <Route path="/human-resources/salary-report/itf-report" element={<ITFReport />}/>
 

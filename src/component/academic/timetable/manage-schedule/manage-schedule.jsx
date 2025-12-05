@@ -30,6 +30,7 @@ function ManageTimetableSchedule(props) {
     InsertedBy: props.loginData[0].StaffID
   });
   const schedule_time = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+  // eslint-disable-next-line no-unused-vars
   const [timetableSemester, setTimetableSemester] = useState([]);
   const [semesterOptions, setSemesterOptions] = useState([]);
   const [moduleList, setModuleList] = useState([]);
@@ -71,7 +72,7 @@ function ManageTimetableSchedule(props) {
       .then((res) => {
         let rows = []
         if (res.data.length > 0) {
-          res.data.map((row) => {
+          res.data.forEach((row) => {
             rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
           });
           setTimetableSemester(res.data);
@@ -87,7 +88,7 @@ function ManageTimetableSchedule(props) {
       .then((res) => {
         let rows = [];
         res.data.length > 0 &&
-          res.data.map((row) => {
+          res.data.forEach((row) => {
             rows.push({ text: `${row.ModuleName} (${row.ModuleCode})`, id: row.ModuleCode });
           });
         setModuleList(rows);
@@ -102,7 +103,7 @@ function ManageTimetableSchedule(props) {
         let rows = [];
 
         res.data.length > 0 &&
-          res.data.map((row) => {
+          res.data.forEach((row) => {
             rows.push({
               text: `${row.CampusName} => ${row.BlockName} => ${row.VenueName}`,
               id: row.VenueID,
@@ -121,7 +122,7 @@ function ManageTimetableSchedule(props) {
         setStudentGroupList(res.data);
         let rows = [];
         res.data.length > 0 &&
-          res.data.map((row) => {
+          res.data.forEach((row) => {
             rows.push({ text: row.GroupName, id: row.EntryID });
           });
         setGroupList(rows);
@@ -135,7 +136,7 @@ function ManageTimetableSchedule(props) {
       .then((res) => {
         let rows = [];
         res.data.length > 0 &&
-          res.data.map((row) => {
+          res.data.forEach((row) => {
             rows.push({
               text: `${row.StaffName} (${row.StaffID})`,
               id: row.StaffID,
@@ -179,14 +180,14 @@ function ManageTimetableSchedule(props) {
 
             const staff = data.staff;
             if (staff.length > 0) {
-              staff.map(st => {
+              staff.forEach(st => {
                 timetableStaff.push(st.StaffID)
               })
             }
 
             const group = data.group;
             if (group.length > 0) {
-              group.map(st => {
+              group.forEach(st => {
                 timetableGroup.push(parseInt(st.GroupID))
               })
             }
@@ -249,7 +250,7 @@ function ManageTimetableSchedule(props) {
     }
     toast.info('Submitting... Please wait!');
 
-    timetableStaff.map(async (staff, index) => {
+    timetableStaff.forEach(async (staff, index) => {
       const sendRecord = {
         schedule: item,
         group: timetableGroup,
@@ -280,7 +281,7 @@ function ManageTimetableSchedule(props) {
     });
 
     if (conflictCheck.bypass === false) {
-      timetableGroup.map(async (group_id, index) => {
+      timetableGroup.forEach(async (group_id, index) => {
         const sendRecord = {
           schedule: item,
           group: timetableGroup,
@@ -376,6 +377,7 @@ function ManageTimetableSchedule(props) {
         handleSubmit();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   },[canSubmit])
 
   const onSemesterChange = (e) => {
@@ -448,7 +450,7 @@ function ManageTimetableSchedule(props) {
     setIsLoading(true);
     let list = [];
     studentGroupList.length > 0 &&
-      studentGroupList.map((ii) => {
+      studentGroupList.forEach((ii) => {
         let filter = runningModuleList.filter(
           (i) =>
             i.CourseCode === ii.CourseCode &&
@@ -486,6 +488,7 @@ function ManageTimetableSchedule(props) {
 
   useEffect(() => {
     getRecords();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (

@@ -38,14 +38,15 @@ function ProcessCA(props) {
         setIsLoading(false)
     }
     useEffect(() => {
-        getRecords().then(r => {
+        getRecords().then(() => {
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     
     const processStudentsCA = async () => {
         let counter_value = 0;
 
-        runningModule.map(async module => {
+        runningModule.forEach(async module => {
             const module_name = module.ModuleName;
             const module_code = module.ModuleCode;
             let student_ca_data = [];
@@ -56,12 +57,12 @@ function ProcessCA(props) {
             if (module_ca_settings.length > 0) {
                 //CHECK IF STUDENT EXIST
                 if (module_reg_students.length > 0) {
-                    module_reg_students.map(student => {
+                    module_reg_students.forEach(student => {
                         let student_ca_record = [];
                         const student_id = student.StudentID;
                         const student_level = student.StudentLevel;
                         const student_semester = student.StudentSemester;
-                        module_ca_settings.map(setting => {
+                        module_ca_settings.forEach(setting => {
                             const student_ca = caEntryID.filter(i => i.StudentID === student_id && i.SettingsID === setting.EntryID);
                             if (student_ca.length > 0) {
                                 const student_ca_value = (student_ca[0].CAScore / setting.CAMarked) * setting.CAPerCon

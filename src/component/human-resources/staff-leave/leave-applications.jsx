@@ -11,11 +11,8 @@ import ReportTable from "../../common/table/report_table";
 import Select from 'react-select';
 import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
-import { decryptData, formatDate, formatDateAndTime } from "../../../resources/constants";
+import { formatDate, formatDateAndTime } from "../../../resources/constants";
 import Loader from "../../common/loader/loader";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import staffList from "../../user/staff-report/staff-list";
 import * as DOMPurify from 'dompurify';
 
 
@@ -65,7 +62,7 @@ const StaffLeaveApplications = (props) => {
                 .then((result) => {
                     let rows = [];
                     if (result.data.length > 0) {
-                        result.data.map((item, index) => {
+                        result.data.forEach((item, index) => {
                             let casual = result.data.filter(x => x.LeaveType === 'Casual' && x.ApplicationStatus === 1);
                             let annual = result.data.filter(x => x.LeaveType === 'Main' && x.ApplicationStatus === 1);
                             rows.push([
@@ -138,6 +135,7 @@ const StaffLeaveApplications = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const getStaffList = async () => {
@@ -145,7 +143,7 @@ const StaffLeaveApplications = (props) => {
             .then((response) => {
                 let rows = [];
                 if (response.data.length > 0) {
-                    response.data.map((row) => {
+                    response.data.forEach((row) => {
                         rows.push({ value: row.StaffID, label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname })
                     });
                     setStaffList(rows)
@@ -162,6 +160,7 @@ const StaffLeaveApplications = (props) => {
 
     useEffect(() => {
         getStaffList();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onEdit = (e) => {

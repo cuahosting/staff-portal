@@ -1,9 +1,48 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import Select from "react-select";
 import {currencyConverter} from "../../../../resources/constants";
+import AGTable from "../../../common/table/AGTable";
 
 export default function InventoryPurchaseOrderProcessing(props) {
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Item", field: "item_name" },
+            { label: "Quantity Expected", field: "quantity_expected" },
+            { label: "Quantity Received", field: "quantity_received" },
+            { label: "Unit Price", field: "unit_price" },
+            { label: "Total", field: "total" },
+            { label: "Action", field: "action" }
+        ],
+        rows: [],
+    });
 
+    useEffect(() => {
+        if (props.selectedOrderItems && props.selectedOrderItems.length > 0) {
+            const rows = props.selectedOrderItems.map((item, index) => ({
+                sn: index + 1,
+                item_name: item.item_name,
+                quantity_expected: item.quantity,
+                quantity_received: <input type="number" id={`quantity-${item.item_id}`} item_id={item.item_id} request_id={item.request_id} amount={item.amount} item_name={item.item_name} className="quantity form-control" name="quantity" min={1} defaultValue={item.quantity} style={{width: '90px', height: '30px'}}/>,
+                unit_price: <span style={{color: '#888888'}}>{currencyConverter(item.amount)}</span>,
+                total: <input id={`total-${item.item_id}`} className="form-control" value={currencyConverter(item.amount * +item.quantity)} total={item.amount} disabled style={{width: '150px', height: '30px', backgroundColor: 'transparent', border: 'none'}} />,
+                action: (
+                    <button className="btn btn-link p-0 text-danger" title="Delete" onClick={() => handleDelete(item)}>
+                        <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
+                    </button>
+                )
+            }));
+            setDatatable({
+                ...datatable,
+                rows: rows,
+            });
+        } else {
+            setDatatable({
+                ...datatable,
+                rows: [],
+            });
+        }
+    }, [props.selectedOrderItems]);
 
     const handleDelete = async (item) => {
 
@@ -70,45 +109,7 @@ export default function InventoryPurchaseOrderProcessing(props) {
                     <hr/>
                     <h2>Purchase Order Items</h2>
                     <hr/>
-                    <table className="table table-striped ">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Item</th>
-                            <th>Quantity Expected</th>
-                            <th>Quantity Received</th>
-                            <th>Unit Price</th>
-                            <th>Total</th>
-                            <th>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {
-                            props.selectedOrderItems.length > 0 ?
-                                props.selectedOrderItems.map((item, index)=> {
-                                    return(
-                                        <tr key={index}>
-                                            <td>{index+1}</td>
-                                            <td>{item.item_name}</td>
-                                            <td>{item.quantity}</td>
-                                            <td><input type="number" id={`quantity-${item.item_id}`} item_id={item.item_id} request_id={item.request_id} amount={item.amount}  item_name={item.item_name} className="quantity form-control" name="quantity" min={1} defaultValue={item.quantity} style={{width: '90px', height: '30px'}}/></td>
-                                            <td style={{color: '#888888'}}>{currencyConverter(item.amount)}</td>
-                                            <td><input id={`total-${item.item_id}`} className="form-control" value={currencyConverter(item.amount * +item.quantity )} total={item.amount} disabled style={{width: '150px', height: '30px', backgroundColor: 'transparent', border: 'none'}} /></td>
-                                            <td>
-                                                <i className="fa fa-trash-alt text-danger" onClick={()=>handleDelete(item)}/>
-                                            </td>
-                                        </tr>
-                                    )
-                                })
-                                :
-                                <tr>
-                                    <td colSpan={6} className="text-center alert alert-danger"><b>No item selected, please select item.</b></td>
-                                </tr>
-
-                        }
-
-                        </tbody>
-                    </table>
+                    <AGTable data={datatable} paging={false} />
                     <input type="hidden" id="amount_paid" value={+props.selectedOrder.amount_paid} hidden/>
 
                 </div>

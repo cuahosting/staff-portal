@@ -1,0 +1,25 @@
+198,201c198,207
+<             <PageHeader
+<                 title={"Mark Attendance"}
+<                 items={["Assessment", "Attendance", "Mark Attendance"]}
+<             />
+---
+>             <PageHeader
+>                 title={"Mark Attendance"}
+>                 items={["Assessment", "Attendance", "Mark Attendance"]}
+>                 buttons={
+>                     <div className="auth-form-group">
+>                         <label className="auth-label">Select Date</label>
+>                         <input type="date" name="SelectedDate" id="SelectedDate" className="form-control auth-input" onChange={onEdit} value={selectedDate} />
+>                     </div>
+>                 }
+>             />
+204,211d209
+<                         <div className="card-title" />
+<                         <div className="card-toolbar">
+<                             <div className="pull-left auth-form-group" >
+<                                 <label className="auth-label">Select Date</label>
+<                                 <input type="date" name="SelectedDate" id="SelectedDate" className="form-control auth-input" onChange={onEdit} value={selectedDate} />
+<                             </div>
+<                         </div>
+<                     </div>

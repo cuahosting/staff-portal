@@ -8,7 +8,6 @@ import { toast } from "react-toastify";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { serverLink } from "../../../resources/url";
 import { useEffect } from "react";
-import JoditEditor from "jodit-react";
 import ReportTable from "../../common/table/report_table";
 
 
@@ -31,7 +30,7 @@ const ComplainTypes = (props) => {
                 .then((result) => {
                     if (result.data.length > 0) {
                         let rows = []
-                        result.data.map((item, index) => {
+                        result.data.forEach((item, index) => {
                             rows.push([
                                 index + 1,
                                 item.ComplainType,
@@ -102,6 +101,7 @@ const ComplainTypes = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return isLoading ? (<Loader />) : (

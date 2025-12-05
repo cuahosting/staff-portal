@@ -6,25 +6,36 @@ import Loader from "../../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import {useNavigate} from "react-router";
+// eslint-disable-next-line no-unused-vars
 import AGReportTable from "../../../common/table/AGReportTable";
 import Select from "react-select";
+// eslint-disable-next-line no-unused-vars
 import {showAlert} from "../../../common/sweetalert/sweetalert";
 
 function TimetableMigration(props) {
     const token = props.loginData[0].token
     const [isLoading, setIsLoading] = useState(true);
+    // eslint-disable-next-line no-unused-vars
     const [timetableList, setTimetableList] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [semesterList, setSemesterList] = useState([]);
     const [schoolSemester, setSchoolSemester] = useState("");
     const [schoolSemester2, setSchoolSemester2] = useState("");
     const [semesterOptions, setSemesterOptions] = useState([]);
     const [semesterOptions2, setSemesterOptions2] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const columns = ["Day", "Module", "Type", "Block", "Venue", "Start Time", "End Time", "Staff", "Group", "Action", "Delete"]
+    // eslint-disable-next-line no-unused-vars
     const [tableData, setTableData] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const navigate = useNavigate();
+    // eslint-disable-next-line no-unused-vars
     const [selectedSemester, setSelectedSemester] = useState("");
+    // eslint-disable-next-line no-unused-vars
     const [selectedSemester2, setSelectedSemester2] = useState("");
+    // eslint-disable-next-line no-unused-vars
     const [groupList, setGroupList] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [venueList, setVenueList] = useState([]);
 
     const [formData, setFormData] = useState({
@@ -42,7 +53,7 @@ function TimetableMigration(props) {
             .then((res) => {
                 let rows = []
                 if (res.data.length > 0) {
-                    res.data.map((row) => {
+                    res.data.forEach((row) => {
                         rows.push({value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode})
                     });
                     setSemesterList(res.data);
@@ -155,11 +166,7 @@ function TimetableMigration(props) {
 
     useEffect(() => {
         getSemesterList()
-    },[])
-
-
-    useEffect(() => {
-        getSemesterList()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
 

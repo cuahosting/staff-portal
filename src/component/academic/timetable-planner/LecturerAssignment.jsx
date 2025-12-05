@@ -6,6 +6,7 @@ import Loader from "../../common/loader/loader";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux/es/exports";
+// eslint-disable-next-line no-unused-vars
 import Select2 from "react-select2-wrapper";
 import "react-select2-wrapper/css/select2.css";
 import AGReportTable from "../../common/table/AGReportTable";
@@ -22,6 +23,7 @@ function LecturerAssignment(props) {
     StaffName: ""
   })
 
+  // eslint-disable-next-line no-unused-vars
   const [modules, setModules] = useState([])
   const [semesterOptions, setSemesterOptions] = useState([]);
   const [selectedModule, setSelectedModule] = useState({
@@ -48,7 +50,7 @@ function LecturerAssignment(props) {
         .then((result) => {
           let rows = []
           if (result.data.length > 0) {
-            result.data.map((row) => {
+            result.data.forEach((row) => {
               rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
             });
             setSemesterList(result.data);
@@ -69,7 +71,7 @@ function LecturerAssignment(props) {
         staff.push(response.data)
         let rows_ = [];
         response.data.length > 0 &&
-          response.data.map((row) => {
+          response.data.forEach((row) => {
             rows_.push({ value: row.StaffID, label: row.FirstName + " " + row.MiddleName + "" + row.Surname },)
           });
         setStaffList(rows_);
@@ -83,7 +85,7 @@ function LecturerAssignment(props) {
       .then((response) => {
         let rows = [];
         if (response.data.length > 0) {
-          response.data.map((item, index) => {
+          response.data.forEach((item, index) => {
             rows.push([
               item.ModuleCode,
               item.ModuleName,
@@ -139,6 +141,7 @@ function LecturerAssignment(props) {
 
   useEffect(() => {
     geSemesters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSemesterChange = async (e) => {

@@ -4,89 +4,93 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import {currencyConverter, formatDate, moneyFormat, TimeTablePeriods} from "../../../resources/constants";
+import {currencyConverter, moneyFormat} from "../../../resources/constants";
 import { toast } from "react-toastify";
-import Select from "react-select";
-import DataTable from "../../common/data-table/data-table";
+import AGTable from "../../common/table/AGTable";
 
 function PensionScheduleReport(props) {
     const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
-    const header = ["S/N", "Staff ID", "First Name", "MiddleName", "Surname", "PFA", "RSA PIN", "Employee Contribution (₦)", "Employer Contribution (₦)", "Total Contribution Payable (₦)"];
-    const [data, setData] = useState([])
-    const [reportData, setReportData] = useState([])
-    const [semesterList, setSemesterList] = useState([]);
-    const [semesterOptions, setSemesterOptions] = useState([]);
+    const [reportData, setReportData] = useState([]);
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Staff ID", field: "staffId" },
+            { label: "First Name", field: "firstName" },
+            { label: "MiddleName", field: "middleName" },
+            { label: "Surname", field: "surname" },
+            { label: "PFA", field: "pfa" },
+            { label: "RSA PIN", field: "rsaPin" },
+            { label: "Employee Contribution (₦)", field: "employeeContribution" },
+            { label: "Employer Contribution (₦)", field: "employerContribution" },
+            { label: "Total Contribution Payable (₦)", field: "totalContribution" },
+        ],
+        rows: [],
+    });
 
     const [formData, setFormData] = useState({
         month_id: "",
         inserted_by: props.LoginDetails[0]?.StaffID,
     })
 
-    const  getTotal = () => {
+    const getTotal = () => {
         let total_amount = 0;
-        reportData.filter(e => e.employee_contribution > 0).map((item, index) => {
+        reportData.filter(e => e.employee_contribution > 0).forEach((item) => {
             total_amount += item.total_pension_contribution;
         });
         return total_amount;
     }
 
-    const  showTable = () => {
-        try {
-            let total  = 0;
-            let employee = 0;
-            let employer = 0;
-            const row =  reportData.filter(e => e.employee_contribution > 0).map((item, index) => {
-                total += item.total_pension_contribution;
-                employee +=  item.employee_contribution;
-                employer +=  item.employer_contribution;
-                return (
-                    <tr key={index}>
-                        <td className="text-xs font-weight-bold">{index +1}</td>
-                        <td className="text-xs font-weight-bold">{item.StaffID}</td>
-                        <td className="text-xs font-weight-bold">{item.FirstName}</td>
-                        <td className="text-xs font-weight-bold">{item.MiddleName}</td>
-                        <td className="text-xs font-weight-bold">{item.Surname}</td>
-                        <td className="text-xs font-weight-bold">{item.PensionName}</td>
-                        <td className="text-xs font-weight-bold">{item.RSAPin}</td>
-                        <td className="text-xs font-weight-bold">{moneyFormat(item.employee_contribution)}</td>
-                        <td className="text-xs font-weight-bold">{moneyFormat(item.employer_contribution)}</td>
-                        <td className="text-xs font-weight-bold">{moneyFormat(item.total_pension_contribution)}</td>
-                    </tr>
-                );
-            });
+    const buildTableData = (data) => {
+        let rows = [];
+        let total = 0;
+        let employee = 0;
+        let employer = 0;
 
-            return (
-                <>
-                    {row}
-                    {
-                        row.length > 0 ?
-                            <tr>
-                                <td className="text-xs font-weight-bold">999999</td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"><h3>Total</h3></td>
-                                <td className="text-xs font-weight-bold"><b>{moneyFormat(employee)}</b></td>
-                                <td className="text-xs font-weight-bold"><b>{moneyFormat(employer)}</b></td>
-                                <td className="text-xs font-weight-bold"><b>{moneyFormat(total)}</b></td>
-                            </tr>
-                            : <></>
-                    }
-                </>
-            )
-        } catch (e) {
-            alert(e.message);
+        data.filter(e => e.employee_contribution > 0).forEach((item, index) => {
+            total += item.total_pension_contribution;
+            employee += item.employee_contribution;
+            employer += item.employer_contribution;
+            rows.push({
+                sn: index + 1,
+                staffId: item.StaffID ?? "N/A",
+                firstName: item.FirstName ?? "N/A",
+                middleName: item.MiddleName ?? "N/A",
+                surname: item.Surname ?? "N/A",
+                pfa: item.PensionName ?? "N/A",
+                rsaPin: item.RSAPin ?? "N/A",
+                employeeContribution: moneyFormat(item.employee_contribution),
+                employerContribution: moneyFormat(item.employer_contribution),
+                totalContribution: moneyFormat(item.total_pension_contribution),
+            });
+        });
+
+        // Add total row
+        if (rows.length > 0) {
+            rows.push({
+                sn: "",
+                staffId: "",
+                firstName: "",
+                middleName: "",
+                surname: "",
+                pfa: "",
+                rsaPin: "Total",
+                employeeContribution: moneyFormat(employee),
+                employerContribution: moneyFormat(employer),
+                totalContribution: moneyFormat(total),
+            });
         }
+
+        setDatatable(prev => ({
+            ...prev,
+            rows: rows,
+        }));
     };
 
     const getSalaryReport = async (salary_month) => {
-
         if (salary_month === "") {
-
+            setDatatable(prev => ({ ...prev, rows: [] }));
         } else {
             setIsLoading(true)
             await axios.get(`${serverLink}staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`, token)
@@ -94,6 +98,10 @@ function PensionScheduleReport(props) {
                     console.log(res.data)
                     if (res.data.length > 0) {
                         setReportData(res.data)
+                        buildTableData(res.data);
+                    } else {
+                        setReportData([]);
+                        setDatatable(prev => ({ ...prev, rows: [] }));
                     }
                     setIsLoading(false)
                 }).catch((e) => {
@@ -147,9 +155,11 @@ function PensionScheduleReport(props) {
                     }
                     {
                         <div className="mt-4">
-                            {reportData.length > 0 &&
-                                <div className="table-responsive">
-                                    <DataTable header={header} body={showTable()} title="Pension Schedule Report"/>
+                            {datatable.rows.length > 0 &&
+                                <div className="card card-no-border">
+                                    <div className="card-body p-0">
+                                        <AGTable data={datatable} />
+                                    </div>
                                 </div>
                             }
                         </div>

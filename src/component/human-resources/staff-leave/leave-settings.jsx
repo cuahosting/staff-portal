@@ -1,17 +1,11 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React from "react";
 import { connect } from "react-redux";
-import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import StaffLeaveCategories from "./leave-categories";
-import axios from 'axios'
-import { serverLink } from "../../../resources/url";
 import StaffLeaveSignatories from "./leave-signatories";
-import { DoorBack } from "@mui/icons-material";
 
 const StaffLeaveSettings = (props) => {
     const InsertedBy = props.loginDetails[0].StaffID
-    const token = props.loginDetails[0].token
 
     return (
         <div className="d-flex flex-column flex-row-fluid">

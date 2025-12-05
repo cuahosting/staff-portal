@@ -292,6 +292,7 @@ function AddEditStaffPensionRecord(props)
     getStaffPensionRecords().then((r) => { });
 
     getPensionAdministrators().then((r) => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (

@@ -5,6 +5,7 @@ import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
+// eslint-disable-next-line no-unused-vars
 import { formatDate, formatDateAndTime } from "../../../../resources/constants";
 import {useNavigate} from "react-router";
 import AGReportTable from "../../../common/table/AGReportTable";
@@ -13,7 +14,9 @@ import Select from "react-select";
 function TimetableReport(props) {
   const token = props.loginData[0].token
   const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
   const [timetableList, setTimetableList] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [semesterList, setSemesterList] = useState([]);
   const [schoolSemester, setSchoolSemester] = useState("");
   const [semesterOptions, setSemesterOptions] = useState([]);
@@ -32,7 +35,7 @@ function TimetableReport(props) {
         .then((res) => {
             let rows = []
             if (res.data.length > 0) {
-                res.data.map((row) => {
+                res.data.forEach((row) => {
                     rows.push({value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode})
                 });
                 setSemesterList(res.data);
@@ -75,7 +78,7 @@ function TimetableReport(props) {
                 .then(res => {
                     if (res.data.timetable.length > 0) {
                         let rows = [];
-                        res.data.timetable.map((data, index) => {
+                        res.data.timetable.forEach((data, index) => {
                             const venue_filter = venueList.filter(i => i.VenueID === parseInt(data.VenueID));
                             const venue_name = venue_filter.length > 0 ? venue_filter[0]['VenueName'] : '--';
                             const block = venue_filter.length > 0 ? venue_filter[0]['BlockName'] : '--';
@@ -83,7 +86,7 @@ function TimetableReport(props) {
                             const filter_staff = res.data.staff.filter(i => i.TimetableID === data.EntryID);
                             let staff_list = "";
                             if (filter_staff.length > 0) {
-                                filter_staff.map(staff => {
+                                filter_staff.forEach(staff => {
                                     // staff_list += staff.StaffID +'<br/>'
                                     staff_list += staff.StaffID +', '
                                 })
@@ -92,7 +95,7 @@ function TimetableReport(props) {
                             const filter_group = res.data.group.filter(i => i.TimetableID === data.EntryID);
                             let group_list = "";
                             if (filter_group.length > 0) {
-                                filter_group.map(group => {
+                                filter_group.forEach(group => {
                                     // group_list += groupList.filter(i => i.EntryID === parseInt(group.GroupID))[0]['GroupName'] +'<br/>'
                                     group_list += groupList.filter(i => i.EntryID === parseInt(group.GroupID))[0]['GroupName'] +', '
                                 })
@@ -221,6 +224,7 @@ function TimetableReport(props) {
 
   useEffect(() => {
     getSemesterList()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
 

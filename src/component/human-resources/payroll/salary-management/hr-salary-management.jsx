@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import ReportTable from "../../../common/table/report_table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -25,8 +25,47 @@ function HrSalaryManagement(props) {
     const [salarySettings, setSalarySettings] = useState(null);
 
     // Table data
-    const columns = ["S/N", "Staff ID", "Staff Name", "Department", "Designation", "Payment Amount", "Bank Details", "Due Date", "Actions"];
-    const [data, setData] = useState([]);
+    const [datatable, setDatatable] = useState({
+        columns: [
+            {
+                label: "S/N",
+                field: "sn",
+            },
+            {
+                label: "Staff ID",
+                field: "StaffID",
+            },
+            {
+                label: "Staff Name",
+                field: "StaffName",
+            },
+            {
+                label: "Department",
+                field: "Department",
+            },
+            {
+                label: "Designation",
+                field: "Designation",
+            },
+            {
+                label: "Payment Amount",
+                field: "PaymentAmount",
+            },
+            {
+                label: "Bank Details",
+                field: "BankDetails",
+            },
+            {
+                label: "Due Date",
+                field: "DueDate",
+            },
+            {
+                label: "Action",
+                field: "action",
+            },
+        ],
+        rows: [],
+    });
 
     // Form states
     const [createItem, setCreateItem] = useState({
@@ -149,59 +188,64 @@ function HrSalaryManagement(props) {
     // Format table data
     const formatTableData = (records) => {
         let rows = [];
-        records.map((item, index) => {
+        records.forEach((item, index) => {
             const bankDetails = item.BeneficiaryAccountNumber ?
                 `${item.BeneficiaryAccountNumber} (${item.BankSortCode || 'N/A'})` :
                 "No bank details";
 
-            rows.push([
-                index + 1,
-                item.StaffID,
-                item.StaffName || "N/A",
-                item.Department || "N/A",
-                item.Designation || "N/A",
-                currencyConverter(item.PaymentAmount),
-                bankDetails,
-                item.DueDate || "N/A",
-                <div className="d-flex gap-2">
-                    <button
-                        className="btn btn-sm btn-info"
-                        data-bs-toggle="modal"
-                        data-bs-target="#breakdown_modal"
-                        onClick={() => viewBreakdown(item.StaffID)}
-                        title="View Breakdown"
-                    >
-                        <i className="fa fa-eye" />
-                    </button>
-                    <button
-                        className="btn btn-sm btn-success"
-                        data-bs-toggle="modal"
-                        data-bs-target="#history_modal"
-                        onClick={() => viewHistory(item.StaffID)}
-                        title="View History"
-                    >
-                        <i className="fa fa-history" />
-                    </button>
-                    <button
-                        className="btn btn-sm btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_general"
-                        onClick={() => onEditSalary(item)}
-                        title="Edit"
-                    >
-                        <i className="fa fa-pen" />
-                    </button>
-                    <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => onDelete(item.EntryID)}
-                        title="Delete"
-                    >
-                        <i className="fa fa-trash" />
-                    </button>
-                </div>
-            ]);
+            rows.push({
+                sn: index + 1,
+                StaffID: item.StaffID,
+                StaffName: item.StaffName || "N/A",
+                Department: item.Department || "N/A",
+                Designation: item.Designation || "N/A",
+                PaymentAmount: currencyConverter(item.PaymentAmount),
+                BankDetails: bankDetails,
+                DueDate: item.DueDate || "N/A",
+                action: (
+                    <>
+                        <button
+                            className="btn btn-link p-0 text-info" style={{ marginRight: 15 }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#breakdown_modal"
+                            onClick={() => viewBreakdown(item.StaffID)}
+                            title="View Breakdown"
+                        >
+                            <i style={{ fontSize: '15px', color: "#17a2b8" }} className="fa fa-eye" />
+                        </button>
+                        <button
+                            className="btn btn-link p-0 text-success" style={{ marginRight: 15 }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#history_modal"
+                            onClick={() => viewHistory(item.StaffID)}
+                            title="View History"
+                        >
+                            <i style={{ fontSize: '15px', color: "#28a745" }} className="fa fa-history" />
+                        </button>
+                        <button
+                            className="btn btn-link p-0 text-primary" style={{ marginRight: 15 }}
+                            data-bs-toggle="modal"
+                            data-bs-target="#kt_modal_general"
+                            onClick={() => onEditSalary(item)}
+                            title="Edit"
+                        >
+                            <i style={{ fontSize: '15px', color: "blue" }} className="fa fa-pen" />
+                        </button>
+                        <button
+                            className="btn btn-link p-0 text-danger"
+                            onClick={() => onDelete(item.EntryID)}
+                            title="Delete"
+                        >
+                            <i style={{ fontSize: '15px', color: "red" }} className="fa fa-trash" />
+                        </button>
+                    </>
+                )
+            });
         });
-        setData(rows);
+        setDatatable({
+            ...datatable,
+            rows: rows,
+        });
     };
 
     // Get bank name by ID
@@ -692,12 +736,7 @@ function HrSalaryManagement(props) {
                     </div>
 
                     <div className="card-body p-0">
-                        <ReportTable
-                            title="Staff Salary Management"
-                            columns={columns}
-                            data={data}
-                            row_count={20}
-                        />
+                        <AGTable data={datatable} />
                     </div>
                 </div>
             </div>

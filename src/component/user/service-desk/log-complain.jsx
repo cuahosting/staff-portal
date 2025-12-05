@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import Loader from "../../common/loader/loader";
-import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import axios from 'axios'
 import { toast } from "react-toastify";
@@ -109,6 +108,7 @@ const LogComplain = (props) => {
     }
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return isLoading ? (<Loader />) : (

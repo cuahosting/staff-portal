@@ -107,7 +107,7 @@ function Faculty(props)
         if (result.data.length > 0)
         {
           staff_ = result.data;
-          result.data.map((row) =>
+          result.data.forEach((row) =>
           {
             rows.push({ value: row.StaffID, label: row.StaffName + " - (" + row.StaffID + ")" })
           });
@@ -124,7 +124,7 @@ function Faculty(props)
         if (result.data.length > 0)
         {
           let rows = [];
-          result.data.map((faculty, index) =>
+          result.data.forEach((faculty, index) =>
           {
             rows.push({
               sn: index + 1,
@@ -347,6 +347,7 @@ function Faculty(props)
   useEffect(() =>
   {
     getFaculty();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (

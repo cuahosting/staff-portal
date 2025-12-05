@@ -31,7 +31,7 @@ export default function CUStudentIdCard(props) {
                                                         borderRadius: '50%'
                                                     }}
                                                         src={CULogo}
-                                                        alt="Staff Picture"
+                                                        alt="University Logo"
                                                     />
                                                     <div className='id_front_top_text'>
                                                         {projectName}
@@ -45,7 +45,7 @@ export default function CUStudentIdCard(props) {
                                                         props.selectedStudent.studentBiometric[0]?.Passport.includes("simplefileupload") ? props.selectedStudent.studentBiometric[0]?.Passport :
                                                             `${serverLink}public/uploads/${shortCode}/biometric/${props.selectedStudent.studentBiometric[0].Passport}`
                                                     }
-                                                    alt="Staff Picture"
+                                                    alt="Student Passport"
                                                 />
                                             </div>
                                             <div className="bottom">
@@ -106,7 +106,7 @@ export default function CUStudentIdCard(props) {
                                                     borderRadius: '50%'
                                                 }}
                                                     src={CULogo}
-                                                    alt="Staff Picture"
+                                                    alt="University Logo"
                                                 />
                                             </div>
                                             <div className="bottom">
@@ -121,7 +121,7 @@ export default function CUStudentIdCard(props) {
                                                         height: "50px",
                                                     }}
                                                         src={Sign}
-                                                        alt="Staff Picture"
+                                                        alt="Signature"
                                                     />
                                                 </div>
                                                 <p style={{ fontSize: '12px', marginTop: '-40px' }}>

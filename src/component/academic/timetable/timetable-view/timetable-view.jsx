@@ -13,6 +13,7 @@ function TimetableView(props) {
     const [venueList, setVenueList] = useState([]);
     const [timetableData, setTimetableData] = useState([]);
     const [title, setTitle] = useState("");
+    // eslint-disable-next-line no-unused-vars
     const [groupList, setGroupList] = useState([]);
     const [selectedGroupList, setSelectedGroupList] = useState([]);
     const componentRef = useRef();
@@ -61,7 +62,7 @@ function TimetableView(props) {
                     if (timetable.length > 0) {
                         let timetable_row = [];
                         let group_record = [];
-                        timetable.map(tt => {
+                        timetable.forEach(tt => {
                             tt.HallID = parseInt(tt.VenueID);
                             tt.StaffList = staff.filter(i => i.TimetableID === tt.EntryID);
                             tt.VenueID = venueList.filter(f => f.VenueID === parseInt(tt.VenueID)).length > 0 ?
@@ -71,7 +72,7 @@ function TimetableView(props) {
                             const filter_group = group.filter(t => t.TimetableID === tt.EntryID)
                             if (filter_group.length > 0) {
                                 let group_list = [];
-                                filter_group.map(g => {
+                                filter_group.forEach(g => {
                                     group_list.push({ groupID: parseInt(g.GroupID), groupName: studentGroupList.filter(b => b.EntryID === parseInt(g.GroupID))[0]['GroupName'] })
                                     group_record.push(parseInt(g.GroupID))
                                 })
@@ -98,16 +99,19 @@ function TimetableView(props) {
 
     useEffect(() => {
         getRecords()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.item_id])
 
     useEffect(() => {
         getRecords()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
         if (venueList.length > 0 && studentGroupList.length > 0) {
             fetchTimetableData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [studentGroupList])
 
     const handlePrint = useReactToPrint({
@@ -136,7 +140,7 @@ function TimetableView(props) {
                                     selectedGroupList.map(item => {
                                         let group_timetable = [];
                                         if (timetableData.length > 0) {
-                                            timetableData.map(tt => {
+                                            timetableData.forEach(tt => {
                                                 const filter = tt.GroupList.filter(i => i.groupID === item.EntryID)
                                                 if (filter.length > 0) {
                                                     group_timetable.push(tt)

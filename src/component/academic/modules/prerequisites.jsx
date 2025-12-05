@@ -14,6 +14,7 @@ function ModulePrerequisites(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState('off')
     const [moduleOptions, setModuleOptions] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [modulePreOptions, setModulePreOptions] = useState([]);
     const [datatable, setDatatable] = useState({
         columns: [
@@ -52,7 +53,7 @@ function ModulePrerequisites(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((preq, index) => {
+                    result.data.forEach((preq, index) => {
                         let mName = props.modulesList.length > 0 ?  props.modulesList.filter(x => x.ModuleCode === preq.ModuleCode)[0]?.ModuleName : ""
                         let preqmName = props.modulesList.length > 0 ?  props.modulesList.filter(x => x.ModuleCode === preq.PreModuleCode)[0]?.ModuleName : ""
                         rows.push({
@@ -96,6 +97,7 @@ function ModulePrerequisites(props) {
             });
     };
 
+    // eslint-disable-next-line no-unused-vars
     const onEdit = (e) => {
         setcreatePreRequisite({
             ...createPreRequisite,
@@ -204,10 +206,11 @@ function ModulePrerequisites(props) {
     useEffect(() => {
         getPrerequisite()
         let rows = [];
-        {props.modulesList.length > 0 && props.modulesList.map((x, y) => {
+        props.modulesList.length > 0 && props.modulesList.forEach((x) => {
             rows.push({ value: x.ModuleCode, label: x.ModuleCode + "-" +x.ModuleName})
-        })}
+        })
         setModuleOptions(rows)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

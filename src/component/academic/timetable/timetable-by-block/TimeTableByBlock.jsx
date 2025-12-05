@@ -14,6 +14,7 @@ function TimeTableByBlock(props) {
   const [canSeeReport, setCanSeeReport] = useState(false);
   const [blocks, setBlocks] = useState([]);
   const [semesterOptions, setSemesterOptions] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [allSemester, setAllSemester] = useState([]);
   const [data, setData] = useState([]);
   const [tableHeight, setTableHeight] = useState("600px");
@@ -32,6 +33,7 @@ function TimeTableByBlock(props) {
     "End Time",
     "Staff Name",
   ];
+  // eslint-disable-next-line no-unused-vars
   const staffID = props.login[0].StaffID;
 
   //   useEffect(() => {
@@ -62,7 +64,7 @@ function TimeTableByBlock(props) {
         .then((response) => {
           let rows = []
           if (response.data.length > 0) {
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
             });
             setAllSemester(response.data);
@@ -75,6 +77,7 @@ function TimeTableByBlock(props) {
         });
     };
     getSchoolSemester();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -90,6 +93,7 @@ function TimeTableByBlock(props) {
         });
     };
     getTimetableSemester();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSemesterChange = (e) => {
@@ -118,7 +122,7 @@ function TimeTableByBlock(props) {
         const result = res.data;
         if (result.length > 0) {
           let rows = [];
-          result.map((item) => {
+          result.forEach((item) => {
             rows.push([
               item.DayName,
               item.ModuleCode,

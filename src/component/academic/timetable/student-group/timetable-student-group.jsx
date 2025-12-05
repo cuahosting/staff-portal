@@ -78,7 +78,7 @@ function TimetableStudentGroup(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((group, index) => {
+                    result.data.forEach((group, index) => {
                         rows.push({
                             sn: index + 1,
                             GroupName: group.GroupName ?? "N/A",
@@ -231,6 +231,7 @@ function TimetableStudentGroup(props) {
         }
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {getCourses();}, [])
 
     useEffect(() => {
@@ -239,7 +240,7 @@ function TimetableStudentGroup(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((group, index) => {
+                    result.data.forEach((group, index) => {
                         rows.push({
                             sn: index + 1,
                             GroupName: group.GroupName ?? "N/A",
@@ -282,6 +283,7 @@ function TimetableStudentGroup(props) {
             .catch((err) => {
                 console.log("NETWORK ERROR");
             });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

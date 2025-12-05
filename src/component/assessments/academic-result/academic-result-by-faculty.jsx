@@ -30,7 +30,7 @@ function AcademicResultByFaculty(props) {
                 .then((result) => {
                     let rows = []
                     if (result.data.length > 0) {
-                        result.data.map((row) => {
+                        result.data.forEach((row) => {
                             rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
                         });
                         setSemesterList(result.data);
@@ -50,7 +50,7 @@ function AcademicResultByFaculty(props) {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((exam, index) => {
+                    result.data.forEach((exam, index) => {
                         rows.push([
                             index + 1,
                             exam.StudentID,
@@ -101,7 +101,8 @@ function AcademicResultByFaculty(props) {
 
     useEffect(() => {
         getSemesters();
-    }, [""]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return isLoading ? (
         <Loader />

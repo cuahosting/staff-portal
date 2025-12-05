@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux/es/exports";
-import {projectName, serverLink} from "../../../resources/url";
+import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import {formatDate, moneyFormat, formatDateAndTime, TimeTablePeriods} from "../../../resources/constants";
+import { moneyFormat, formatDateAndTime } from "../../../resources/constants";
 import { toast } from "react-toastify";
-import DataTable from "../../common/data-table/data-table";
 import "./style.css"
 
 const logoStyle = {
@@ -20,11 +19,9 @@ function SalarySummaryReport(props) {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isShow, setIsShow] = useState(false);
-    const header = ["S/N", "Staff ID", "First Name", "MiddleName", "Surname", "Net Pay (₦)", "Banker", "Account Number", "Bank Code"];
-    const [data, setData] = useState([])
-    const [semesterList, setSemesterList] = useState([]);
-    const [semesterOptions, setSemesterOptions] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [allowances, setAllowances] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [deductions, setDeductions] = useState([]);
     const [reportData, setReportData] = useState({
         PAYE: 0,

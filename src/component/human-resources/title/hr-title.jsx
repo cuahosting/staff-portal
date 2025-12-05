@@ -42,7 +42,7 @@ function HRTitle(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((title, index) => {
+                    result.data.forEach((title, index) => {
                         rows.push({
                             sn: index + 1,
                             name: title.TitleName,
@@ -158,7 +158,7 @@ function HRTitle(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((title, index) => {
+                    result.data.forEach((title, index) => {
                         rows.push({
                             sn: index + 1,
                             name: title.TitleName,
@@ -192,6 +192,7 @@ function HRTitle(props) {
             .catch((err) => {
                 console.log("NETWORK ERROR");
             });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

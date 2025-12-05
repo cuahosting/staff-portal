@@ -17,6 +17,7 @@ function GenerateAttendance(props)
     const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [isFormLoading, setIsFormLoading] = useState('off');
     const [attendanceCard, setAttendanceCard] = useState([]);
     const [datatable, setDatatable] = useState({
@@ -86,7 +87,7 @@ function GenerateAttendance(props)
                 if (result.data.length > 0)
                 {
                     let rows = [];
-                    result.data.map((timetable, index) =>
+                    result.data.forEach((timetable, index) =>
                     {
                         setFormData({
                             ...formData,

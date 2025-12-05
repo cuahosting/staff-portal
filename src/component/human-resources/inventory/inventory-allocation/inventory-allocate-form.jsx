@@ -1,9 +1,44 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import Select from "react-select";
 import {toast} from "react-toastify";
 import ReportTable from "../../../common/table/report_table";
+import AGTable from "../../../common/table/AGTable";
 
 export default function InventoryAllocateForm(props) {
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Item", field: "item_name" },
+            { label: "Quantity", field: "quantity" },
+            { label: "Action", field: "action" }
+        ],
+        rows: [],
+    });
+
+    useEffect(() => {
+        if (props.cart && props.cart.length > 0) {
+            const rows = props.cart.map((item, index) => ({
+                sn: index + 1,
+                item_name: item.item_name,
+                quantity: item.quantity,
+                action: (
+                    <button className="btn btn-link p-0 text-danger" title="Delete" onClick={() => handleDelete(item)}>
+                        <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
+                    </button>
+                )
+            }));
+            setDatatable({
+                ...datatable,
+                rows: rows,
+            });
+        } else {
+            setDatatable({
+                ...datatable,
+                rows: [],
+            });
+        }
+    }, [props.cart]);
+
     useEffect(()=> {
         if (props.value.employee_id !== ""){
             props.setCart([])
@@ -83,39 +118,7 @@ export default function InventoryAllocateForm(props) {
                                 <div className="d-flex flex-column gap-10">
 
                                     <div className="table-responsive-md">
-                                        <table className="table table-bordered table-striped ">
-                                            <thead>
-                                            <tr>
-                                                <th>S/N</th>
-                                                <th>Item</th>
-                                                <th>Quantity</th>
-                                                <th>Delete</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {
-                                                props.cart.length > 0 ?
-                                                    props.cart.map((item, index)=> {
-                                                        return(
-                                                            <tr key={index}>
-                                                                <td>{index+1}</td>
-                                                                <td>{item.item_name}</td>
-                                                                <td>{item.quantity}</td>
-                                                                <td>
-                                                                    <i className="fa fa-trash-alt text-danger" onClick={()=>handleDelete(item)}/>
-                                                                </td>
-                                                            </tr>
-                                                        )
-                                                    })
-                                                    :
-                                                    <tr>
-                                                        <td colSpan={6} className="text-center alert alert-danger"><b>No item selected, please select item.</b></td>
-                                                    </tr>
-
-                                            }
-
-                                            </tbody>
-                                        </table>
+                                        <AGTable data={datatable} paging={false} />
                                     </div>
 
                                     {

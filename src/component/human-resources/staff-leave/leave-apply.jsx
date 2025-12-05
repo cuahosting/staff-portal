@@ -13,7 +13,6 @@ import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
 import { formatDate, formatDateAndTime } from "../../../resources/constants";
 import Loader from "../../common/loader/loader";
-import staffList from "../../user/staff-report/staff-list";
 
 
 
@@ -79,7 +78,7 @@ const StaffLeaveApply = (props) => {
                             });
                         setDaysTakenByType(taken);
 
-                        result.data.map((item, index) => {
+                        result.data.forEach((item, index) => {
                             const staffLabel = item.ReliefStaffID ? `${item.ReliefStaffID}` : props.loginDetails[0].StaffID;
                             rows.push([
                                 index + 1,
@@ -136,6 +135,7 @@ const StaffLeaveApply = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const getStaffList = async () => {
@@ -143,7 +143,7 @@ const StaffLeaveApply = (props) => {
             .then((response) => {
                 let rows = [];
                 if (response.data.length > 0) {
-                    response.data.map((row) => {
+                    response.data.forEach((row) => {
                         rows.push({ value: row.StaffID, label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname })
                     });
                     setStaffList(rows)
@@ -160,6 +160,7 @@ const StaffLeaveApply = (props) => {
 
     useEffect(() => {
         getStaffList();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onEdit = (e) => {

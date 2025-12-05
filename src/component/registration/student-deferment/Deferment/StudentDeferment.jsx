@@ -15,7 +15,7 @@ import {
   projectEmail,
   projectPhone,
 } from "../../../../resources/url";
-import ReportTable from "../../../common/table/report_table";
+import AGTable from "../../../common/table/AGTable";
 import { fontSize } from "@mui/system";
 
 function StudentDeferment(props) {
@@ -28,19 +28,21 @@ function StudentDeferment(props) {
   const [selectedStudent, setSelectedStudent] = useState([]);
   const [semesterList, setSemesterList] = useState([]);
   const componentRef = useRef();
-  const [generalDatatable, setGeneralDatatable] = useState([]);
-  const columns = [
-    "S/N",
-    "Student ID",
-    "Student Name",
-    "Reason",
-    "Semesters Off",
-    "Guardian Name",
-    "Guardian Contact",
-    "Applied On",
-    "Status",
-    "Action",
-  ];
+  const [datatable, setDatatable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Student ID", field: "studentId" },
+      { label: "Student Name", field: "studentName" },
+      { label: "Reason", field: "reason" },
+      { label: "Semesters Off", field: "semestersOff" },
+      { label: "Guardian Name", field: "guardianName" },
+      { label: "Guardian Contact", field: "guardianContact" },
+      { label: "Applied On", field: "appliedOn" },
+      { label: "Status", field: "status" },
+      { label: "Action", field: "action" },
+    ],
+    rows: [],
+  });
   const [semester, setSemester] = useState({
     code: "",
     desc: "",
@@ -120,53 +122,58 @@ function StudentDeferment(props) {
                 } else {
                   status = <span className="badge badge-danger">Rejected</span>;
                 }
-                rows.push([
-                  index + 1,
-                  item.StudentID,
-                  item.Name,
-                  item.Reason,
-                  item.NumberOfSemesters,
-                  item.ParentName,
-                  item.ParentPhoneNumber,
-                  formatDateAndTime(item.InsertedOn, "date_and_time"),
-                  status,
-                  <>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-primary"
-                      onClick={() => {
-                        setCanSeeReport(true);
-                        setTimeout(() => {
-                          print();
-                          setCanSeeReport(false);
-                        }, 10);
-                        setSelectedStudent(item.StudentID);
-                      }}
-                    >
-                      <i className="fa fa-print" />
-                    </button>
-                    <button
-                      style={{
-                        marginLeft: "5px",
-                        visibility:
-                          item.Status === 1 || item.Status === 3
-                            ? "hidden"
-                            : "visible",
-                      }}
-                      type="button"
-                      onClick={() => {
-                        approveDefermentRequest(item.StudentID);
-                      }}
-                      className="btn btn-sm btn-success"
-                    >
-                      <i className="fa fa-check" />
-                    </button>
-                  </>,
-                ]);
+                rows.push({
+                  sn: index + 1,
+                  studentId: item.StudentID,
+                  studentName: item.Name,
+                  reason: item.Reason,
+                  semestersOff: item.NumberOfSemesters,
+                  guardianName: item.ParentName,
+                  guardianContact: item.ParentPhoneNumber,
+                  appliedOn: formatDateAndTime(item.InsertedOn, "date_and_time"),
+                  status: status,
+                  action: (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        onClick={() => {
+                          setCanSeeReport(true);
+                          setTimeout(() => {
+                            print();
+                            setCanSeeReport(false);
+                          }, 10);
+                          setSelectedStudent(item.StudentID);
+                        }}
+                      >
+                        <i className="fa fa-print" />
+                      </button>
+                      <button
+                        style={{
+                          marginLeft: "5px",
+                          visibility:
+                            item.Status === 1 || item.Status === 3
+                              ? "hidden"
+                              : "visible",
+                        }}
+                        type="button"
+                        onClick={() => {
+                          approveDefermentRequest(item.StudentID);
+                        }}
+                        className="btn btn-sm btn-success"
+                      >
+                        <i className="fa fa-check" />
+                      </button>
+                    </>
+                  ),
+                });
               });
             setDefermentData(data.data);
           }
-          setGeneralDatatable(rows);
+          setDatatable({
+            ...datatable,
+            rows: rows,
+          });
         })
         .catch((err) => {
           toast.error("NETWORK ERROR. Please try again!");
@@ -206,8 +213,7 @@ function StudentDeferment(props) {
               </select>
             </div>
             <br />
-            <ReportTable columns={columns} data={generalDatatable} />
-            {/* <Table data={generalDatatable} /> */}
+            <AGTable data={datatable} />
           </div>
         </div>
 

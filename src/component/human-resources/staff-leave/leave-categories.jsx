@@ -16,6 +16,7 @@ const StaffLeaveCategories = (props) => {
     const [isLoading, setIsLoading] = useState(true)
     const columns = ["SN", "Name", "Description", "Annual Days Allowed", "Casual Days Allowed", "InsertedBy", "Action"];
     const [data, setData] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [leaveCategories, setLeaveCategories] = useState();
     const [leave, setLeave] = useState({
         Name: "",
@@ -32,7 +33,7 @@ const StaffLeaveCategories = (props) => {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((item, index) => {
+                    result.data.forEach((item, index) => {
                         rows.push([
                             index + 1,
                             item.Name,
@@ -103,6 +104,7 @@ const StaffLeaveCategories = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     return isLoading ? (<Loader />) : (
         <div className="card">

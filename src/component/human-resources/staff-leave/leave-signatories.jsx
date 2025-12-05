@@ -18,9 +18,7 @@ const StaffLeaveSignatories = (props) => {
     const columns = ["SN", "Category", "Staff", "Position", "Inserted By", "Action"];
     const [data, setData] = useState([]);
     const [leaveCategories, setLeaveCategories] = useState([]);
-    const [leaveSignatories, setLeaveSignatories] = useState([]);
     const [staffList, setStaffList] = useState([])
-    const InsertedBy = props.InsertedBy;
     const [sign, setsign] = useState({
         CategoryID: "",
         StaffID: "",
@@ -35,7 +33,7 @@ const StaffLeaveSignatories = (props) => {
                 .then((result) => {
                     let rows_ = []
                     if (result.data.length > 0) {
-                        result.data.map((row) => {
+                        result.data.forEach((row) => {
                             rows_.push({ value: row.StaffID, label: row.StaffID + " -- " + row.StaffName })
                         });
                     }
@@ -55,7 +53,7 @@ const StaffLeaveSignatories = (props) => {
                 .then((result) => {
                     let rows = [];
                     if (result.data.length > 0) {
-                        result.data.map((item, index) => {
+                        result.data.forEach((item, index) => {
                             let cat = categories.length > 0 ? categories.filter(x => x.EntryID === item.CategoryID)[0].Description : "No Category"
                             rows.push([
                                 index + 1,
@@ -141,6 +139,7 @@ const StaffLeaveSignatories = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     return isLoading ? (<Loader />) : (
         <div className="card">

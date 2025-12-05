@@ -1,4 +1,3 @@
-import { ArrowRightAlt } from "@mui/icons-material";
 import axios from "axios";
 import React from "react";
 import { useEffect } from "react";
@@ -56,7 +55,7 @@ const StaffLeaveCategoryMembers = (props) => {
             .then((result) => {
                 let rows = []
                 if (staffList.length > 0) {
-                    staffList.map((item, index) => {
+                    staffList.forEach((item, index) => {
                         let action = []
                         action = result.data.filter(x => x.StaffID === item.StaffID && x.CategoryID.toString() === categoryID.toString());
                         assigned_ = action.length > 0 ? 1 : 0;
@@ -148,6 +147,7 @@ const StaffLeaveCategoryMembers = (props) => {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return isLoading ? (<Loader />) : (

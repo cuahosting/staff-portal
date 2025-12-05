@@ -7,15 +7,28 @@ import {toast} from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import {currencyConverter, formatDate, formatDateAndTime, sumObjectArray} from "../../../resources/constants";
 import Modal from "../../common/modal/modal";
-import ReportTable from "../../common/table/report_table";
+import AGTable from "../../common/table/AGTable";
 import swal from "sweetalert";
 import Select from "react-select";
 
 function FinanceMyBudget(props) {
     const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["S/N", "Year", "Amount", "Allocated Amount", "Balance Amount", "Status", "Added Date", "Decision By", "Decision Date", "Action"];
-    const [dataTable, setDataTable] = useState([]);
+    const [budgetDatatable, setBudgetDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Year", field: "year" },
+            { label: "Amount", field: "amount" },
+            { label: "Allocated Amount", field: "allocatedAmount" },
+            { label: "Balance Amount", field: "balanceAmount" },
+            { label: "Status", field: "status" },
+            { label: "Added Date", field: "addedDate" },
+            { label: "Decision By", field: "decisionBy" },
+            { label: "Decision Date", field: "decisionDate" },
+            { label: "Action", field: "action" }
+        ],
+        rows: [],
+    });
     const [yearList, setYearList] = useState([]);
     const [accountList, setAccountList] = useState([]);
     const [budgetTrackerList, setBudgetTrackerList] = useState([]);
@@ -60,30 +73,42 @@ function FinanceMyBudget(props) {
                     if (budget_list.length > 0) {
                         let rows = [];
                         budget_list.map((item, index) => {
-                            rows.push([
-                                index+1, getBudgetYear(year_list, item.YearID), currencyConverter(item.Amount), currencyConverter(item.AllocatedAmount), currencyConverter(item.BalanceAmount), item.Status, formatDateAndTime(item.InsertedDate, 'date'), item.DecisionBy, formatDateAndTime(item.DecisionDate, 'date'),
-                                <div className="btn-group">
-                                    <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"
-                                            onClick={()=>handleOnEdit(item, budget_items)}
-                                    ><i className="fa fa-pen" /></button>
-                                    {
-                                        item.Status === 'submitted' &&
-                                        <button className="btn btn-danger btn-sm"
-                                                onClick={()=>{
-                                                    swal({title: "Are you sure?", text: "Once deleted, you will not be able to recover the budget!", icon: "warning", buttons: true, dangerMode: true,
-                                                    }).then((willDelete) => {
-                                                        if (willDelete) {
-                                                            handleBudgetDelete(item.EntryID);
-                                                        }
-                                                    });
-                                                }}
-                                        ><i className="fa fa-trash" /></button>
-                                    }
-
-                                </div>
-                            ]);
+                            rows.push({
+                                sn: index+1,
+                                year: getBudgetYear(year_list, item.YearID),
+                                amount: currencyConverter(item.Amount),
+                                allocatedAmount: currencyConverter(item.AllocatedAmount),
+                                balanceAmount: currencyConverter(item.BalanceAmount),
+                                status: item.Status,
+                                addedDate: formatDateAndTime(item.InsertedDate, 'date'),
+                                decisionBy: item.DecisionBy,
+                                decisionDate: formatDateAndTime(item.DecisionDate, 'date'),
+                                action: (
+                                    <>
+                                        <button className="btn btn-primary btn-sm" style={{marginRight:15}} data-bs-toggle="modal" data-bs-target="#kt_modal_general"
+                                                onClick={()=>handleOnEdit(item, budget_items)}
+                                        ><i className="fa fa-pen" /></button>
+                                        {
+                                            item.Status === 'submitted' &&
+                                            <button className="btn btn-danger btn-sm"
+                                                    onClick={()=>{
+                                                        swal({title: "Are you sure?", text: "Once deleted, you will not be able to recover the budget!", icon: "warning", buttons: true, dangerMode: true,
+                                                        }).then((willDelete) => {
+                                                            if (willDelete) {
+                                                                handleBudgetDelete(item.EntryID);
+                                                            }
+                                                        });
+                                                    }}
+                                            ><i className="fa fa-trash" /></button>
+                                        }
+                                    </>
+                                )
+                            });
                         });
-                        setDataTable(rows)
+                        setBudgetDatatable({
+                            ...budgetDatatable,
+                            rows: rows,
+                        });
                     }
                 }
                 setIsLoading(false);
@@ -489,12 +514,7 @@ function FinanceMyBudget(props) {
 
                         <button className="btn btn-info btn-sm pull-right" data-bs-toggle="modal" data-bs-target="#kt_modal_general_item"  onClick={()=>{ setBudgetSelectValue({entry_id: '', item_name: ''}) }}>Add Budget Item <i className="fa fa-plus" /></button>
                         <div className="row col-md-12" style={{width:'100%'}}>
-                            <ReportTable
-                                title={`My Budget List`}
-                                columns={columns}
-                                data={dataTable}
-                                height={"600px"}
-                            />
+                            <AGTable data={budgetDatatable} />
                         </div>
                     </div>
 

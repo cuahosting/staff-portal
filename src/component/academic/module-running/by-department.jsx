@@ -54,7 +54,7 @@ const ByDepartment = (props) => {
         .then((response) => {
           let rows = []
           if (response.data.length > 0) {
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ value: row.DepartmentCode, label: row.DepartmentName })
             });
             setDepartmentsList(rows);
@@ -66,6 +66,7 @@ const ByDepartment = (props) => {
         });
     };
     getDepartments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -79,7 +80,7 @@ const ByDepartment = (props) => {
           const result = res.data;
           if (result.length > 0) {
             let rows = [];
-            result.map((item, index) => {
+            result.forEach((item, index) => {
               rows.push([
                 index + 1,
                 item.FacultyName,

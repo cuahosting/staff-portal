@@ -107,6 +107,7 @@ function TuitionFee(props)
         {
             abortController.abort();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const onEdit = (e) =>

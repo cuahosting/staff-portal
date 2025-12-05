@@ -16,6 +16,7 @@ function AcademicResultByUniversity(props) {
     const [data, setData] = useState([]);
     const [semesterList, setSemesterList] = useState([]);
     const [semesterOptions, setSemesterOptions] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [departmentsList, setDepartments] = useState([]);
     const [departmentOptions, setDepartmentsOptions] = useState([]);
     const [semester, setSemeter] = useState({
@@ -31,7 +32,7 @@ function AcademicResultByUniversity(props) {
                 .then((result) => {
                     let rows = []
                     if (result.data.length > 0) {
-                        result.data.map((row) => {
+                        result.data.forEach((row) => {
                             rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
                         });
                         setSemesterList(result.data);
@@ -51,7 +52,7 @@ function AcademicResultByUniversity(props) {
             .then((response) => {
                 let rows = [];
                 if (response.data.length > 0) {
-                    response.data.map((row) => {
+                    response.data.forEach((row) => {
                         rows.push({ value: row.FacultyCode, label: row.FacultyName })
                     });
                     setDepartmentsOptions(rows)
@@ -68,9 +69,9 @@ function AcademicResultByUniversity(props) {
                 if (result.data.length > 0) {
                     const distinctCourse = [...new Set(result.data.map(obj => obj.CourseName))];
 
-                    distinctCourse.map((item, key)=> {
+                    distinctCourse.forEach((item, key)=> {
                         rows.push(["", "", "", "", <h1 className="text-center text-uppercase text-success">{item}</h1>, "", "", "", "", ""]);
-                        result.data.filter(e=>e.CourseName === item).map((exam, index) => {
+                        result.data.filter(e=>e.CourseName === item).forEach((exam, index) => {
                             rows.push([
                                 index + 1,
                                 exam.StudentID,
@@ -135,7 +136,8 @@ function AcademicResultByUniversity(props) {
     useEffect(() => {
         getSemesters();
         getCourses();
-    }, [""]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return isLoading ? (
         <Loader />

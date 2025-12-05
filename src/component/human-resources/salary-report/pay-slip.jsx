@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { connect } from "react-redux/es/exports";
 import { serverLink } from "../../../resources/url";
 import axios from "axios";
@@ -6,17 +6,10 @@ import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import {
     currencyConverter,
-    formatDate,
     formatDateAndTime,
-    moneyFormat,
-    TimeTablePeriods
 } from "../../../resources/constants";
 import { toast } from "react-toastify";
-import DataTable from "../../common/data-table/data-table";
-import { useRef } from 'react';
-import { createRoutesFromElements } from 'react-router';
-import { useReactToPrint } from 'react-to-print';
-import CourseForm from "../../academic/course/courseform";
+import AGTable from "../../common/table/AGTable";
 import Modal from "../../common/modal/modal";
 import PaySlipPrint from "./pay-slip-print";
 
@@ -25,17 +18,23 @@ function PaySlip(props) {
     const componentRef = useRef();
 
     const [isLoading, setIsLoading] = useState(true);
-    const header = ["S/N", "STAFF ID", "STAFF NAME", "DESIGNATION", "SALARY DATE", "ACTIONS"];
-    const [data, setData] = useState([])
-    const [reportData, setReportData] = useState([])
-    const [semesterList, setSemesterList] = useState([]);
     const [salaryDetails, setSalaryDetails] = useState([])
     const [salaryDetails2, setSalaryDetails2] = useState([])
-    const [employeeID, setEmployeeID] = useState([])
     const [salaryMonths, setSalaryMonths] = useState([])
-    const [tableData, setTableData] = useState([]);
     const [printPaySlip, setprintPaySlip] = useState(false)
-    const detailsColumns = ["S/N", "ITEM", "TYPE", "AMOUNT", "DATE"]
+    const [fetechingRecord, setFetchingRecord] = useState(null)
+
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
+            { label: "STAFF ID", field: "staffId" },
+            { label: "STAFF NAME", field: "staffName" },
+            { label: "DESIGNATION", field: "designation" },
+            { label: "SALARY DATE", field: "salaryDate" },
+        ],
+        rows: [],
+    });
 
     const [formData, setFormData] = useState({
         month_id: "",
@@ -43,91 +42,85 @@ function PaySlip(props) {
     })
 
     const getData = async () => {
-
         await axios.get(`${serverLink}staff/human-resources/finance-report/report/salary-months`, token).then((res) => {
             setSalaryMonths(res.data)
             setIsLoading(false)
         }).catch((e) => {
             toast.error(e.response.data)
         })
-
     }
-    const [fetechingRecord, setFetchingRecord] = useState(null)
 
+    const handleViewDetails = async (x) => {
+        setSalaryDetails([])
+        setFetchingRecord(x.employee_id)
+        setFormData({
+            employee_id: x.employee_id,
+            employee_name: x.employee_name,
+            salary_date: x.salary_date,
+            total_pay: x.total_pay,
+            run_date: x.inserted_date
+        })
+        await axios.get(`${serverLink}staff/human-resources/finance-report/report/salary/details/${x.employee_id}/${x.salary_date}`, token).then((results) => {
+            if (results.data.length > 0) {
+                let det_rows = []
+                setSalaryDetails2(results.data)
+                results.data.forEach((det, index) => {
+                    det_rows.push([
+                        index + 1,
+                        det.item_name,
+                        <span className={det.salary_type === "Allowance" ? "text-success" : "text-danger"}>
+                            {det.salary_type}
+                        </span>,
+                        <span className={det.salary_type === "Allowance" ? "text-success" : "text-danger"}>
+                            {currencyConverter(det.amount)}
+                        </span>,
+                        formatDateAndTime(det.salary_date, "month_and_year")
+                    ])
+                })
+                setSalaryDetails(det_rows)
+            } else {
+                setSalaryDetails([])
+            }
+            setFetchingRecord(null)
+        })
+    }
 
     const getSalaryReport = async (salary_month) => {
-
         if (salary_month === "") {
-            setTableData([])
+            setDatatable(prev => ({ ...prev, rows: [] }));
         } else {
             setIsLoading(true)
             await axios.get(`${serverLink}staff/human-resources/finance-report/report/salary/summary?salary_month=${salary_month}`, token)
                 .then((res) => {
                     if (res.data.length > 0) {
                         let rows = [];
-                        let row2 = [];
-                        let ft;
-                        res.data.map((x, i) => {
-                            row2.push(x.employee_id)
+                        res.data.forEach((x, i) => {
                             rows.push({
-                                SN: x.i + 1,
-                                employee_id: x.employee_id,
-                                employee_name: x.employee_name,
-                                designation: x.designation,
-                                salary_date: formatDateAndTime(x.salary_date, "month_and_year"),
-                                action: <div className='d-flex'>
-                                    < button
-                                        className='btn  btn-primary m-lg-2'  data-bs-toggle="modal" data-bs-target="#standard-modal"
-                                        onClick={async () => {
-                                            setSalaryDetails([])
-                                            // onOpenModal(true)
-                                            setFetchingRecord(x.employee_id)
-                                            setFormData({
-                                                employee_id: x.employee_id,
-                                                employee_name: x.employee_name,
-                                                salary_date: x.salary_date,
-                                                total_pay: x.total_pay,
-                                                run_date: x.inserted_date
-
-                                            })
-                                            await axios.get(`${serverLink}staff/human-resources/finance-report/report/salary/details/${x.employee_id}/${x.salary_date}`, token).then((results) => {
-                                                if (results.data.length > 0) {
-
-                                                    let det_rows = []
-                                                    setSalaryDetails2(results.data)
-                                                    results.data.map((det, index) => {
-                                                        det_rows.push([
-                                                            index + 1,
-                                                            det.item_name,
-                                                            <span
-                                                                className={det.salary_type === "Allowance" ? "text-success" : "text-danger"}>
-                                                            {det.salary_type}
-                                                        </span>,
-                                                            <span
-                                                                className={det.salary_type === "Allowance" ? "text-success" : "text-danger"}>
-                                                            {currencyConverter(det.amount)}
-                                                        </span>,
-                                                            formatDateAndTime(det.salary_date, "month_and_year")
-                                                        ])
-                                                    })
-                                                    setSalaryDetails(det_rows)
-                                                } else {
-                                                    setSalaryDetails([])
-                                                }
-                                                setFetchingRecord(null)
-                                            })
-                                        }}
+                                sn: i + 1,
+                                staffId: x.employee_id ?? "N/A",
+                                staffName: x.employee_name ?? "N/A",
+                                designation: x.designation ?? "N/A",
+                                salaryDate: formatDateAndTime(x.salary_date, "month_and_year"),
+                                action: (
+                                    <button
+                                        className='btn btn-link p-0 text-primary'
+                                        style={{marginRight: 15}}
+                                        title="View Details"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#standard-modal"
+                                        onClick={() => handleViewDetails(x)}
                                     >
-
-                                        <i className='fa fa-eye'/>
-                                        &nbsp; {fetechingRecord !== null ? "loading" : "Print Split"}
+                                        <i style={{ fontSize: '15px', color: "blue" }} className='fa fa-eye'/>
                                     </button>
-
-                                </div>
+                                )
                             })
                         })
-                        setEmployeeID(row2)
-                        setTableData(rows)
+                        setDatatable(prev => ({
+                            ...prev,
+                            rows: rows,
+                        }));
+                    } else {
+                        setDatatable(prev => ({ ...prev, rows: [] }));
                     }
                     setIsLoading(false)
                 }).catch((e) => {
@@ -139,28 +132,8 @@ function PaySlip(props) {
 
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-
-
-    const  showTable = () => {
-        try {
-            return tableData.map((item, index) => {
-                return (
-                    <tr key={index}>
-                        <td className="text-xs font-weight-bold">{index +1}</td>
-                        <td className="text-xs font-weight-bold">{item.employee_id}</td>
-                        <td className="text-xs font-weight-bold">{item.employee_name}</td>
-                        <td className="text-xs font-weight-bold">{item.designation}</td>
-                        <td className="text-xs font-weight-bold">{item.salary_date}</td>
-                        <td className="text-xs font-weight-bold">{item.action}</td>
-                    </tr>
-                );
-            });
-        } catch (e) {
-            alert(e.message);
-        }
-    };
-
 
     const onChange = (e) => {
         const val = e.target.value;
@@ -180,11 +153,6 @@ function PaySlip(props) {
         }, 100);
     }
 
-    // const handlePrint = useReactToPrint({
-    //     content: () => componentRef.current,
-    // });
-
-
     const handlePrint = () => {
         const printWindow = window.open('', '', 'width=800,height=600');
 
@@ -193,7 +161,7 @@ function PaySlip(props) {
         <head>
           <title>Pay Slip</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-        
+
           <style>
             /* Add any custom styles here if needed */
             body { font-family: Arial, sans-serif; padding: 20px; }
@@ -230,8 +198,6 @@ function PaySlip(props) {
         }, 100);
     };
 
-
-
     return isLoading ? (
         <Loader />
     ) : (
@@ -264,9 +230,11 @@ function PaySlip(props) {
                 <div className="row">
                     {
                         <div className="mt-4">
-                            {tableData.length > 0 &&
-                                <div className="table-responsive">
-                                    <DataTable header={header} body={showTable()} title="PaySlip Report"/>
+                            {datatable.rows.length > 0 &&
+                                <div className="card card-no-border">
+                                    <div className="card-body p-0">
+                                        <AGTable data={datatable} />
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -277,11 +245,6 @@ function PaySlip(props) {
                 {
                     salaryDetails.length > 0 ?
                         <div>
-                            {/* <ReportTable
-                                data={salaryDetails}
-                                columns={detailsColumns}
-                            /> */}
-
                             <div className='table-responsive'>
                                 <table className='table table-striped'>
                                     <thead>
@@ -321,9 +284,6 @@ function PaySlip(props) {
                             </div>
 
                             <div className='mt-5 pt-5 text-center fw-bolder h-100'>
-                                {/*<h1>*/}
-                                {/*    TOTAL : {currencyConverter(formData?.total_pay)}*/}
-                                {/*</h1>*/}
                                 <div>
                                     <button
                                         className='btn btn-md btn-primary'

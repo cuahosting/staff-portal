@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { SSCESubjects as subjects } from "../../../../resources/subjects";
 import { serverLink } from "../../../../resources/url";
 import axios from "axios";
+import AGTable from "../../../common/table/AGTable";
 
 function Jamb(props)
 {
@@ -21,6 +22,34 @@ function Jamb(props)
         AppID: props.AppId,
     });
 
+    // Datatable state for AG Grid
+    const [jambTable, setJambTable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Subject", field: "SubjectName" },
+            { label: "Score", field: "SubjectScore" },
+        ],
+        rows: [],
+    });
+
+
+    // Populate JAMB table when props.jambData changes
+    useEffect(() => {
+        if (props.jambData && props.jambData.length > 0) {
+            let rows = [];
+            props.jambData.forEach((item, index) => {
+                rows.push({
+                    sn: index + 1,
+                    SubjectName: item.SubjectName,
+                    SubjectScore: item.SubjectScore,
+                });
+            });
+            setJambTable({
+                ...jambTable,
+                rows: rows,
+            });
+        }
+    }, [props.jambData]);
 
     const handleChange = (e) =>
     {
@@ -109,19 +138,7 @@ function Jamb(props)
                                     <td>{props.jambData[0]?.ExaminationYear}</td>
                                 </tr>
                             </table>
-                            <table className="table table-bordered" style={{ borderStyle: "solid", borderWidth: "1px", padding: "20px" }}>
-                                {
-                                    props.jambData.map((x =>
-                                    {
-                                        return (
-                                            <tr>
-                                                <td>{x.SubjectName}</td>
-                                                <td>{x.SubjectScore}</td>
-                                            </tr>
-                                        )
-                                    }))
-                                }
-                            </table>
+                            <AGTable data={jambTable} />
                         </div>
                     }
 

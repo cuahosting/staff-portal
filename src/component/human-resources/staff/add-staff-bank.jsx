@@ -18,6 +18,7 @@ function AddStaffBank(props) {
   const [data, setData] = useState({
     bank: [],
   });
+  // eslint-disable-next-line no-unused-vars
   const [qualifications, setQualifications] = useState([]);
   const addForm = () => {
     setAddBank(true);
@@ -57,6 +58,7 @@ function AddStaffBank(props) {
     getStaff().then((r) => { });
     getData().then((r) => { });
     getStaffBank().then((r) => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const deleteItem = async (id, image) => {

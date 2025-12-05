@@ -54,6 +54,7 @@ function AttendanceList(props)
         rows: [],
     });
 
+    // eslint-disable-next-line no-unused-vars
     const [formData, setFormData] = useState({
         SelectedDate: props.attendanceData.SelectedDate,
         Schedule: props.attendanceData.Schedule,
@@ -73,7 +74,7 @@ function AttendanceList(props)
 
                     let rows = [];
                     console.log(result.data)
-                    result.data.map((attendance, index) =>
+                    result.data.forEach((attendance, index) =>
                     {
                         rows.push({
                             sn: index + 1,
@@ -126,6 +127,7 @@ function AttendanceList(props)
 
     const onEdit = async (e) =>
     {
+        // eslint-disable-next-line no-unused-vars
         let value = e.target.value;
         let student_id = e.target.getAttribute('data');
         let sendData = { ...formData, StudentID: student_id };
@@ -147,6 +149,7 @@ function AttendanceList(props)
     useEffect(() =>
     {
         getAttendanceList();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

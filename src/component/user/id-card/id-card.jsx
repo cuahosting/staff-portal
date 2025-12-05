@@ -20,8 +20,8 @@ import CUStudentIdCard from "./cu/student-id-card";
 function GenerateIDCard(props) {
     const token = props.loginData[0].token;
 
-    const [isLoading, setIsLoading] = useState(false);
-    const { Image } = useQRCode();
+    const [isLoading] = useState(false);
+    useQRCode();
     const componentRef = useRef();
     const [data, setData] = useState({
         students: [],
@@ -66,7 +66,7 @@ function GenerateIDCard(props) {
                     setData(res.data)
                     if (res.data.staff.length > 0) {
                         let rows = [];
-                        res.data.staff.map(item => {
+                        res.data.staff.forEach(item => {
                             rows.push({
                                 id: item.StaffID,
                                 text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StaffID})`
@@ -88,7 +88,7 @@ function GenerateIDCard(props) {
                     setData(res.data)
                     if (res.data.students.length > 0) {
                         let rows = [];
-                        res.data.students.map(item => {
+                        res.data.students.forEach(item => {
                             rows.push({
                                 id: item.StudentID,
                                 text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`

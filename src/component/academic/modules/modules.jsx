@@ -14,7 +14,9 @@ import ModuleTemplate from "../../../images/Module Templates.csv";
 import swal from "sweetalert";
 
 function Modules(props) {
+    // eslint-disable-next-line no-unused-vars
     const current = new Date();
+    // eslint-disable-next-line no-unused-vars
     const date = `${current.getDate()}/${
         current.getMonth() + 1
     }/${current.getFullYear()}`;
@@ -77,7 +79,7 @@ function Modules(props) {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((row) => {
+                    result.data.forEach((row) => {
                         rows.push({value: row.CourseCode, label: row.CourseName})
                     });
                     setDepartmentsOptions(rows)
@@ -123,7 +125,7 @@ function Modules(props) {
                 if (result.data.length > 0) {
                     setModulesList(result.data);
                     let rows = [];
-                    result.data.map((modules, index) => {
+                    result.data.forEach((modules, index) => {
                         rows.push({
                             sn: index + 1,
                             EntryID: modules.EntryID,
@@ -219,7 +221,7 @@ function Modules(props) {
             .then((result) => {
                 if (result.data.length > 0) {
                     let existing_modules = [];
-                    result.data.map((modules, index) => {
+                    result.data.forEach((modules) => {
                         existing_modules.push(modules.ModuleCode);
                     });
 
@@ -436,6 +438,7 @@ function Modules(props) {
 
     useEffect(() => {
         getModules();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

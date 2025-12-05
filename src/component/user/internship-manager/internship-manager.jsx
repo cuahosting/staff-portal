@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
@@ -69,25 +69,6 @@ function InternshipManager(props) {
         Status: "",
     });
 
-    const getStaff = async () => {
-            axios.get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-                .then((res) => {
-                    setStaffList(res.data);
-                    setIsLoading(false);
-                    if (res.data.length > 0 ){
-                        let rows = [];
-                        res.data.map(item => {
-                            rows.push({
-                                id: item.StaffID,
-                                text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StaffID})`
-                            })
-                        })
-                    }
-                })
-                .catch((err) => {
-                    console.log("NETWORK ERROR");
-                });
-    };
 
     const onEdit = (e) => {
         setUpdateStudentInternship({
@@ -158,7 +139,7 @@ function InternshipManager(props) {
         }
     }
 
-    const getSemesters = async () => {
+    const getSemesters = useCallback(async () => {
         axios
             .get(`${serverLink}registration/registration-report/semester-list/`, token)
             .then((response) => {
@@ -168,11 +149,32 @@ function InternshipManager(props) {
             .catch((ex) => {
                 console.error(ex);
             });
-    };
+    }, [token]);
+
+    const getStaffMemo = useCallback(async () => {
+        axios.get(`${serverLink}staff/hr/staff-management/staff/list`, token)
+            .then((res) => {
+                setStaffList(res.data);
+                setIsLoading(false);
+                if (res.data.length > 0 ){
+                    let rows = [];
+                    res.data.forEach(item => {
+                        rows.push({
+                            id: item.StaffID,
+                            text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StaffID})`
+                        })
+                    })
+                }
+            })
+            .catch((err) => {
+                console.log("NETWORK ERROR");
+            });
+    }, [token]);
+
     useEffect(() => {
         getSemesters().then((r) => {});
-        getStaff().then((r) => {});
-    }, []);
+        getStaffMemo().then((r) => {});
+    }, [getSemesters, getStaffMemo]);
 
     const handleChange = async (e) => {
         setIsLoading(true);
@@ -191,7 +193,7 @@ function InternshipManager(props) {
 
                     if (result.data.length > 0){
                         let rows = [];
-                        result.data.map((item, index) => {
+                        result.data.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 StudentID: item.StudentID,
@@ -202,7 +204,7 @@ function InternshipManager(props) {
                                     <>
                                         {item.AcceptanceDocument ? (
                                             <a className="btn btn-sm btn-danger" target="_blank"
-                                               referrerPolicy="no-referrer"
+                                               rel="noreferrer"
                                                href={`${serverLink}public/uploads/${shortCode}/student_uploads/internship_uploads/${item.AcceptanceDocument}`}>
                                                 <i className="fa fa-file-pdf" />
                                             </a>
@@ -288,7 +290,7 @@ function InternshipManager(props) {
 
                     if (result.data.length > 0){
                         let rows = [];
-                        result.data.map((item, index) => {
+                        result.data.forEach((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 StudentID: item.StudentID,
@@ -299,7 +301,7 @@ function InternshipManager(props) {
                                     <>
                                         {item.AcceptanceDocument ? (
                                             <a className="btn btn-sm btn-danger" target="_blank"
-                                               referrerPolicy="no-referrer"
+                                               rel="noreferrer"
                                                href={`${serverLink}public/uploads/${shortCode}/student_uploads/internship_uploads/${item.AcceptanceDocument}`}>
                                                 <i className="fa fa-file-pdf" />
                                             </a>

@@ -9,7 +9,7 @@ import
   PermissionDetailsReducer,
   currentSemesterReducer, generalDetailsReducer, dashboardDaraReducer
 } from "./detailsReducer";
-import { projectCode, shortCode } from "../resources/constants";
+import { shortCode } from "../resources/constants";
 
 const rootReducer = combineReducers({
   LoginDetails: LoginDetailsReducer,

@@ -1,10 +1,52 @@
+import { useState, useEffect } from "react";
 import { formatDateAndTime } from "../../../resources/constants";
+import AGTable from "../../common/table/AGTable";
 
 
 const LoginHistory = (props) => {
   const color = ['success', 'danger', 'info', 'secondary', 'primary', 'warning']
   const logins_ = props.activities.filter(x => x.Action.includes('logged'));
   const activities_ = props.activities.filter(x => !x.Action.includes('logged'));
+
+  const [loginDatatable, setLoginDatatable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Status", field: "status" },
+      { label: "Action", field: "action" },
+      { label: "Date & Time", field: "datetime" }
+    ],
+    rows: [],
+  });
+
+  useEffect(() => {
+    if (logins_.length > 0) {
+      let rows = [];
+      logins_.forEach((item, index) => {
+        var color_ = color[Math.floor(Math.random() * color.length)];
+        let data = new Date(item.InsertedDate)
+        let date = formatDateAndTime(item.InsertedDate, "date")
+        let hrs = data.getHours();
+        let mins = data.getMinutes();
+        if (hrs <= 9)
+          hrs = '0' + hrs
+        if (mins < 10)
+          mins = '0' + mins
+        const postTime = hrs + ':' + mins
+
+        rows.push({
+          sn: index + 1,
+          status: <span data-kt-element="bullet" className={`bullet bullet-vertical d-flex align-items-center h-40px bg-${color_}`} />,
+          action: item.Action,
+          datetime: `${date} : ${postTime}`
+        });
+      });
+      setLoginDatatable({
+        ...loginDatatable,
+        rows: rows,
+      });
+    }
+  }, [props.activities]);
+
   return (
     <>
       <div className="card h-xl-100" id="kt_timeline_widget_2_card">
@@ -29,54 +71,11 @@ const LoginHistory = (props) => {
         <div className="card-body" style={{ maxHeight: '350px', overflowY: 'auto' }}>
           <div className="tab-content">
             <div className="tab-pane fade active show" id="kt_timeline_widget_2_tab_1">
-              <div className="table-responsive">
-                <table className="table align-middle gs-0 gy-4">
-                  <thead>
-                    <tr>
-                      <th className="p-0 " />
-                      <th className="p-0 " />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                      logins_.length > 0 ?
-                        <>
-                          {
-                            logins_.map((item, index) => {
-                              var color_ = color[Math.floor(Math.random() * color.length)];
-                              let data = new Date(item.InsertedDate)
-                              let date = formatDateAndTime(item.InsertedDate, "date")
-                              let hrs = data.getHours();
-                              let mins = data.getMinutes();
-                              if (hrs <= 9)
-                                hrs = '0' + hrs
-                              if (mins < 10)
-                                mins = '0' + mins
-                              const postTime = hrs + ':' + mins
-                              return (
-                                <tr key={index}>
-                                  <td>
-                                    <span data-kt-element="bullet" className={`bullet bullet-vertical d-flex align-items-center h-40px bg-${color_}`} />
-                                  </td>
-                                  <td>
-                                    <span className={`text-gray-800 text-hover-${color_} fw-bolder fs-6`}>{item.Action}</span>
-                                    <span className="text-gray-400 fw-bolder fs-7 d-block">{date} : {postTime}</span>
-                                  </td>
-                                </tr>
-                              )
-                            })
-                          }
-                        </>
-                        : <>
-                          <tr>
-                            <td></td>
-                            <td></td>
-                          </tr>
-                        </>
-                    }
-                  </tbody>
-                </table>
-              </div>
+              {logins_.length > 0 ? (
+                <AGTable data={loginDatatable} paging={false} />
+              ) : (
+                <div className="text-center p-5">No login records</div>
+              )}
             </div>
             <div className="tab-pane fade" id="kt_timeline_widget_2_tab_2">
               <div className="timeline-label">

@@ -6,92 +6,97 @@ import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import {
     currencyConverter,
-    formatDate,
     formatDateAndTime,
     moneyFormat,
-    TimeTablePeriods
 } from "../../../resources/constants";
 import { toast } from "react-toastify";
-import DataTable from "../../common/data-table/data-table";
+import AGTable from "../../common/table/AGTable";
 
 function ITFReport(props) {
     const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
-    const header = ["S/N", "Staff ID", "Staff Name", "Date of Birth", "Gender", "Monthly Earnings (₦)", "ITF Amount", "Remarks"];
-    const [data, setData] = useState([])
-    const [reportData, setReportData] = useState([])
-    const [semesterList, setSemesterList] = useState([]);
-    const [semesterOptions, setSemesterOptions] = useState([]);
+    const [reportData, setReportData] = useState([]);
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Staff ID", field: "staffId" },
+            { label: "Staff Name", field: "staffName" },
+            { label: "Date of Birth", field: "dateOfBirth" },
+            { label: "Gender", field: "gender" },
+            { label: "Monthly Earnings (₦)", field: "monthlyEarnings" },
+            { label: "ITF Amount", field: "itfAmount" },
+            { label: "Remarks", field: "remarks" },
+        ],
+        rows: [],
+    });
 
     const [formData, setFormData] = useState({
         month_id: "",
         inserted_by: props.LoginDetails[0]?.StaffID,
     })
 
-    const  getTotal = () => {
+    const getTotal = () => {
         let total_amount = 0;
-        reportData.filter(e => e.NetPay > 0).map((item, index) => {
+        reportData.filter(e => e.NetPay > 0).forEach((item) => {
             total_amount += (1/100) * item.NetPay;
         });
         return total_amount;
     }
 
-    const  showTable = () => {
-        try {
-            let total  = 0;
-            let itf = 0;
-            const row =  reportData.filter(e => e.NetPay > 0).map((item, index) => {
-                total += item.NetPay;
-                itf += (1/100) * item.NetPay;
-                return (
-                    <tr key={index}>
-                        <td className="text-xs font-weight-bold">{index +1}</td>
-                        <td className="text-xs font-weight-bold">{item.StaffID}</td>
-                        <td className="text-xs font-weight-bold">{item.FirstName} {item.MiddleName} {item.Surname}</td>
-                        <td className="text-xs font-weight-bold">{formatDateAndTime(item.DateOfBirth, 'date')}</td>
-                        <td className="text-xs font-weight-bold">{item.Gender}</td>
-                        <td className="text-xs font-weight-bold">{moneyFormat(item.NetPay)}</td>
-                        <td className="text-xs font-weight-bold">{moneyFormat((1/100) * item.NetPay)}</td>
-                        <td className="text-xs font-weight-bold">{' '}</td>
-                    </tr>
-                );
-            });
+    const buildTableData = (data) => {
+        let rows = [];
+        let total = 0;
+        let itf = 0;
 
-            return (
-                <>
-                    {row}
-                    {
-                        row.length > 0 ?
-                            <tr>
-                                <td className="text-xs font-weight-bold">999999</td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"><h3>Total</h3></td>
-                                <td className="text-xs font-weight-bold"><b>{moneyFormat(total)}</b></td>
-                                <td className="text-xs font-weight-bold"><b>{moneyFormat(itf)}</b></td>
-                                <td className="text-xs font-weight-bold"></td>
-                            </tr>
-                            : <></>
-                    }
-                </>
-            )
-        } catch (e) {
-            alert(e.message);
+        data.filter(e => e.NetPay > 0).forEach((item, index) => {
+            total += item.NetPay;
+            itf += (1/100) * item.NetPay;
+            rows.push({
+                sn: index + 1,
+                staffId: item.StaffID ?? "N/A",
+                staffName: `${item.FirstName} ${item.MiddleName} ${item.Surname}`,
+                dateOfBirth: formatDateAndTime(item.DateOfBirth, 'date'),
+                gender: item.Gender ?? "N/A",
+                monthlyEarnings: moneyFormat(item.NetPay),
+                itfAmount: moneyFormat((1/100) * item.NetPay),
+                remarks: "",
+            });
+        });
+
+        // Add total row
+        if (rows.length > 0) {
+            rows.push({
+                sn: "",
+                staffId: "",
+                staffName: "",
+                dateOfBirth: "",
+                gender: "Total",
+                monthlyEarnings: moneyFormat(total),
+                itfAmount: moneyFormat(itf),
+                remarks: "",
+            });
         }
+
+        setDatatable(prev => ({
+            ...prev,
+            rows: rows,
+        }));
     };
 
     const getSalaryReport = async (salary_month) => {
-
         if (salary_month === "") {
-
+            setDatatable(prev => ({ ...prev, rows: [] }));
         } else {
             setIsLoading(true)
             await axios.get(`${serverLink}staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`, token)
                 .then((res) => {
                     if (res.data.length > 0) {
                         setReportData(res.data)
+                        buildTableData(res.data);
+                    } else {
+                        setReportData([]);
+                        setDatatable(prev => ({ ...prev, rows: [] }));
                     }
                     setIsLoading(false)
                 }).catch((e) => {
@@ -145,9 +150,11 @@ function ITFReport(props) {
                     }
                     {
                         <div className="mt-4">
-                            {reportData.length > 0 &&
-                                <div className="table-responsive">
-                                    <DataTable header={header} body={showTable()} title="ITF Schedule Report"/>
+                            {datatable.rows.length > 0 &&
+                                <div className="card card-no-border">
+                                    <div className="card-body p-0">
+                                        <AGTable data={datatable} />
+                                    </div>
                                 </div>
                             }
                         </div>

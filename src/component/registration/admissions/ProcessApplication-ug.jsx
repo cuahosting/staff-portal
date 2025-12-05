@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
+import AGTable from "../../common/table/AGTable";
 import
 {
   admissionEmail,
@@ -87,12 +88,36 @@ function ProcessApplication(props)
 
   const [dt__, setDt__] = useState([])
 
+  // Datatable states for AG Grid
+  const [documentsTable, setDocumentsTable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Document Name", field: "DocumentType" },
+      { label: "Action", field: "action" },
+    ],
+    rows: [],
+  });
+
+  const [paymentTable, setPaymentTable] = useState({
+    columns: [
+      { label: "S/N", field: "sn" },
+      { label: "Description", field: "Description" },
+      { label: "Amount", field: "AmountPaid" },
+      { label: "Reference", field: "PaymentReference" },
+      { label: "Payment Document", field: "PaymentDocument" },
+      { label: "Date Paid", field: "DatePaid" },
+      { label: "Action", field: "action" },
+    ],
+    rows: [],
+  });
+
   useEffect(() =>
   {
     const getSemesters = async () =>
     {
     };
     getSemesters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() =>
@@ -112,6 +137,7 @@ function ProcessApplication(props)
         });
     };
     getCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAdmissionDet = async (result, tuition) =>
@@ -189,7 +215,38 @@ function ProcessApplication(props)
         .get(`${serverLink}registration/admissions/payment/list/${applicant}/${app_type}`, token)
         .then((response) =>
         {
-          setPaymentHistory(response.data)
+          setPaymentHistory(response.data);
+
+          // Populate payment table
+          if (response.data.length > 0) {
+            let rows = [];
+            response.data.forEach((j, index) => {
+              const disabled = j.Status.toString() !== "2" ? true : false;
+              const visible = j.Description.toLocaleLowerCase().includes('tuition') === true ? "block" : "none";
+              rows.push({
+                sn: index + 1,
+                Description: j.Description,
+                AmountPaid: j.AmountPaid,
+                PaymentReference: j.PaymentReference,
+                PaymentDocument: (
+                  <a className="btn btn-sm btn-primary" target="_blank"
+                    href={j.FilePath.includes("simplefileupload.com") ? j.FilePath : `${serverLink}public/uploads/${shortCode}/application/document/${j.FilePath}`}>
+                    View Document</a>
+                ),
+                DatePaid: formatDateAndTime(j.InsertedDate, "date"),
+                action: shortCode === "OAU" || shortCode === "CU" ? (
+                  <button disabled={disabled} style={{ display: `${visible}` }} className="btn btn-sm btn-primary"
+                    onClick={allowEnrolment}>
+                    Allow Enrolment
+                  </button>
+                ) : null,
+              });
+            });
+            setPaymentTable({
+              ...paymentTable,
+              rows: rows,
+            });
+          }
         });
 
       let course_code;
@@ -217,6 +274,30 @@ function ProcessApplication(props)
           setStatustext(text);
           setStatuscolor(color);
           setAppInfo(response.data);
+
+          // Populate documents table
+          if (response.data.documents && response.data.documents.length > 0) {
+            let rows = [];
+            response.data.documents.forEach((doc, index) => {
+              rows.push({
+                sn: index + 1,
+                DocumentType: doc.DocumentType,
+                action: (
+                  <a
+                    href={doc.FileName.includes("simplefileupload.com") ? doc.FileName : `${serverLink}public/uploads/${shortCode}/application/document/${doc.FileName}`}
+                    target="_blank"
+                    className="btn btn-primary"
+                  >
+                    View
+                  </a>
+                ),
+              });
+            });
+            setDocumentsTable({
+              ...documentsTable,
+              rows: rows,
+            });
+          }
         });
 
       axios.get(`${serverLink}registration/admissions/ad-faculty/${course_code}`, token)
@@ -238,6 +319,7 @@ function ProcessApplication(props)
   useEffect(() =>
   {
     getApplicantData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (e) =>
@@ -855,85 +937,18 @@ function ProcessApplication(props)
         </table>
         <hr />
         <h3>Supporting Documents</h3>
-        <table className="table table-row-dashed">
-          <thead>
-            <tr>
-              <th className="fw-bolder">Document Name</th>
-              <th className="fw-bolder">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {appInfo.documents.map((doc, index) => (
-              <tr key={index}>
-                <td>{doc.DocumentType}</td>
-                <td>
-                  <a
-                    href={doc.FileName.includes("simplefileupload.com") ? doc.FileName : `${serverLink}public/uploads/${shortCode}/application/document/${doc.FileName}`}
-                    target="_blank"
-                    className="btn btn-primary"
-                  >
-                    View
-                  </a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <AGTable data={documentsTable} />
         <hr />
         <>
           <h3>Payment History</h3>
-          <table className="table table-row-dashed">
-            <thead>
-              <tr>
-                <th className="fw-bolder">Description</th>
-                <th className="fw-bolder">Amount</th>
-                <th className="fw-bolder">Reference</th>
-                <th className="fw-bolder">Payment Document</th>
-                <th className="fw-bolder">Date Paid</th>
-                <th className="fw-bolder">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                paymentHistory.length > 0 ?
-                  <>
-                    {
-                      paymentHistory.map((j, index) =>
-                      {
-                        const disabled = j.Status.toString() !== "2" ? true : false;
-                        const visible = j.Description.toLocaleLowerCase().includes('tuition') === true ? "block" : "none"
-                        return (
-                          <tr key={index}>
-                            <td>{j.Description}</td>
-                            <td>{j.AmountPaid}</td>
-                            <td>{j.PaymentReference}</td>
-                            <td><a className="btn btn-sm btn-primary" target="_blank"
-                              href={j.FilePath.includes("simplefileupload.com") ? j.FilePath : `${serverLink}public/uploads/${shortCode}/application/document/${j.FilePath}`}>
-                              View Document</a></td>
-                            <td>{formatDateAndTime(j.InsertedDate, "date")}</td>
-                            {
-                              shortCode === "OAU" || shortCode === "CU" &&
-                              <td>
-                                <button disabled={disabled} style={{ display: `${visible}` }} className="btn btn-sm btn-primary"
-                                  onClick={allowEnrolment}>
-                                  Allow Enrolment
-                                </button>
-                              </td>
-                            }
-                          </tr>
-                        )
-                      })
-                    }
-                  </>
-                  : <>
-                    <tr>
-                      <td><h3>No Payment made</h3></td>
-                    </tr>
-                  </>
-              }
-
-            </tbody>
-          </table>
+          {
+            paymentHistory.length > 0 ?
+              <AGTable data={paymentTable} />
+              :
+              <div className="alert alert-warning">
+                <h3>No Payment made</h3>
+              </div>
+          }
           <hr />
         </>
 

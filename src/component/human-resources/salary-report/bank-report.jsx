@@ -6,27 +6,36 @@ import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import {
     currencyConverter,
-    formatDate,
     formatDateAndTime,
     moneyFormat,
-    TimeTablePeriods
 } from "../../../resources/constants";
 import { toast } from "react-toastify";
-import DataTable from "../../common/data-table/data-table";
-import BankDataTable from "../../common/data-table/bank-data-table";
+import AGTable from "../../common/table/AGTable";
 import {showConfirm} from "../../common/sweetalert/sweetalert";
 
 function BankReport(props) {
     const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
-    const header = ["S/N", "Staff Name", "Designation", "Phone", "Salary Amount (₦)", "Bank", "Acc. No.", "Employment type"];
-    const [data, setData] = useState([])
     const [reportData, setReportData] = useState([])
     const [reportDataBK, setReportDataBK] = useState([])
     const [banks, setBanks] = useState([]);
     const [IsVCApproved, setIsVCApproved] = useState(false);
     const [IsBursarApproved, setIsBursarApproved] = useState(false);
+
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "S/N", field: "sn" },
+            { label: "Staff Name", field: "staffName" },
+            { label: "Designation", field: "designation" },
+            { label: "Phone", field: "phone" },
+            { label: "Salary Amount (₦)", field: "salaryAmount" },
+            { label: "Bank", field: "bank" },
+            { label: "Acc. No.", field: "accountNumber" },
+            { label: "Employment type", field: "employmentType" },
+        ],
+        rows: [],
+    });
 
     const [formData, setFormData] = useState({
         month_id: "",
@@ -34,50 +43,42 @@ function BankReport(props) {
         inserted_by: props.LoginDetails[0]?.StaffID,
     })
 
+    const buildTableData = (data) => {
+        let rows = [];
+        let total = 0;
 
-    const  showTable = () => {
-        try {
-            let total = 0;
-            const row = reportData.filter(e => e.NetPay > 0).map((item, index) => {
-                total += item.NetPay;
-                return (
-                    <tr key={index}>
-                        <td className="text-xs font-weight-bold">{index +1}</td>
-                        <td className="text-xs font-weight-bold">{item.FirstName} {item.MiddleName} {item.Surname}</td>
-                        <td className="text-xs font-weight-bold">{item.Designation}</td>
-                        <td className="text-xs font-weight-bold">{item.PhoneNumber}</td>
-                        <td className="text-xs font-weight-bold">{moneyFormat(item.NetPay)}</td>
-                        <td className="text-xs font-weight-bold">{item.BankName}</td>
-                        <td className="text-xs font-weight-bold">{item.AccountNumber}</td>
-                        <td className="text-xs font-weight-bold">{item.StaffType}</td>
-                    </tr>
-                );
+        data.filter(e => e.NetPay > 0).forEach((item, index) => {
+            total += item.NetPay;
+            rows.push({
+                sn: index + 1,
+                staffName: `${item.FirstName} ${item.MiddleName} ${item.Surname}`,
+                designation: item.Designation ?? "N/A",
+                phone: item.PhoneNumber ?? "N/A",
+                salaryAmount: moneyFormat(item.NetPay),
+                bank: item.BankName ?? "N/A",
+                accountNumber: item.AccountNumber ?? "N/A",
+                employmentType: item.StaffType ?? "N/A",
             });
+        });
 
-            return (
-                <>
-                    {row}
-                    {
-                        row.length > 0 ?
-                            <tr>
-                                <td className="text-xs font-weight-bold">999999</td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"><h3>Total</h3></td>
-                                <td className="text-xs font-weight-bold"><b>{moneyFormat(total)}</b></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                                <td className="text-xs font-weight-bold"></td>
-                            </tr>
-                            : <></>
-                    }
-
-
-                </>
-            )
-        } catch (e) {
-            alert(e.message);
+        // Add total row
+        if (rows.length > 0) {
+            rows.push({
+                sn: "",
+                staffName: "",
+                designation: "",
+                phone: "Total",
+                salaryAmount: moneyFormat(total),
+                bank: "",
+                accountNumber: "",
+                employmentType: "",
+            });
         }
+
+        setDatatable(prev => ({
+            ...prev,
+            rows: rows,
+        }));
     };
 
     const getData = async () => {
@@ -94,9 +95,8 @@ function BankReport(props) {
     }
 
     const getSalaryReport = async (salary_month) => {
-
         if (salary_month === "") {
-
+            setDatatable(prev => ({ ...prev, rows: [] }));
         } else {
             setIsLoading(true)
             await axios.get(`${serverLink}staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`, token)
@@ -106,6 +106,10 @@ function BankReport(props) {
                         setReportDataBK(res.data)
                         setIsVCApproved(res.data.every(e => e.vc_approval === true))
                         setIsBursarApproved(res.data.every(e => e.bursar_approval === true))
+                        buildTableData(res.data);
+                    } else {
+                        setReportData([]);
+                        setDatatable(prev => ({ ...prev, rows: [] }));
                     }
                     setIsLoading(false)
                 }).catch((e) => {
@@ -115,9 +119,9 @@ function BankReport(props) {
         }
     }
 
-    const  getTotal = () => {
+    const getTotal = () => {
         let total_amount = 0;
-        reportData.filter(e => e.NetPay > 0).map((item, index) => {
+        reportData.filter(e => e.NetPay > 0).forEach((item) => {
             total_amount += item.NetPay;
         });
         return total_amount;
@@ -133,15 +137,14 @@ function BankReport(props) {
                 )
             );
             setReportData(filtered);
+            buildTableData(filtered);
             setFormData({
                 ...formData,
                 bank: e.target.value
             })
-            setIsLoading(false); // ✅ Move here — after data is set
+            setIsLoading(false);
         }, 1000);
     };
-
-
 
     const onChange = (e) => {
         const val = e.target.value;
@@ -280,32 +283,31 @@ function BankReport(props) {
                     }
                     {
                         <div className="mt-4">
-                            {reportData.length > 0 &&
-                                <div className="table-responsive">
-                                    <BankDataTable header={header} date={" "+formatDateAndTime(formData.month_id, 'month_and_year')} body={showTable()}  caption={`TOTAL AMOUNT: ${currencyConverter(getTotal() ?? 0)}`} total_amount={getTotal() ?? 0} title={`Bank Schedule Report ${formatDateAndTime(formData.month_id, 'month_and_year')}`}
-                                    signatory={(IsVCApproved && IsBursarApproved) ? <div className="d-flex justify-content-between ">
-                                        <p style={{fontSize: '14px'}}>
-                                            <img src={require('../../../images/vc_sign.jpeg')} style={{height: '70px', width: '200px'}}/><br/>
-                                            Vice Chancellor<br/>
-                                            {/* <b>Prof. name.</b><br/> */}
-                                            Vice Chancellor<br/>
-                                            Cosmopolitan University<br/>
-                                            Central Area Abuja, Nigeria <br/>
-                                            <br/>
+                            {datatable.rows.length > 0 &&
+                                <div className="card card-no-border">
+                                    <div className="card-body p-0">
+                                        <AGTable data={datatable} />
+                                    </div>
+                                    {(IsVCApproved && IsBursarApproved) &&
+                                        <div className="d-flex justify-content-between p-4 print-only">
+                                            <p style={{fontSize: '14px'}}>
+                                                <img src={require('../../../images/vc_sign.jpeg')} style={{height: '70px', width: '200px'}} alt="VC Signature"/><br/>
+                                                Vice Chancellor<br/>
+                                                Vice Chancellor<br/>
+                                                Cosmopolitan University<br/>
+                                                Central Area Abuja, Nigeria <br/>
+                                                <br/>
+                                            </p>
 
-                                        </p>
-
-                                        <p style={{fontSize: '14px'}}>
-                                            <img src={require('../../../images/bursar.jpeg')} style={{height: '70px', width: '200px'}}/><br/>
-                                            Bursar<br/>
-                                            {/* <b>Dr. Onigah Peter Oko,</b><br/> */}
-                                            Chief Financial Officer<br/>
-                                            Cosmopolitan University<br/>
-                                            Central Area Abuja, Nigeria <br/>
-                                        </p>
-                                    </div> : <></>}
-                                    />
-
+                                            <p style={{fontSize: '14px'}}>
+                                                <img src={require('../../../images/bursar.jpeg')} style={{height: '70px', width: '200px'}} alt="Bursar Signature"/><br/>
+                                                Bursar<br/>
+                                                Chief Financial Officer<br/>
+                                                Cosmopolitan University<br/>
+                                                Central Area Abuja, Nigeria <br/>
+                                            </p>
+                                        </div>
+                                    }
                                 </div>
                             }
                         </div>

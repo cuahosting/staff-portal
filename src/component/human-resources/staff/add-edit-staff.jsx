@@ -8,11 +8,10 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { serverLink } from "../../../resources/url";
-import { formatDate, formatDateAndTime, projectEmail, encryptData } from "../../../resources/constants";
+import { formatDate, formatDateAndTime, encryptData, projectDomain, removeSpace } from "../../../resources/constants";
 import { Link } from "react-router-dom";
 import Select from 'react-select';
 import { projectName, simpleFileUploadAPIKey } from "../../../resources/url";
-import { projectDomain, removeSpace } from "../../../resources/constants";
 import SimpleFileUpload from "react-simple-file-upload";
 
 
@@ -814,6 +813,7 @@ function AddEditStaff(props)
     getLastStaffID().then((r) => { });
     getStaff().then((r) => { });
     getData().then((r) => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePassportUpload = (url) =>

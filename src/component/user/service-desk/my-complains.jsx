@@ -5,12 +5,9 @@ import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import axios from 'axios'
 import { toast } from "react-toastify";
-import { showAlert } from "../../common/sweetalert/sweetalert";
 import { serverLink } from "../../../resources/url";
 import { useEffect } from "react";
-import JoditEditor from "jodit-react";
 import ReportTable from "../../common/table/report_table";
-import Select from 'react-select';
 import { formatDateAndTime, shortCode } from "../../../resources/constants";
 import * as DOMPurify from 'dompurify';
 
@@ -18,10 +15,8 @@ const MyComplainList = (props) => {
     const token = props.LoginDetails[0].token;
 
     const color = ['success', 'danger', 'info', 'secondary', 'primary', 'warning']
-    const editorRef = React.createRef();
     const [isLoading, setisLoading] = useState(true);
     const [complainTypes, setComplainTypes] = useState([]);
-    const [isFormLoading, setIsFormLoading] = useState('off')
     const columns = ["SN", "FullName", "User Type", "Complain Type", "Title", "Description", "File", "Status", "Action"]
     const [complain, setComplain] = useState({
         StaffID: "",
@@ -33,7 +28,6 @@ const MyComplainList = (props) => {
     })
     const [semesterList, setSemesterList] = useState([]);
     const [data, setData] = useState([]);
-    const [staffList, setStaffList] = useState([]);
     const [trackingList, setTrackingList] = useState([]);
 
     const getData = async () => {
@@ -67,7 +61,7 @@ const MyComplainList = (props) => {
             .then((result) => {
                 let rows = [];
                 if (result.data.length > 0) {
-                    result.data.map((item, index) => {
+                    result.data.forEach((item, index) => {
                         rows.push([
                             index + 1,
                             item.UserType === "staff" ? item.StaffName : item.StudentName,
@@ -84,7 +78,7 @@ const MyComplainList = (props) => {
                                 }}>
                                 Description
                             </button>,
-                            <a className="btn btn-link" target={"_blank"} href={`${serverLink}public/uploads/${shortCode}/service-desk/${item.FilePath}`} >View File</a>,
+                            <a className="btn btn-link" target={"_blank"} rel="noreferrer" href={`${serverLink}public/uploads/${shortCode}/service-desk/${item.FilePath}`} >View File</a>,
                             <span className={item.Status === "Submitted" ? "badge badge-secondary"
                                 : item.Status === "1" ? "badge badge-info"
                                     : item.Status === "2" ? "badge badge-info"
@@ -141,6 +135,7 @@ const MyComplainList = (props) => {
  
     useEffect(() => {
         getData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return isLoading ? (<Loader />) : (

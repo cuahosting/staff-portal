@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import PageRoutes from "./component/pageroutes/pageroutes";
 import { connect } from "react-redux";
 import PublicRoutes from "./component/pageroutes/publicroutes";

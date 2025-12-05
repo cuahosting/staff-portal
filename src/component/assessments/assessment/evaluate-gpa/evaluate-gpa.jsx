@@ -6,6 +6,7 @@ import axios from "axios";
 import {serverLink} from "../../../../resources/url";
 import {toast} from "react-toastify";
 import 'react-circular-progressbar/dist/styles.css';
+// eslint-disable-next-line no-unused-vars
 import AgReportTable from "../../../common/table/AGReportTable";
 import {shortCode} from "../../../../resources/constants";
 
@@ -13,6 +14,7 @@ import {shortCode} from "../../../../resources/constants";
 function EvaluateGPA(props) {
     const token = props.loginData.token;
     const [isLoading, setIsLoading] = useState(true);
+    // eslint-disable-next-line no-unused-vars
     const [runningModule, setRunningModule] = useState([]);
     const [semester, setSemester] = useState({
         code: "",
@@ -21,7 +23,9 @@ function EvaluateGPA(props) {
 
     const [resultEntryList, setResultEntryList] = useState([]);
     const [studentsList, setStudentsList] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [gpa, setGPA] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [semesters, setSemesters] = useState([]);
     const [studentRegisteredModules, setStudentRegisteredModules] = useState([]);
     const [modules, setModules] = useState([]);
@@ -72,8 +76,9 @@ function EvaluateGPA(props) {
     };
 
     useEffect(() => {
-        getRecords().then(r => {});
-        getSemesters().then(r => {});
+        getRecords().then(() => {});
+        getSemesters().then(() => {});
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleChange = async (e) => {
@@ -127,7 +132,7 @@ function EvaluateGPA(props) {
         if (studentsCount.length > 0){
             let counter_value = 0;
 
-            studentsCount.map( async student => {
+            studentsCount.forEach( async student => {
                 let CUE = 0;
                 let CUR = 0;
                 let WGP = 0;
@@ -136,7 +141,7 @@ function EvaluateGPA(props) {
                 const studentRegisteredModulesInSemester = studentRegisteredModules.filter(i => i.SemesterCode === semesterCode && i.StudentID === student.StudentID);
 
                 // CALCULATE WGP AND CUE
-                studentResultsInSemester.map(r => {
+                studentResultsInSemester.forEach(r => {
                     const module = modules.filter(i => i.ModuleCode === r.ModuleCode);
 
                     if (module.length > 0) {
@@ -146,7 +151,7 @@ function EvaluateGPA(props) {
                 });
 
                 // CALCULATE CUR
-                studentRegisteredModulesInSemester.map(r => {
+                studentRegisteredModulesInSemester.forEach(r => {
                     const module = modules.filter(i => i.ModuleCode === r.ModuleCode);
                     if (module.length > 0) {
                         CUR += (module[0].CreditUnit ?? 0);

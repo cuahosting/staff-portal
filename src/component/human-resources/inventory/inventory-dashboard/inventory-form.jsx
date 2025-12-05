@@ -1,33 +1,36 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import Select from "react-select";
 import SimpleFileUpload from "react-simple-file-upload";
 import {projectName, simpleFileUploadAPIKey} from "../../../../resources/url";
 import {currencyConverter} from "../../../../resources/constants";
+import AGTable from "../../../common/table/AGTable";
 
 export default function InventoryForm(props) {
+    const [datatable, setDatatable] = useState({
+        columns: [
+            { label: "Field", field: "field" },
+            { label: "Value", field: "value" }
+        ],
+        rows: [],
+    });
+
+    useEffect(() => {
+        const rows = [
+            { field: "ITEM NAME", value: props.data.ItemName || "N/A" },
+            { field: "Manufacturer", value: props.data.ManufacturerName || "N/A" },
+            { field: "Category", value: props.data.CategoryName || "N/A" },
+            { field: "Sub Category", value: props.data.SubCategoryName || "N/A" }
+        ];
+        setDatatable({
+            ...datatable,
+            rows: rows,
+        });
+    }, [props.data]);
+
     return (
         <>
             <div className="form-group mb-4 col-md-12">
-                <table className="table table-bordered table-striped fs-xl-4">
-                    <thead>
-                        <tr>
-                            <th className="fw-bold text-uppercase" style={{width: '50%'}}>ITEM NAME</th>
-                            <td>{props.data.ItemName}</td>
-                        </tr>
-                        <tr>
-                            <th className="fw-bold text-uppercase">Manufacturer</th>
-                            <td>{props.data.ManufacturerName}</td>
-                        </tr>
-                        <tr>
-                            <th className="fw-bold text-uppercase">Category</th>
-                            <td>{props.data.CategoryName}</td>
-                        </tr>
-                        <tr>
-                            <th className="fw-bold text-uppercase">Sub Category</th>
-                            <td>{props.data.SubCategoryName}</td>
-                        </tr>
-                    </thead>
-                </table>
+                <AGTable data={datatable} paging={false} />
                 <hr/>
             </div>
             <div className="form-group mb-4 col-md-12">

@@ -54,7 +54,7 @@ const ByFaculty = (props) => {
         .then((response) => {
           let rows = []
           if (response.data.length > 0) {
-            response.data.map((row) => {
+            response.data.forEach((row) => {
               rows.push({ value: row.FacultyCode, label: row.FacultyName })
             });
             setFacultyList(rows);
@@ -66,6 +66,7 @@ const ByFaculty = (props) => {
         });
     };
     getFaculty();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -79,7 +80,7 @@ const ByFaculty = (props) => {
           const result = res.data;
           if (result.length > 0) {
             let rows = [];
-            result.map((item, index) => {
+            result.forEach((item, index) => {
               rows.push([
                 index + 1,
                 item.FacultyName,

@@ -13,6 +13,7 @@ import "./payment-receipt.css";
 import Logo from '../../../../images/logo.png';
 import BarcodeImage from "../../../common/barcode/barcode";
 import { connect } from "react-redux";
+import AGTable from "../../../common/table/AGTable";
 
 function PaymentReceipt(props) {
     const token = props.loginData[0].token;
@@ -34,12 +35,44 @@ function PaymentReceipt(props) {
         window.print();
     }
 
+    const [itemsDatatable, setItemsDatatable] = useState({
+        columns: [
+            { label: "S/No", field: "sn" },
+            { label: "Description", field: "description" },
+            { label: "Total", field: "total" }
+        ],
+        rows: [],
+    });
+
     const loadReceiptItems = async () => {
         await axios.get(`${serverLink}staff/finance/get_payment_data/${PaymentID}`, token)
             .then((result) => {
                 if (result.data.paymentHistory.length > 0) {
                     setRecord(result.data.paymentHistory[0])
                     setItemList(result.data.paymentItems)
+
+                    // Build items datatable
+                    if (result.data.paymentItems.length > 0) {
+                        let rows = [];
+                        result.data.paymentItems.forEach((item, index) => {
+                            rows.push({
+                                sn: index + 1,
+                                description: item.Description,
+                                total: currencyConverter(parseFloat(item.Amount))
+                            });
+                        });
+                        // Add total row
+                        rows.push({
+                            sn: '',
+                            description: <strong>TOTAL:</strong>,
+                            total: <strong>{currencyConverter(result.data.paymentHistory[0].TotalExpectedAmount)}</strong>
+                        });
+                        setItemsDatatable({
+                            ...itemsDatatable,
+                            rows: rows,
+                        });
+                    }
+
                     setIsLoading(false)
                 }else{
                     window.location.href = '/'
@@ -136,32 +169,7 @@ function PaymentReceipt(props) {
                             </div>
                         </div>
                         <div className="">
-                            <table className="table  table-responsive-sm mt-3">
-                                <thead style={{borderBottom: '1px solid grey'}}>
-                                <tr>
-                                    <th>S/No</th>
-                                    <th>Description</th>
-                                    <th>Total</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {itemList&&
-                                    itemList.map((item ,key) => {
-                                        count++;
-                                        return (
-                                            <tr key={key}>
-                                                <td>{count}</td>
-                                                <td>{item.Description}</td>
-                                                <td>{currencyConverter(parseFloat(item.Amount))}</td>
-                                            </tr>
-                                        )
-                                    })}
-                                <tr>
-                                    <td className="fw-bold text-center" colSpan={2} style={{fontWeight: 'bold'}}>TOTAL: </td>
-                                    <td  className="fw-bold"  style={{fontWeight: 'bold'}}>{currencyConverter(record.TotalExpectedAmount)}</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                            <AGTable data={itemsDatatable} paging={false} />
                         </div>
 
                     </div>

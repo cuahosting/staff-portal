@@ -16,8 +16,11 @@ function AcademicResultByModule(props)
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "StudentID", "Student", "Module", "Level", "Semester", "Grade", "CAs", "Exams", "Total"];
     const [data, setData] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [semesterList, setSemesterList] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [semesterOptions, setSemesterOptions] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [moduleList, setModules] = useState([]);
     const [moduleOptions, setModulesOptions] = useState([]);
     const [moduleCode, setModuleCode] = useState({
@@ -38,7 +41,7 @@ function AcademicResultByModule(props)
 
                     const uniqueModules = [...mapFromRes.values()];
 
-                    uniqueModules.map((row) =>
+                    uniqueModules.forEach((row) =>
                     {
                         rows.push({ value: row.ModuleCode, label: row.ModuleName + ` (${row.ModuleCode})` })
                     });
@@ -60,7 +63,7 @@ function AcademicResultByModule(props)
                 let rows = [];
                 if (result.data.length > 0)
                 {
-                    result.data.map((exam, index) =>
+                    result.data.forEach((exam, index) =>
                     {
                         rows.push([
                             index + 1,
@@ -108,7 +111,8 @@ function AcademicResultByModule(props)
     useEffect(() =>
     {
         getModules();
-    }, [""]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return isLoading ? (
         <Loader />
