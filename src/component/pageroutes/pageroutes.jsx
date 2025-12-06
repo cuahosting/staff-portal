@@ -252,6 +252,7 @@ import SalarySummaryReport from "../human-resources/salary-report/salary-summary
 import SalaryBreakdownReport from "../human-resources/salary-report/salary-breakdown-report";
 import NSITFReport from "../human-resources/salary-report/nsitf-report";
 import ITFReport from "../human-resources/salary-report/itf-report";
+import HrSalarySchedule from "../human-resources/payroll/salary-schedule/hr-salary-schedule";
 
 export default function PageRoutes()
 {
@@ -403,6 +404,10 @@ export default function PageRoutes()
                 <Route
                   path="/human-resources/payroll/gross-pay-management"
                   element={<HrGrossPayManagement />}
+                />
+                <Route
+                  path="/human-resources/payroll/salary-schedule"
+                  element={<HrSalarySchedule />}
                 />
                 <Route
                   path="/human-resources/finance-report/all-payment"

@@ -438,6 +438,43 @@ function AddEditStaff(props)
     getLastStaffID().then(r => { });
   };
 
+  /**
+   * Builds a FormData object from staff data for multipart submission
+   * @param {Object} staffData - The staff data object
+   * @param {File|null} file - The passport file (if any)
+   * @returns {FormData} - The constructed FormData object
+   */
+  const buildFormData = (staffData, file = null) => {
+    const formData = new FormData();
+
+    // List of all text fields to append
+    const textFields = [
+      'EntryID', 'StaffID', 'FirstName', 'MiddleName', 'Surname', 'TitleID',
+      'Gender', 'DateOfBirth', 'MaritalStatus', 'NationalityID', 'StateID',
+      'LgaID', 'Religion', 'PhoneNumber', 'AltPhoneNumber', 'EmailAddress',
+      'OfficialEmailAddress', 'ContactAddress', 'StaffType', 'DesignationID',
+      'GrossPay', 'DepartmentCode', 'IsActive', 'IsAcademicStaff',
+      'DateOfFirstEmployment', 'DateOfCurrentEmployment', 'ContractStartDate',
+      'ContractEndDate', 'LineManagerID', 'CourseCode', 'Password', 'AddedBy',
+      'UpdatedBy', 'Biography', 'Research', 'Facebook', 'Linkedin', 'Twitter',
+      'Scholar', 'Researchgate', 'Academia', 'Orcid'
+    ];
+
+    textFields.forEach(field => {
+      const value = staffData[field];
+      if (value !== undefined && value !== null && value !== '') {
+        formData.append(field, value);
+      }
+    });
+
+    // Append file only if it exists
+    if (file) {
+      formData.append('passport', file);
+    }
+
+    return formData;
+  };
+
   const getInsertedUserID = async () =>
   {
     setInsertUser(
@@ -646,25 +683,25 @@ function AddEditStaff(props)
           //file2: createStaff.file2
         };
 
+        // Build multipart form data for single request submission
+        const formData = buildFormData(sendData, createStaff.update_passport ? createStaff.file : null);
+
         axios
           .post(
-            `${serverLink}staff/hr/staff-management/add/staff/${newId}`,
-            sendData, token
+            `${serverLink}staff/hr/staff-management/add/staff/multipart/${newId}`,
+            formData,
+            {
+              headers: {
+                ...token.headers,
+                'Content-Type': 'multipart/form-data'
+              }
+            }
           )
-
           .then(async (res) =>
           {
-
             if (res.data.message === "success")
             {
               toast.success("Staff Added Successfully");
-              if (createStaff.update_passport === true)
-              {
-                let formData = new FormData();
-                formData.append("file", createStaff.file);
-                formData.append("StaffID", newId)
-                await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/passport`, formData)
-              }
               getLastStaffID();
               getData();
               getStaff();
@@ -727,8 +764,12 @@ function AddEditStaff(props)
                 Researchgate: "",
                 Academia: "",
                 Orcid: "",
+                update_passport: false
               });
               getLastStaffID();
+            } else if (res.data.message === "exist")
+            {
+              toast.error("Staff ID already exists!");
             } else
             {
               console.log("Error from insert", res);
@@ -738,6 +779,17 @@ function AddEditStaff(props)
           .catch((error) =>
           {
             console.log("Error", error);
+            if (error.response && error.response.data) {
+              if (error.response.data.error === "File size exceeds 1MB limit") {
+                toast.error("Passport file is too large. Maximum size is 1MB.");
+              } else if (error.response.data.error && error.response.data.error.includes("format")) {
+                toast.error("Invalid file format. Only PNG, JPG, and JPEG are allowed.");
+              } else {
+                toast.error("An error occurred. Please try again.");
+              }
+            } else {
+              toast.error("Network error. Please check your connection.");
+            }
           });
       } else
       {
@@ -745,10 +797,6 @@ function AddEditStaff(props)
           `Image format not supported. Kindly format and try again!`
         );
       }
-      // })
-      // .catch((error) => {
-      //   console.log("NETWORK ERROR", error);
-      // });
 
     } else
     {
@@ -763,31 +811,34 @@ function AddEditStaff(props)
       }
 
       toast.info("Updating staff. Please wait..");
+
+      // Build multipart form data for single request submission
+      const updateData = {
+        ...createStaff,
+        UpdatedBy: props.loginData[0].StaffID
+      };
+      const formData = buildFormData(updateData, createStaff.update_passport ? createStaff.file : null);
+
       await axios
         .patch(
-          `${serverLink}staff/hr/staff-management/update/staff`,
-          createStaff, token
+          `${serverLink}staff/hr/staff-management/update/staff/multipart`,
+          formData,
+          {
+            headers: {
+              ...token.headers,
+              'Content-Type': 'multipart/form-data'
+            }
+          }
         )
         .then(async (result) =>
         {
           if (result.data.message === "success")
           {
             toast.success("Staff Updated Successfully");
-            if (createStaff.update_passport === true)
-            {
-              let formData = new FormData();
-              formData.append("file", createStaff.file);
-              formData.append("StaffID", newId)
-              await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/passport`, formData)
-            }
-
             getStaff();
             getLastStaffID();
             getData();
-            getStaff();
             getInsertedUserID();
-
-            // ADD STAFF BANK
           } else
           {
             showAlert(
@@ -799,11 +850,18 @@ function AddEditStaff(props)
         })
         .catch((error) =>
         {
-          showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
-            "error"
-          );
+          console.log("Error", error);
+          if (error.response && error.response.data) {
+            if (error.response.data.error === "File size exceeds 1MB limit") {
+              toast.error("Passport file is too large. Maximum size is 1MB.");
+            } else if (error.response.data.error && error.response.data.error.includes("format")) {
+              toast.error("Invalid file format. Only PNG, JPG, and JPEG are allowed.");
+            } else {
+              showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
+          } else {
+            showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+          }
         });
     }
   };

@@ -83,6 +83,8 @@ export default function AGReportTable({
       sortable: true,
       filter: true,
       resizable: true,
+      flex: 1,
+      minWidth: 100,
       // Handle JSX elements (like action buttons)
       cellRenderer: (params) => {
         if (React.isValidElement(params.value)) {
@@ -155,7 +157,7 @@ export default function AGReportTable({
   }), []);
 
   return (
-    <div ref={printRef}>
+    <div ref={printRef} style={{ width: '100%' }}>
       {/* Print header - only shows when printing */}
       <div className="print-only text-center" style={{ padding: '20px', backgroundColor: '#f8f9fa' }}>
         <img src={projectLogo} alt="Project Logo" height="100px" />
@@ -166,12 +168,14 @@ export default function AGReportTable({
       </div>
 
       {/* Title for screen view */}
-      <div className="no-print">
-        <h3 style={{ marginBottom: '15px' }}>{title}</h3>
-      </div>
+      {title && (
+        <div className="no-print">
+          <h3 style={{ marginBottom: '15px' }}>{title}</h3>
+        </div>
+      )}
 
       {/* Export and Print buttons */}
-      <div style={{ marginBottom: '10px' }} className="no-print">
+      <div style={{ marginBottom: '10px', padding: '10px' }} className="no-print">
         <button
           onClick={onExportCSV}
           className="btn btn-sm btn-primary me-2"
@@ -212,6 +216,7 @@ export default function AGReportTable({
           suppressCellFocus={true}
           enableCellTextSelection={true}
           ensureDomOrder={true}
+          domLayout="normal"
         />
       </div>
 

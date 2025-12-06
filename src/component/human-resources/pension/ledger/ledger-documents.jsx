@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import swal from "sweetalert";
-import Select from "react-select";
 import { serverLink } from "../../../../resources/url";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import Loader from "../../../common/loader/loader";
-import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
 import Modal from "../../../common/modal/modal";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import AGReportTable from "../../../common/table/AGReportTable";
 import { formatDateAndTime } from "../../../../resources/constants";
 
 function LedgerDocuments(props) {
@@ -136,72 +132,67 @@ function LedgerDocuments(props) {
     return isLoading ? (
         <Loader />
     ) : (
-        <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader
-                title={"Payroll"}
-                items={["Human Resources", "Payroll", "Ledger Document Types"]}
-            />
-            <div className="flex-column-fluid">
-                <div className="card card-no-border">
-                    <div className="card-header border-0 pt-6">
-                        <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() => Reset()}
-                                >
-                                    Add Document Type
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="card-body p-0">
-                        <div className="col-md-12" style={{ overflowX: "auto" }}>
-                            <ReportTable data={data} columns={columns} title="Document Types" />
-                        </div>
-                    </div>
+        <div style={{ width: '100%' }}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 className="fw-bold mb-1">Ledger Document Types</h3>
+                    <nav aria-label="breadcrumb">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item"><a href="/">Home</a></li>
+                            <li className="breadcrumb-item">Human Resources</li>
+                            <li className="breadcrumb-item">Payroll</li>
+                            <li className="breadcrumb-item active">Document Types</li>
+                        </ol>
+                    </nav>
                 </div>
-                <Modal title={"Ledger Documents"}>
-                    <form onSubmit={onSubmit}>
-                        <div className="row">
-
-                            <div className="form-group mt-4">
-                                <label htmlFor="DocumentType">Document Type</label>
-                                <input
-                                    type="text"
-                                    id={"DocumentType"}
-                                    onChange={onEdit}
-                                    required
-                                    value={documentTypes.DocumentType}
-                                    className={"form-control mt-4 mb-5"}
-                                    placeholder={"Enter the Document Type"}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-group pt-2">
-                            <button
-                                className="btn btn-primary w-100"
-                                id="kt_modal_new_address_submit"
-                                data-kt-indicator={isFormLoading}
-                            >
-                                <span className="indicator-label">Submit</span>
-                                <span className="indicator-progress">
-                                    Please wait...
-                                    <span className="spinner-border spinner-border-sm align-middle ms-2" />
-                                </span>
-                            </button>
-                        </div>
-                    </form>
-                </Modal>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_general"
+                    onClick={() => Reset()}
+                >
+                    <i className="fa fa-plus me-2"></i>Add Document Type
+                </button>
             </div>
+
+            <div className="card shadow-sm" style={{ width: '100%' }}>
+                <div className="card-body p-0" style={{ width: '100%' }}>
+                    <AGReportTable columns={columns} data={data} height="600px" />
+                </div>
+            </div>
+
+            <Modal title={"Ledger Documents"}>
+                <form onSubmit={onSubmit}>
+                    <div className="row">
+                        <div className="form-group mt-4">
+                            <label htmlFor="DocumentType">Document Type</label>
+                            <input
+                                type="text"
+                                id={"DocumentType"}
+                                onChange={onEdit}
+                                required
+                                value={documentTypes.DocumentType}
+                                className={"form-control mt-2 mb-3"}
+                                placeholder={"Enter the Document Type"}
+                            />
+                        </div>
+                    </div>
+                    <div className="form-group pt-2">
+                        <button
+                            className="btn btn-primary w-100"
+                            id="kt_modal_new_address_submit"
+                            data-kt-indicator={isFormLoading}
+                        >
+                            <span className="indicator-label">Submit</span>
+                            <span className="indicator-progress">
+                                Please wait...
+                                <span className="spinner-border spinner-border-sm align-middle ms-2" />
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 }

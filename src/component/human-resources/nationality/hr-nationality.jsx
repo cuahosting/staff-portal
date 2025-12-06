@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -590,7 +590,7 @@ function HRNationality(props) {
             />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
-                    <div className="card-body p-0">
+                    <div className="card-body pt-5">
                         <ul className="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-bold mb-8">
 
                             <li className="nav-item">
@@ -608,9 +608,9 @@ function HRNationality(props) {
                         </ul>
 
                         <div className="tab-content" id="myTabContent">
-                            
+
                             <div className="tab-pane fade active show" id="nationality" role="tabpanel">
-                                <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
+                                <div className="d-flex justify-content-end mb-4" data-kt-customer-table-toolbar="base">
                                     <button
                                         type="button"
                                         className="btn btn-primary"
@@ -628,12 +628,12 @@ function HRNationality(props) {
                                         Add Nationality
                                     </button>
                                 </div>
-                                <Table data={nationalityDatatable} />
+                                <AGTable data={nationalityDatatable} />
                             </div>
-                            
-                            
+
+
                             <div className="tab-pane fade" id="state" role="tabpanel">
-                                <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
+                                <div className="d-flex justify-content-end mb-4" data-kt-customer-table-toolbar="base">
                                     <button
                                         type="button"
                                         className="btn btn-primary"
@@ -674,11 +674,11 @@ function HRNationality(props) {
                                     </div>
                                 }
 
-                                <Table data={stateDatatable} />
+                                <AGTable data={stateDatatable} />
                             </div>
 
                             <div className="tab-pane fade" id="lga" role="tabpanel">
-                                <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
+                                <div className="d-flex justify-content-end mb-4" data-kt-customer-table-toolbar="base">
                                     <button
                                         type="button"
                                         className="btn btn-primary"
@@ -731,7 +731,7 @@ function HRNationality(props) {
                                         </div>
                                     </div>
                                 }
-                                <Table data={lgaDatatable} />
+                                <AGTable data={lgaDatatable} />
                             </div>
 
                         </div>

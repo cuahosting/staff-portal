@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -24,6 +24,10 @@ function HRBank(props) {
         field: "name",
       },
       {
+        label: "Sort Code",
+        field: "sort_code",
+      },
+      {
         label: "Action",
         field: "action",
       },
@@ -33,6 +37,7 @@ function HRBank(props) {
 
   const [createBank, setCreateBank] = useState({
     bank_name: "",
+    sort_code: "",
     entry_id: "",
   });
 
@@ -46,6 +51,7 @@ function HRBank(props) {
             rows.push({
               sn: index + 1,
               name: bank.BankName,
+              sort_code: bank.SortCode || "",
               action: (
                 <button
                   className="btn btn-sm btn-primary"
@@ -54,6 +60,7 @@ function HRBank(props) {
                   onClick={() =>
                     setCreateBank({
                       bank_name: bank.BankName,
+                      sort_code: bank.SortCode || "",
                       entry_id: bank.EntryID,
                     })
                   }
@@ -102,6 +109,7 @@ function HRBank(props) {
             setCreateBank({
               ...createBank,
               bank_name: "",
+              sort_code: "",
               entry_id: "",
             });
           } else if (result.data.message === "exist") {
@@ -132,6 +140,7 @@ function HRBank(props) {
             setCreateBank({
               ...createBank,
               bank_name: "",
+              sort_code: "",
               entry_id: "",
             });
           } else {
@@ -162,6 +171,7 @@ function HRBank(props) {
               rows.push({
                 sn: index + 1,
                 name: bank.BankName,
+                sort_code: bank.SortCode || "",
                 action: (
                     <button
                         className="btn btn-sm btn-primary"
@@ -170,6 +180,7 @@ function HRBank(props) {
                         onClick={() =>
                             setCreateBank({
                               bank_name: bank.BankName,
+                              sort_code: bank.SortCode || "",
                               entry_id: bank.EntryID,
                             })
                         }
@@ -201,36 +212,29 @@ function HRBank(props) {
       <PageHeader
         title={"Banks"}
         items={["Human Resources", "Others", "Banks"]}
+        buttons={
+          <button
+            type="button"
+            className="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#kt_modal_general"
+            onClick={() =>
+              setCreateBank({
+                ...createBank,
+                bank_name: "",
+                sort_code: "",
+                entry_id: "",
+              })
+            }
+          >
+            Add Bank
+          </button>
+        }
       />
       <div className="flex-column-fluid">
         <div className="card">
-          <div className="card-header border-0 pt-6">
-            <div className="card-title" />
-            <div className="card-toolbar">
-              <div
-                className="d-flex justify-content-end"
-                data-kt-customer-table-toolbar="base"
-              >
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateBank({
-                      ...createBank,
-                      bank_name: "",
-                      entry_id: "",
-                    })
-                  }
-                >
-                  Add Bank
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="card-body p-0">
-            <Table data={datatable} />
+          <div className="card-body pt-5">
+            <AGTable data={datatable} />
           </div>
         </div>
         <Modal title={"Bank Form"}>
@@ -243,6 +247,18 @@ function HRBank(props) {
               value={createBank.bank_name}
               className={"form-control"}
               placeholder={"Enter the Bank Name"}
+            />
+          </div>
+
+          <div className="form-group pt-2">
+            <label htmlFor="sort_code">Sort Code</label>
+            <input
+              type="text"
+              id={"sort_code"}
+              onChange={onEdit}
+              value={createBank.sort_code}
+              className={"form-control"}
+              placeholder={"Enter the Sort Code"}
             />
           </div>
 

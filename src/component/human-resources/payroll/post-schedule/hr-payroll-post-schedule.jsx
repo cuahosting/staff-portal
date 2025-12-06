@@ -174,21 +174,30 @@ function HrPayrollPostSchedule(props) {
             const fringe = (salarySetting[0].Fringe / 100) * gross;
             const medical = (salarySetting[0].Medical / 100) * gross;
             const wardrobe = (salarySetting[0].Wardrobe / 100) * gross;
-            const payee = calcSalaryPayee(gross); // Monthly salary for tax calculation
 
-            // Check if staff is enrolled in pension
+            // Only calculate payee if isDeductions = 1
+            let payee = 0;
+            if (item.isDeductions === 1) {
+                payee = calcSalaryPayee(gross);
+            }
+
+            // Check if staff has IsPension = 1 in hr_staff table
             let pensionEmployee = 0;
             let pensionEmployer = 0;
             let pensionData = null;
-            const check_staff_pension = pensionStaffList.filter(i => i.StaffID === item.StaffID);
-            if (check_staff_pension.length > 0) {
-                pensionEmployee = (pensionSetting[0].EmployeeContribution / 100) * (basic + housing + transport);
-                pensionEmployer = (pensionSetting[0].EmployerContribution / 100) * (basic + housing + transport);
+
+            if (item.IsPension === 1) {
+                // Pension is 8% of Gross
+                pensionEmployee = 0.08 * gross;
+                pensionEmployer = (pensionSetting[0].EmployerContribution / 100) * gross;
+
+                // Get pension admin ID from pension staff records if available
+                const check_staff_pension = pensionStaffList.filter(i => i.StaffID === item.StaffID);
                 pensionData = {
                     employee: pensionEmployee,
                     employer: pensionEmployer,
                     total: pensionEmployee + pensionEmployer,
-                    adminId: check_staff_pension[0].PensionAdminID
+                    adminId: check_staff_pension.length > 0 ? check_staff_pension[0].PensionAdminID : null
                 };
             }
 
@@ -200,10 +209,14 @@ function HrPayrollPostSchedule(props) {
                 { item_name: 'Fringe', salary_type: 'Allowance', amount: fringe },
                 { item_name: 'Medical', salary_type: 'Allowance', amount: medical },
                 { item_name: 'Wardrobe', salary_type: 'Allowance', amount: wardrobe },
-                { item_name: 'Payee', salary_type: 'Deduction', amount: payee },
             ];
 
-            // Add pension deduction if applicable
+            // Only add Payee deduction if calculated (isDeductions = 1)
+            if (payee > 0) {
+                salaryItems.push({ item_name: 'Payee', salary_type: 'Deduction', amount: payee });
+            }
+
+            // Add pension deduction if applicable (IsPension = 1)
             if (pensionEmployee > 0) {
                 salaryItems.push({ item_name: 'Pension', salary_type: 'Deduction', amount: pensionEmployee });
             }

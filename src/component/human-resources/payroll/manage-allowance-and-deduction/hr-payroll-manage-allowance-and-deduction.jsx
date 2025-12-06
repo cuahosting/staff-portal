@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
-import ReportTable from "../../../common/table/report_table";
+import AGReportTable from "../../../common/table/AGReportTable";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
 import Modal from "../../../common/modal/modal";
 import { connect } from "react-redux";
@@ -322,25 +322,33 @@ function HRPayrollManageAllowanceAndDeduction(props)
     return isLoading ? (
         <Loader />
     ) : (
-        <>
-
-            <div className="row">
-
-                <div className="col-md-12">
-                    <button
-                        type="button"
-                        className="btn btn-primary btn-sm float-end"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_general"
-                        onClick={onClear}
-                    >
-                        Add New
-                    </button>
+        <div style={{ width: '100%' }}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 className="fw-bold mb-1">Allowances and Deductions</h3>
+                    <nav aria-label="breadcrumb">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item"><a href="/">Home</a></li>
+                            <li className="breadcrumb-item">Human Resource</li>
+                            <li className="breadcrumb-item">Payroll</li>
+                            <li className="breadcrumb-item active">Manage Allowance and Deduction</li>
+                        </ol>
+                    </nav>
                 </div>
-                <div className="col-md-12">
-                    <div className="col-md-12" >
-                        <ReportTable title={`Allowances and Deductions`} columns={columns} data={data} />
-                    </div>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_general"
+                    onClick={onClear}
+                >
+                    <i className="fa fa-plus me-2"></i>Add New
+                </button>
+            </div>
+
+            <div className="card shadow-sm" style={{ width: '100%' }}>
+                <div className="card-body p-0" style={{ width: '100%' }}>
+                    <AGReportTable columns={columns} data={data} height="600px" />
                 </div>
             </div>
 
@@ -457,7 +465,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
                     </button>
                 </div>
             </Modal>
-        </>
+        </div>
     );
 }
 
