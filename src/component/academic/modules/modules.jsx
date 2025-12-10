@@ -1,25 +1,25 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
 import axios from "axios";
-import {serverLink} from "../../../resources/url";
+import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
-import {showAlert} from "../../common/sweetalert/sweetalert";
-import {toast} from "react-toastify";
-import {connect} from "react-redux/es/exports";
-import {ModulesForm} from "./modulesform";
+import { showAlert } from "../../common/sweetalert/sweetalert";
+import { toast } from "react-toastify";
+import { connect } from "react-redux/es/exports";
+import { ModulesForm } from "./modulesform";
 import ModulePrerequisites from "./prerequisites";
 import ModuleTemplate from "../../../images/Module Templates.csv";
 import swal from "sweetalert";
+import { motion } from "framer-motion";
 
 function Modules(props) {
     // eslint-disable-next-line no-unused-vars
     const current = new Date();
     // eslint-disable-next-line no-unused-vars
-    const date = `${current.getDate()}/${
-        current.getMonth() + 1
-    }/${current.getFullYear()}`;
+    const date = `${current.getDate()}/${current.getMonth() + 1
+        }/${current.getFullYear()}`;
 
     const token = props.LoginDetails[0].token;
 
@@ -67,7 +67,7 @@ function Modules(props) {
         rows: [],
     });
 
-    const initializeUpdateModuleCode = {old_module_code: '', new_module_code: ''}
+    const initializeUpdateModuleCode = { old_module_code: '', new_module_code: '' }
     const [updateModuleCode, setUpdateModuleCode] = useState(initializeUpdateModuleCode);
 
     const [departmentsList, setDepartments] = useState(props.DepartmentList);
@@ -80,7 +80,7 @@ function Modules(props) {
                 let rows = [];
                 if (result.data.length > 0) {
                     result.data.forEach((row) => {
-                        rows.push({value: row.CourseCode, label: row.CourseName})
+                        rows.push({ value: row.CourseCode, label: row.CourseName })
                     });
                     setDepartmentsOptions(rows)
                     setDepartments(result.data);
@@ -131,7 +131,7 @@ function Modules(props) {
                             action: (
                                 <>
                                     <button
-                                        className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
+                                        className="btn btn-link p-0 text-primary" style={{ marginRight: 15 }} title="Edit"
                                         data-bs-toggle="modal"
                                         data-bs-target="#kt_modal_general"
                                         onClick={() => {
@@ -142,7 +142,7 @@ function Modules(props) {
                                                 ModuleName: modules.ModuleName,
                                                 ModuleType: modules.ModuleType,
                                                 DepartmentCode: modules.DepartmentCode,
-                                                DepartmentCode2: {value: modules.CourseCode, label: modules.CourseName},
+                                                DepartmentCode2: { value: modules.CourseCode, label: modules.CourseName },
                                                 CreditUnit: modules.CreditUnit,
                                                 CAPerCon: modules.CAPerCon,
                                                 ExamPerCon: modules.ExamPerCon,
@@ -151,7 +151,7 @@ function Modules(props) {
                                             });
                                         }}
                                     >
-                                        <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
+                                        <i style={{ fontSize: '15px', color: "blue" }} className="fa fa-pen color-blue" />
                                     </button>
                                     <button
                                         className="btn btn-link p-0 text-danger" title="Delete"
@@ -169,7 +169,7 @@ function Modules(props) {
                                             });
                                         }}
                                     >
-                                        <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
+                                        <i style={{ fontSize: '15px', color: "red" }} className="fa fa-trash" />
                                     </button>
                                 </>
                             ),
@@ -239,14 +239,12 @@ function Modules(props) {
                                 toast.success("Modules Uploaded Successfully");
                                 showAlert(
                                     "MODULE UPLOADED",
-                                    `Modules Uploaded Successfully! \n   ${
-                                        duplicate.length > 0
-                                            ? ` However, the following modules exist in the database: ${duplicate}`
-                                            : ""
-                                    } \n  ${
-                                        contribution.length > 0
-                                            ? `Contribution Limit Exceeded 100% for: ${contribution}`
-                                            : ""
+                                    `Modules Uploaded Successfully! \n   ${duplicate.length > 0
+                                        ? ` However, the following modules exist in the database: ${duplicate}`
+                                        : ""
+                                    } \n  ${contribution.length > 0
+                                        ? `Contribution Limit Exceeded 100% for: ${contribution}`
+                                        : ""
                                     } `,
                                     "success"
                                 );
@@ -255,20 +253,17 @@ function Modules(props) {
                             } else if (result.data.message === "all exist") {
                                 showAlert(
                                     "MODULE EXIST",
-                                    `All the Uploaded modules exist in the database, Please check and try again! \n ${
-                                        duplicate.length > 0 ? duplicate : ""
-                                    }  \n  ${
-                                        contribution.length > 0
-                                            ? `Contribution Limit Exceeded 100% for: ${contribution}`
-                                            : ""
+                                    `All the Uploaded modules exist in the database, Please check and try again! \n ${duplicate.length > 0 ? duplicate : ""
+                                    }  \n  ${contribution.length > 0
+                                        ? `Contribution Limit Exceeded 100% for: ${contribution}`
+                                        : ""
                                     } `,
                                     "error"
                                 );
                             } else if (result.data.message === "limit exceeded") {
                                 showAlert(
                                     "CONTRIBUTION LIMIT EXCEEDED",
-                                    `All the Uploaded modules have exceeded contribution limit, Please check and try again! \n  ${
-                                        contribution.length > 0 ? contribution : ""
+                                    `All the Uploaded modules have exceeded contribution limit, Please check and try again! \n  ${contribution.length > 0 ? contribution : ""
                                     }`,
                                     "error"
                                 );
@@ -442,35 +437,40 @@ function Modules(props) {
     }, []);
 
     return isLoading ? (
-        <Loader/>
+        <Loader />
     ) : (
-        <div className="d-flex flex-column flex-row-fluid">
+        <motion.div
+            className="d-flex flex-column flex-row-fluid"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
             <PageHeader
                 title={"Modules"}
                 items={["Academics", "Modules", "Manage modules"]}
                 buttons={
                     <>
                         <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#bulk_modal"><i className="fa fa-upload me-2"></i>Bulk Upload
+                            data-bs-target="#bulk_modal"><i className="fa fa-upload me-2"></i>Bulk Upload
                         </button>
                         <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#kt_modal_general"
-                                onClick={() => setcreateModule({
-                                    ...createModule,
-                                    EntryID: "",
-                                    ModuleCode: "",
-                                    ModuleName: "",
-                                    ModuleType: "",
-                                    CreditUnit: "",
-                                    CAPerCon: "",
-                                    ExamPerCon: "",
-                                    InsertedBy: props.LoginDetails[0].StaffID,
-                                })}><i className="fa fa-plus me-2"></i>Add a Module
+                            data-bs-target="#kt_modal_general"
+                            onClick={() => setcreateModule({
+                                ...createModule,
+                                EntryID: "",
+                                ModuleCode: "",
+                                ModuleName: "",
+                                ModuleType: "",
+                                CreditUnit: "",
+                                CAPerCon: "",
+                                ExamPerCon: "",
+                                InsertedBy: props.LoginDetails[0].StaffID,
+                            })}><i className="fa fa-plus me-2"></i>Add a Module
                         </button>
                         <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#kt_modal_general_module_code" onClick={() => {
-                            setUpdateModuleCode(initializeUpdateModuleCode)
-                        }}>
+                            data-bs-target="#kt_modal_general_module_code" onClick={() => {
+                                setUpdateModuleCode(initializeUpdateModuleCode)
+                            }}>
                             Update Module Code
                         </button>
                     </>
@@ -517,8 +517,8 @@ function Modules(props) {
                         <div className="flex-column-fluid">
                             <div className="card card-no-border">
                                 <div className="card-body p-0">
-                                    <div className="col-md-12" style={{overflowX: "auto"}}>
-                                        <AGTable data={datatable}/>
+                                    <div className="col-md-12" style={{ overflowX: "auto" }}>
+                                        <AGTable data={datatable} />
                                     </div>
                                 </div>
                             </div>
@@ -558,18 +558,18 @@ function Modules(props) {
                                             />
                                         </div>
                                         <span className="badge bg-danger mt-1">
-                      Only .csv is allowed
-                    </span>
+                                            Only .csv is allowed
+                                        </span>
                                     </div>
                                     <div className="form-group pt-4">
                                         <button type="submit" className="btn btn-primary w-100"
-                                                id="kt_modal_new_address_submit" onClick={onUploadFile}
-                                                data-kt-indicator={props.isFormLoading}>
+                                            id="kt_modal_new_address_submit" onClick={onUploadFile}
+                                            data-kt-indicator={props.isFormLoading}>
                                             <span className="indicator-label">Upload</span>
                                             <span className="indicator-progress">
-                        Please wait...
-                        <span className="spinner-border spinner-border-sm align-middle ms-2"/>
-                      </span>
+                                                Please wait...
+                                                <span className="spinner-border spinner-border-sm align-middle ms-2" />
+                                            </span>
                                         </button>
                                     </div>
                                 </div>
@@ -623,7 +623,7 @@ function Modules(props) {
                                         </div>
                                     </div>
                                     <button className="btn btn-primary w-100"
-                                            onClick={handleSubmitModuleCodeUpdate}>Submit
+                                        onClick={handleSubmitModuleCodeUpdate}>Submit
                                     </button>
                                 </div>
                             </Modal>
@@ -637,7 +637,7 @@ function Modules(props) {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

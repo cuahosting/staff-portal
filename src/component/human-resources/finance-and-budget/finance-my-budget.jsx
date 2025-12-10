@@ -509,10 +509,13 @@ function FinanceMyBudget(props) {
                         <PageHeader
                             title={"MY BUDGET"}
                             items={["Human-Resources", "Finance & Budget", "My Budget"]}
+                            buttons={
+                                <>
+                                    <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => { setSelectedBudget({ ...formInitialize, year_id: getActiveAccountYear() }); setSelectedItem([]) }}>Add New Budget <i className="fa fa-plus" /></button>
+                                    <button className="btn btn-info btn-sm pull-right" data-bs-toggle="modal" data-bs-target="#kt_modal_general_item" onClick={() => { setBudgetSelectValue({ entry_id: '', item_name: '' }) }}>Add Budget Item <i className="fa fa-plus" /></button>
+                                </>
+                            }
                         />
-                        <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => { setSelectedBudget({ ...formInitialize, year_id: getActiveAccountYear() }); setSelectedItem([]) }}>Add New Budget <i className="fa fa-plus" /></button>
-
-                        <button className="btn btn-info btn-sm pull-right" data-bs-toggle="modal" data-bs-target="#kt_modal_general_item" onClick={() => { setBudgetSelectValue({ entry_id: '', item_name: '' }) }}>Add Budget Item <i className="fa fa-plus" /></button>
                         <div className="row col-md-12" style={{ width: '100%' }}>
                             <AGTable data={budgetDatatable} />
                         </div>

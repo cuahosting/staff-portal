@@ -46,10 +46,21 @@ function ReportTable(props) {
     }, [props.data]);
 
     // Prepare data for DataTable
-    const tableData = useMemo(() => ({
-        columns: [{ label: 'S/N', field: 'sn' }, ...tableColumns],
-        rows: tableRows,
-    }), [tableColumns, tableRows]);
+    const tableData = useMemo(() => {
+        // Check if S/N column already exists (case insensitive)
+        const hasSnColumn = tableColumns.some(col =>
+            col.label && ['s/n', 'sn', 's.n', 'serial number'].includes(col.label.toLowerCase())
+        );
+
+        const finalColumns = hasSnColumn
+            ? tableColumns
+            : [{ label: 'S/N', field: 'sn' }, ...tableColumns];
+
+        return {
+            columns: finalColumns,
+            rows: tableRows,
+        };
+    }, [tableColumns, tableRows]);
 
     return (
         <div ref={printRef} className="report-table-container">

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './DataTable.css';
 
 /**
@@ -278,32 +279,40 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
               </tr>
             </thead>
             <tbody>
-              {paginatedRows.length > 0 ? (
-                paginatedRows.map((row, rowIdx) => (
-                  <tr key={rowIdx}>
-                    {columns.map((col, colIdx) => (
-                      <td
-                        key={colIdx}
-                        className={
-                          col.field === 'sn' ? 'sn-cell' :
-                            col.field === 'action' ? 'action-cell' : ''
-                        }
-                      >
-                        {row[col.field]}
-                      </td>
-                    ))}
+              <AnimatePresence>
+                {paginatedRows.length > 0 ? (
+                  paginatedRows.map((row, rowIdx) => (
+                    <motion.tr
+                      key={row.EntryID || row.sn || rowIdx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2, delay: rowIdx * 0.03 }}
+                    >
+                      {columns.map((col, colIdx) => (
+                        <td
+                          key={colIdx}
+                          className={
+                            col.field === 'sn' ? 'sn-cell' :
+                              col.field === 'action' ? 'action-cell' : ''
+                          }
+                        >
+                          {row[col.field]}
+                        </td>
+                      ))}
+                    </motion.tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={columns.length}>
+                      <div className="data-table-empty">
+                        <i className="fa fa-inbox"></i>
+                        <p>No data available</p>
+                      </div>
+                    </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={columns.length}>
-                    <div className="data-table-empty">
-                      <i className="fa fa-inbox"></i>
-                      <p>No data available</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
+                )}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>

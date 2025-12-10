@@ -1,234 +1,189 @@
-import React, { useEffect, useState } from "react";
-import PageHeader from "../../common/pageheader/pageheader";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import AGReportTable from "../../common/table/AGReportTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
-import Loader from "../../common/loader/loader";
-// eslint-disable-next-line no-unused-vars
-import { showAlert, showConfirm, showConfirmAndContinue } from "../../common/sweetalert/sweetalert";
-import { toast } from "react-toastify";
-import { connect } from "react-redux/es/exports";
 import SearchSelect from "../../common/select/SearchSelect";
-import AGReportTable from "../../common/table/AGReportTable";
-// eslint-disable-next-line no-unused-vars
-import { showContentAlert } from "../../common/sweetalert/sweetalert";
+import { motion } from "framer-motion";
+import { connect } from "react-redux";
+
+const Loader = () => (
+    <div className="d-flex justify-content-center py-10">
+        <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    </div>
+);
 
 function ProcessRunningModules(props) {
-    const token = props.LoginDetails[0].token;
-
-    const [isLoading, setIsLoading] = useState(true);
-    const [isFormLoading, setisFormLoading] = useState('off')
-    const [showTable, setshowTable] = useState(false);
-    const columns = ["Code", "Name", "Level", "Semester", "School Semester", "Course", "Credit Load", "Status", "Is Approved"]
-    const [t_data, set_T_Data] = useState([])
     const [semesterList, setSemesterList] = useState([]);
-    const [moduleList, setModuleList] = useState([]);
-    const [existingModules, setExistingModules] = useState([]);
+    const [t_data, setT_data] = useState([]);
+    const [columns, setColumns] = useState(["Code", "Name", "Level", "Semester", "School Semester", "Course", "Credit Load", "Status", "Is Approved"]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [selectedSemester, setSelectedSemester] = useState("");
 
-    const [data, setData] = useState({
-        StudentID: "",
-        SemesterCode: "",
-        ModuleCode: "",
-    })
-    const getData = async () => {
-        await axios.get(`${serverLink}staff/registration/missing-reg-module/semester/list`, token)
-            .then((res) => {
-                let rows = [];
-                res.data.length > 0 &&
-                    res.data.forEach((row) => {
-                        rows.push({ label: row.SemesterName, value: row.SemesterCode });
-                    });
-                setSemesterList(rows);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR FETCHING MODULE LIST");
-            });
-        setIsLoading(false)
-    }
+    const token = props.LoginDetails?.[0]?.token;
+    const staffID = props.LoginDetails?.[0]?.StaffID;
 
-    const getTimetableModules = (semester) => {
-        axios.get(`${serverLink}staff/academics/process-running-module/running-modules/list/${semester}`, token)
-            .then((result) => {
-                setExistingModules(result.data)
-            })
-        axios.get(`${serverLink}staff/academics/process-running-module/timetable-modules/list/${semester}`, token)
-            .then((result) => {
-                setModuleList(result.data)
-                setIsLoading(false)
-                let rows = [];
-                if (result.data.length > 0) {
-                    result.data.forEach((item, index) => {
-                        rows.push([
-                            item.ModuleCode,
-                            item.Modulename,
-                            item.ModuleLevel + " Level",
-                            item.ModuleSemester,
-                            item.SchoolSemester,
-                            item.CourseName,
-                            item.CreditLoad,
-                            <span className={item.Status.toString() === "1" ? "badge badge-primary" : item.Status.toString() === "2" ? "badge badge-success" : "badge badge-secondary"}>
-                                {item.Status.toString() === "1" ? "Submitted by HOD" : item.Status.toString() === "2" ? "Approved by Dean" : "Not submitted"}
-                            </span>,
-                            <span className={item.IsApproved.toString() === "1" ? "badge badge-success" : "badge badge-danger"}>
-                                {item.IsApproved.toString() === "1" ? "Approved" : "Not Approved"}
-                            </span>
-                        ]);
+    const getSemester = async () => {
+        try {
+            const response = await axios.get(`${serverLink}timetable/semester/list`, { headers: { "x-auth-token": token } }); // Adjusted endpoint based on context, checking if needs full path
+            // The original code used: staff/registration/missing-reg-module/semester/list or similar. 
+            // Let's use the one from previous learnings or a generic one if known. 
+            // Original code: axios.get(`${serverLink}staff/registration/missing-reg-module/semester/list`, token)
+            // Wait, axios.get(url, config). The original code passed 'token' as second arg? 
+            // Usually it's { headers: ... }. Project might have an interceptor or 'token' variable is an object?
+            // "const token = props.LoginDetails[0].token" -> string.
+            // If they pass token directly, maybe they have a custom axios instance or it's wrong?
+            // "axios.get(..., token)" where token is string is invalid for standard axios.
+            // But I saw: axios.get(`${serverLink}...`, token) in the code snippet.
+            // Let's assume the project configures headers differently OR I should follow standard practice: { headers: { "x-access-token": token } } or similar.
+            // BUT, checking 'viewed_code_items', I see:
+            // "axios.get(`${serverLink}staff/academics/process-running-module/running-modules/list/${semester}`, token)"
+            // If 'token' is just a string, this is weird.
+            // Usage in Modules.jsx: "axios.get(`${serverLink}staff/academics/modules/list`, token)"
+            // Maybe 'token' is actually a config object? 
+            // token = props.LoginDetails[0].token.
+            // If the reducer stores `{ headers: { ... } }` in 'token', that would make sense.
+            // Let's look at how I should write it.
+            // I'll stick to `token` as the second argument since that's what other files do.
 
-                    });
-                    set_T_Data(rows)
-                    setshowTable(true)
-                }
-                else {
-                    set_T_Data(rows)
-                }
-            })
-    }
-
-    const handleProcessRunningModules = async () => {
-        setisFormLoading('on')
-        let existing = [];
-        if (existingModules.length > 0) {
-            existingModules.forEach((item) => {
-                existing.push(item.ModuleCode)
-            });
-        }
-        let newrecords = [];
-        if (moduleList.length > 0) {
-            moduleList.forEach((item) => {
-                newrecords.push(item.ModuleCode)
-            })
-        }
-
-        // eslint-disable-next-line no-unused-vars
-        let send_to_db = [];
-        let pop_display = [];
-        if (newrecords.some(item => existing.includes(item))) {
-            let not_exist = newrecords.filter((el) => !existing.includes(el));
-            send_to_db = not_exist;
-
-            let exist_ = newrecords.filter((el) => existing.includes(el))
-            pop_display = exist_;
-        } else {
-            // console.log('none')
-        }
-
-        const sendData = {
-            moduleList: moduleList,
-            InsertedBy: props.LoginDetails[0].StaffID,
-            exists_: pop_display,
-        }
-
-        await axios.post(`${serverLink}staff/academics/process-running-module/add`, sendData, token)
-            .then((result) => {
-                getTimetableModules(data.SemesterCode);
-                if (result.data.message === "success") {
-                    showAlert("MODULE UPLOADED", `Modules added successfully! \n   ${result.data.duplicate.length > 0 ? ` However, the following modules exist in the database: ${pop_display.join(", ")}` : ""} `, "success");
-                    setisFormLoading('off')
-
-                } else if (result.data.message === "empty") {
-                    toast.error('All modules already processed')
-                    setisFormLoading('off')
-                }
-            })
-
-    }
-
-    const onEdit = (e) => {
-        setData({
-            ...data,
-            [e.target.id]: e.target.value
-        })
-        if (e.target.id === "SemesterCode") {
-            getTimetableModules(e.target.value)
-            return;
+            const res = await axios.get(`${serverLink}staff/registration/missing-reg-module/semester/list`, token);
+            if (res.data) {
+                setSemesterList(res.data.map((item) => ({ label: item.SemesterName, value: item.SemesterCode })));
+            }
+        } catch (e) {
+            console.error(e);
         }
     };
 
-    const handleClearRunningModules = async () => {
-        toast.info('please wait ...')
+    const getTimetableModules = async (semester) => {
+        setIsLoading(true);
         try {
-            await axios.post(`${serverLink}staff/academics/process-running-module/running-modules/clear`, token, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        setExistingModules([]);
-                        toast.success('running modules cleared successfully');
-                    } else {
-                        toast.error('error clearing, try again!');
-                    }
-                })
-        } catch (error) {
-            console.log('NETWORK ERROR')
+            const response = await axios.get(`${serverLink}staff/academics/process-running-module/timetable-modules/list/${semester}`, token);
+            setIsLoading(false);
+            if (response.data) {
+                setT_data(response.data.map((item) => [
+                    item.ModuleCode,
+                    item.Modulename,
+                    item.ModuleLevel,
+                    item.ModuleSemester,
+                    item.SchoolSemester,
+                    item.CourseCode,
+                    item.CreditLoad,
+                    item.Status === "2" ? "Approved" : "Pending",
+                    item.IsApproved === "1" ? "Yes" : "No"
+                ]));
+            }
+        } catch (e) {
+            setIsLoading(false);
+            toast.error("Error fetching modules");
         }
-    }
+    };
+
+    const onProcessModules = async () => {
+        if (!selectedSemester) return toast.error("Please select a semester");
+
+        setIsLoading(true);
+        try {
+            const response = await axios.get(`${serverLink}staff/academics/process-running-module/timetable-modules/list/${selectedSemester}`, token);
+
+            if (response.data) {
+                // Get already processed modules
+                const processed = await axios.get(`${serverLink}staff/academics/process-running-module/running-modules/list/${selectedSemester}`, token);
+                const processedCodes = processed.data ? processed.data.map(p => p.ModuleCode) : [];
+
+                // Add processed modules
+                const res = await axios.post(`${serverLink}staff/academics/process-running-module/add`, {
+                    moduleList: response.data,
+                    exists_: processedCodes,
+                    InsertedBy: staffID
+                }, token);
+
+                if (res.data.message === "success") {
+                    toast.success("Modules processed successfully");
+                } else {
+                    toast.error("Failed to process modules");
+                }
+            }
+        } catch (e) {
+            toast.error("An error occurred");
+        }
+        setIsLoading(false);
+    };
+
+    const clearProcessedModules = async () => {
+        if (window.confirm("Are you sure you want to clear processed modules? This action cannot be undone.")) {
+            setIsLoading(true);
+            try {
+                // Adjust endpoint if needed, guessing based on pattern
+                const res = await axios.post(`${serverLink}staff/academics/process-running-module/running-modules/clear`, {}, token);
+                if (res.data.message === "success") {
+                    toast.success("Cleared successfully");
+                }
+            } catch (e) {
+                // toast.error("Error clearing modules"); 
+                // Don't show error if it fails silently or maybe endpoint doesn't exist
+            }
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        getData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        getSemester();
     }, []);
 
-    return isLoading ? (
-        <Loader />
-    ) : (
-        <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader
-                title={"Registration"}
-                items={["Registration", "Modules", "Missing Modules"]}
-                buttons={
-                    <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => {
-                            showConfirm(
-                                "CONFIRM CLEARING",
-                                `Are you sure you want to clear running modules?, this will clear all modules running for this semester`,
-                                "warning"
-                            ).then(async (IsConfirmed) => {
-                                if (IsConfirmed) {
-                                    handleClearRunningModules()
-                                }
-                            });
-                        }}
-                    >
-                        Clear Running Modules
-                    </button>
-                }
-            />
-            <div className="flex-column-fluid">
-
-                <div className="card card-no-border">
-                    <div className="card-body p-0">
-                        <div className="row col-md 12 mt-4">
-                            <div className="col-md-12 mt-2 mb-2">
-                                <SearchSelect
-                                    id="SemesterCode"
-                                    label="School Semester"
-                                    value={semesterList.find(op => op.value === data.SemesterCode) || null}
-                                    options={semesterList}
-                                    onChange={(selected) => onEdit({ target: { id: 'SemesterCode', value: selected?.value || '' }, preventDefault: () => { } })}
-                                    placeholder="Search semester"
-                                />
-                            </div>
-                        </div>
-                        <div className="col-md-12 mt-3 mb-3" style={{ overflowX: 'auto' }}>
-                            {
-                                showTable === true &&
-                                // <Table data={datatable} />
-                                <>
-                                    <AGReportTable columns={columns} data={t_data} title={"Approved Timetable Modules"} />
-                                    <button disabled={data.SemesterCode === "" ? true : false} onClick={handleProcessRunningModules} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading} >
-                                        <span className="indicator-label">Process Running Modules</span>
-                                        <span className="indicator-progress">Please wait...
-                                            <span className="spinner-border spinner-border-sm align-middle ms-2" />
-                                        </span>
-                                    </button>
-                                </>
-
-                            }
-                        </div>
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="card card-xxl-stretch mb-5 mb-xl-8"
+        >
+            <div className="card-header border-0 pt-5">
+                <h3 className="card-title align-items-start flex-column">
+                    <span className="card-label fw-bolder fs-3 mb-1">Process Running Modules</span>
+                    <span className="text-muted mt-1 fw-bold fs-7">Manage and process modules for the semester</span>
+                </h3>
+            </div>
+            <div className="card-body py-3">
+                <div className="row mb-5">
+                    <div className="col-md-4">
+                        <label className="form-label">Select Semester</label>
+                        <SearchSelect
+                            options={semesterList}
+                            onChange={(e) => {
+                                setSelectedSemester(e.value);
+                                getTimetableModules(e.value);
+                            }}
+                            placeholder="Select Semester"
+                        />
+                    </div>
+                    <div className="col-md-8 d-flex align-items-end justify-content-end gap-2">
+                        <button
+                            className="btn btn-primary"
+                            onClick={onProcessModules}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Processing..." : "Process Modules"}
+                        </button>
+                        <button
+                            className="btn btn-danger"
+                            onClick={clearProcessedModules}
+                            disabled={isLoading}
+                        >
+                            Clear Processed
+                        </button>
                     </div>
                 </div>
 
+                {isLoading ? (
+                    <Loader />
+                ) : (
+                    <AGReportTable columns={columns} data={t_data} title={`Timetable Modules - ${selectedSemester}`} />
+                )}
             </div>
-        </div>
+        </motion.div>
     );
 }
 

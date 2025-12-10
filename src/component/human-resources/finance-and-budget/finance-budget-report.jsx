@@ -61,8 +61,15 @@ function FinanceBudgetReport(props) {
     }
 
     const onYearChange = (e) => {
-        getReport(e)
-
+        if (e) {
+            getReport(e)
+        } else {
+            setFormData({
+                ...formData,
+                year: ""
+            })
+            setBudgetList([])
+        }
     }
 
     const onStaffChange = (e) => {
@@ -314,10 +321,9 @@ function FinanceBudgetReport(props) {
                             items={["Human-Resources", "Finance & Budget", "Budget Report"]}
                         />
                         <div className="row col-md-12">
-                            <label htmlFor="BudgetYear">Select Budget Year</label>
                             <SearchSelect
                                 id="BudgetYear"
-                                className="form-select form-select"
+                                label="Select Budget Year"
                                 value={formData.year}
                                 onChange={onYearChange}
                                 options={yearsList}
