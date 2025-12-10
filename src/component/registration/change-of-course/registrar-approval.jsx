@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import { ChangeOfCourseEmail, formatDateAndTime, sendEmail } from "../../../resources/constants";
 
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import Loader from "../../common/loader/loader";
 import axios from "axios";
 import {serverLink} from "../../../resources/url";

@@ -20,16 +20,16 @@ function CampusSettings(props) {
                 field: "CampusID",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Campus Name",
                 field: "CampusName",
             },
             {
                 label: "Location",
                 field: "Location",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -194,7 +194,7 @@ function CampusSettings(props) {
                                     Location: "",
                                 })
                             }>
-                            Add Campus
+                            <i className="fa fa-plus me-2"></i>Add Campus
                         </button>
                     </div>
                 </div>

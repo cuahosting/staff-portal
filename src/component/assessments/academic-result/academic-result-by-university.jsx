@@ -4,9 +4,9 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AgReportTable from "../../common/table/report_table";
+import AgReportTable from "../../common/table/ReportTable";
 import { toast } from "react-toastify";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function AcademicResultByUniversity(props) {
     const token = props.LoginDetails[0].token;
@@ -33,7 +33,7 @@ function AcademicResultByUniversity(props) {
                     let rows = []
                     if (result.data.length > 0) {
                         result.data.forEach((row) => {
-                            rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+                            rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
                         setSemesterOptions(rows)
@@ -69,9 +69,9 @@ function AcademicResultByUniversity(props) {
                 if (result.data.length > 0) {
                     const distinctCourse = [...new Set(result.data.map(obj => obj.CourseName))];
 
-                    distinctCourse.forEach((item, key)=> {
+                    distinctCourse.forEach((item, key) => {
                         rows.push(["", "", "", "", <h1 className="text-center text-uppercase text-success">{item}</h1>, "", "", "", "", ""]);
-                        result.data.filter(e=>e.CourseName === item).forEach((exam, index) => {
+                        result.data.filter(e => e.CourseName === item).forEach((exam, index) => {
                             rows.push([
                                 index + 1,
                                 exam.StudentID,
@@ -109,10 +109,10 @@ function AcademicResultByUniversity(props) {
                 SemesterCode: e.value,
                 SemesterCode2: e
             })
-            if (semester.DepartmentCode !== ""){
-                getData(e.value,semester.DepartmentCode);
+            if (semester.DepartmentCode !== "") {
+                getData(e.value, semester.DepartmentCode);
             }
-        }else{
+        } else {
             setSemeter({
                 ...semester,
                 SemesterCode: "",
@@ -129,7 +129,7 @@ function AcademicResultByUniversity(props) {
             DepartmentCode2: e,
         })
 
-        getData( semester.SemesterCode,e.value);
+        getData(semester.SemesterCode, e.value);
     }
 
 
@@ -149,11 +149,10 @@ function AcademicResultByUniversity(props) {
             />
             <div className="row">
                 {semesterList.length > 0 &&
-                    <div className="col-md-6 mb-4 form-group">
-                        <label htmlFor="_Semester">Select Semester</label>
-                        <Select
+                    <div className="col-md-6 mb-4">
+                        <SearchSelect
                             id="_Semester"
-                            className="form-select form-select"
+                            label="Select Semester"
                             value={semester.SemesterCode2}
                             onChange={onSemesterChange}
                             options={semesterOptions}
@@ -162,11 +161,10 @@ function AcademicResultByUniversity(props) {
                     </div>}
                 {
                     semester.SemesterCode !== "" ?
-                        <div className="col-md-6 mb-4 form-group">
-                            <label htmlFor="_Semester">Select Faculty</label>
-                            <Select
+                        <div className="col-md-6 mb-4">
+                            <SearchSelect
                                 name="DepartmentCode"
-                                className="form-select form-select"
+                                label="Select Faculty"
                                 value={semester.DepartmentCode2}
                                 onChange={onDepartmentChange}
                                 options={departmentOptions}

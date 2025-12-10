@@ -20,16 +20,16 @@ function BlockSettings(props) {
                 field: "BlockID",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Block Name",
                 field: "BlockName",
             },
             {
                 label: "Campus",
                 field: "CampusID",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -210,7 +210,7 @@ function BlockSettings(props) {
                                     CampusID: "",
                                 })
                             }>
-                            Add Block
+                            <i className="fa fa-plus me-2"></i>Add Block
                         </button>
                     </div>
                 </div>

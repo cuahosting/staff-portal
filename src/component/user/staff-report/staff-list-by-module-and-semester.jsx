@@ -5,9 +5,8 @@ import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
-import ReportTable from "../../common/table/report_table";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function StaffListByModuleAndSemester(props) {
   const token = props.login[0].token;
@@ -45,9 +44,9 @@ function StaffListByModuleAndSemester(props) {
         .then((res) => {
           let rows = [];
           res.data.length > 0 &&
-          res.data.map((row) => {
-            rows.push({ text: row.ModuleName + "--" + row.ModuleCode, id: row.ModuleCode});
-          });
+            res.data.map((row) => {
+              rows.push({ label: row.ModuleName + "--" + row.ModuleCode, value: row.ModuleCode });
+            });
           const result = rows;
           setModuleList(result);
           if (result.length > 0) {
@@ -148,15 +147,15 @@ function StaffListByModuleAndSemester(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Module
                       </label>
-                      <Select2
-                    id="moduleCode"
-                    value={module.moduleCode}
-                    data={moduleList}
-                    onSelect={handleChange}
-                    options={{
-                      placeholder: "Search Module",
-                    }}
-                  />
+                      <SearchSelect
+                        id="moduleCode"
+                        label="Select Module"
+                        value={moduleList.find(op => op.value === module.moduleCode) || null}
+                        options={moduleList}
+                        onChange={(selected) => handleChange({ target: { id: 'moduleCode', value: selected?.value || '' } })}
+                        placeholder="Search Module"
+                        required
+                      />
                       {/* <select
                         className="form-select"
                         data-placeholder="Select Module"
@@ -178,21 +177,15 @@ function StaffListByModuleAndSemester(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select School Semester
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select school semester"
+                      <SearchSelect
                         id="schoolSemester"
+                        label="Select School Semester"
+                        value={allSemester.map(semester => ({ value: semester.SemesterCode, label: semester.SemesterName })).find(s => s.value === module.schoolSemester) || null}
+                        options={allSemester.map(semester => ({ value: semester.SemesterCode, label: semester.SemesterName }))}
+                        onChange={(selected) => handleChange({ target: { id: 'schoolSemester', value: selected?.value || '' }, preventDefault: () => { } })}
+                        placeholder="Select school semester"
                         required
-                        onChange={handleChange}
-                        value={module.schoolSemester}
-                      >
-                        <option value="">Select option</option>
-                        {allSemester.map((semester, index) => (
-                          <option key={index} value={semester.SemesterCode}>
-                            {semester.SemesterName}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                     <div className="col-md-4">
                       <div className="row ">

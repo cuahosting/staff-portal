@@ -5,7 +5,8 @@ import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function StaffListByDesignation(props) {
   const token = props.login[0].token;
@@ -94,7 +95,7 @@ function StaffListByDesignation(props) {
       });
   };
 
-  const handleSubmit = async (e) => {};
+  const handleSubmit = async (e) => { };
 
   return isLoading ? (
     <Loader />
@@ -115,20 +116,15 @@ function StaffListByDesignation(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Designation
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select Designation"
+                      <SearchSelect
                         id="designationID"
-                        onChange={handleChange}
+                        label="Select Designation"
+                        value={designationList.map(d => ({ value: d.EntryID, label: d.DesignationName })).find(s => s.value === designation.designationID) || null}
+                        options={designationList.map(d => ({ value: d.EntryID, label: d.DesignationName }))}
+                        onChange={(selected) => handleChange({ target: { id: 'designationID', value: selected?.value || '' }, preventDefault: () => { } })}
+                        placeholder="Select Designation"
                         required
-                      >
-                        <option value="">Select option</option>
-                        {designationList.map((d, i) => (
-                          <option key={i} value={d.EntryID}>
-                            {d.DesignationName}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   </div>
                 </form>

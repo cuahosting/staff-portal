@@ -6,9 +6,9 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import AgReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/ReportTable";
 import { TimeTablePeriods, dynamicSort, formatDate } from "../../../../resources/constants";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 import CsvDownloadButton from 'react-json-to-csv'
 
 
@@ -291,10 +291,9 @@ function MarkExamBarcode(props) {
             <div className="row">
                 <div className="row pt-5">
                     <div className="col-lg-6 col-md-6 pt-5">
-                        <label htmlFor="_Semester">Select Semester</label>
-                        <Select
+                        <SearchSelect
                             id="_Semester"
-                            className="form-select form-select"
+                            label="Select Semester"
                             value={formData.SemesterCode2}
                             onChange={onSemesterChange}
                             options={semesterOptions}
@@ -302,10 +301,9 @@ function MarkExamBarcode(props) {
                         />
                     </div>
                     <div className="col-lg-6 col-md-6 pt-5">
-                        <label htmlFor="_Semester">Select Date</label>
-                        <Select
-                            id="_Semester"
-                            className="form-select form-select"
+                        <SearchSelect
+                            id="_Date"
+                            label="Select Date"
                             value={formData.ExamDate2}
                             onChange={onSemesterChange}
                             options={examDates}
@@ -314,17 +312,14 @@ function MarkExamBarcode(props) {
                     </div>
 
                     <div className="col-lg-9 col-md-9 pt-5">
-                        <div className="form-group">
-                            <label htmlFor="_Semester">Select Timetable</label>
-                            <Select
-                                id="_Semester"
-                                className="form-select form-select"
-                                value={formData.TimetableID2}
-                                onChange={onSemesterChange}
-                                options={timetableList}
-                                placeholder="Select Timetable"
-                            />
-                        </div>
+                        <SearchSelect
+                            id="_Timetable"
+                            label="Select Timetable"
+                            value={formData.TimetableID2}
+                            onChange={onSemesterChange}
+                            options={timetableList}
+                            placeholder="Select Timetable"
+                        />
                     </div>
                     {
                         data2.length > 0 &&

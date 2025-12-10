@@ -3,7 +3,7 @@ import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../../common/loader/loader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import {toast} from "react-toastify";
 import {showAlert, showConfirm, showContentAlert} from "../../../common/sweetalert/sweetalert";
 import PageHeader from "../../../common/pageheader/pageheader";
@@ -213,7 +213,7 @@ function FinanceAllowResult(props) {
                             items={["Human-Resources", "Finance", "Finance Unblock Student Result"]}
                         />
                         <div className="row col-md-12" style={{width:'100%'}}>
-                            <Table  data={studentDatatable}/>
+                            <AGTable data={studentDatatable}/>
                         </div>
                     </div>
 

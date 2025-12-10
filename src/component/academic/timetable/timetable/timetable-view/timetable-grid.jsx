@@ -5,8 +5,7 @@ import Loader from "../../../../common/loader/loader";
 import PageHeader from "../../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../../resources/url";
 import { useEffect } from "react";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../../../common/select/SearchSelect";
 import TimetableView from "../../timetable-view/timetable-view";
 
 const ViewTimeTableGrid = (props) => {
@@ -37,7 +36,7 @@ const ViewTimeTableGrid = (props) => {
                     if (result.data.length > 0) {
                         let rows = [];
                         result.data.map((item => {
-                            rows.push({id: item.SemesterCode, text: item.SemesterName})
+                            rows.push({ value: item.SemesterCode, label: item.SemesterName })
                         }))
                         setSemesterList(rows)
                     }
@@ -60,7 +59,7 @@ const ViewTimeTableGrid = (props) => {
                         setModuleList(result.data)
                     }
                 })
-           
+
             await axios.get(`${serverLink}staff/hr/staff-management/staff/list`, token)
                 .then((result) => {
                     if (result.data.length > 0) {
@@ -87,7 +86,7 @@ const ViewTimeTableGrid = (props) => {
     }
 
     const onEdit = (e) => {
-        if (e.target.id ==="Semester"){
+        if (e.target.id === "Semester") {
             setSemester(e.target.value);
             setViewType("")
             setViewByValue("")
@@ -99,67 +98,67 @@ const ViewTimeTableGrid = (props) => {
             if (e.target.value === "faculty") {
                 if (facultyList.length > 0) {
                     facultyList.map(x => {
-                        rows.push({ id: x.FacultyCode, text: x.FacultyName })
+                        rows.push({ value: x.FacultyCode, label: x.FacultyName })
                     })
                 }
             } else if (e.target.value === "department") {
                 if (departmentList.length > 0) {
                     departmentList.map(x => {
-                        rows.push({ id: x.DepartmentCode, text: x.DepartmentName })
+                        rows.push({ value: x.DepartmentCode, label: x.DepartmentName })
                     })
                 }
             } else if (e.target.value === "course") {
                 if (courseList.length > 0) {
                     courseList.map(x => {
-                        rows.push({ id: x.CourseCode, text: x.CourseName })
+                        rows.push({ value: x.CourseCode, label: x.CourseName })
                     })
                 }
             } else if (e.target.value === "group") {
                 if (groupList.length > 0) {
                     groupList.map(x => {
-                        rows.push({ id: x.EntryID, text: x.GroupName })
+                        rows.push({ value: x.EntryID, label: x.GroupName })
                     })
                 }
             } else if (e.target.value === "campus") {
                 if (venueList.length > 0) {
                     venueList.map(x => {
-                        const filter = rows.filter(y => y.id === x.CampusID)
+                        const filter = rows.filter(y => y.value === x.CampusID)
                         if (filter.length < 1)
-                            rows.push({id: x.CampusID, text: x.CampusName})
+                            rows.push({ value: x.CampusID, label: x.CampusName })
                     })
                 }
             } else if (e.target.value === "block") {
                 if (venueList.length > 0) {
                     venueList.map(x => {
-                        const filter = rows.filter(y => y.id === x.BlockID)
+                        const filter = rows.filter(y => y.value === x.BlockID)
                         if (filter.length < 1)
-                            rows.push({id: x.BlockID, text: `${x.CampusName} => ${x.BlockName}`})
+                            rows.push({ value: x.BlockID, label: `${x.CampusName} => ${x.BlockName}` })
                     })
                 }
             } else if (e.target.value === "venue") {
                 if (venueList.length > 0) {
                     venueList.map(x => {
-                        const filter = rows.filter(y => y.id === x.VenueID)
+                        const filter = rows.filter(y => y.value === x.VenueID)
                         if (filter.length < 1)
-                            rows.push({id: x.VenueID, text: `${x.CampusName} => ${x.BlockName} => ${x.VenueName}`})
+                            rows.push({ value: x.VenueID, label: `${x.CampusName} => ${x.BlockName} => ${x.VenueName}` })
                     })
                 }
             } else if (e.target.value === "module") {
                 if (moduleList.length > 0) {
                     moduleList.map(x => {
-                        rows.push({ id: x.ModuleCode, text: x.ModuleName })
+                        rows.push({ value: x.ModuleCode, label: x.ModuleName })
                     })
                 }
             } else if (e.target.value === "staff") {
                 if (staffList.length > 0) {
                     staffList.map(x => {
-                        rows.push({ id: x.StaffID, text: `${x.FirstName} ${x.MiddleName} ${x.Surname} (${x.StaffID})` })
+                        rows.push({ value: x.StaffID, label: `${x.FirstName} ${x.MiddleName} ${x.Surname} (${x.StaffID})` })
                     })
                 }
             } else if (e.target.value === "student") {
                 if (studentList.length > 0) {
                     studentList.map(x => {
-                        rows.push({ id: x.StudentID, text: `${x.FirstName} ${x.MiddleName} ${x.Surname} (${x.StudentID})` })
+                        rows.push({ value: x.StudentID, label: `${x.FirstName} ${x.MiddleName} ${x.Surname} (${x.StudentID})` })
                     })
                 }
             }
@@ -169,7 +168,7 @@ const ViewTimeTableGrid = (props) => {
             setViewByValue(e.target.value)
         }
 
-       
+
     }
 
     useEffect(() => {
@@ -187,58 +186,66 @@ const ViewTimeTableGrid = (props) => {
             <div className="flex-column-fluid">
                 <div className="row col-md-12 mb-3">
                     <div className="col-md-4">
-                        <Select2
+                        <SearchSelect
                             id="Semester"
-                            data={semesterList}
-                            defaultValue={semester}
-                            onSelect={onEdit}
-                            options={{
-                                placeholder: "Search Semester",
-                            }}
+                            label="Select Semester"
+                            value={semesterList.find(op => op.value === semester) || null}
+                            options={semesterList}
+                            onChange={(selected) => onEdit({ target: { id: 'Semester', value: selected?.value || '' } })}
+                            placeholder="Search Semester"
                         />
                     </div>
                     <div className="col-md-4">
-                        <Select2
+                        <SearchSelect
                             id="ViewBy"
+                            label="Select View Option"
                             disabled={semester === ""}
-                            data={[
-                                {id: 'faculty', text: 'Faculty'},
-                                {id: 'department', text: 'Department'},
-                                {id: 'course', text: 'Course'},
-                                {id: 'group', text: 'Group'},
-                                {id: 'campus', text: 'Campus'},
-                                {id: 'block', text: 'Block'},
-                                {id: 'venue', text: 'Venue'},
-                                {id: 'module', text: 'Module'},
-                                {id: 'staff', text: 'Staff'},
-                                {id: 'student', text: 'Student'}
+                            options={[
+                                { value: 'faculty', label: 'Faculty' },
+                                { value: 'department', label: 'Department' },
+                                { value: 'course', label: 'Course' },
+                                { value: 'group', label: 'Group' },
+                                { value: 'campus', label: 'Campus' },
+                                { value: 'block', label: 'Block' },
+                                { value: 'venue', label: 'Venue' },
+                                { value: 'module', label: 'Module' },
+                                { value: 'staff', label: 'Staff' },
+                                { value: 'student', label: 'Student' }
                             ]}
-                            defaultValue={viewType}
-                            onSelect={onEdit}
-                            options={{
-                                placeholder: "Search View Option",
-                            }}
+                            value={[
+                                { value: 'faculty', label: 'Faculty' },
+                                { value: 'department', label: 'Department' },
+                                { value: 'course', label: 'Course' },
+                                { value: 'group', label: 'Group' },
+                                { value: 'campus', label: 'Campus' },
+                                { value: 'block', label: 'Block' },
+                                { value: 'venue', label: 'Venue' },
+                                { value: 'module', label: 'Module' },
+                                { value: 'staff', label: 'Staff' },
+                                { value: 'student', label: 'Student' }
+                            ].find(op => op.value === viewType) || null}
+                            onChange={(selected) => onEdit({ target: { id: 'ViewBy', value: selected?.value || '' } })}
+                            placeholder="Search View Option"
                         />
                     </div>
                     <div className="col-md-4">
-                        <Select2
+                        <SearchSelect
                             id="ViewByValue"
+                            label="Select Report Item"
                             disabled={semester === "" || viewType === ""}
-                            data={selectedType}
-                            defaultValue={ViewByValue}
-                            onSelect={onEdit}
-                            options={{
-                                placeholder: "Search Report Item",
-                            }}
+                            options={selectedType}
+                            value={selectedType.find(op => op.value === ViewByValue) || null}
+                            onChange={(selected) => onEdit({ target: { id: 'ViewByValue', value: selected?.value || '' } })}
+                            placeholder="Search Report Item"
                         />
                     </div>
                 </div>
 
 
-                    {
-                        semester !== "" && viewType !=="" && ViewByValue !== "" &&
-                        <TimetableView type={viewType} item_id={ViewByValue} semester={semester} show_key={true} />
-                    }
+                {
+                    semester !== "" && viewType !== "" && ViewByValue !== "" &&
+                    <TimetableView type={viewType} item_id={ViewByValue} semester={semester} show_key={true} />
+                }
             </div>
         </div>
 

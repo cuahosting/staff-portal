@@ -24,12 +24,12 @@ function ClashByPass(props) {
                 field: "FacultyCode",
             },
             {
-                label: "Faculty Name",
-                field: "FacultyName",
-            },
-            {
                 label: "Action",
                 field: "action",
+            },
+            {
+                label: "Faculty Name",
+                field: "FacultyName",
             }
         ],
         rows: [],
@@ -148,31 +148,24 @@ function ClashByPass(props) {
             <PageHeader
                 title={"Timetable Clash Bypass"}
                 items={["Academics", " Timetable bypass"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#bypass"
+                        onClick={() =>
+                            setClash({
+                                ...clash,
+                                EntryID: "",
+                                FacultyCode: ""
+                            })
+                        }>
+                        <i className="fa fa-plus me-2"></i>Add Clash
+                    </button>
+                }
             />
         <div className="card card-no-border" style={{ width: '100%' }}>
-            <div className="card-header border-0 pt-6">
-                <div className="card-title" />
-                <div className="card-toolbar">
-                    <div
-                        className="d-flex justify-content-end"
-                        data-kt-customer-table-toolbar="base">
-                        <button
-                            type="button"
-                            className="btn btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#bypass"
-                            onClick={() =>
-                                setClash({
-                                    ...clash,
-                                    EntryID: "",
-                                    FacultyCode: ""
-                                })
-                            }>
-                            Add Clash
-                        </button>
-                    </div>
-                </div>
-            </div>
             <div className="card-body p-0" >
                 <div className="col-md-12" >
                     <AGTable data={datatable} />

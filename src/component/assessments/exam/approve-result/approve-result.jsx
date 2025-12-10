@@ -1,23 +1,19 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import axios from "axios";
-import {serverLink} from "../../../../resources/url";
-import {toast} from "react-toastify";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import Select from 'react-select';
-import makeAnimated from 'react-select/animated';
-import AgReportTable from "../../../common/table/report_table";
+import { serverLink } from "../../../../resources/url";
+import { toast } from "react-toastify";
+import SearchSelect from "../../../common/select/SearchSelect";
+import AgReportTable from "../../../common/table/ReportTable";
 const randomToken = require('random-token');
 
 
 function ApproveResult(props) {
     const token = props.loginData.token;
 
-    const [isLoading,setIsLoading] = useState(true);
-    const animatedComponents = makeAnimated();
+    const [isLoading, setIsLoading] = useState(true);
     const [semesterList, setSemesterList] = useState([]);
     const [resultList, setResultList] = useState([]);
     const [resultFilter, setResultFilter] = useState([]);
@@ -41,16 +37,16 @@ function ApproveResult(props) {
                     let semester_rows = [];
                     if (semester_list.length > 0) {
                         semester_list.map(sem => {
-                            semester_rows.push({id: sem.SemesterCode, text: sem.SemesterName})
+                            semester_rows.push({ value: sem.SemesterCode, label: sem.SemesterName })
                         })
                     }
                     setSemesterList(semester_rows);
 
                     let module_rows = [];
                     if (module_list.length > 0) {
-                        module_rows.push({value: 'all', label: `Select All`})
+                        module_rows.push({ value: 'all', label: `Select All` })
                         module_list.map(item => {
-                            module_rows.push({value: item.ModuleCode, label: `${item.ModuleName} (${item.ModuleCode})`})
+                            module_rows.push({ value: item.ModuleCode, label: `${item.ModuleName} (${item.ModuleCode})` })
                         })
                     }
                     setModuleListSelect(module_rows);
@@ -92,7 +88,7 @@ function ApproveResult(props) {
                     filter.map((p, index) => {
                         table_data.push([(index_counter), p.StudentID, p.ModuleCode, p.ModuleTitle, p.CAScore, p.ExamScore, p.Total, p.StudentGrade, p.Decision])
                         filter_results.push(p)
-                        index_counter +=1;
+                        index_counter += 1;
                     })
                 }
             })
@@ -128,7 +124,7 @@ function ApproveResult(props) {
                         toast.error(`${result.StudentID}'s ${result.ModuleTitle} result not approved. Try again!`)
                     }
                     setCounter(counter_index)
-                    counter_index +=1;
+                    counter_index += 1;
                 })
                 .catch(err => {
                     toast.error("Network error")
@@ -137,11 +133,11 @@ function ApproveResult(props) {
 
     }
 
-    useEffect(() => { getRecord(); },[])
+    useEffect(() => { getRecord(); }, [])
 
-    return isLoading ? <Loader/> : (
+    return isLoading ? <Loader /> : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Approve Result"} items={["Assessment", "Exams & Records", "Approve Result"]}/>
+            <PageHeader title={"Approve Result"} items={["Assessment", "Exams & Records", "Approve Result"]} />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-body">
@@ -149,14 +145,13 @@ function ApproveResult(props) {
                             <div className="col-md-6">
                                 <div className="form-group">
                                     <label htmlFor="SemesterCode">Select Semester</label>
-                                    <Select2
+                                    <SearchSelect
                                         id="SemesterCode"
-                                        defaultValue={semesterCode}
-                                        data={semesterList}
-                                        onSelect={handleChange}
-                                        options={{
-                                            placeholder: "Select Semester",
-                                        }}
+                                        label="Select Semester"
+                                        value={semesterList.find(op => op.value === semesterCode) || null}
+                                        options={semesterList}
+                                        onChange={(selected) => handleChange({ target: { id: 'SemesterCode', value: selected?.value || '' }, preventDefault: () => { } })}
+                                        placeholder="Select Semester"
                                     />
                                 </div>
                             </div>
@@ -165,18 +160,19 @@ function ApproveResult(props) {
                             <div className="col-md-6">
                                 <div className="form-group">
                                     <label htmlFor="ModuleCode">Select Module</label>
-                                    <Select
-                                        defaultValue={moduleCode}
-                                        components={animatedComponents}
+                                    <SearchSelect
+                                        label="Select Module"
+                                        value={moduleListSelect.filter(op => moduleCode.includes(op.value))}
                                         options={moduleListSelect}
                                         isMulti
                                         isDisabled={semesterCode === ''}
                                         onChange={selected => {
-                                            selected.length &&
-                                            selected.find(option => option.value === "all")
+                                            selected &&
+                                                selected.find(option => option.value === "all")
                                                 ? handleModuleChange(moduleListSelect.slice(1))
                                                 : handleModuleChange((selected))
                                         }}
+                                        placeholder="Select Module"
                                     />
 
                                 </div>
@@ -186,16 +182,16 @@ function ApproveResult(props) {
 
                         <div className="row pt-5">
                             <div className="col-md-5 Remaining text-center">
-                                <b style={{fontSize: '100px'}}>{counter}</b>
-                                <hr/>
+                                <b style={{ fontSize: '100px' }}>{counter}</b>
+                                <hr />
                                 <p>Approved Result</p>
                             </div>
                             <div className="col-md-2 Processed text-center text-uppercase">
-                                <b style={{fontSize: '60px'}}>Of</b>
+                                <b style={{ fontSize: '60px' }}>Of</b>
                             </div>
                             <div className="col-md-5 text-center">
-                                <b style={{fontSize: '100px'}}>{resultFilter.length}</b>
-                                <hr/>
+                                <b style={{ fontSize: '100px' }}>{resultFilter.length}</b>
+                                <hr />
                                 <p>Pending Result</p>
                             </div>
                         </div>

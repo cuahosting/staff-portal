@@ -9,8 +9,8 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { serverLink } from "../../../resources/url";
 import { useEffect } from "react";
 import JoditEditor from "jodit-react";
-import ReportTable from "../../common/table/report_table";
-import Select from 'react-select';
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import { formatDateAndTime, shortCode } from "../../../resources/constants";
 import * as DOMPurify from 'dompurify';
 
@@ -30,7 +30,7 @@ const ComplainsAssignedToMe = (props) => {
         InsertedBy: props.LoginDetails[0].StaffID,
         currentSemester: props.currentSemester,
         EntryID: "",
-        SemesterCode:""
+        SemesterCode: ""
     })
     const [semesterList, setSemesterList] = useState([]);
     const [data, setData] = useState([]);
@@ -59,7 +59,7 @@ const ComplainsAssignedToMe = (props) => {
                     let rows_ = []
                     if (result.data.length > 0) {
                         result.data.forEach((row) => {
-                            rows_.push({ value: row.StaffID, label: row.StaffID+" - "+row.StaffID+" - "+row.FirstName + " " + row.MiddleName + " " + row.Surname },)
+                            rows_.push({ value: row.StaffID, label: row.StaffID + " - " + row.StaffID + " - " + row.FirstName + " " + row.MiddleName + " " + row.Surname },)
                         });
                     }
                     setStaffList(rows_);
@@ -77,7 +77,7 @@ const ComplainsAssignedToMe = (props) => {
     }
 
     const getComplainst = async (semester) => {
-        if(semester === ""){
+        if (semester === "") {
             toast.error("please select semester");
             setData([])
             return;
@@ -181,7 +181,7 @@ const ComplainsAssignedToMe = (props) => {
             setComplain({
                 ...complain,
                 [e.target.id]: e.target.value
-            })    
+            })
             getComplainst(e.target.value);
         }
         setComplain({
@@ -214,23 +214,18 @@ const ComplainsAssignedToMe = (props) => {
                         <div className="row col-md-12 mb-5 mt-5">
                             <div className="form-group">
                                 <label htmlFor="SemesterCode">Semester </label>
-                                <select id="SemesterCode" onChange={onEdit}
-                                    value={complain.SemesterCode} className="form-select" >
-                                    <option value={""}>-select type-</option>
-                                    {
-                                        semesterList.length > 0 &&
-                                        semesterList.map((x, i) => {
-                                            return (
-                                                <option key={i} value={x.SemesterCode} >{x.SemesterName} </option>
-                                            )
-                                        })
-                                    }
-                                </select>
+                                <SearchSelect
+                                    id="SemesterCode"
+                                    value={semesterList.find(op => op.SemesterCode === complain.SemesterCode) ? { value: complain.SemesterCode, label: semesterList.find(op => op.SemesterCode === complain.SemesterCode).SemesterName } : null}
+                                    onChange={(selected) => onEdit({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                    options={semesterList.map(x => ({ value: x.SemesterCode, label: x.SemesterName }))}
+                                    placeholder="Select Semester"
+                                />
                             </div>
                             <div className="col-md-12 mt-5">
                                 {
                                     data.length > 0 &&
-                                    <ReportTable columns={columns} data={data}  height="700px" />
+                                    <ReportTable columns={columns} data={data} height="700px" />
                                 }
                             </div>
 
@@ -279,7 +274,7 @@ const ComplainsAssignedToMe = (props) => {
                                                                             <span className="fw-bold" >
                                                                                 {x.ActionBy}:
                                                                             </span><span style={{ textAlign: 'justify' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(x.Description) }} />
-                                                                            {x.AssignedTo !=="" &&
+                                                                            {x.AssignedTo !== "" &&
                                                                                 <p>Action Assigned To: <span className="fw-bold">{x.AssignedTo} {x.StaffName}</span></p>}
 
 
@@ -300,14 +295,23 @@ const ComplainsAssignedToMe = (props) => {
                                     <div className="col-md-12">
                                         <div className="form-group">
                                             <label htmlFor="Stage">Stage</label>
-                                            <select id="Stage" onChange={onEdit}
-                                                value={complain.Stage} className="form-select" >
-                                                <option value={""}>-select stage-</option>
-                                                <option value={"1"}>Assigned to staff</option>
-                                                <option value={"2"}>Escalated</option>
-                                                <option value={"3"}>In Progress</option>
-                                                <option value={"4"}>Resolved</option>
-                                            </select>
+                                            <SearchSelect
+                                                id="Stage"
+                                                value={[
+                                                    { value: "1", label: "Assigned to staff" },
+                                                    { value: "2", label: "Escalated" },
+                                                    { value: "3", label: "In Progress" },
+                                                    { value: "4", label: "Resolved" }
+                                                ].find(op => op.value === complain.Stage) || null}
+                                                onChange={(selected) => onEdit({ target: { id: 'Stage', value: selected?.value || '' } })}
+                                                options={[
+                                                    { value: "1", label: "Assigned to staff" },
+                                                    { value: "2", label: "Escalated" },
+                                                    { value: "3", label: "In Progress" },
+                                                    { value: "4", label: "Resolved" }
+                                                ]}
+                                                placeholder="Select Stage"
+                                            />
                                         </div>
                                     </div>
                                     {
@@ -315,11 +319,12 @@ const ComplainsAssignedToMe = (props) => {
                                             <div className="col-md-12 mt-5">
                                                 <div className="form-group">
                                                     <label htmlFor="Staff">Staff</label>
-                                                    <Select
+                                                    <SearchSelect
                                                         name="Staff"
                                                         value={complain.StaffID}
                                                         onChange={onMainLecturerChange}
                                                         options={staffList}
+                                                        placeholder="Select Staff"
                                                     />
                                                 </div>
                                             </div>
@@ -336,8 +341,8 @@ const ComplainsAssignedToMe = (props) => {
 
                                     </div>
                                     <div className="col-md-12 mt-5">
-                                        <button disabled={complain.Status === "4"?true: false} type="button" onClick={onSubmit} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading}>
-                                            <span className="indicator-label">{complain.Status === "4" ? "Complain Resolved":"Submit"}</span>
+                                        <button disabled={complain.Status === "4" ? true : false} type="button" onClick={onSubmit} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading}>
+                                            <span className="indicator-label">{complain.Status === "4" ? "Complain Resolved" : "Submit"}</span>
                                             <span className="indicator-progress">Please wait...
                                                 <span className="spinner-border spinner-border-sm align-middle ms-2" />
                                             </span>

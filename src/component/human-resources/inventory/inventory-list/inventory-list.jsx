@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import {currencyConverter, formatDateAndTime} from "../../../../resources/constants";
 function InventoryList(props) {
     let token = props.loginData[0].token;

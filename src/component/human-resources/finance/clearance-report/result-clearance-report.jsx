@@ -4,11 +4,10 @@ import { toast } from "react-toastify";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import {formatDateAndTime} from "../../../../resources/constants";
+import SearchSelect from "../../../common/select/SearchSelect";
+import { formatDateAndTime } from "../../../../resources/constants";
 
 const ResultClearanceReport = (props) => {
     const token = props.login[0].token;
@@ -81,9 +80,9 @@ const ResultClearanceReport = (props) => {
             .then((response) => {
                 let rows = [];
                 response.data.length > 0 &&
-                response.data.map((row) => {
-                    rows.push({ text: row.Description + " " + "(" + row.SemesterCode + ")", id: row.SemesterCode });
-                });
+                    response.data.map((row) => {
+                        rows.push({ label: row.Description + " " + "(" + row.SemesterCode + ")", value: row.SemesterCode });
+                    });
                 setSemesterList(rows);
                 setIsLoading(false);
             })
@@ -92,7 +91,7 @@ const ResultClearanceReport = (props) => {
             });
     }
     useEffect(() => {
-        getSemesters().then((r) => {});
+        getSemesters().then((r) => { });
     }, []);
 
     return isLoading ? (
@@ -114,14 +113,13 @@ const ResultClearanceReport = (props) => {
                                             <label className="required fs-6 fw-bold mb-2">
                                                 Select Semester
                                             </label>
-                                            <Select2
+                                            <SearchSelect
                                                 id="semesterCode"
-                                                data={semesterList}
-                                                value={semesterCode.semesterCode}
-                                                onSelect={handleChange}
-                                                options={{
-                                                    placeholder: "Search Semester Code",
-                                                }}
+                                                label="Select Semester"
+                                                value={semesterList.find(op => op.value === semesterCode.semesterCode) || null}
+                                                options={semesterList}
+                                                onChange={(selected) => handleChange({ target: { id: 'semesterCode', value: selected?.value || '' }, preventDefault: () => { } })}
+                                                placeholder="Search Semester Code"
                                             />
                                         </div>
                                     </div>

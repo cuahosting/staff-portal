@@ -4,7 +4,6 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import { applyMiddleware, createStore, compose } from "redux";
-import { serverStatus } from "./resources/url";
 import rootReducer from "./reducers/rootReducer";
 import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
@@ -14,7 +13,8 @@ import "./resources/enhanced-forms.css";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 let store;
-if (serverStatus === "Dev") {
+// Only include redux-logger in development mode
+if (process.env.NODE_ENV === 'development') {
   store = createStore(
     rootReducer,
     composeEnhancers(applyMiddleware(logger, thunkMiddleware))

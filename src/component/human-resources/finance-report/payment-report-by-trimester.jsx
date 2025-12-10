@@ -4,7 +4,7 @@ import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import { connect } from "react-redux";
 
 function PaymentReportByTrimester(props) {

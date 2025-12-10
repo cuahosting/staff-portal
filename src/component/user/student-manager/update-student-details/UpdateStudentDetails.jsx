@@ -1,17 +1,16 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 import axios from "axios";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
-import {serverLink} from "../../../../resources/url";
+import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import ReportTable from "../../../common/table/report_table";
-import {decryptData, encryptData, formatDateAndTime} from "../../../../resources/constants";
-import {CommentsDisabledOutlined} from "@mui/icons-material";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import {useForm} from "react-hook-form";
+import ReportTable from "../../../common/table/ReportTable";
+import { decryptData, encryptData, formatDateAndTime } from "../../../../resources/constants";
+import { CommentsDisabledOutlined } from "@mui/icons-material";
+import SearchSelect from "../../../common/select/SearchSelect";
+import { useForm } from "react-hook-form";
 
 function UpdateStudentDetails(props) {
     const token = props.loginData.token;
@@ -20,7 +19,7 @@ function UpdateStudentDetails(props) {
     const [isCheckedEmail, setIsCheckedEmail] = useState(false);
     const [isCheckedStatus, setIsCheckedStatus] = useState(false);
     const [isCheckedPassword, setIsCheckedPassword] = useState(false);
-    const {register, handleSubmit, setValue} = useForm();
+    const { register, handleSubmit, setValue } = useForm();
     const [studentSelectList, setStudentSelectList] = useState([]);
     const [formData, setFormData] = useState({
         FirstName: "",
@@ -43,7 +42,7 @@ function UpdateStudentDetails(props) {
         setValue("Email2", "");
     };
     const handleCheckedPass = () => {
-      setIsCheckedPassword(!isCheckedPassword);
+        setIsCheckedPassword(!isCheckedPassword);
         setValue("Password", "");
     };
     const updateStudentDetail = async (data) => {
@@ -112,12 +111,12 @@ function UpdateStudentDetails(props) {
     async function updatePassword(data) {
         console.log(data)
         await axios.patch(`${serverLink}staff/users/student-manager/update-student-password`, data, token).then((res) => {
-                if (res.data.message === "success") {
-                    toast.success("Password Updated");
-                } else {
-                    toast.error("An error has occurred. Please try again!");
-                }
-            })
+            if (res.data.message === "success") {
+                toast.success("Password Updated");
+            } else {
+                toast.error("An error has occurred. Please try again!");
+            }
+        })
             .catch((err) => {
                 console.log(err);
                 toast.error("NETWORK ERROR. Please try again!");
@@ -152,8 +151,8 @@ function UpdateStudentDetails(props) {
                     let rows = [];
                     result.map((item) => {
                         rows.push({
-                            id: item.StudentID,
-                            text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
+                            value: item.StudentID,
+                            label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
                         });
                     });
                     setStudentSelectList(rows);
@@ -167,7 +166,7 @@ function UpdateStudentDetails(props) {
 
     const handleChange = (e) => {
         const filter_student = studentList.filter(
-            (i) => i.StudentID === e.target.value
+            (i) => i.StudentID === e.value
         );
         if (filter_student.length > 0) {
             selectedStudent.StudentID = filter_student[0].StudentID;
@@ -188,7 +187,7 @@ function UpdateStudentDetails(props) {
         getStudentDetails();
     }, []);
     return isLoading ? (
-        <Loader/>
+        <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
@@ -201,13 +200,11 @@ function UpdateStudentDetails(props) {
                         <form onSubmit={handleSubmit(updateStudentDetail)}>
                             <div className="form-group">
                                 <label htmlFor="roomNumber">Student ID</label>
-                                <Select2
-                                    defaultValue={selectedStudent.StudentID}
-                                    data={studentSelectList}
+                                <SearchSelect
+                                    value={studentSelectList.find(op => op.value === selectedStudent.StudentID) || null}
                                     onChange={handleChange}
-                                    options={{
-                                        placeholder: "Search Student",
-                                    }}
+                                    options={studentSelectList}
+                                    placeholder="Search Student"
                                 />
                             </div>
                             <p className="pt-5">
@@ -222,7 +219,7 @@ function UpdateStudentDetails(props) {
                                     Update Email?
                                 </label>
                                 <input
-                                    style={{marginLeft: "20px"}}
+                                    style={{ marginLeft: "20px" }}
                                     type="checkbox"
                                     checked={isCheckedStatus}
                                     onChange={handleCheckedStatus}
@@ -233,7 +230,7 @@ function UpdateStudentDetails(props) {
                                     Update Status?
                                 </label>
                                 <input
-                                    style={{marginLeft: "20px"}}
+                                    style={{ marginLeft: "20px" }}
                                     type="checkbox"
                                     checked={isCheckedPassword}
                                     onChange={handleCheckedPass}
@@ -272,18 +269,18 @@ function UpdateStudentDetails(props) {
                             {isCheckedStatus && (
                                 <div class="col pt-5">
                                     <label htmlFor="roomNumber">Status</label>
-                                    <select
-                                        className="form-control"
+                                    <SearchSelect
                                         required
-                                        {...register("status")}
-                                    >
-                                        <option value="">Select Status</option>
-                                        <option value="Active">Active</option>
-                                        <option value="Dead">Dead</option>
-                                        <option value="Deferred">Deferred</option>
-                                        <option value="Expelled">Expelled</option>
-                                        <option value="Rusticated">Rusticated</option>
-                                    </select>
+                                        onChange={(selected) => setValue("status", selected?.value || "")}
+                                        options={[
+                                            { value: "Active", label: "Active" },
+                                            { value: "Dead", label: "Dead" },
+                                            { value: "Deferred", label: "Deferred" },
+                                            { value: "Expelled", label: "Expelled" },
+                                            { value: "Rusticated", label: "Rusticated" }
+                                        ]}
+                                        placeholder="Select Status"
+                                    />
                                 </div>
                             )}
                             {isCheckedPassword && (

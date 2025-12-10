@@ -1,21 +1,15 @@
-import React from "react";
-import { MDBDataTableV5 } from "mdbreact";
+/**
+ * Table - Now using custom DataTable component
+ *
+ * This component provides backward compatibility for components using the
+ * old MDBDataTableV5-based Table interface while using DataTable under the hood.
+ *
+ * Props:
+ * - data: { columns: [{label, field}], rows: [{...}] }
+ * - paging: boolean - Enable pagination (optional, default true)
+ */
 
-export default function Table(props) {
-  return (
-    <div className="table-responsive">
-      <MDBDataTableV5
-          hover
-          entriesOptions={[50, 100, 200]}
-          entries={50}
-          pagesAmount={4}
-          data={props.data}
-          paging={props.paging ?? true}
-          pagingTop
-          searchTop
-          searchBottom={false}
-          barReverse
-      />
-    </div>
-  );
-}
+import DataTable from './DataTable';
+
+// Re-export DataTable as Table for backward compatibility
+export default DataTable;

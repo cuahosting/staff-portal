@@ -6,14 +6,22 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
+
+// Options for static dropdowns
+const accountTypeOptions = [
+  { value: 'Savings', label: 'Savings' },
+  { value: 'Current', label: 'Current' },
+  { value: 'Domiciliary', label: 'Domiciliary' },
+  { value: 'N/A', label: 'N/A' },
+];
 
 function AddStaffBank(props) {
   const token = props.loginData[0].token;
 
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
+  const [bankOptions, setBankOptions] = useState([]);
   const [addBank, setAddBank] = useState(false);
   const [data, setData] = useState({
     bank: [],
@@ -24,9 +32,12 @@ function AddStaffBank(props) {
     setAddBank(true);
     setAddStaffBank({
       StaffID: "",
+      StaffID2: null,
       AccountNumber: "",
       AccountType: "",
+      AccountType2: null,
       BankID: "",
+      BankID2: null,
       BVN: "",
       InsertedBy: props.loginData[0].StaffID,
       InsertedDate: "",
@@ -35,9 +46,12 @@ function AddStaffBank(props) {
 
   const [addStaffBank, setAddStaffBank] = useState({
     StaffID: "",
+    StaffID2: null,
     AccountNumber: "",
     AccountType: "",
+    AccountType2: null,
     BankID: "",
+    BankID2: null,
     BVN: "",
     InsertedBy: "",
     InsertedDate: "",
@@ -48,6 +62,14 @@ function AddStaffBank(props) {
       .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
       .then((response) => {
         setData(response.data);
+        // Build bank options
+        if (response.data.bank && response.data.bank.length > 0) {
+          const banks = response.data.bank.map(item => ({
+            value: item.EntryID,
+            label: item.BankName
+          }));
+          setBankOptions(banks);
+        }
       })
       .catch((error) => {
         console.log("NETWORK ERROR", error);
@@ -68,7 +90,6 @@ function AddStaffBank(props) {
         .delete(`${serverLink}application/pg/document/delete/${id}/${image}`, token)
         .then((res) => {
           if (res.data.message === "success") {
-            // props.update_app_data();
             toast.success(`Deleted`);
           } else {
             toast.error(
@@ -89,7 +110,10 @@ function AddStaffBank(props) {
         let rows = [];
         response.data.length > 0 &&
           response.data.map((row) => {
-            rows.push({ text: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + "" + row.Surname, id: row.StaffID });
+            rows.push({
+              value: row.StaffID,
+              label: row.StaffID + " -- " + row.FirstName + " " + row.MiddleName + " " + row.Surname
+            });
           });
         setStaffList(rows);
         setIsLoading(false);
@@ -116,7 +140,10 @@ function AddStaffBank(props) {
       if (
         addStaffBank.hasOwnProperty(key) &&
         key !== "InsertedBy" &&
-        key !== "InsertedDate"
+        key !== "InsertedDate" &&
+        key !== "StaffID2" &&
+        key !== "AccountType2" &&
+        key !== "BankID2"
       ) {
         if (addStaffBank[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
@@ -160,13 +187,6 @@ function AddStaffBank(props) {
     getStaffBank().then((r) => { });
   };
 
-  const handleStaffEdit = (e) => {
-    setAddStaffBank({
-      ...addStaffBank,
-      [e.target.id]: e.target.value,
-    });
-  }
-
   return isLoading ? (
     <Loader />
   ) : (
@@ -198,68 +218,37 @@ function AddStaffBank(props) {
           {addBank ? (
             <div className="row">
               <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="StaffID">StaffID</label>
-                  <Select2
-                    id="StaffID"
-                    value={addStaffBank.StaffID}
-                    data={staffList}
-                    onSelect={handleStaffEdit}
-                    options={{
-                      placeholder: "Search staff",
-                    }}
-                  />
-
-                  {/* <select
-                    id="StaffID"
-                    name="StaffID"
-                    value={addStaffBank.StaffID}
-                    className="form-control"
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {staffList ? (
-                      <>
-                        {staffList.map((item, index) => {
-                          return (
-                            <option key={index} value={item.StaffID}>
-                              {item.StaffID} -- {item.FirstName} {item.MiddleName} {item.Surname}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select> */}
-                </div>
+                <SearchSelect
+                  id="StaffID"
+                  label="Staff ID"
+                  value={addStaffBank.StaffID2}
+                  options={staffList}
+                  onChange={(selected) => {
+                    setAddStaffBank({
+                      ...addStaffBank,
+                      StaffID: selected?.value || '',
+                      StaffID2: selected,
+                    });
+                  }}
+                  placeholder="Search staff"
+                />
               </div>
               <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="BankID">Bank Name</label>
-                  <select
-                    id="BankID"
-                    className="form-control"
-                    required
-                    value={addStaffBank.BankID}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.bank ? (
-                      <>
-                        {data.bank.map((item, index) => {
-                          return (
-                            <option key={index} value={item.EntryID}>
-                              {item.BankName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
-                </div>
+                <SearchSelect
+                  id="BankID"
+                  label="Bank Name"
+                  value={addStaffBank.BankID2}
+                  options={bankOptions}
+                  onChange={(selected) => {
+                    setAddStaffBank({
+                      ...addStaffBank,
+                      BankID: selected?.value || '',
+                      BankID2: selected,
+                    });
+                  }}
+                  placeholder="Select Bank"
+                  required
+                />
               </div>
               <div className="col-lg-6 col-md-6 pt-5">
                 <div className="form-group">
@@ -275,22 +264,21 @@ function AddStaffBank(props) {
                 </div>
               </div>
               <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="AccountType">Account Type</label>
-                  <select
-                    id="AccountType"
-                    className="form-control"
-                    required
-                    value={addStaffBank.AccountType}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    <option value="Savings">Savings</option>
-                    <option value="Current">Current</option>
-                    <option value="Domiciliary">Domiciliary</option>
-                    <option value="N/A">N/A</option>
-                  </select>
-                </div>
+                <SearchSelect
+                  id="AccountType"
+                  label="Account Type"
+                  value={addStaffBank.AccountType2}
+                  options={accountTypeOptions}
+                  onChange={(selected) => {
+                    setAddStaffBank({
+                      ...addStaffBank,
+                      AccountType: selected?.value || '',
+                      AccountType2: selected,
+                    });
+                  }}
+                  placeholder="Select Account Type"
+                  required
+                />
               </div>
               <div className="col-lg-6 col-md-6 pt-5">
                 <div className="form-group">
@@ -306,149 +294,8 @@ function AddStaffBank(props) {
                   />
                 </div>
               </div>
-
-              {/*<div className="col-lg-4 col-md-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="StaffID">StaffID</label>*/}
-              {/*    <select*/}
-              {/*      id="StaffID"*/}
-              {/*      name="StaffID"*/}
-              {/*      value={addStaffQualifications.StaffID}*/}
-              {/*      className="form-control"*/}
-              {/*      onChange={onEdit}*/}
-              {/*    >*/}
-              {/*      <option value="">Select Option</option>*/}
-              {/*      {staffList ? (*/}
-              {/*        <>*/}
-              {/*          {staffList.map((item, index) => {*/}
-              {/*            return (*/}
-              {/*              <option key={index} value={item.StaffID}>*/}
-              {/*                {item.StaffID}*/}
-              {/*              </option>*/}
-              {/*            );*/}
-              {/*          })}*/}
-              {/*        </>*/}
-              {/*      ) : (*/}
-              {/*        ""*/}
-              {/*      )}*/}
-              {/*    </select>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 col-md-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="QualificationID">Qualification Title</label>*/}
-              {/*    <select*/}
-              {/*      id="QualificationID"*/}
-              {/*      name="QualificationID"*/}
-              {/*      value={addStaffQualifications.QualificationID}*/}
-              {/*      className="form-control"*/}
-              {/*      onChange={onEdit}*/}
-              {/*    >*/}
-              {/*      <option value="">Select Option</option>*/}
-              {/*      {qualifications ? (*/}
-              {/*        <>*/}
-              {/*          {qualifications.map((item, index) => {*/}
-              {/*            return (*/}
-              {/*              <option key={index} value={item.EntryID}>*/}
-              {/*                {item.QualificationTitle}*/}
-              {/*              </option>*/}
-              {/*            );*/}
-              {/*          })}*/}
-              {/*        </>*/}
-              {/*      ) : (*/}
-              {/*        ""*/}
-              {/*      )}*/}
-              {/*    </select>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 col-md-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="Discipline">Discipline</label>*/}
-              {/*    <input*/}
-              {/*      type="text"*/}
-              {/*      id="Discipline"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="Discipline"*/}
-              {/*      value={addStaffQualifications.Discipline}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-8 col-md-8 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="InstitutionName">InstitutionName</label>*/}
-              {/*    <input*/}
-              {/*      type="text"*/}
-              {/*      id="InstitutionName"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="InstitutionName"*/}
-              {/*      value={addStaffQualifications.InstitutionName}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 col-md-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="InstitutionName">Year</label>*/}
-              {/*    <input*/}
-              {/*      type="number"*/}
-              {/*      id="Year"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="Year"*/}
-              {/*      value={addStaffQualifications.Year}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
             </div>
           ) : null}
-
-          {/*<div className="table-responsive">*/}
-          {/*  {!qualifications.length < 1 ? (*/}
-          {/*    <table className="table table-hover">*/}
-          {/*      <thead>*/}
-          {/*        <tr>*/}
-          {/*          <th>Document Type</th>*/}
-          {/*          <th>File Name</th>*/}
-          {/*          <th>Action</th>*/}
-          {/*        </tr>*/}
-          {/*      </thead>*/}
-          {/*      <tbody>*/}
-          {/*        {qualifications.map((item, index) => (*/}
-          {/*          <tr key={index}>*/}
-          {/*            <td>{item.Document}</td>*/}
-          {/*            <td>*/}
-          {/*              <a*/}
-          {/*                target="_blank"*/}
-          {/*                // referrerPolicy="no-referrer"*/}
-          {/*                // href={`${serverLink}public/uploads/${shortCode}/application/document/${item.FileName}`}*/}
-          {/*              >*/}
-          {/*                <i className="fa fa-file-pdf-o" />*/}
-          {/*              </a>*/}
-          {/*            </td>*/}
-          {/*            <td>*/}
-          {/*              <Button*/}
-          {/*                variant="danger"*/}
-          {/*                onClick={() =>*/}
-          {/*                  deleteItem(item.EntryID, item.FileName)*/}
-          {/*                }*/}
-          {/*              >*/}
-          {/*                <i*/}
-          {/*                  className="fa fa-trash-o small"*/}
-          {/*                  style={{ fontsize: "30px" }}*/}
-          {/*                ></i>*/}
-          {/*              </Button>*/}
-          {/*            </td>*/}
-          {/*          </tr>*/}
-          {/*        ))}*/}
-          {/*      </tbody>*/}
-          {/*    </table>*/}
-          {/*  ) : (*/}
-          {/*    <div className="alert alert-info">*/}
-          {/*      There is no record. Click on Add Document*/}
-          {/*    </div>*/}
-          {/*  )}*/}
-          {/*</div>*/}
         </div>
       </div>
     </div>

@@ -9,8 +9,8 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { serverLink } from "../../../resources/url";
 import { useEffect } from "react";
 import JoditEditor from "jodit-react";
-import ReportTable from "../../common/table/report_table";
-import Select from 'react-select';
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import { formatDateAndTime, shortCode } from "../../../resources/constants";
 import * as DOMPurify from 'dompurify';
 
@@ -30,7 +30,7 @@ const ComplainList = (props) => {
         InsertedBy: props.LoginDetails[0].StaffID,
         currentSemester: props.currentSemester,
         EntryID: "",
-        SemesterCode:""
+        SemesterCode: ""
     })
     const [semesterList, setSemesterList] = useState([]);
     const [data, setData] = useState([]);
@@ -59,7 +59,7 @@ const ComplainList = (props) => {
                     let rows_ = []
                     if (result.data.length > 0) {
                         result.data.forEach((row) => {
-                            rows_.push({ value: row.StaffID, label: row.StaffID+" - "+row.FirstName + " " + row.MiddleName + " " + row.Surname },)
+                            rows_.push({ value: row.StaffID, label: row.StaffID + " - " + row.FirstName + " " + row.MiddleName + " " + row.Surname },)
                         });
                     }
                     setStaffList(rows_);
@@ -77,7 +77,7 @@ const ComplainList = (props) => {
     }
 
     const getComplainst = async (semester) => {
-        if(semester === ""){
+        if (semester === "") {
             toast.error("please select semester");
             setData([])
             return;
@@ -181,7 +181,7 @@ const ComplainList = (props) => {
             setComplain({
                 ...complain,
                 [e.target.id]: e.target.value
-            })    
+            })
             getComplainst(e.target.value);
         }
         setComplain({
@@ -213,151 +213,159 @@ const ComplainList = (props) => {
                     <div className="card-body pt-5">
                         <div className="row col-md-12 mb-5 mt-5">
                             <div className="form-group">
-                                <label htmlFor="SemesterCode">Semester </label>
-                                <select id="SemesterCode" onChange={onEdit}
-                                    value={complain.SemesterCode} className="form-select" >
-                                    <option value={""}>-select type-</option>
-                                    {
-                                        semesterList.length > 0 &&
-                                        semesterList.map((x, i) => {
-                                            return (
-                                                <option key={i} value={x.SemesterCode} >{x.SemesterName} </option>
-                                            )
-                                        })
-                                    }
-                                </select>
-                            </div>
-                            <div className="col-md-12 mt-5">
-                                {
-                                    data.length > 0 &&
-                                    <ReportTable columns={columns} data={data} height="700px" />
-                                }
-                            </div>
-
-                            <Modal title={"Complaint description"} id="description" width={"500px"} close="close">
-                                <div className="col-md-12">
-                                    <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(complain.Description) }} ></p>
+                                <div className="form-group">
+                                    <label htmlFor="SemesterCode">Semester </label>
+                                    <SearchSelect
+                                        id="SemesterCode"
+                                        value={semesterList.find(op => op.SemesterCode === complain.SemesterCode) ? { value: complain.SemesterCode, label: semesterList.find(op => op.SemesterCode === complain.SemesterCode).SemesterName } : null}
+                                        onChange={(selected) => onEdit({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                        options={semesterList.map(x => ({ value: x.SemesterCode, label: x.SemesterName }))}
+                                        placeholder="Select Semester"
+                                    />
                                 </div>
-                            </Modal>
+                                <div className="col-md-12 mt-5">
+                                    {
+                                        data.length > 0 &&
+                                        <ReportTable columns={columns} data={data} height="700px" />
+                                    }
+                                </div>
 
-                            <Modal title={"Resolve Complaint"} id="resolve" large={true} style={{ width: '500px' }}>
-                                <div className="row col-md-12">
-                                    <div className="card-body">
-                                        <div className="timeline-label mb-5">
-                                            {
-                                                trackingList.length > 0 ?
-                                                    <>
-                                                        <div className="timeline-item">
-                                                            <div className="timeline-label fw-bold text-gray-800 fs-6">time</div>
-                                                            <div className="timeline-badge">
-                                                                <i className="fa fa-genderless text-success fs-1" />
-                                                            </div>
-                                                            <div className="timeline-content d-flex">
-                                                                <span className="fw-bold text-gray-800 ps-3">Complain Tracking timeline</span>
-                                                            </div>
-                                                        </div>
-                                                        {
-                                                            trackingList.map((x, y) => {
-                                                                var color_ = color[Math.floor(Math.random() * color.length)];
-                                                                let date_ = new Date(x.InsertedDate)
-                                                                let date = formatDateAndTime(x.InsertedDate, "date")
-                                                                let hrs = date_.getHours();
-                                                                let mins = date_.getMinutes();
-                                                                if (hrs <= 9)
-                                                                    hrs = '0' + hrs
-                                                                if (mins < 10)
-                                                                    mins = '0' + mins
-                                                                const postTime = hrs + ':' + mins
-                                                                return (
-                                                                    <div className="timeline-item" key={y}>
-                                                                        <div className="timeline-label fw-bolder text-gray-800 fs-6">{postTime}</div>
-                                                                        <div className="timeline-badge">
-                                                                            <i className={`fa fa-genderless text-${color_} fs-1`} />
-                                                                        </div>
-                                                                        <div className="fw-mormal timeline-content ps-3">
-                                                                            <span className="fw-bolder text-gray-400 fs-8">{date} : {postTime}</span><br />
-                                                                            <span className="fw-bold" >
-                                                                                {x.ActionBy}:
-                                                                            </span><span style={{ textAlign: 'justify' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(x.Description) }} />
-                                                                            {x.AssignedTo !=="" &&
-                                                                                <p>Action Assigned To: <span className="fw-bold">{x.AssignedTo} {x.StaffName}</span></p>}
-
-                                                                        </div>
-                                                                    </div>
-                                                                )
-                                                            })
-                                                        }
-                                                    </> :
-                                                    <>
-                                                        <label className="alert alert-info badge-lg">
-                                                            No Tracking Record Found
-                                                        </label>
-                                                    </>
-                                            }
-                                        </div>
-                                    </div>
+                                <Modal title={"Complaint description"} id="description" width={"500px"} close="close">
                                     <div className="col-md-12">
-                                        <div className="form-group">
-                                            <label htmlFor="Stage">Stage</label>
-                                            <select id="Stage" onChange={onEdit}
-                                                value={complain.Stage} className="form-select" >
-                                                <option value={""}>-select stage-</option>
-                                                <option value={"1"}>Assigned to staff</option>
-                                                <option value={"2"}>Escalated</option>
-                                                <option value={"3"}>In Progress</option>
-                                                <option value={"4"}>Resolved</option>
-                                            </select>
-                                        </div>
+                                        <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(complain.Description) }} ></p>
                                     </div>
-                                    {
-                                        complain.Stage === "1" || complain.Stage === "2" ?
-                                            <div className="col-md-12 mt-5">
-                                                <div className="form-group">
-                                                    <label htmlFor="Staff">Staff</label>
-                                                    <Select
-                                                        name="Staff"
-                                                        value={complain.StaffID}
-                                                        onChange={onMainLecturerChange}
-                                                        options={staffList}
-                                                    />
-                                                </div>
+                                </Modal>
+
+                                <Modal title={"Resolve Complaint"} id="resolve" large={true} style={{ width: '500px' }}>
+                                    <div className="row col-md-12">
+                                        <div className="card-body">
+                                            <div className="timeline-label mb-5">
+                                                {
+                                                    trackingList.length > 0 ?
+                                                        <>
+                                                            <div className="timeline-item">
+                                                                <div className="timeline-label fw-bold text-gray-800 fs-6">time</div>
+                                                                <div className="timeline-badge">
+                                                                    <i className="fa fa-genderless text-success fs-1" />
+                                                                </div>
+                                                                <div className="timeline-content d-flex">
+                                                                    <span className="fw-bold text-gray-800 ps-3">Complain Tracking timeline</span>
+                                                                </div>
+                                                            </div>
+                                                            {
+                                                                trackingList.map((x, y) => {
+                                                                    var color_ = color[Math.floor(Math.random() * color.length)];
+                                                                    let date_ = new Date(x.InsertedDate)
+                                                                    let date = formatDateAndTime(x.InsertedDate, "date")
+                                                                    let hrs = date_.getHours();
+                                                                    let mins = date_.getMinutes();
+                                                                    if (hrs <= 9)
+                                                                        hrs = '0' + hrs
+                                                                    if (mins < 10)
+                                                                        mins = '0' + mins
+                                                                    const postTime = hrs + ':' + mins
+                                                                    return (
+                                                                        <div className="timeline-item" key={y}>
+                                                                            <div className="timeline-label fw-bolder text-gray-800 fs-6">{postTime}</div>
+                                                                            <div className="timeline-badge">
+                                                                                <i className={`fa fa-genderless text-${color_} fs-1`} />
+                                                                            </div>
+                                                                            <div className="fw-mormal timeline-content ps-3">
+                                                                                <span className="fw-bolder text-gray-400 fs-8">{date} : {postTime}</span><br />
+                                                                                <span className="fw-bold" >
+                                                                                    {x.ActionBy}:
+                                                                                </span><span style={{ textAlign: 'justify' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(x.Description) }} />
+                                                                                {x.AssignedTo !== "" &&
+                                                                                    <p>Action Assigned To: <span className="fw-bold">{x.AssignedTo} {x.StaffName}</span></p>}
+
+                                                                            </div>
+                                                                        </div>
+                                                                    )
+                                                                })
+                                                            }
+                                                        </> :
+                                                        <>
+                                                            <label className="alert alert-info badge-lg">
+                                                                No Tracking Record Found
+                                                            </label>
+                                                        </>
+                                                }
                                             </div>
-                                            : <></>
-                                    }
-                                    <div className="col-md-12 mt-5">
-                                        <label htmlFor="StageDescription">Description</label>
-                                        <JoditEditor
-                                            value={complain.StageDescription}
-                                            ref={editorRef}
-                                            tabIndex={1}
-                                            onChange={onDescriptionChange}
-                                        />
+                                        </div>
+                                        <div className="col-md-12">
+                                            <div className="form-group">
+                                                <label htmlFor="Stage">Stage</label>
+                                                <SearchSelect
+                                                    id="Stage"
+                                                    value={[
+                                                        { value: "1", label: "Assigned to staff" },
+                                                        { value: "2", label: "Escalated" },
+                                                        { value: "3", label: "In Progress" },
+                                                        { value: "4", label: "Resolved" }
+                                                    ].find(op => op.value === complain.Stage) || null}
+                                                    onChange={(selected) => onEdit({ target: { id: 'Stage', value: selected?.value || '' } })}
+                                                    options={[
+                                                        { value: "1", label: "Assigned to staff" },
+                                                        { value: "2", label: "Escalated" },
+                                                        { value: "3", label: "In Progress" },
+                                                        { value: "4", label: "Resolved" }
+                                                    ]}
+                                                    placeholder="Select Stage"
+                                                />
+                                            </div>
+                                        </div>
+                                        {
+                                            complain.Stage === "1" || complain.Stage === "2" ?
+                                                <div className="col-md-12 mt-5">
+                                                    <div className="form-group">
+                                                        <label htmlFor="Staff">Staff</label>
+                                                        <SearchSelect
+                                                            name="Staff"
+                                                            value={complain.StaffID}
+                                                            onChange={onMainLecturerChange}
+                                                            options={staffList}
+                                                            placeholder="Select Staff"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                : <></>
+                                        }
+                                        <div className="col-md-12 mt-5">
+                                            <label htmlFor="StageDescription">Description</label>
+                                            <JoditEditor
+                                                value={complain.StageDescription}
+                                                ref={editorRef}
+                                                tabIndex={1}
+                                                onChange={onDescriptionChange}
+                                            />
+
+                                        </div>
+                                        <div className="col-md-12 mt-5">
+                                            <button disabled={complain.Status === "4" ? true : false} type="button" onClick={onSubmit} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading}>
+                                                <span className="indicator-label">{complain.Status === "4" ? "Complain Resolved" : "Submit"}</span>
+                                                <span className="indicator-progress">Please wait...
+                                                    <span className="spinner-border spinner-border-sm align-middle ms-2" />
+                                                </span>
+                                            </button>
+
+                                        </div>
 
                                     </div>
-                                    <div className="col-md-12 mt-5">
-                                        <button disabled={complain.Status === "4"?true: false} type="button" onClick={onSubmit} className="btn btn-primary w-100" id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading}>
-                                            <span className="indicator-label">{complain.Status === "4" ? "Complain Resolved":"Submit"}</span>
-                                            <span className="indicator-progress">Please wait...
-                                                <span className="spinner-border spinner-border-sm align-middle ms-2" />
-                                            </span>
-                                        </button>
-
-                                    </div>
-
-                                </div>
-                            </Modal>
+                                </Modal>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-    )
+    );
 }
+
 const mapStateToProps = (state) => {
     return {
         LoginDetails: state.LoginDetails,
         currentSemester: state.currentSemester
     };
 };
+
 export default connect(mapStateToProps, null)(ComplainList);

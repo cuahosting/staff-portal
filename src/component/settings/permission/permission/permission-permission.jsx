@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -9,7 +9,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import {formatDateAndTime} from "../../../../resources/constants";
 import {connect} from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 
 function PermissionPermission(props) {
     const token = props.loginData[0].token;

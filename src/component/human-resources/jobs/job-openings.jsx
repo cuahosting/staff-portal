@@ -6,7 +6,7 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import JobOpeningsForm from "./job-openings-form";
 import { encryptData, formatDate, formatDateAndTime, projectJobsURL } from "../../../resources/constants";
 

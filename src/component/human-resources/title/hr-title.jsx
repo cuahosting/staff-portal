@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -20,12 +20,12 @@ function HRTitle(props) {
                 field: "sn",
             },
             {
-                label: "Title Name",
-                field: "name",
-            },
-            {
                 label: "Action",
                 field: "action",
+            },
+            {
+                label: "Title Name",
+                field: "name",
             },
         ],
         rows: [],
@@ -202,36 +202,32 @@ function HRTitle(props) {
             <PageHeader
                 title={"Title"}
                 items={["Human Resources", "Others", "Title"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setCreate({
+                                ...create,
+                                title_name: "",
+                                entry_id: "",
+                            })
+                        }
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Add Title
+                    </button>
+                }
             />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setCreate({
-                                            ...create,
-                                            title_name: "",
-                                            entry_id: "",
-                                        })
-                                    }
-                                >
-                                    Add Title
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div className="card-body p-0">
-                        <Table data={datatable} />
+                        <AGTable data={datatable} />
                     </div>
                 </div>
                 <Modal title={"Bank Form"}>

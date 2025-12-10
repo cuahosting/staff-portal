@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import {serverLink} from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import AgReportTable from "../../../common/table/report_table";
+import AgReportTable from "../../../common/table/ReportTable";
 import {formatDateAndTime} from "../../../../resources/constants";
 
 function ExamGradeSettings(props) {

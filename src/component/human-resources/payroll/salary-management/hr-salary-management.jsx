@@ -9,7 +9,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
-import Select from 'react-select';
+import SearchSelect from "../../../common/select/SearchSelect";
 import { ProgressBar } from "react-bootstrap";
 
 function HrSalaryManagement(props) {
@@ -30,6 +30,10 @@ function HrSalaryManagement(props) {
             {
                 label: "S/N",
                 field: "sn",
+            },
+            {
+                label: "Action",
+                field: "action",
             },
             {
                 label: "Staff ID",
@@ -58,10 +62,6 @@ function HrSalaryManagement(props) {
             {
                 label: "Due Date",
                 field: "DueDate",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -746,9 +746,9 @@ function HrSalaryManagement(props) {
                 <div className="row mb-3">
                     <div className="col-md-6">
                         <label htmlFor="staff_select" className="form-label required">Select Staff</label>
-                        <Select
+                        <SearchSelect
                             isDisabled={createItem.entry_id !== ""}
-                            name="staff_select"
+                            id="staff_select"
                             value={createItem.staff}
                             onChange={handleStaffSelect}
                             options={staffSelect}
@@ -807,17 +807,13 @@ function HrSalaryManagement(props) {
                     </div>
                     <div className="col-md-6">
                         <label htmlFor="EmployeeType" className="form-label required">Employee Type</label>
-                        <select
+                        <SearchSelect
                             id="EmployeeType"
-                            onChange={onEdit}
-                            value={createItem.EmployeeType}
-                            className="form-select"
-                        >
-                            <option value="">Select employee type</option>
-                            <option value="Full-Time">Full-Time</option>
-                            <option value="Part-Time">Part-Time</option>
-                            <option value="Contract">Contract</option>
-                        </select>
+                            onChange={(selected) => onEdit({ target: { id: 'EmployeeType', value: selected?.value || '' } })}
+                            value={[{ label: 'Full-Time', value: 'Full-Time' }, { label: 'Part-Time', value: 'Part-Time' }, { label: 'Contract', value: 'Contract' }].find(op => op.value === createItem.EmployeeType) || null}
+                            options={[{ label: 'Full-Time', value: 'Full-Time' }, { label: 'Part-Time', value: 'Part-Time' }, { label: 'Contract', value: 'Contract' }]}
+                            placeholder="Select employee type"
+                        />
                     </div>
                 </div>
 
@@ -879,9 +875,9 @@ function HrSalaryManagement(props) {
                             <div className="row mb-3">
                                 <div className="col-md-12">
                                     <label className="form-label required">Select Staff Members</label>
-                                    <Select
+                                    <SearchSelect
                                         isMulti
-                                        name="bulk_staff"
+                                        id="bulk_staff"
                                         options={staffSelect}
                                         value={selectedStaff}
                                         onChange={handleBulkStaffSelect}
@@ -920,17 +916,13 @@ function HrSalaryManagement(props) {
                             <div className="row mb-3">
                                 <div className="col-md-12">
                                     <label htmlFor="EmployeeType" className="form-label required">Employee Type</label>
-                                    <select
+                                    <SearchSelect
                                         id="EmployeeType"
-                                        onChange={onBulkEdit}
-                                        value={bulkData.EmployeeType}
-                                        className="form-select"
-                                    >
-                                        <option value="">Select employee type</option>
-                                        <option value="Full-Time">Full-Time</option>
-                                        <option value="Part-Time">Part-Time</option>
-                                        <option value="Contract">Contract</option>
-                                    </select>
+                                        onChange={(selected) => onBulkEdit({ target: { id: 'EmployeeType', value: selected?.value || '' } })}
+                                        value={[{ label: 'Full-Time', value: 'Full-Time' }, { label: 'Part-Time', value: 'Part-Time' }, { label: 'Contract', value: 'Contract' }].find(op => op.value === bulkData.EmployeeType) || null}
+                                        options={[{ label: 'Full-Time', value: 'Full-Time' }, { label: 'Part-Time', value: 'Part-Time' }, { label: 'Contract', value: 'Contract' }]}
+                                        placeholder="Select employee type"
+                                    />
                                 </div>
                             </div>
 

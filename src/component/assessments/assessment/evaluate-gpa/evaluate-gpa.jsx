@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import axios from "axios";
-import {serverLink} from "../../../../resources/url";
-import {toast} from "react-toastify";
+import { serverLink } from "../../../../resources/url";
+import { toast } from "react-toastify";
 import 'react-circular-progressbar/dist/styles.css';
 // eslint-disable-next-line no-unused-vars
 import AgReportTable from "../../../common/table/AGReportTable";
-import {shortCode} from "../../../../resources/constants";
+import { shortCode } from "../../../../resources/constants";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 
 function EvaluateGPA(props) {
@@ -31,7 +32,9 @@ function EvaluateGPA(props) {
     const [modules, setModules] = useState([]);
     const [studentsCount, setStudentsCount] = useState([]);
     const [semesterList, setSemesterList] = useState([]);
-    const semesterCode  = semester.code;
+    const [semesterOptions, setSemesterOptions] = useState([]);
+    const [selectedSemester, setSelectedSemester] = useState(null);
+    const semesterCode = semester.code;
 
     const [counter, setCounter] = useState(0);
 
@@ -48,9 +51,10 @@ function EvaluateGPA(props) {
                     setStudentRegisteredModules(data.student_registered_module);
                     setModules(data.modules);
 
-                    setStudentsCount(data.result_entry_list.filter(function({StudentID, SemesterCode}) {
+                    setStudentsCount(data.result_entry_list.filter(function ({ StudentID, SemesterCode }) {
                         const key = `${StudentID}${SemesterCode}`;
-                        return !this.has(key) && this.add(key);}, new Set));
+                        return !this.has(key) && this.add(key);
+                    }, new Set));
 
                 } else {
                     toast.error("Something went wrong fetching data. Please try again!")
@@ -68,6 +72,12 @@ function EvaluateGPA(props) {
             .get(`${serverLink}registration/registration-report/semester-list/`, token)
             .then((response) => {
                 setSemesterList(response.data);
+                let options = [];
+                response.data.forEach(s => {
+                    const activeLabel = s.IsActive === '1' || s.IsActive === 1 ? ' (Active)' : '';
+                    options.push({ value: s.SemesterCode, label: `${s.SemesterCode} - ${s.Description}${activeLabel}` });
+                });
+                setSemesterOptions(options);
                 setIsLoading(false);
             })
             .catch((ex) => {
@@ -76,52 +86,53 @@ function EvaluateGPA(props) {
     };
 
     useEffect(() => {
-        getRecords().then(() => {});
-        getSemesters().then(() => {});
+        getRecords().then(() => { });
+        getSemesters().then(() => { });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleChange = async (e) => {
+    const handleChange = async (selected) => {
+        setSelectedSemester(selected);
         setSemester({
             ...semester,
-            [e.target.id]: e.target.value,
+            code: selected?.value || "",
         });
-    }
+    };
 
-    const getGradeWeight = (grade) =>{
+    const getGradeWeight = (grade) => {
         if (shortCode === 'BAUK' || shortCode === "AUM") {
-            if (grade === "A"){
+            if (grade === "A") {
                 return 5;
             }
-            if (grade === "B"){
+            if (grade === "B") {
                 return 4;
             }
-            if (grade === "C"){
+            if (grade === "C") {
                 return 3;
             }
-            if (grade === "D"){
+            if (grade === "D") {
                 return 2;
             }
-            if (grade === "E"){
+            if (grade === "E") {
                 return 1;
             }
-            if (grade === "F"){
+            if (grade === "F") {
                 return 0;
             }
         } else {
-            if (grade === "A"){
+            if (grade === "A") {
                 return 4;
             }
-            if (grade === "B"){
+            if (grade === "B") {
                 return 3;
             }
-            if (grade === "C"){
+            if (grade === "C") {
                 return 2;
             }
-            if (grade === "D"){
+            if (grade === "D") {
                 return 1;
             }
-            if (grade === "F"){
+            if (grade === "F") {
                 return 0;
             }
         }
@@ -129,10 +140,10 @@ function EvaluateGPA(props) {
     }
 
     const processGPA = async () => {
-        if (studentsCount.length > 0){
+        if (studentsCount.length > 0) {
             let counter_value = 0;
 
-            studentsCount.forEach( async student => {
+            for (const student of studentsCount) {
                 let CUE = 0;
                 let CUR = 0;
                 let WGP = 0;
@@ -186,29 +197,29 @@ function EvaluateGPA(props) {
                     }
 
                     if (sendData !== "undefined" && sendData !== null) {
-                        await axios.post(`${serverLink}staff/assessments/process/evaluation/data`, sendData, token)
-                            .then(res => {
-                                if (res.data.message === 'success') {
-                                    toast.success(`${student.StudentID} Evaluation successfully.`);
-                                } else {
-                                    toast.success(`${student.StudentID} Evaluation failed.`);
-                                }
-                            }).catch(err => {
-                                toast.error("Network Error. Please try again!");
-                            })
+                        try {
+                            const res = await axios.post(`${serverLink}staff/assessments/process/evaluation/data`, sendData, token);
+                            if (res.data.message === 'success') {
+                                toast.success(`${student.StudentID} Evaluation successfully.`);
+                            } else {
+                                toast.error(`${student.StudentID} Evaluation failed.`);
+                            }
+                        } catch (err) {
+                            toast.error("Network Error. Please try again!");
+                        }
                     }
 
                 }
                 counter_value += 1;
                 setCounter(counter_value);
-            });
+            }
 
             semester.code = "";
         }
     }
 
     return isLoading ? (
-        <Loader/>
+        <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
@@ -220,24 +231,15 @@ function EvaluateGPA(props) {
                 <div className="card card-no-border">
                     <div className="card-body p-0">
                         <div className="col-md-12 fv-row pt-10">
-                            <label className="required fs-6 fw-bold mb-2">
-                                Select Semester
-                            </label>
-                            <select
-                                className="form-select"
-                                data-placeholder="Select Semester"
+                            <SearchSelect
                                 id="code"
+                                label="Select Semester"
+                                value={selectedSemester}
+                                options={semesterOptions}
                                 onChange={handleChange}
-                                value={semester.code}
+                                placeholder="Select Semester"
                                 required
-                            >
-                                <option value="">Select option</option>
-                                {semesterList.map((s, i) => (
-                                    <option key={i} value={s.SemesterCode}>
-                                        {s.Description}
-                                    </option>
-                                ))}
-                            </select>
+                            />
                         </div>
                     </div>
                     <br />
@@ -245,25 +247,25 @@ function EvaluateGPA(props) {
                     {semester.code !== "" && (
                         <div className="card-body">
                             <div className="row">
-                                <div className="col-md-4 Remaining"><b style={{fontSize: '150px'}}>{counter}</b>
-                                    <hr/>
+                                <div className="col-md-4 Remaining"><b style={{ fontSize: '150px' }}>{counter}</b>
+                                    <hr />
                                     <p>Processed GPA</p>
                                 </div>
                                 <div className="col-md-4 Processed text-center text-uppercase">
-                                    <b style={{fontSize: '120px'}}>Of</b>
+                                    <b style={{ fontSize: '120px' }}>Of</b>
                                     <h3 className="student_name"></h3>
                                     <h3 className="percentage"></h3>
                                 </div>
                                 <div className="col-md-4 text-center">
-                                    <b style={{fontSize: '120px'}}>{studentsCount.length}</b>
-                                    <hr/>
+                                    <b style={{ fontSize: '120px' }}>{studentsCount.length}</b>
+                                    <hr />
                                     <p>Number of Students</p>
                                 </div>
                             </div>
                             {counter.length > 0 ? (
                                 <div className="alert alert-info">Refresh the page and evaluate GPA</div>
-                            ):(
-                                <button className="btn btn-primary w-100 run-progression" id="run-progression"  onClick={processGPA}>Evaluate GPA</button>
+                            ) : (
+                                <button className="btn btn-primary w-100 run-progression" id="run-progression" onClick={processGPA}>Evaluate GPA</button>
                             )}
                         </div>
                     )}

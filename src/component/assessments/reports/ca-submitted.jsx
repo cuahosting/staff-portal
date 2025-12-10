@@ -5,8 +5,8 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AGTable from "../../common/table/table";
-import Select from 'react-select';
+import AGTable from "../../common/table/AGTable";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function CASubmitted(props) {
     const token = props.LoginDetails[0].token;
@@ -65,7 +65,7 @@ function CASubmitted(props) {
                     let rows = []
                     if (result.data.length > 0) {
                         result.data.map((row) => {
-                            rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+                            rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
                         setSemesterOptions(rows)
@@ -78,7 +78,7 @@ function CASubmitted(props) {
         }
     }
 
-    const getTimetable =async(semester)=>{
+    const getTimetable = async (semester) => {
         setIsLoading(true)
         await axios.get(`${serverLink}staff/assessment/exam/ca-submitted/${semester}`, token)
             .then((result) => {
@@ -103,7 +103,7 @@ function CASubmitted(props) {
                     });
                     setIsLoading(false)
                     setshowBody(true)
-                }else{
+                } else {
                     setIsLoading(false);
                     toast.error('no record')
                     setshowBody(false)
@@ -149,11 +149,10 @@ function CASubmitted(props) {
                     <div className="card-body pt-2">
                         <div className="col-md-12">
                             {semesterList.length > 0 &&
-                                <div className="col-md-12 mb-4 form-group">
-                                    <label htmlFor="_Semester">Select Semester</label>
-                                    <Select
+                                <div className="col-md-12 mb-4">
+                                    <SearchSelect
                                         id="_Semester"
-                                        className="form-select form-select"
+                                        label="Select Semester"
                                         value={createSchedule.SemesterCode2}
                                         onChange={onSemesterChange}
                                         options={semesterOptions}

@@ -6,11 +6,8 @@ import Loader from "../../common/loader/loader";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux/es/exports";
-// eslint-disable-next-line no-unused-vars
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 import AGReportTable from "../../common/table/AGReportTable";
-import Select from 'react-select';
 
 
 function LecturerAssignment(props) {
@@ -40,7 +37,7 @@ function LecturerAssignment(props) {
     _Semester: "",
     _Semester2: ""
   })
-  const columns = ["ModuleCode", "ModuleName", "ModuleLevel", "ModuleSemester", "ModuleType", "SchoolSemester", "Action", "MainLecturer", "AlternateLecturer", "AlternateLecturer2",]
+  const columns = ["ModuleCode", "Action", "ModuleName", "ModuleLevel", "ModuleSemester", "ModuleType", "SchoolSemester", "MainLecturer", "AlternateLecturer", "AlternateLecturer2",]
   const [data, setData] = useState([])
   const [semesterList, setSemesterList] = useState([]);
 
@@ -51,7 +48,7 @@ function LecturerAssignment(props) {
           let rows = []
           if (result.data.length > 0) {
             result.data.forEach((row) => {
-              rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+              rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
             });
             setSemesterList(result.data);
             setSemesterOptions(rows)
@@ -88,11 +85,6 @@ function LecturerAssignment(props) {
           response.data.forEach((item, index) => {
             rows.push([
               item.ModuleCode,
-              item.ModuleName,
-              item.ModuleLevel,
-              item.ModuleSemester,
-              item.ModuleType,
-              item.SchoolSemester,
               <button
                 className="btn btn-sm btn-primary"
                 data-bs-toggle="modal"
@@ -115,8 +107,13 @@ function LecturerAssignment(props) {
                 }
                 }
               >
-                <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
+                <i style={{ fontSize: '15px', color: "blue" }} className="fa fa-pen color-blue" />
               </button>,
+              item.ModuleName,
+              item.ModuleLevel,
+              item.ModuleSemester,
+              item.ModuleType,
+              item.SchoolSemester,
               item.MainLecturerName,
               item.AlternateLecturerName,
               item.AlternateLecturer2Name
@@ -129,7 +126,7 @@ function LecturerAssignment(props) {
         else {
           toast.error('no record');
           setData(rows)
-         // setIsLoading(false)
+          // setIsLoading(false)
         }
 
       })
@@ -221,13 +218,12 @@ function LecturerAssignment(props) {
           {semesterList.length > 0 &&
             <div className="fv-row mb-6 enhanced-form-group">
               <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="_Semester">Select Semester</label>
-              <Select
-                  id="_Semester"
-                  className="form-select form-select"
-                  value={selectedModule._Semester2}
-                  onChange={onSemesterChange}
-                  options={semesterOptions}
-                  placeholder="select Semester"
+              <SearchSelect
+                id="_Semester"
+                value={selectedModule._Semester2}
+                onChange={onSemesterChange}
+                options={semesterOptions}
+                placeholder="select Semester"
               />
               {/*<select id="_Semester" onChange={onSemesterChange}*/}
               {/*  value={selectedModule._Semester}*/}
@@ -268,33 +264,37 @@ function LecturerAssignment(props) {
                 {
                   staffList.length > 0 &&
                   <>
-                    <div className="fv-row mb-6 enhanced-form-group mt-5">
-                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
-                        Main Lecturer
-                      </label>
-                      <Select
-                        name="MainLecturer"
+                    <div className="col-md-12">
+                      <SearchSelect
+                        id="MainLecturer"
+                        label="Main Lecturer"
                         value={selectedModule.MainLecturer}
                         onChange={onMainLecturerChange}
                         options={staff}
+                        placeholder="Select Main Lecturer"
+                        required
                       />
                     </div>
-                    <div className="fv-row mb-6 enhanced-form-group">
-                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">Supporting Lecturer 1</label>
-                      <Select
-                        name="AlternateLecturer"
+                    <div className="col-md-12">
+                      <SearchSelect
+                        id="AlternateLecturer"
+                        label="Supporting Lecturer 1"
                         value={selectedModule.AlternateLecturer}
                         onChange={onAltLecturer1Change}
                         options={staff}
+                        placeholder="Select Supporting Lecturer"
+                        required
                       />
                     </div>
-                    <div className="fv-row mb-6 enhanced-form-group">
-                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">Supporting Lecturer 2</label>
-                      <Select
-                        name="AlternateLecturer2"
+                    <div className="col-md-12">
+                      <SearchSelect
+                        id="AlternateLecturer2"
+                        label="Supporting Lecturer 2"
                         value={selectedModule.AlternateLecturer2}
                         onChange={onAltLecturer2Change}
                         options={staff}
+                        placeholder="Select Supporting Lecturer"
+                        required
                       />
                     </div>
                   </>

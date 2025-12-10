@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -354,7 +354,7 @@ function Inventory(props) {
                                         Add Item
                                     </button>
                                 </div>
-                                <Table data={inventoryDatatable} />
+                                <AGTable data={inventoryDatatable} />
                             </div>
                             <div className="tab-pane fade" id="inventory_usage" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -377,7 +377,7 @@ function Inventory(props) {
                                     {/*    Add Usage*/}
                                     {/*</button>*/}
                                 </div>
-                                <Table data={inventoryUsageDatatable} />
+                                <AGTable data={inventoryUsageDatatable} />
                             </div>
                         </div>
                     </div>

@@ -6,7 +6,7 @@ import PageHeader from "../../common/pageheader/pageheader";
 import AGReportTable from "../../common/table/AGReportTable";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
 
 const ByDepartment = (props) => {
@@ -130,7 +130,7 @@ const ByDepartment = (props) => {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Course
                       </label>
-                      <Select
+                      <SearchSelect
                         name="code"
                         value={departments.code2}
                         onChange={ondepartmentsChange}

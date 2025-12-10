@@ -5,14 +5,14 @@ import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
 import {toast} from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import Modal from "../../common/modal/modal";
 import {currencyConverter, formatDateAndTime} from "../../../resources/constants";
 
 function FinanceAccount(props) {
     const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["Account Name", "Account Type", "Added By", "Added Date", "Updated By", "Updated Date", "Action"];
+    const columns = ["S/N", "Action", "Account Name", "Account Type", "Added By", "Added Date", "Updated By", "Updated Date"];
     const [dataTable, setDataTable] = useState([]);
     const formDataVariable = {entry_id:'', account_name:'', account_type:'', inserted_by:props.LoginDetails[0].StaffID}
     const [formData, setFormData] = useState(formDataVariable)
@@ -23,14 +23,15 @@ function FinanceAccount(props) {
                 if (result.data.message === 'success') {
                     if (result.data.data.length > 0) {
                         let rows = [];
-                        result.data.data.map(item => {
-                            rows.push([item.AccountName, item.AccountType, item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date'), item.UpdatedBy, formatDateAndTime(item.UpdatedDate, 'date'),
+                        result.data.data.map((item, index) => {
+                            rows.push([index + 1,
                                 <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"
                                         onClick={()=>setFormData({
                                             ...formData,
                                             entry_id: item.EntryID, account_name: item.AccountName, account_type: item.AccountType
                                         })}
-                                >Edit Account <i className="fa fa-pen" /></button>
+                                ><i className="fa fa-pen" /></button>,
+                                item.AccountName, item.AccountType, item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date'), item.UpdatedBy, formatDateAndTime(item.UpdatedDate, 'date')
                             ]);
                         });
                         setDataTable(rows)
@@ -130,8 +131,13 @@ function FinanceAccount(props) {
                         <PageHeader
                             title={"ACCOUNT"}
                             items={["Human-Resources", "Finance & Budget", "Financial Accounts"]}
+                            buttons={
+                                <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"  onClick={()=>setFormData(formDataVariable)}>
+                                    <i className="fa fa-plus me-2"></i>
+                                    Add Account
+                                </button>
+                            }
                         />
-                        <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"  onClick={()=>setFormData(formDataVariable)}>Add Account <i className="fa fa-plus" /></button>
                         <div className="row col-md-12" style={{width:'100%'}}>
                             <ReportTable
                                 title={`Financial Accounts`}

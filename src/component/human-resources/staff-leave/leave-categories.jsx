@@ -3,7 +3,8 @@ import { useState } from "react";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import Modal from "../../common/modal/modal";
-import ReportTable from "../../common/table/report_table";
+import PageHeader from "../../common/pageheader/pageheader";
+import ReportTable from "../../common/table/ReportTable";
 import axios from 'axios'
 import { useEffect } from "react";
 import { toast } from "react-toastify";
@@ -14,7 +15,7 @@ const StaffLeaveCategories = (props) => {
     const token = props.loginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true)
-    const columns = ["SN", "Name", "Description", "Annual Days Allowed", "Casual Days Allowed", "InsertedBy", "Action"];
+    const columns = ["SN", "Action", "Name", "Description", "Annual Days Allowed", "Casual Days Allowed", "InsertedBy"];
     const [data, setData] = useState([]);
     // eslint-disable-next-line no-unused-vars
     const [leaveCategories, setLeaveCategories] = useState();
@@ -36,11 +37,6 @@ const StaffLeaveCategories = (props) => {
                     result.data.forEach((item, index) => {
                         rows.push([
                             index + 1,
-                            item.Name,
-                            item.Description,
-                            item.LeaveDaysAllowed,
-                            item.CasualDaysAllowed,
-                            item.InsertedBy,
                             (
                                 <button className="btn btn-sm btn-primary"
                                     data-bs-toggle="modal"
@@ -51,7 +47,12 @@ const StaffLeaveCategories = (props) => {
 
                                     <i className="fa fa-pen" />
                                 </button>
-                            )
+                            ),
+                            item.Name,
+                            item.Description,
+                            item.LeaveDaysAllowed,
+                            item.CasualDaysAllowed,
+                            item.InsertedBy
                         ])
                     })
                     setData(rows)
@@ -107,40 +108,43 @@ const StaffLeaveCategories = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     return isLoading ? (<Loader />) : (
-        <div className="card">
-            <div className="card-header border-0 pt-6">
-                <div className="card-title" ><h2>Leave Categories</h2></div>
+        <div className="d-flex flex-column flex-row-fluid">
+            <PageHeader
+                title="Leave Categories"
+                items={["Human Resources", "Staff Leave", "Leave Categories"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#leave"
+                        onClick={() => {
+                            setLeave({
+                                ...leave,
+                                Name: "",
+                                Description: "",
+                                LeaveDaysAllowed: "",
+                                CasualDaysAllowed: "",
+                                InsertedBy: props.InsertedBy,
+                                EntryID: ""
+                            })
+                        }}
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Add Category
+                    </button>
+                }
+            />
+            <div className="card">
+                <div className="card-header border-0 pt-6">
+                    <div className="card-title"><h2>Leave Categories</h2></div>
+                </div>
 
-                <div className="card-toolbar">
-                    <div
-                        className="d-flex justify-content-end"
-                        data-kt-customer-table-toolbar="base">
-                        <button
-                            type="button"
-                            className="btn btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#leave" onClick={() => {
-                                setLeave({
-                                    ...leave,
-                                    Name: "",
-                                    Description: "",
-                                    LeaveDaysAllowed: "",
-                                    CasualDaysAllowed: "",
-                                    InsertedBy: props.InsertedBy,
-                                    EntryID: ""
-                                })
-                            }}>
-                            Add Category
-                        </button>
+                <div className="card-body p-0">
+                    <div className="col-md-12" style={{ overflowX: 'auto' }}>
+                        <ReportTable data={data} columns={columns} height="700px" />
                     </div>
                 </div>
-            </div>
-
-            <div className="card-body p-0">
-                <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                    <ReportTable data={data} columns={columns} height="700px" />
-                </div>
-            </div>
 
             <Modal title={"Manage leave"} id={"leave"} close={"leave"}>
                 <form onSubmit={onSubmit} >
@@ -205,6 +209,7 @@ const StaffLeaveCategories = (props) => {
                     </div>
                 </form>
             </Modal>
+            </div>
         </div>
     )
 }

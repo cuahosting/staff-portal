@@ -6,7 +6,7 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import Loader from "../../../common/loader/loader";
 import { serverLink } from "../../../../resources/url";
 import AGReportTable from "../../../common/table/AGReportTable";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function TimeTableByCourse(props) {
   const token = props.login[0].token;
@@ -46,7 +46,7 @@ function TimeTableByCourse(props) {
           let rows = []
           if (response.data.length > 0) {
             response.data.forEach((row) => {
-              rows.push({value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode})
+              rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
             });
             setAllSemester(response.data);
             setSemesterOptions(rows)
@@ -174,14 +174,14 @@ function TimeTableByCourse(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select School Semester
                       </label>
-                      <Select
-                          name="schoolSemester"
-                          value={timetable.schoolSemester2}
-                          onChange={onSemesterChange}
-                          options={semesterOptions}
-                          placeholder="select Semester"
+                      <SearchSelect
+                        name="schoolSemester"
+                        value={timetable.schoolSemester2}
+                        onChange={onSemesterChange}
+                        options={semesterOptions}
+                        placeholder="select Semester"
                       />
-                      {/*<select*/}
+                      {/*<SearchSelect*/}
                       {/*  className="form-select"*/}
                       {/*  data-placeholder="Select school semester"*/}
                       {/*  id="schoolSemester"*/}

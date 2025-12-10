@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../common/pageheader/pageheader";
 import axios from "axios";
-import { serverLink} from "../../../resources/url";
+import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
-import {connect} from "react-redux";
-import { encryptData
+import { connect } from "react-redux";
+import {
+    encryptData
 } from "../../../resources/constants";
-import {formatDate} from "../../../resources/constants";
-import Select from "react-select";
-import {toast} from "react-toastify";
+import { formatDate } from "../../../resources/constants";
+import SearchSelect from "../../common/select/SearchSelect";
+import { toast } from "react-toastify";
 
 function UpdateStaffPassword(props) {
     const token = props.loginData[0].token;
@@ -46,10 +47,11 @@ function UpdateStaffPassword(props) {
                             FirstName: row.FirstName,
                             MiddleName: row.MiddleName,
                             Surname: row.Surname,
-                            label: `${row.FirstName} ${row.MiddleName} ${row.Surname} (${row.StaffID})`})
+                            label: `${row.FirstName} ${row.MiddleName} ${row.Surname} (${row.StaffID})`
+                        })
                     });
                     setStaff(_row)
-                }else{
+                } else {
                     showAlert(
                         "NOT FOUND",
                         "Record not found. Please try again!",
@@ -73,6 +75,7 @@ function UpdateStaffPassword(props) {
     };
 
     const onStaffChange = (e) => {
+        if (!e) return;
         setFormData({
             ...formData,
             StaffID: e.value,
@@ -98,19 +101,19 @@ function UpdateStaffPassword(props) {
 
         }
 
-        if (formData.Password.toString().toLowerCase() !== formData.ConfirmPassword.toString().toLowerCase()){
+        if (formData.Password.toString().toLowerCase() !== formData.ConfirmPassword.toString().toLowerCase()) {
             showAlert("ERROR", `Password did not match`, "error");
             return false;
         }
 
         setIsFormLoading('on')
 
-      let  sendData = {
+        let sendData = {
             ...formData,
             Password: encryptData(formData.Password)
         }
 
-        await axios.patch( `${serverLink}staff/staff-report/update-staff-password`, sendData, token ).then((res) => {
+        await axios.patch(`${serverLink}staff/staff-report/update-staff-password`, sendData, token).then((res) => {
             if (res.data.message === "success") {
                 toast.success("Staff Password Updated Successfully");
                 setFormData({
@@ -139,15 +142,15 @@ function UpdateStaffPassword(props) {
     };
 
 
-    useEffect(()=> {
+    useEffect(() => {
         getData();
     }, [])
 
 
-    useEffect(()=> {
-        if (formData.StaffID !== ""){
+    useEffect(() => {
+        if (formData.StaffID !== "") {
             setShowForm(true)
-        }else{
+        } else {
             setShowForm(false)
         }
     }, [formData.StaffID])
@@ -168,9 +171,9 @@ function UpdateStaffPassword(props) {
                         <div className="d-flex col-md-12">
                             <div className="col-md-12 pb-3">
                                 <label htmlFor="StaffID">Select Staff</label>
-                                <Select
+                                <SearchSelect
                                     id="StaffID"
-                                    name="StaffID"
+                                    label="Select Staff"
                                     value={formData.StaffID2}
                                     onChange={onStaffChange}
                                     options={staff}
@@ -214,7 +217,7 @@ function UpdateStaffPassword(props) {
                                             <button onClick={onSubmit} id="kt_modal_new_address_submit" data-kt-indicator={isFormLoading} className="btn btn-primary w-100">
                                                 <span className="indicator-label">Update</span>
                                                 <span className="indicator-progress">Please wait...
-                                                        <span className="spinner-border spinner-border-sm align-middle ms-2"/>
+                                                    <span className="spinner-border spinner-border-sm align-middle ms-2" />
                                                 </span>
                                             </button>
                                         </div>

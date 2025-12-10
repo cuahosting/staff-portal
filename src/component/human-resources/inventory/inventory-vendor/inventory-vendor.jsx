@@ -7,7 +7,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import InventoryVendorForm from "./inventory-vendor-form";
 function InventoryVendor(props) {
     let token = props.loginData[0].token
@@ -18,7 +18,7 @@ function InventoryVendor(props) {
         phone_number: '', email_address: '', submitted_by: '', updated_by: ''}
     const [formData, setFormData] = useState(initialValue);
 
-    const columns = ["S/N", "Vendor Name", "Email Address", "Phone Number", "Address", "Description", "Updated By", "Action"];
+    const columns = ["S/N", "Action", "Vendor Name", "Email Address", "Phone Number", "Address", "Description", "Updated By"];
     const [tableData,setTableData] = useState([]);
 
     const fetchData = async () => {
@@ -28,7 +28,7 @@ function InventoryVendor(props) {
                     const row = [];
                     if (res.data.response.length > 0) {
                         res.data.response.map((r, i) => {
-                            row.push([i+1, r.vendor_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by,
+                            row.push([i+1,
                                 (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -52,7 +52,8 @@ function InventoryVendor(props) {
                                     >
                                         <i className="fa fa-pen" />
                                     </button>
-                                )
+                                ),
+                                r.vendor_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by
                             ])
                         })
                         setTableData(row)
@@ -170,29 +171,28 @@ function InventoryVendor(props) {
         <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Inventory Vendor"} items={["Inventory", "Inventory Vendor"]} />
+            <PageHeader
+                title={"Inventory Vendor"}
+                items={["Inventory", "Inventory Vendor"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setFormData(initialValue)
+                        }
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Add Vendor
+                    </button>
+                }
+            />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setFormData(initialValue)
-                                    }
-                                >
-                                    Add Vendor
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div className="card-body p-0">
                         <ReportTable title={"Inventory Vendor"} columns={columns} data={tableData} />

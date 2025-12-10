@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../../resources/url";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { currencyConverter } from "../../../../resources/constants";
 
 function InventoryTrackStockMovementReport(props)

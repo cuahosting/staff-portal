@@ -1,21 +1,21 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
 import axios from "axios";
-import {serverLink} from "../../../../resources/url";
+import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
-import {connect} from "react-redux";
-import Select2 from "react-select2-wrapper";
+import { connect } from "react-redux";
+import SearchSelect from "../../../common/select/SearchSelect";
 import AgReportTable from "../../../common/table/AGReportTable";
-import {toast} from "react-toastify";
-import {showAlert} from "../../../common/sweetalert/sweetalert";
+import { toast } from "react-toastify";
+import { showAlert } from "../../../common/sweetalert/sweetalert";
 
 function CAFinalSubmission(props) {
     const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(false);
     const [runningModules, setRunningModules] = useState([]);
     const [caSubmissionDataTable, setCASubmissionDataTable] = useState([]);
-    const [createFindCARecord, setCreateFindCARecord] = useState({ModuleCode: ""});
-    const columns = ["S/N", "Module Code", "Module Name", "CA Name", "CA Contribution (100%)"];
+    const [createFindCARecord, setCreateFindCARecord] = useState({ ModuleCode: "" });
+    const columns = ["Module Code", "Module Name", "CA Name", "CA Contribution (100%)"];
     const [tableHeight, setTableHeight] = useState("200px");
     const [caSettingsList, setCASettingList] = useState([]);
     const [onSubmitItem, setOnSubmitItem] = useState([]);
@@ -26,9 +26,9 @@ function CAFinalSubmission(props) {
             .then((response) => {
                 let rows = [];
                 response.data.length > 0 &&
-                response.data.forEach((row) => {
-                    rows.push({text: `${row.ModuleName} (${row.ModuleCode})`, id: row.ModuleCode});
-                });
+                    response.data.forEach((row) => {
+                        rows.push({ label: `${row.ModuleName} (${row.ModuleCode})`, value: row.ModuleCode });
+                    });
 
                 setRunningModules(rows);
                 setIsLoading(false);
@@ -52,7 +52,7 @@ function CAFinalSubmission(props) {
             ModuleCode: e.target.value,
         }
 
-        if (sendData.ModuleCode !== ""){
+        if (sendData.ModuleCode !== "") {
             await axios
                 .get(`${serverLink}staff/assessments/get/ca/settings/${sendData.ModuleCode}/`, token)
                 .then((response) => {
@@ -62,13 +62,13 @@ function CAFinalSubmission(props) {
                         setCASettingList(data)
                         data.forEach((item, index) => {
                             let ca_score_field = <input type="number" step={0.01} className="form-control"
-                                                        placeholder="Enter CA Contribution"
-                                                        onChange={onEdit}
-                                                        module_code={item.ModuleCode}
-                                                        entry_id = {item.EntryID}
+                                placeholder="Enter CA Contribution"
+                                onChange={onEdit}
+                                module_code={item.ModuleCode}
+                                entry_id={item.EntryID}
                             />;
 
-                            rows.push([(index + 1), item.ModuleCode, item.ModuleName, item.CAName, ca_score_field])
+                            rows.push([item.ModuleCode, item.ModuleName, item.CAName, ca_score_field])
                         })
                         if (rows.length < 10) {
                             setTableHeight(`${rows.length}00`);
@@ -180,7 +180,7 @@ function CAFinalSubmission(props) {
 
 
     return isLoading ? (
-        <Loader/>
+        <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
@@ -190,21 +190,20 @@ function CAFinalSubmission(props) {
             <div className="row">
                 <div className="row pt-5">
                     <div className="col-lg-12 col-md-4 pt-5">
-                        <label htmlFor="ModuleCode">Select Module</label>
-                        <Select2
+                        <SearchSelect
                             id="ModuleCode"
-                            name="ModuleCode"
-                            value={createFindCARecord.ModuleCode}
-                            data={runningModules}
-                            onChange={findStudentsRegisteredModules}
-                            options={{placeholder: "Search Module",}}
+                            label="Select Module"
+                            value={runningModules.find(op => op.value === createFindCARecord.ModuleCode) || null}
+                            options={runningModules}
+                            onChange={(selected) => findStudentsRegisteredModules({ target: { id: 'ModuleCode', value: selected?.value || '' }, preventDefault: () => { } })}
+                            placeholder="Search Module"
                         />
                     </div>
                 </div>
             </div>
 
             {isLoading ? (
-                <Loader/>
+                <Loader />
             ) : (
                 <>
                     <div className="table-responsive pt-10">

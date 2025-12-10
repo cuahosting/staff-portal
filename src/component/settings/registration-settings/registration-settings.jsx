@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -281,7 +281,7 @@ function SemesterRegistrationSettings(props) {
             </div>
           </div>
           <div className="card-body p-0">
-            <Table data={registrationSettingsRecordDatatable} />
+            <AGTable data={registrationSettingsRecordDatatable} />
           </div>
         </div>
         <Modal title={"Semester Registration Settings Form"}>

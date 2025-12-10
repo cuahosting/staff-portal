@@ -7,12 +7,12 @@ import {toast} from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import {formatDate, formatDateAndTime} from "../../../resources/constants";
 import Modal from "../../common/modal/modal";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 
 function FinanceFinancialYear(props) {
     const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["S/N", "Year Start Date", "Year End Date", "Is Active", "Updated By", "Updated Date", "Action"];
+    const columns = ["S/N", "Action", "Year Start Date", "Year End Date", "Is Active", "Updated By", "Updated Date"];
     const [dataTable, setDataTable] = useState([]);
     const formDataVariable = {entry_id:'', start_date:'', end_date:'', inserted_by:props.LoginDetails[0].StaffID, is_active:0}
     const [formData, setFormData] = useState(formDataVariable);
@@ -24,18 +24,19 @@ function FinanceFinancialYear(props) {
                     if (result.data.data.length > 0) {
                         let rows = [];
                         result.data.data.map((item, index) => {
-                            rows.push([index+1, formatDateAndTime(item.StartDate, 'date'), formatDateAndTime(item.EndDate, 'date'), item.IsActive === 0 ? 'Not Active' : 'Active', item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date_and_time'),
+                            rows.push([index+1,
                                 <>
                                     <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"
                                             onClick={()=>setFormData({
                                                 ...formData,
                                                 entry_id: item.EntryID, start_date: formatDate(item.StartDate), end_date: formatDate(item.EndDate)
                                             })}
-                                    >Edit Year <i className="fa fa-pen" /></button>
+                                    ><i className="fa fa-pen" /></button>
                                     <button className={`btn btn-sm ${item.IsActive===0?'btn-info':'btn-danger'}`}
                                             onClick={()=>handleStatusChange(item.EntryID, item.IsActive, result.data.data)}
                                     >{item.IsActive===0?'Activate':'Deactivate'}</button>
-                                </>
+                                </>,
+                                formatDateAndTime(item.StartDate, 'date'), formatDateAndTime(item.EndDate, 'date'), item.IsActive === 0 ? 'Not Active' : 'Active', item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date_and_time')
                             ]);
                         });
                         setDataTable(rows)
@@ -147,10 +148,15 @@ function FinanceFinancialYear(props) {
                 <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width:'100%' }}>
                     <div className="">
                         <PageHeader
-                            title={"ACCOUNT"}
+                            title={"Financial Year"}
                             items={["Human-Resources", "Finance & Budget", "Financial Year"]}
+                            buttons={
+                                <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"  onClick={()=>setFormData(formDataVariable)}>
+                                    <i className="fa fa-plus me-2"></i>
+                                    Add Financial Year
+                                </button>
+                            }
                         />
-                        <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"  onClick={()=>setFormData(formDataVariable)}>Add Financial Year <i className="fa fa-plus" /></button>
                         <div className="row col-md-12" style={{width:'100%'}}>
                             <ReportTable
                                 title={`Financial Year`}

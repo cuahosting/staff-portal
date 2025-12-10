@@ -6,8 +6,8 @@ import Loader from "../../../common/loader/loader";
 // eslint-disable-next-line no-unused-vars
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
-import Select from "react-select"
+import ReportTable from "../../../common/table/ReportTable";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function CAEntryReport(props)
 {
@@ -93,7 +93,7 @@ function CAEntryReport(props)
                     <div className="col-lg-6 col-md-4 pt-0">
                         <label htmlFor="ModuleCode">Select Module {isFecthing === 'settings' && <span className="fw-bold"><i>&emsp;loading settings...</i></span>} </label>
 
-                        <Select
+                        <SearchSelect
                             name="ModuleCode"
                             // value={createFindCARecord.ModuleCode}
                             onChange={findCA}

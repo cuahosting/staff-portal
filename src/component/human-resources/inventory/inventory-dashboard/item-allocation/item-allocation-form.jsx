@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from "react";
-import Select from "react-select";
+import React, { useState, useEffect } from "react";
+import SearchSelect from "../../../../common/select/SearchSelect";
 import AGTable from "../../../../common/table/AGTable";
 
 
@@ -43,15 +43,14 @@ export default function ItemAllocationForm(props) {
                 props.data.show === 1 ?
                     <div className="form-group mb-4 col-md-12">
                         <AGTable data={datatable} paging={false} />
-                        <hr/>
+                        <hr />
                     </div>
                     : <></>
             }
             <div className="form-group mb-4 col-md-12">
                 <label htmlFor="VendorID">Select Inventory Item</label>
-                <Select
+                <SearchSelect
                     id="InventoryID"
-                    name="InventoryID"
                     value={props.data.ItemID2}
                     onChange={props.onItemChange}
                     options={props.inventory}
@@ -60,9 +59,8 @@ export default function ItemAllocationForm(props) {
             </div>
             <div className="form-group mb-4 col-md-12">
                 <label htmlFor="UserID">Select Staff</label>
-                <Select
+                <SearchSelect
                     id="UserID"
-                    name="UserID"
                     value={props.data.UserID2}
                     onChange={props.onStaffChange}
                     options={props.staff}
@@ -71,9 +69,8 @@ export default function ItemAllocationForm(props) {
             </div>
             <div className="form-group mb-4 col-md-12">
                 <label htmlFor="DepartmentCode">Select Department</label>
-                <Select
+                <SearchSelect
                     id="DepartmentCode"
-                    name="DepartmentCode"
                     value={props.data.DepartmentCode2}
                     onChange={props.onDepartmentChange}
                     options={props.department}
@@ -94,9 +91,8 @@ export default function ItemAllocationForm(props) {
             </div>
             <div className="form-group mb-4 col-md-12">
                 <label htmlFor="DepartmentCode">Select Storage Location</label>
-                <Select
+                <SearchSelect
                     id="LocationID"
-                    name="LocationID"
                     value={props.data.LocationID2}
                     onChange={props.onLocationChange}
                     options={props.location}
@@ -108,9 +104,9 @@ export default function ItemAllocationForm(props) {
                 <h2>Warning!</h2>
                 <p>Are you sure you want to allocate the following item to <b>{props.data.UserName}</b> ?</p>
                 <p>
-                    <b> ITEM NAME: </b> {props.data.ItemName} <br/>
-                    <b> QUANTITY:  </b> {props.data.Quantity} <br/>
-                    <b> STORE LOCATION:  </b> {props.data.LocationName} <br/>
+                    <b> ITEM NAME: </b> {props.data.ItemName} <br />
+                    <b> QUANTITY:  </b> {props.data.Quantity} <br />
+                    <b> STORE LOCATION:  </b> {props.data.LocationName} <br />
                 </p>
                 <p> Please note that once submitted, you can't delete or alter this record!</p>
             </div>
@@ -119,7 +115,7 @@ export default function ItemAllocationForm(props) {
                 <button onClick={props.onSubmit} id="kt_modal_new_address_submit" data-kt-indicator={props.isFormLoading} className="btn btn-primary w-100">
                     <span className="indicator-label">Submit</span>
                     <span className="indicator-progress">Please wait...
-                            <span className="spinner-border spinner-border-sm align-middle ms-2"/>
+                        <span className="spinner-border spinner-border-sm align-middle ms-2" />
                     </span>
                 </button>
             </div>

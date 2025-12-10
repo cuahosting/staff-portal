@@ -4,10 +4,9 @@ import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { connect } from "react-redux";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import PageHeader from "../../common/pageheader/pageheader";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
 const ActiveStudentListByCourse = (props) => {
   const token = props.login[0].token;
@@ -78,12 +77,11 @@ const ActiveStudentListByCourse = (props) => {
     const getCourseByStaff = async () => {
       axios
         .get(`${serverLink}student/student-report/course/list/`, token)
-        // .get(`${serverLink}staff/academics/timetable/modules-by-staff/${staffID}`, token)
         .then((response) => {
           let rows = [];
           response.data.length > 0 &&
             response.data.map((row) => {
-              rows.push({ text: row.CourseName, id: row.CourseCode });
+              rows.push({ value: row.CourseCode, label: row.CourseName });
             });
           setCourseList(rows);
           setIsLoading(false);
@@ -111,33 +109,17 @@ const ActiveStudentListByCourse = (props) => {
                 <form>
                   <div className="row fv-row">
                     <div className="col-md-12 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
-                        Select Course
-                      </label>
-                      <Select2
+                      <SearchSelect
                         id="courseCode"
-                        data={courseList}
-                        value={courseCode.courseCode}
-                        onSelect={handleChange}
-                        options={{
-                          placeholder: "Search Course Code",
+                        label="Select Course"
+                        value={courseList.find(c => c.value === courseCode.courseCode) || null}
+                        options={courseList}
+                        onChange={(selected) => {
+                          handleChange({ target: { id: 'courseCode', value: selected?.value || '' }, preventDefault: () => { } });
                         }}
-                      />
-                      {/* <select
-                        className="form-select"
-                        data-placeholder="Select Module"
-                        id="courseCode"
-                        onChange={handleChange}
-                        value={courseCode.courseCode}
+                        placeholder="Search Course Code"
                         required
-                      >
-                        <option value="">Select option</option>
-                        {courseList.map((c, i) => (
-                          <option key={i} value={c.CourseCode}>
-                            {c.CourseName}
-                          </option>
-                        ))}
-                      </select> */}
+                      />
                     </div>
                   </div>
                 </form>

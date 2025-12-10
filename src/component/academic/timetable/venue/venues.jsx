@@ -22,6 +22,10 @@ function VenueSettings(props) {
                 field: "VenueID",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Venue Name",
                 field: "VenueName",
             },
@@ -36,10 +40,6 @@ function VenueSettings(props) {
             {
                 label: "Capacity",
                 field: "Capacity",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -241,7 +241,7 @@ function VenueSettings(props) {
                                     InsertedBy: props.LoginDetails[0].StaffID
                                 })
                             }>
-                            Add Venue
+                            <i className="fa fa-plus me-2"></i>Add Venue
                         </button>
                     </div>
                 </div>

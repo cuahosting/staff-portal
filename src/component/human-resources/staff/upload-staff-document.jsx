@@ -7,19 +7,16 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import SimpleFileUpload from "react-simple-file-upload";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
-function UploadStaffDocument(props)
-{
+function UploadStaffDocument(props) {
   const token = props.loginData[0].token;
 
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
   const [addDocument, setAddDocument] = useState(false);
   const [staffDocuments, setStaffDocuments] = useState([]);
-  const addForm = () =>
-  {
+  const addForm = () => {
     setAddDocument(true);
     setAddStaffDocument({
       StaffID: "",
@@ -37,81 +34,65 @@ function UploadStaffDocument(props)
     InsertedDate: "",
   });
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     getStaff().then((r) => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const deleteItem = async (id, image) =>
-  {
-    if (id)
-    {
+  const deleteItem = async (id, image) => {
+    if (id) {
       toast.info(`Deleting... Please wait!`);
       await axios
         .delete(`${serverLink}application/pg/document/delete/${id}/${image}`, token)
-        .then((res) =>
-        {
-          if (res.data.message === "success")
-          {
+        .then((res) => {
+          if (res.data.message === "success") {
             // props.update_app_data();
             toast.success(`Deleted`);
-          } else
-          {
+          } else {
             toast.error(
               `Something went wrong. Please check your connection and try again!`
             );
           }
         })
-        .catch((error) =>
-        {
+        .catch((error) => {
           console.log("NETWORK ERROR", error);
         });
     }
   };
 
-  const getStaff = async () =>
-  {
+  const getStaff = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         let rows = [];
         response.data.length > 0 &&
-          response.data.map((row) =>
-          {
-            rows.push({ text: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname, id: row.StaffID });
+          response.data.map((row) => {
+            rows.push({ value: row.StaffID, label: row.StaffID + " -- " + row.FirstName + " " + row.MiddleName + " " + row.Surname });
           });
         setStaffList(rows);
         setIsLoading(false);
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
 
-  const getStaffDocument = async (staffId) =>
-  {
+  const getStaffDocument = async (staffId) => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/staff/document/`, staffId, token)
-      .then((response) =>
-      {
+      .then((response) => {
         setStaffDocuments(response.data);
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
 
 
-  const handlePassportUpload = async (url) =>
-  {
+  const handlePassportUpload = async (url) => {
     if (url !== '' && addStaffDocument.DocumentType !== '' && addStaffDocument.DocumentType.length > 0
       && addStaffDocument.InsertedDate !== '' && addStaffDocument.InsertedDate.length > 0
-      && addStaffDocument.InsertedBy !== '' && addStaffDocument.InsertedBy.length > 0)
-    {
+      && addStaffDocument.InsertedBy !== '' && addStaffDocument.InsertedBy.length > 0) {
       await showAlert("EMPTY FIELD", `All fields are required`, "error");
       return false;
     }
@@ -131,45 +112,36 @@ function UploadStaffDocument(props)
 
     // return false;
     await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/document`, sendData, token)
-      .then((res) =>
-      {
-        if (res.data.message === "success")
-        {
+      .then((res) => {
+        if (res.data.message === "success") {
           toast.success(`Document Uploaded`);
           setAddDocument(false);
 
-        } else
-        {
+        } else {
           toast.error(`Something went wrong submitting your document!`);
         }
       })
-      .catch((error) =>
-      {
+      .catch((error) => {
         console.log("Error", error);
       });
   }
 
-  const onSubmit = async (e) =>
-  {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    for (let key in addStaffDocument)
-    {
+    for (let key in addStaffDocument) {
       if (
         addStaffDocument.hasOwnProperty(key) &&
         key !== "InsertedBy" &&
         key !== "InsertedDate"
-      )
-      {
-        if (addStaffDocument[key] === "")
-        {
+      ) {
+        if (addStaffDocument[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
           return false;
         }
       }
     }
 
-    if (addStaffDocument.file.size / 1024 > 2048)
-    {
+    if (addStaffDocument.file.size / 1024 > 2048) {
       toast.error(`File Size Can't be more than 2MB`);
       return false;
     }
@@ -181,10 +153,8 @@ function UploadStaffDocument(props)
 
     await axios
       .post(`${serverLink}staff/hr/staff-management/uploadDocument`, formData, token)
-      .then((res) =>
-      {
-        if (res.data.type === "success")
-        {
+      .then((res) => {
+        if (res.data.type === "success") {
           const sendData = {
             StaffID: addStaffDocument.StaffID,
             DocumentType: addStaffDocument.DocumentType,
@@ -197,37 +167,30 @@ function UploadStaffDocument(props)
               `${serverLink}staff/hr/staff-management/upload/staff/document`,
               sendData, token
             )
-            .then((res) =>
-            {
-              if (res.data.message === "success")
-              {
+            .then((res) => {
+              if (res.data.message === "success") {
                 // props.update_app_data();
                 toast.success(`Document Uploaded`);
                 setAddDocument(false);
-              } else
-              {
+              } else {
                 toast.error(`Something went wrong submitting your document!`);
               }
             })
-            .catch((error) =>
-            {
+            .catch((error) => {
               console.log("Error", error);
             });
-        } else
-        {
+        } else {
           toast.error(
             `Something went wrong uploading your document. Please try again!`
           );
         }
       })
-      .catch((error) =>
-      {
+      .catch((error) => {
         console.log("NETWORK ERROR", error);
       });
   };
 
-  const onEdit = (e) =>
-  {
+  const onEdit = (e) => {
     const id = e.target.id;
     const value = id === "file" ? e.target.files[0] : e.target.value;
 
@@ -239,8 +202,7 @@ function UploadStaffDocument(props)
     getStaffDocument().then((r) => { });
   };
 
-  const handleStaffEdit = (e) =>
-  {
+  const handleStaffEdit = (e) => {
     setAddStaffDocument({
       ...addStaffDocument,
       [e.target.id]: e.target.value,
@@ -279,19 +241,21 @@ function UploadStaffDocument(props)
           {addDocument ? (
             <div className="row">
               <div className="col-lg-4 col-md-4">
-                <div className="form-group">
-                  <label htmlFor="DocumentType">StaffID</label>
-                  <Select2
-                    id="StaffID"
-                    value={addStaffDocument.StaffID}
-                    data={staffList}
-                    onSelect={handleStaffEdit}
-                    options={{
-                      placeholder: "Search staff",
-                    }}
-                  />
+                <SearchSelect
+                  id="StaffID"
+                  label="Staff ID"
+                  value={staffList.find(s => s.value === addStaffDocument.StaffID) || null}
+                  options={staffList}
+                  onChange={(selected) => {
+                    setAddStaffDocument({
+                      ...addStaffDocument,
+                      StaffID: selected?.value || '',
+                    });
+                  }}
+                  placeholder="Search staff"
+                />
 
-                  {/* <select
+                {/* <select
                     id="StaffID"
                     name="StaffID"
                     value={addStaffDocument.StaffID}
@@ -313,7 +277,6 @@ function UploadStaffDocument(props)
                       ""
                     )}
                   </select> */}
-                </div>
               </div>
               <div className="col-lg-4 col-md-4">
                 <div className="form-group">
@@ -422,12 +385,11 @@ function UploadStaffDocument(props)
           {/*</div>*/}
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails,
   };

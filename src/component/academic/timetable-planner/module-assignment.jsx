@@ -7,7 +7,7 @@ import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
-import Select from 'react-select'
+import SearchSelect from "../../common/select/SearchSelect";
 import { toast } from "react-toastify";
 import AGReportTable from "../../common/table/AGReportTable";
 
@@ -17,7 +17,7 @@ const ModuleAssignment = (props) => {
     const [courses, setCourses] = useState([]);
     const [modules, setModules] = useState([]);
     const [semesterList, setsemesterList] = useState([]);
-    const columns = ["SN", "ModuleCode", "Module Name", "ModuleLevel", "Module Semester", "ModuleType", "SchoolSemester", "IsApproved?", "action"];
+    const columns = ["SN", "action", "ModuleCode", "Module Name", "ModuleLevel", "Module Semester", "ModuleType", "SchoolSemester", "IsApproved?"];
     const [assignedModulesData, setAssignedModulesData] = useState([]);
     const [allModules, setAllModules] = useState([]);
 
@@ -31,7 +31,7 @@ const ModuleAssignment = (props) => {
         SchoolSemester: "",
         ModuleSemester: "",
         ModuleCode: "",
-        CreditUnit:"",
+        CreditUnit: "",
         ModuleName: "",
         ModuleType: "",
         Module: "",
@@ -79,7 +79,7 @@ const ModuleAssignment = (props) => {
         // }
         if (allModules.length > 0) {
             allModules.forEach((item) => {
-                rows.push({ value: item.ModuleCode+"-"+item.CreditUnit, label: item.ModuleCode + " -- " + item.ModuleName })
+                rows.push({ value: item.ModuleCode + "-" + item.CreditUnit, label: item.ModuleCode + " -- " + item.ModuleName })
             })
         } else {
             setAssignedModulesData([])
@@ -89,6 +89,7 @@ const ModuleAssignment = (props) => {
     }
 
     const onCourseChange = (e) => {
+        if (!e) return;
         setAssign({
             ...assign,
             Course: e,
@@ -99,12 +100,13 @@ const ModuleAssignment = (props) => {
     }
 
     const onModuleChnage = (e) => {
+        if (!e) return;
         setAssign({
             ...assign,
             Module: e,
             ModuleName: e.label.split(" -- ")[1],
             ModuleCode: e.value.split("-")[0],
-            CreditUnit : e.value.split("-")[1]
+            CreditUnit: e.value.split("-")[1]
         })
     }
 
@@ -160,13 +162,13 @@ const ModuleAssignment = (props) => {
             })
     }
 
-    const viewAssignedModules=()=>{
+    const viewAssignedModules = () => {
         toast.info("please wait...");
         setAssignedModulesData([]);
-        viewAssigned().then((res)=>{
-           
+        viewAssigned().then((res) => {
+
         });
-        
+
     }
     const viewAssigned = async () => {
         try {
@@ -177,23 +179,23 @@ const ModuleAssignment = (props) => {
                         result.data.forEach((item, index) => {
                             rows.push([
                                 index + 1,
+                                (<button className="btn btns-m btn-danger" onClick={() => { removeCourse(item.EntryID) }}>
+                                    <i style={{ fontSize: '15px', color: "red" }} className="fa fa-trash" />
+                                </button>),
                                 item.ModuleCode,
                                 item.ModuleName,
                                 item.ModuleLevel,
                                 item.ModuleSemester,
                                 item.ModuleType,
                                 item.SchoolSemester,
-                                <label className={item.isApproved===1 ? "badge badge-success": "badge badge-primary"}>
-                                    {item.isApproved===1 ? "Approved": "Not Approved"}
+                                <label className={item.isApproved === 1 ? "badge badge-success" : "badge badge-primary"}>
+                                    {item.isApproved === 1 ? "Approved" : "Not Approved"}
 
-                                </label>,
-                                (<button className="btn btns-m btn-danger" onClick={() => { removeCourse(item.EntryID) }}>
-                                    <i style={{ fontSize: '15px', color:"red" }} className="fa fa-trash" />
-                                </button>)
+                                </label>
                             ])
                         })
                     }
-                    else{
+                    else {
                         toast.error('no modules assigned yet')
                     }
                     setAssignedModulesData(rows)
@@ -219,135 +221,85 @@ const ModuleAssignment = (props) => {
                 <div className="card card-no-border">
                     <div className="row col-md-12 m-3 p-3">
                         <div className="col-md-3">
-                            <div className="fv-row mb-6 enhanced-form-group">
-                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="Level">
-                                    Module Level
-                                </label>
-                                <div className="enhanced-input-wrapper">
-                                    <select
-                                        className="form-control form-control-lg form-control-solid enhanced-input"
-                                        id="Level"
-                                        data-placeholder="Select option"
-                                        onChange={onEdit}
-                                    >
-                                        <option value="">Select option</option>
-                                        <option value="100">100 Level</option>
-                                        <option value="200">200 Level</option>
-                                        <option value="300">300 Level</option>
-                                        <option value="400">400 Level</option>
-                                        <option value="500">500 Level</option>
-                                        <option value="600">600 Level</option>
-                                        <option value="700">700 Level</option>
-                                        <option value="800">800 Level</option>
-                                        <option value="900">900 Level</option>
-                                    </select>
-                                </div>
-                            </div>
+                            <SearchSelect
+                                id="Level"
+                                label="Module Level"
+                                value={[{ value: "100", label: "100 Level" }, { value: "200", label: "200 Level" }, { value: "300", label: "300 Level" }, { value: "400", label: "400 Level" }, { value: "500", label: "500 Level" }, { value: "600", label: "600 Level" }, { value: "700", label: "700 Level" }, { value: "800", label: "800 Level" }, { value: "900", label: "900 Level" }].find(op => op.value === assign.Level) || null}
+                                options={[{ value: "100", label: "100 Level" }, { value: "200", label: "200 Level" }, { value: "300", label: "300 Level" }, { value: "400", label: "400 Level" }, { value: "500", label: "500 Level" }, { value: "600", label: "600 Level" }, { value: "700", label: "700 Level" }, { value: "800", label: "800 Level" }, { value: "900", label: "900 Level" }]}
+                                onChange={(selected) => onEdit({ target: { id: 'Level', value: selected?.value || '' }, preventDefault: () => { } })}
+                                placeholder="Select option"
+                                required
+                            />
                         </div>
                         <div className="col-md-3">
-                            <div className="fv-row mb-6 enhanced-form-group">
-                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="ModuleSemester">
-                                    Module Semester
-                                </label>
-                                <div className="enhanced-input-wrapper">
-                                    <select
-                                        className="form-control form-control-lg form-control-solid enhanced-input"
-                                        data-placeholder="Select Semester"
-                                        id="ModuleSemester"
-                                        onChange={onEdit}
-                                    >
-                                        <option value="">Select option</option>
-                                        <option value="First">First Semester</option>
-                                        <option value="Second">Second Semester</option>
-                                    </select>
-                                </div>
-                            </div>
+                            <SearchSelect
+                                id="ModuleSemester"
+                                label="Module Semester"
+                                value={[{ value: "First", label: "First Semester" }, { value: "Second", label: "Second Semester" }].find(op => op.value === assign.ModuleSemester) || null}
+                                options={[{ value: "First", label: "First Semester" }, { value: "Second", label: "Second Semester" }]}
+                                onChange={(selected) => onEdit({ target: { id: 'ModuleSemester', value: selected?.value || '' }, preventDefault: () => { } })}
+                                placeholder="Select Semester"
+                                required
+                            />
                         </div>
                         <div className="col-md-3">
-                            <div className="fv-row mb-6 enhanced-form-group">
-                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="ModuleType">
-                                    Module Type
-                                </label>
-                                <div className="enhanced-input-wrapper">
-                                    <select
-                                        className="form-control form-control-lg form-control-solid enhanced-input"
-                                        data-placeholder="Select Semester"
-                                        id="ModuleType"
-                                        onChange={onEdit}
-                                    >
-                                        <option value="">Select option</option>
-                                        <option value="Lecture">Lecture</option>
-                                        <option value="Interactive">Interactive</option>
-                                        <option value="Class">Class</option>
-                                        <option value="Workshop">Workshop</option>
-                                        <option value="Online">Online</option>
-                                        <option value="Seminar">Seminar</option>
-                                        <option value="Core">Core</option>
-                                    </select>
-                                </div>
-                            </div>
+                            <SearchSelect
+                                id="ModuleType"
+                                label="Module Type"
+                                value={[{ value: "Lecture", label: "Lecture" }, { value: "Interactive", label: "Interactive" }, { value: "Class", label: "Class" }, { value: "Workshop", label: "Workshop" }, { value: "Online", label: "Online" }, { value: "Seminar", label: "Seminar" }, { value: "Core", label: "Core" }].find(op => op.value === assign.ModuleType) || null}
+                                options={[{ value: "Lecture", label: "Lecture" }, { value: "Interactive", label: "Interactive" }, { value: "Class", label: "Class" }, { value: "Workshop", label: "Workshop" }, { value: "Online", label: "Online" }, { value: "Seminar", label: "Seminar" }, { value: "Core", label: "Core" }]}
+                                onChange={(selected) => onEdit({ target: { id: 'ModuleType', value: selected?.value || '' }, preventDefault: () => { } })}
+                                placeholder="Select Semester"
+                                required
+                            />
                         </div>
                         <div className="col-md-3">
-                            <div className="fv-row mb-6 enhanced-form-group">
-                                <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="SchoolSemester">
-                                    School Semester
-                                </label>
-                                <div className="enhanced-input-wrapper">
-                                    <select
-                                        className="form-control form-control-lg form-control-solid enhanced-input"
-                                        data-placeholder="Select Semester"
-                                        id="SchoolSemester"
-                                        onChange={onEdit}
-                                    >
-                                        <option value="">Select option</option>
-                                        {
-                                            semesterList.length > 0 &&
-                                            semesterList.map((x, y) => {
-                                                return (
-                                                    <option value={x.SemesterCode} key={y}>{x.SemesterName} -- {x.SemesterCode}</option>
-                                                )
-                                            })
-                                        }
-                                    </select>
-                                </div>
-                            </div>
+                            <SearchSelect
+                                id="SchoolSemester"
+                                label="School Semester"
+                                value={semesterList.map(x => ({ value: x.SemesterCode, label: `${x.SemesterName} -- ${x.SemesterCode}` })).find(op => op.value === assign.SchoolSemester) || null}
+                                options={semesterList.map(x => ({ value: x.SemesterCode, label: `${x.SemesterName} -- ${x.SemesterCode}` }))}
+                                onChange={(selected) => onEdit({ target: { id: 'SchoolSemester', value: selected?.value || '' }, preventDefault: () => { } })}
+                                placeholder="Select Semester"
+                                required
+                            />
                         </div>
                     </div>
 
-                    <div className="card-body p-0">
-                        <div className="fv-row mb-6 enhanced-form-group">
-                            <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="CourseCode">
-                                Course
-                            </label>
-                            <div className="col-md-12">
-                                <Select
+                    <div className="row col-md-12 m-3 p-3">
+                        <div className="col-md-12">
+                            <SearchSelect
+                                id="CourseCode"
+                                label="Course"
                                 isDisabled={assign.Level === "" || assign.ModuleSemester === "" || assign.SchoolSemester === "" || assign.ModuleType === "" ? true : false}
-                                    options={courses}
-                                    onChange={onCourseChange}
-                                    value={assign.Course}
+                                options={courses}
+                                onChange={onCourseChange}
+                                value={assign.Course}
+                                placeholder="Select Course"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {
+                        modules.length > 0 &&
+                        <div className="row col-md-12 m-3 p-3">
+                            <div className="col-md-6">
+                                <SearchSelect
+                                    options={modules}
+                                    onChange={onModuleChnage}
+                                    value={assign.Module}
+                                    placeholder="Select Module"
                                 />
                             </div>
-                        </div>
-
-                        {
-                            modules.length > 0 &&
-                            <div className="row col-md-12 mt-5 pt-5">
-                                <div className="col-md-6">
-                                    <Select
-                                        options={modules}
-                                        onChange={onModuleChnage}
-                                        value={assign.Module}
-                                    />
-                                </div>
-                                <div className="col-md-3">
-                                    <button className="btn btn-sm btn-primary" onClick={addModule}>Add Module</button>
-                                </div>
-                                <div className="col-md-3">
-                                    <button className="btn btn-sm btn-dark" onClick={viewAssignedModules}>View Assigned Modules</button>
-                                </div>
+                            <div className="col-md-3">
+                                <button className="btn btn-sm btn-primary" onClick={addModule}>Add Module</button>
                             </div>
-                        }
-                    </div>
+                            <div className="col-md-3">
+                                <button className="btn btn-sm btn-dark" onClick={viewAssignedModules}>View Assigned Modules</button>
+                            </div>
+                        </div>
+                    }
 
 
                 </div>
@@ -362,7 +314,7 @@ const ModuleAssignment = (props) => {
                         <AGReportTable columns={columns} data={assignedModulesData} /></>
                 }
             </div>
-        </div>
+        </div >
     )
 }
 

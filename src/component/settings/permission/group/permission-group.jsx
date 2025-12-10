@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -390,7 +390,7 @@ function PermissionGroup(props) {
                                         Add Group
                                     </button>
                                 </div>
-                                <Table data={groupDatatable} />
+                                <AGTable data={groupDatatable} />
                             </div>
                             
                             
@@ -408,7 +408,7 @@ function PermissionGroup(props) {
                                 </div>
 
                                 {
-                                    groupMemberDatatable.rows.length > 0 && <Table data={groupMemberDatatable} />
+                                    groupMemberDatatable.rows.length > 0 && <AGTable data={groupMemberDatatable} />
                                 }
 
                             </div>

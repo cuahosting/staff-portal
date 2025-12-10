@@ -5,9 +5,8 @@ import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
-import ReportTable from "../../common/table/report_table";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function StudentsConstactByLecturerModule(props) {
   const token = props.login[0].token;
@@ -38,9 +37,9 @@ function StudentsConstactByLecturerModule(props) {
         .then((response) => {
           let rows = [];
           response.data.length > 0 &&
-          response.data.map((row) => {
-            rows.push({ text: row.ModuleName + "--" + row.ModuleCode, id: row.ModuleCode});
-          });
+            response.data.map((row) => {
+              rows.push({ value: row.ModuleCode, label: row.ModuleName + " -- " + row.ModuleCode });
+            });
           setModuleList(rows);
           setIsLoading(false);
         })
@@ -110,15 +109,17 @@ function StudentsConstactByLecturerModule(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Module
                       </label>
-                      <Select2
-                    id="moduleCode"
-                    data={moduleList}
-                    value={module.moduleCode}
-                    onSelect={handleChange}
-                    options={{
-                      placeholder: "Search Module",
-                    }}
-                  />
+                      <SearchSelect
+                        id="moduleCode"
+                        label="Select Module"
+                        value={moduleList.find(m => m.value === module.moduleCode) || null}
+                        options={moduleList}
+                        onChange={(selected) => {
+                          handleChange({ target: { id: 'moduleCode', value: selected?.value || '' }, preventDefault: () => { } });
+                        }}
+                        placeholder="Search Module"
+                        required
+                      />
                       {/* <select
                         className="form-select"
                         data-placeholder="Select Module"

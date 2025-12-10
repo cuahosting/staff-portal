@@ -1,6 +1,6 @@
 import React from 'react'
 import Loader from "../../../common/loader/loader";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import JoditEditor from "jodit-react";
 import {sendEmail} from "../../../../resources/constants";
 

@@ -6,7 +6,7 @@ import axios from "axios";
 import {
     serverLink
 } from "../../../resources/url";
-import Select2 from "react-select2-wrapper";
+import SearchSelect from "../../common/select/SearchSelect";
 import { useQRCode } from 'next-qrcode';
 import { useReactToPrint } from "react-to-print";
 import { shortCode } from "../../../resources/constants";
@@ -68,8 +68,8 @@ function GenerateIDCard(props) {
                         let rows = [];
                         res.data.staff.forEach(item => {
                             rows.push({
-                                id: item.StaffID,
-                                text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StaffID})`
+                                value: item.StaffID,
+                                label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StaffID})`
                             })
                         })
                         setStaffList(rows);
@@ -90,8 +90,8 @@ function GenerateIDCard(props) {
                         let rows = [];
                         res.data.students.forEach(item => {
                             rows.push({
-                                id: item.StudentID,
-                                text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
+                                value: item.StudentID,
+                                label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
                             })
                         })
                         setStudentsList(rows);
@@ -169,17 +169,19 @@ function GenerateIDCard(props) {
 
                                     <div className="form-group pt-3">
                                         <label htmlFor="CardType">Select Card Type</label>
-                                        <select
-                                            className="form-control"
+                                        <SearchSelect
                                             id="CardType"
-                                            name="CardType"
-                                            value={createRequest.CardType}
-                                            onChange={onEdit}
-                                        >
-                                            <option value="">Select Option</option>
-                                            <option value="Staff">Staff</option>
-                                            <option value="Student">Student</option>
-                                        </select>
+                                            value={[
+                                                { value: "Staff", label: "Staff" },
+                                                { value: "Student", label: "Student" }
+                                            ].find(op => op.value === createRequest.CardType) || null}
+                                            onChange={(selected) => onEdit({ target: { id: 'CardType', value: selected?.value || '' } })}
+                                            options={[
+                                                { value: "Staff", label: "Staff" },
+                                                { value: "Student", label: "Student" }
+                                            ]}
+                                            placeholder="Select Option"
+                                        />
                                     </div>
 
                                     {contentToRender === true && createRequest.CardType === "Staff" && (
@@ -188,16 +190,14 @@ function GenerateIDCard(props) {
                                                 <>
                                                     <div className="form-group pt-3">
                                                         <label htmlFor="UserID">Select Staff</label>
-                                                        <Select2
+                                                        <SearchSelect
                                                             id="UserID"
                                                             name="UserID"
-                                                            data={staffList}
-                                                            value={createRequest.UserID}
+                                                            options={staffList}
+                                                            value={staffList.find(op => op.value === createRequest.UserID) || null}
                                                             className={"form-control"}
-                                                            onSelect={onEdit}
-                                                            options={{
-                                                                placeholder: "Search Staff",
-                                                            }}
+                                                            onChange={(selected) => onEdit({ target: { id: "UserID", value: selected?.value || "" } })}
+                                                            placeholder="Search Staff"
                                                         />
                                                     </div >
                                                 </>
@@ -212,16 +212,14 @@ function GenerateIDCard(props) {
 
                                                     <div className="form-group pt-3">
                                                         <label htmlFor="UserID">Select Student</label>
-                                                        <Select2
+                                                        <SearchSelect
                                                             id="UserID"
                                                             name="UserID"
-                                                            data={studentsList}
-                                                            value={createRequest.UserID}
+                                                            options={studentsList}
+                                                            value={studentsList.find(op => op.value === createRequest.UserID) || null}
                                                             className={"form-control"}
-                                                            onSelect={onEdit}
-                                                            options={{
-                                                                placeholder: "Search Student",
-                                                            }}
+                                                            onChange={(selected) => onEdit({ target: { id: "UserID", value: selected?.value || "" } })}
+                                                            placeholder="Search Student"
                                                         />
 
                                                     </div>
@@ -260,7 +258,7 @@ function GenerateIDCard(props) {
                                     )}
                                     <br />
                                 </div>
-                                
+
 
                                 <div className="col-md-6">
 
@@ -281,13 +279,13 @@ function GenerateIDCard(props) {
                                                 data={data}
                                             />
                                             :
-                                        <BAUStaffIdCard
-                                            renderIDCard={renderIDCard}
-                                            createRequest={createRequest}
-                                            selectedStaff={selectedStaff}
-                                            componentRef={componentRef}
-                                            data={data}
-                                        />
+                                            <BAUStaffIdCard
+                                                renderIDCard={renderIDCard}
+                                                createRequest={createRequest}
+                                                selectedStaff={selectedStaff}
+                                                componentRef={componentRef}
+                                                data={data}
+                                            />
 
                                     }
 
@@ -310,13 +308,13 @@ function GenerateIDCard(props) {
                                                     data={data}
                                                 />
                                                 :
-                                            <BAUStudentIdCard
-                                                renderIDCard={renderIDCard}
-                                                createRequest={createRequest}
-                                                selectedStudent={selectedStudent}
-                                                componentRef={componentRef}
-                                                data={data}
-                                            />
+                                                <BAUStudentIdCard
+                                                    renderIDCard={renderIDCard}
+                                                    createRequest={createRequest}
+                                                    selectedStudent={selectedStudent}
+                                                    componentRef={componentRef}
+                                                    data={data}
+                                                />
                                     }
                                 </div>
                             </div>

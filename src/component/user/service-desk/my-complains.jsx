@@ -7,7 +7,7 @@ import axios from 'axios'
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import { useEffect } from "react";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import { formatDateAndTime, shortCode } from "../../../resources/constants";
 import * as DOMPurify from 'dompurify';
 

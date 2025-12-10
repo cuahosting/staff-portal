@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
+import SearchSelect from "../../../common/select/SearchSelect";
 import AgReportTable from "../../../common/table/AGReportTable";
 import CATemplate from "./CA_template.csv"
 
@@ -34,7 +34,7 @@ function ExamCAEntry(props) {
                 let rows = [];
                 response.data.length > 0 &&
                     response.data.forEach((row) => {
-                        rows.push({ text: `${row.ModuleName} (${row.ModuleCode})`, id: row.ModuleCode });
+                        rows.push({ value: row.ModuleCode, label: `${row.ModuleName} (${row.ModuleCode})` });
                     });
                 setRunningModules(rows);
                 setIsLoading(false);
@@ -260,41 +260,29 @@ function ExamCAEntry(props) {
             <div className="row">
                 <div className="row pt-5">
                     <div className="col-lg-6 col-md-4 pt-5">
-                        <label htmlFor="ModuleCode">Select Module</label>
-                        <Select2
+                        <SearchSelect
                             id="ModuleCode"
-                            name="ModuleCode"
-                            value={createFindCARecord.ModuleCode}
-                            data={runningModules}
-                            onChange={findCA}
-                            options={{ placeholder: "Search Module", }}
+                            label="Select Module"
+                            value={runningModules.find(m => m.value === createFindCARecord.ModuleCode) || null}
+                            options={runningModules}
+                            onChange={(selected) => {
+                                findCA({ target: { id: 'ModuleCode', value: selected?.value || '' } });
+                            }}
+                            placeholder="Search Module"
                         />
                     </div>
 
                     <div className="col-lg-6 col-md-4 pt-5">
-                        <div className="form-group">
-                            <label htmlFor="SettingsID">Select CA</label>
-                            <select
-                                id="SettingsID"
-                                name="SettingsID"
-                                value={createFindCARecord.SettingsID}
-                                className="form-control"
-                                onChange={findStudentsRegisteredModules}
-                            >
-                                <option value="">Select Option</option>
-                                {caRecord.length > 0 ? (
-                                    <>
-                                        {caRecord.map((item, index) => {
-                                            return (
-                                                <option key={index} value={item.EntryID}>{item.CAName}</option>
-                                            );
-                                        })}
-                                    </>
-                                ) : (
-                                    ""
-                                )}
-                            </select>
-                        </div>
+                        <SearchSelect
+                            id="SettingsID"
+                            label="Select CA"
+                            value={caRecord.length > 0 ? caRecord.filter(c => c.EntryID === parseInt(createFindCARecord.SettingsID)).map(c => ({ value: c.EntryID.toString(), label: c.CAName }))[0] : null}
+                            options={caRecord.map(item => ({ value: item.EntryID.toString(), label: item.CAName }))}
+                            onChange={(selected) => {
+                                findStudentsRegisteredModules({ target: { value: selected?.value || '' }, preventDefault: () => { } });
+                            }}
+                            placeholder="Select CA"
+                        />
                     </div>
                     <div className="col-lg-6 col-md-4 pt-5">
                         <label htmlFor="ModuleCode">Upload File (<small><a className="text-primary italic" target="_blank" rel="noopener noreferrer" href={CATemplate}>Click to donwload template</a></small>)</label>

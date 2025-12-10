@@ -7,8 +7,8 @@ import { serverLink } from "../../../resources/url";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
-import ReportTable from "../../common/table/report_table";
-import Select from 'react-select';
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
 import { formatDate, formatDateAndTime } from "../../../resources/constants";
@@ -21,7 +21,7 @@ const StaffLeaveApplications = (props) => {
 
     const editorRef = React.createRef();
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["SN", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage", "Action"];
+    const columns = ["SN", "Action", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage"];
     const [data, setData] = useState([]);
     let [leaveForm, setLeaveForm] = useState(false)
     const [leaveCategory, setLeaveCategory] = useState([]);
@@ -67,21 +67,6 @@ const StaffLeaveApplications = (props) => {
                             let annual = result.data.filter(x => x.LeaveType === 'Main' && x.ApplicationStatus === 1);
                             rows.push([
                                 index + 1,
-                                item.StaffID + "--" + item.StaffName,
-                                item.LeaveType,
-                                formatDateAndTime(item.StartDate, "date"),
-                                formatDateAndTime(item.EndDate, "date"),
-                                item.DaysTaken,
-                                formatDateAndTime(item.ResumptionDate, "date"),
-                                <label className={item.ActionStage === 0 ? "badge badge-secondary"
-                                    : item.ActionStage === 1 ? "badge badge-primary"
-                                        : item.ActionStage === 2 ? "badge badge-info"
-                                            : item.ActionStage === 3 ? "badge badge-success"
-                                                : "badge badge-danger"}>
-                                    {
-                                        item.ActionStage === 0 ? "Pending Approval" : item.ActionStage === 1 ? "Approved" : item.ActionStage === 2 ? "Started" : item.ActionStage === 3 ? "Completed" : "Denied"
-                                    }
-                                </label>,
                                 <button className="btn btn-sm btn-primary"
                                     data-bs-target="#leave" data-bs-toggle="modal"
                                     onClick={async () => {
@@ -118,7 +103,22 @@ const StaffLeaveApplications = (props) => {
                                         }
                                     }} >
                                     <i className="fa fa-pen" />
-                                </button>
+                                </button>,
+                                item.StaffID + "--" + item.StaffName,
+                                item.LeaveType,
+                                formatDateAndTime(item.StartDate, "date"),
+                                formatDateAndTime(item.EndDate, "date"),
+                                item.DaysTaken,
+                                formatDateAndTime(item.ResumptionDate, "date"),
+                                <label className={item.ActionStage === 0 ? "badge badge-secondary"
+                                    : item.ActionStage === 1 ? "badge badge-primary"
+                                        : item.ActionStage === 2 ? "badge badge-info"
+                                            : item.ActionStage === 3 ? "badge badge-success"
+                                                : "badge badge-danger"}>
+                                    {
+                                        item.ActionStage === 0 ? "Pending Approval" : item.ActionStage === 1 ? "Approved" : item.ActionStage === 2 ? "Started" : item.ActionStage === 3 ? "Completed" : "Denied"
+                                    }
+                                </label>
                             ])
                         })
                     }
@@ -346,11 +346,14 @@ const StaffLeaveApplications = (props) => {
                         <form onSubmit={onSubmit} >
                             <div className="form-group">
                                 <label htmlFor="LeaveType">LeaveType</label>
-                                <select disabled className="form-select" id="LeaveType" onChange={onEdit} value={leave.LeaveType}>
-                                    <option value={""}>-select leave type-</option>
-                                    <option value={"Main"}>Main</option>
-                                    <option value={"Casual"}>Causal</option>
-                                </select>
+                                <SearchSelect
+                                    id="LeaveType"
+                                    value={[{ label: 'Main', value: 'Main' }, { label: 'Casual', value: 'Casual' }].find(op => op.value === leave.LeaveType) || null}
+                                    options={[{ label: 'Main', value: 'Main' }, { label: 'Casual', value: 'Casual' }]}
+                                    isDisabled={true}
+                                    onChange={(selected) => onEdit({ target: { id: 'LeaveType', value: selected?.value || '' } })}
+                                    placeholder="-select leave type-"
+                                />
                             </div>
                             <br />
                             <div className="row ">
@@ -397,12 +400,13 @@ const StaffLeaveApplications = (props) => {
                             <br />
                             <div className="form-group">
                                 <label htmlFor="ReliefStaffID">Relief Staff</label>
-                                <Select
+                                <SearchSelect
+                                    id="ReliefStaffID"
                                     isDisabled={true}
-                                    name="staffID"
                                     value={leave.ReliefStaffID2}
                                     onChange={onStaffChange}
                                     options={StaffList}
+                                    placeholder="Select Relief Staff"
                                 />
                             </div>
                             <br />
@@ -414,11 +418,13 @@ const StaffLeaveApplications = (props) => {
                             <br />
                             <div className="form-group">
                                 <label htmlFor="ApplicationStatus">Decision</label>
-                                <select className="form-select" id="ApplicationStatus" onChange={onEdit}>
-                                    <option value={""}>-select decision-</option>
-                                    <option value={1}>Approve</option>
-                                    <option value={2}>Deny</option>
-                                </select>
+                                <SearchSelect
+                                    id="ApplicationStatus"
+                                    value={[{ label: 'Approve', value: 1 }, { label: 'Deny', value: 2 }].find(op => op.value === parseInt(leave.ApplicationStatus)) || null}
+                                    options={[{ label: 'Approve', value: 1 }, { label: 'Deny', value: 2 }]}
+                                    onChange={(selected) => onEdit({ target: { id: 'ApplicationStatus', value: selected?.value || '' } })}
+                                    placeholder="-select decision-"
+                                />
                             </div>
                             <br />
                             <div className="form-group">

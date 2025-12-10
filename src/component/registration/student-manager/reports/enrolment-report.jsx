@@ -3,7 +3,7 @@ import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../../common/loader/loader";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { encryptData, formatDate, formatDateAndTime } from "../../../../resources/constants";
 import { Link } from "react-router-dom";
 

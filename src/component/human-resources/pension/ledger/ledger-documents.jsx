@@ -13,7 +13,7 @@ function LedgerDocuments(props) {
     const token = props.LoginDetails[0].token
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState("off");
-    const columns = ["SN", "Document Type", "Inserted By", "Inserted Date", "Action"]
+    const columns = ["SN", "Action", "Document Type", "Inserted By", "Inserted Date"]
     const [data, setData] = useState([])
 
     const [documentTypes, setCreateDocumentType] = useState({
@@ -29,9 +29,6 @@ function LedgerDocuments(props) {
                 res.data.map((x, i) => {
                     rows.push([
                         i + 1,
-                        x.DocumentType,
-                        x.InsertedBy,
-                        formatDateAndTime(x.InsertedDate, "date"),
                         <button
                             className="btn btn-sm btn-primary"
                             data-bs-toggle="modal"
@@ -44,7 +41,10 @@ function LedgerDocuments(props) {
                                 })
                             }} >
                             <i className="fa fa-pen-alt" /> Edit
-                        </button>
+                        </button>,
+                        x.DocumentType,
+                        x.InsertedBy,
+                        formatDateAndTime(x.InsertedDate, "date")
                     ])
                 })
                 setData(rows)

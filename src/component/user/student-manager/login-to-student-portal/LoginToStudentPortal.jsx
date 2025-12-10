@@ -6,16 +6,13 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink, serverStatus } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../../common/select/SearchSelect";
 import { useForm } from "react-hook-form";
-import
-  {
-    encryptData,
-    projectStudentURL,
-  } from "../../../../resources/constants";
-function LoginToStudentPortal(props)
-{
+import {
+encryptData,
+projectStudentURL,
+} from "../../../../resources/constants";
+function LoginToStudentPortal(props) {
   const token = props.loginData.token;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -27,66 +24,54 @@ function LoginToStudentPortal(props)
     EmailAddress: "",
   });
   const [studentList, setStudentList] = useState([]);
-  const loginToPortal = async (data) =>
-  {
-    if (selectedStudent.StudentID === "")
-    {
+  const loginToPortal = async (data) => {
+    if (selectedStudent.StudentID === "") {
       toast.error("Please specify student ID");
       return;
     }
     let encryptedId = encryptData(selectedStudent.StudentID);
     let newWindow;
-    if (serverStatus === "Dev")
-    {
+    if (serverStatus === "Dev") {
       newWindow = window.open(`http://localhost:3001/login-from-staff/${encryptedId}`, '_blank', 'noopener,noreferrer')
-    } else
-    {
+    } else {
       newWindow = window.open(`${projectStudentURL}/login-from-staff/${encryptedId}`, '_blank', 'noopener,noreferrer')
     }
 
     if (newWindow) newWindow.opener = null
 
   };
-  const getStudentDetails = async () =>
-  {
+  const getStudentDetails = async () => {
     await axios
       .get(`${serverLink}staff/student-manager/student/active`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         const result = response.data;
-        if (result.length > 0)
-        {
+        if (result.length > 0) {
           let rows = [];
-          result.map((item) =>
-          {
+          result.map((item) => {
             rows.push({
-              id: item.StudentID,
-              text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
+              value: item.StudentID,
+              label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
             });
           });
           setStudentSelectList(rows);
         }
         setStudentList(result);
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
 
-  const handleChange = (e) =>
-  {
+  const handleChange = (e) => {
     const filter_student = studentList.filter(
-      (i) => i.StudentID === e.target.value
+      (i) => i.StudentID === e.value
     );
-    if (filter_student.length > 0)
-    {
+    if (filter_student.length > 0) {
       selectedStudent.StudentID = filter_student[0].StudentID;
     }
   };
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     getStudentDetails();
   }, []);
   return isLoading ? (
@@ -104,13 +89,11 @@ function LoginToStudentPortal(props)
               <div className="row">
                 <div className="col">
                   <label htmlFor="roomNumber">Student ID</label>
-                  <Select2
-                    defaultValue={selectedStudent.StudentID}
-                    data={studentSelectList}
+                  <SearchSelect
+                    value={studentSelectList.find(op => op.value === selectedStudent.StudentID) || null}
                     onChange={handleChange}
-                    options={{
-                      placeholder: "Search Student",
-                    }}
+                    options={studentSelectList}
+                    placeholder="Search Student"
                   />
                 </div>
                 <div className="col">
@@ -127,8 +110,7 @@ function LoginToStudentPortal(props)
   );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails[0],
   };

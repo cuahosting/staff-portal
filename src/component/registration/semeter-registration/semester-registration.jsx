@@ -1,14 +1,13 @@
 import axios from "axios";
-import React, {useEffect, useState} from "react";
-import {toast} from "react-toastify";
-import {serverLink} from "../../../resources/url";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import {connect} from "react-redux";
-import {Link} from "react-router-dom";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import ReportTable from "../../common/table/report_table";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import SearchSelect from "../../common/select/SearchSelect";
+import ReportTable from "../../common/table/ReportTable";
 
 function SemesterRegistration(props) {
     const token = props.loginData[0].token;
@@ -17,7 +16,7 @@ function SemesterRegistration(props) {
     const [activeSemester, setActiveSemester] = useState([])
     const [studentList, setStudentList] = useState([]);
     const [studentSelectList, setStudentSelectList] = useState([]);
-    const [selectedStudent, setSelectedStudent] = useState({StudentID: '', CourseCode: '', StudentLevel: '', StudentSemester: ''})
+    const [selectedStudent, setSelectedStudent] = useState({ StudentID: '', CourseCode: '', StudentLevel: '', StudentSemester: '' })
     const [studentData, setStudentData] = useState({
         moduleList: [],
         registrationList: [],
@@ -44,8 +43,8 @@ function SemesterRegistration(props) {
                     let rows = [];
                     result.map(item => {
                         rows.push({
-                            id: item.StudentID,
-                            text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
+                            value: item.StudentID,
+                            label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
                         })
                     })
                     setStudentSelectList(rows);
@@ -65,7 +64,7 @@ function SemesterRegistration(props) {
             CourseCode: student_row.CourseCode
         }
 
-        await axios.post(`${serverLink}staff/registration/student/registration/data`,sendData, token)
+        await axios.post(`${serverLink}staff/registration/student/registration/data`, sendData, token)
             .then(res => {
                 const result = res.data;
                 let rows = [];
@@ -90,14 +89,14 @@ function SemesterRegistration(props) {
                             const filter_reg_module = registered_module.filter(i => i.ModuleCode === module_code && i.SemesterCode === activeSemester[0].SemesterCode);
                             if (filter_reg_module.length > 0) {
                                 filter_reg_module.map(item => {
-                                    credit_load += running_module.filter(i => i.ModuleCode === item.ModuleCode).reduce((n, {CreditLoad}) => n + CreditLoad, 0);
+                                    credit_load += running_module.filter(i => i.ModuleCode === item.ModuleCode).reduce((n, { CreditLoad }) => n + CreditLoad, 0);
                                     // setCreditLoad(running_module.filter(i => i.ModuleCode === item.ModuleCode).reduce((n, {CreditLoad}) => n + CreditLoad, 0))
                                 })
                                 status = <span className="badge badge-success">Registered</span>
-                                reg_btn = <input type="checkbox" defaultChecked={true} onChange={handleCheck} value={module_code} id="Registered" name={item.CreditLoad}/>
+                                reg_btn = <input type="checkbox" defaultChecked={true} onChange={handleCheck} value={module_code} id="Registered" name={item.CreditLoad} />
                             } else {
                                 status = <span className="badge badge-primary">Fresh</span>
-                                reg_btn = <input type="checkbox" onChange={handleCheck} value={module_code} id="Fresh" name={item.CreditLoad}/>
+                                reg_btn = <input type="checkbox" onChange={handleCheck} value={module_code} id="Fresh" name={item.CreditLoad} />
                             }
 
                             const filter_result = student_result.filter(i => i.ModuleCode === module_code);
@@ -108,14 +107,14 @@ function SemesterRegistration(props) {
                                     reg_btn = <i className="fa fa-check" />
                                 } else {
                                     status = <span className="badge badge-danger">Resit</span>
-                                    if (filter_reg_module.length  > 0)
-                                        reg_btn = <input type="checkbox" defaultChecked={true} onChange={handleCheck} value={module_code} id="Resit" name={item.CreditLoad}/>
+                                    if (filter_reg_module.length > 0)
+                                        reg_btn = <input type="checkbox" defaultChecked={true} onChange={handleCheck} value={module_code} id="Resit" name={item.CreditLoad} />
                                     else
-                                        reg_btn = <input type="checkbox" onChange={handleCheck} value={module_code} id="Resit" name={item.CreditLoad}/>
+                                        reg_btn = <input type="checkbox" onChange={handleCheck} value={module_code} id="Resit" name={item.CreditLoad} />
                                 }
                             }
 
-                            rows.push([(index+1), item.ModuleCode, item.ModuleName, item.CourseCode, item.CourseLevel, item.CourseSemester, item.CreditLoad, item.ModuleType, reg_btn, status])
+                            rows.push([(index + 1), item.ModuleCode, item.ModuleName, item.CourseCode, item.CourseLevel, item.CourseSemester, item.CreditLoad, item.ModuleType, reg_btn, status])
                         })
                         setCreditLoad(credit_load)
                         creditLoad = credit_load
@@ -163,7 +162,7 @@ function SemesterRegistration(props) {
             inserted_by: props.loginData[0].StaffID
         }
         if (sendData.action === 'add') {
-            const student_load = creditLoad+parseInt(e.target.name);
+            const student_load = creditLoad + parseInt(e.target.name);
             if (student_load > activeSemester[0].MaxCreditLoad) {
                 toast.error(`Student's credit load (${student_load}) can't exceed the maximum allowed (${activeSemester[0].MaxCreditLoad}).`)
                 return false;
@@ -224,31 +223,28 @@ function SemesterRegistration(props) {
 
 
     return isLoading ? (
-        <Loader/>
+        <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
                 title={`${activeSemester.length > 0 ? activeSemester[0].SemesterCode : ''} Semester Registration`}
-                items={["Registration", "Semester Registration"]}/>
+                items={["Registration", "Semester Registration"]} />
             <div className="row">
                 {activeSemester.length > 0 ? (
                     <>
                         <div className="register">
                             <div className="row mb-5">
                                 <div className="col-lg-12 col-md-12 pt-5">
-                                    <div className="form-group">
-                                        <label htmlFor="StudentID">Select Student</label>
-                                        <Select2
-                                            id="StudentID"
-                                            defaultValue={selectedStudent.StudentID}
-                                            data={studentSelectList}
-                                            onSelect={handleChange}
-                                            options={{
-                                                placeholder: "Search Student",
-                                            }}
-                                        />
-
-                                    </div>
+                                    <SearchSelect
+                                        id="StudentID"
+                                        label="Select Student"
+                                        value={studentSelectList.find(s => s.value === selectedStudent.StudentID) || null}
+                                        options={studentSelectList}
+                                        onChange={(selected) => {
+                                            handleChange({ target: { value: selected?.value || '' } });
+                                        }}
+                                        placeholder="Search Student"
+                                    />
                                 </div>
                             </div>
                             {

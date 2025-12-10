@@ -3,7 +3,7 @@ import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../../common/loader/loader";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { EmailTemplates, formatDateAndTime, sendEmail } from "../../../../resources/constants";
 import { Link } from "react-router-dom";
 import Modal from "../../../common/modal/modal";
@@ -24,7 +24,7 @@ const EnrolmentList = (props) => {
     const [departmentList, setDepartmentList] = useState(
         props.DepartmentList.length > 0 ? props.DepartmentList : []
     )
-    const columns = ["Name", "Email", "Position", "Department", "Faculty", "Applied On", "Status", "ConfirmationStatus", "Action"]
+    const columns = ["SN", "Action", "Name", "Email", "Position", "Department", "Faculty", "Applied On", "Status", "ConfirmationStatus"]
     const [data, setData] = useState([])
     const [designations, setDesignations] = useState([]);
     const [staffList, setStaffList] = useState([]);
@@ -200,26 +200,7 @@ const EnrolmentList = (props) => {
                     let rows = [];
                     result.data.map((item, index) => {
                         rows.push([
-                            item.FirstName + " " + item.MiddleName + " " + item.Surname,
-                            item.EmailAddress,
-                            item.Position,
-                            departmentList?.filter(x => x.DepartmentCode.toLowerCase() === item.Department?.toLowerCase())[0]?.DepartmentName,
-                            facultyList?.filter(x => x.FacultyCode.toLowerCase() === item.Faculty?.toLowerCase())[0]?.FacultyName,
-                            formatDateAndTime(item.InsertDate, "date"),
-                            <label className={
-                                item.Status === "0" ? "badge badge-secondary" :
-                                    item.Status === "1" ? "badge badge-info" :
-                                        item.Status === "2" ? "badge badge-danger" : "badge badge-success"
-                            }>{
-                                    item.Status === "0" ? "Pending" :
-                                        item.Status === "1" ? "Invited" :
-                                            item.Status === "2" ? "Rejected" : "Accepted"
-                                }</label>,
-                            <label className={
-                                item.ConfirmationStatus === "0" ? "badge badge-secondary" : "badge badge-success"
-                            }>{
-                                    item.ConfirmationStatus === "0" ? "Not Confirmed" : "Confirmed"
-                                }</label>,
+                            index + 1,
                             <button
                                 className="btn btn-sm btn-primary"
                                 data-bs-toggle="modal"
@@ -275,7 +256,27 @@ const EnrolmentList = (props) => {
                                 }
                             >
                                 <i className="fa fa-pen" />
-                            </button>
+                            </button>,
+                            item.FirstName + " " + item.MiddleName + " " + item.Surname,
+                            item.EmailAddress,
+                            item.Position,
+                            departmentList?.filter(x => x.DepartmentCode.toLowerCase() === item.Department?.toLowerCase())[0]?.DepartmentName,
+                            facultyList?.filter(x => x.FacultyCode.toLowerCase() === item.Faculty?.toLowerCase())[0]?.FacultyName,
+                            formatDateAndTime(item.InsertDate, "date"),
+                            <label className={
+                                item.Status === "0" ? "badge badge-secondary" :
+                                    item.Status === "1" ? "badge badge-info" :
+                                        item.Status === "2" ? "badge badge-danger" : "badge badge-success"
+                            }>{
+                                    item.Status === "0" ? "Pending" :
+                                        item.Status === "1" ? "Invited" :
+                                            item.Status === "2" ? "Rejected" : "Accepted"
+                                }</label>,
+                            <label className={
+                                item.ConfirmationStatus === "0" ? "badge badge-secondary" : "badge badge-success"
+                            }>{
+                                    item.ConfirmationStatus === "0" ? "Not Confirmed" : "Confirmed"
+                                }</label>
                         ])
                     })
                     setData(rows)

@@ -20,16 +20,16 @@ function HRNationality(props) {
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Nationality Title",
                 field: "title",
             },
             {
                 label: "Country",
                 field: "country",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -48,16 +48,16 @@ function HRNationality(props) {
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "State Name",
                 field: "state",
             },
             {
                 label: "Country",
                 field: "country",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -95,6 +95,10 @@ function HRNationality(props) {
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "LGA Name",
                 field: "lga",
             },
@@ -105,10 +109,6 @@ function HRNationality(props) {
             {
                 label: "Country",
                 field: "country",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -625,6 +625,7 @@ function HRNationality(props) {
                                             })
                                         }
                                     >
+                                        <i className="fa fa-plus me-2"></i>
                                         Add Nationality
                                     </button>
                                 </div>
@@ -639,6 +640,7 @@ function HRNationality(props) {
                                         className="btn btn-primary"
                                         onClick={toggleAddState}
                                     >
+                                        <i className="fa fa-plus me-2"></i>
                                         Add State
                                     </button>
                                 </div>
@@ -684,6 +686,7 @@ function HRNationality(props) {
                                         className="btn btn-primary"
                                         onClick={toggleAddLga}
                                     >
+                                        <i className="fa fa-plus me-2"></i>
                                         Add LGA
                                     </button>
                                 </div>

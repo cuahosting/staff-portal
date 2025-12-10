@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { formatDateAndTime } from "../../../../resources/constants";
 import {
   CommentsDisabledOutlined,
@@ -14,8 +14,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function HostelAllocationForm(props) {
   const token = props.loginData.token;
@@ -53,7 +52,7 @@ function HostelAllocationForm(props) {
           setreadyToShow2(true);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
   const getStudentList = async () => {
     await axios
@@ -65,8 +64,8 @@ function HostelAllocationForm(props) {
           let rows = [];
           result.map((item) => {
             rows.push({
-              id: `${item.StudentID}?${item.Gender}?${item.StudentName}`,
-              text: `${item.StudentName} (${item.StudentID})`,
+              value: `${item.StudentID}?${item.Gender}?${item.StudentName}`,
+              label: `${item.StudentName} (${item.StudentID})`,
             });
           });
 
@@ -98,7 +97,7 @@ function HostelAllocationForm(props) {
           setId(val.split("?")[0]);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
   const clearItems = () => {
     setreadyToShow(false);
@@ -165,83 +164,57 @@ function HostelAllocationForm(props) {
                 <h3>
                   {StudentName} {id}
                 </h3>
-                <Select2
+                <SearchSelect
                   id="StudentID"
-                  value={studentSelectList.id}
-                  data={studentSelectList}
-                  onSelect={getHostelFor}
-                  options={{
-                    placeholder: "Search Student",
+                  label="Select Student"
+                  value={studentSelectList.find(s => s.value === id + "?" + gender + "?" + StudentName) || null}
+                  options={studentSelectList}
+                  onChange={(selected) => {
+                    getHostelFor({ target: { value: selected?.value || '' }, preventDefault: () => { } });
                   }}
+                  placeholder="Search Student"
                 />
-                {/* <select
-                  id="hostelFor"
-                  {...register("student")}
-                  required
-                  onChange={getHostelFor}
-                  className="form-control"
-                >
-                  <option value="">Select Student</option>
-                  {studentList.map((item) => (
-                    <option
-                      value={`${item.StudentID}?${item.Gender}`}
-                      key={item.StudentID}
-                    >
-                      {`${item.StudentName} - (${item.StudentID})`}
-                    </option>
-                  ))}
-                </select> */}
+
               </div>
               {readyToShow && (
                 <div className="form-group pt-5">
-                  <label htmlFor="hostelFor">
-                    Hostel for {`${gender}`} students
-                  </label>
-                  <select
+                  <SearchSelect
                     id="hostelFor"
-                    onChange={getBedOnChange}
+                    label={`Hostel for ${gender} students`}
+                    value={hostelFloorList.map(h => ({ value: `${h.EntryID}?${h.FloorName}?${h.HostelID}`, label: `${h.HostelName} (${h.FloorName} Floor)` })).find(h => h.value.includes(hostelId))}
+                    options={hostelFloorList.map((item) => ({
+                      value: `${item.EntryID}?${item.FloorName}?${item.HostelID}`,
+                      label: `${item.HostelName} (${item.FloorName} Floor) `
+                    }))}
+                    onChange={(selected) => getBedOnChange({ target: { value: selected?.value || '' } })}
+                    placeholder="Select Hostel"
                     required
-                    className="form-control"
-                  >
-                    <option value="">Select Hostel</option>
-                    {hostelFloorList.map((item) => (
-                      <option
-                        //roomid?floor?hostelid
-                        value={`${item.EntryID}?${item.FloorName}?${item.HostelID}`}
-                        key={item.EntryID}
-                      >
-                        {`${item.HostelName} (${item.FloorName} Floor) `}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               )}
 
               {readyToShow2 && (
                 <>
                   <div className="form-group pt-5">
-                    <label htmlFor="hostelFor">Select Bed</label>
-                    <select
-                      id="hostelFor"
-                      onChange={(e) =>
-                        setBedandRoom({
-                          bedID: e.target.value.split("?")[0],
-                          roomID: e.target.value.split("?")[1],
-                        })
-                      }
+                    <SearchSelect
+                      id="bedSelection"
+                      label="Select Bed"
+                      value={bedList.map(b => ({ value: `${b.EntryID}?${b.RoomID}?${b.RoomNo}?${b.BedNo}`, label: b.RoomBed })).find(b => b.value.includes(bedAndRoom.bedID))}
+                      options={bedList.map((item) => ({
+                        value: `${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`,
+                        label: `${item.RoomBed}`
+                      }))}
+                      onChange={(selected) => {
+                        if (selected) {
+                          setBedandRoom({
+                            bedID: selected.value.split("?")[0],
+                            roomID: selected.value.split("?")[1],
+                          })
+                        }
+                      }}
+                      placeholder="Select Bed"
                       required
-                      className="form-control"
-                    >
-                      <option value="">Select Bed</option>
-                      {bedList.map((item) => (
-                        <option
-                          value={`${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`}
-                          key={item.RoomBed}
-                        >
-                          {`${item.RoomBed}`}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   {/* <div className="form-group pt-5">
                     <label htmlFor="hostelFor">Semester</label>

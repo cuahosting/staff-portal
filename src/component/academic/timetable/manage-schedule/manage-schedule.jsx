@@ -4,12 +4,10 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import { connect } from "react-redux";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import {toast} from "react-toastify";
-import {useParams} from "react-router-dom";
-import {useNavigate} from "react-router";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
+import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 function ManageTimetableSchedule(props) {
   const token = props.loginData[0].token;
@@ -19,13 +17,19 @@ function ManageTimetableSchedule(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [item, setItem] = useState({
     SemesterCode: "",
-    SemesterCode2: "",
+    SemesterCode2: null,
     ModuleCode: "",
+    ModuleCode2: null,
     StartTime: "",
+    StartTime2: null,
     EndTime: "",
+    EndTime2: null,
     ModuleType: "",
+    ModuleType2: null,
     DayName: "",
+    DayName2: null,
     VenueID: "",
+    VenueID2: null,
     EntryID: "",
     InsertedBy: props.loginData[0].StaffID
   });
@@ -52,15 +56,43 @@ function ManageTimetableSchedule(props) {
   })
   const [canSubmit, setCanSubmit] = useState(false)
 
+  // Static options for dropdowns
+  const moduleTypeOptions = [
+    { value: 'Lecture', label: 'Lecture' },
+    { value: 'Interactive', label: 'Interactive' },
+    { value: 'Class', label: 'Class' },
+    { value: 'Workshop', label: 'Workshop' },
+    { value: 'Online', label: 'Online' },
+    { value: 'Seminar', label: 'Seminar' },
+  ];
+
+  const dayOptions = [
+    { value: 'Monday', label: 'Monday' },
+    { value: 'Tuesday', label: 'Tuesday' },
+    { value: 'Wednesday', label: 'Wednesday' },
+    { value: 'Thursday', label: 'Thursday' },
+    { value: 'Friday', label: 'Friday' },
+    { value: 'Saturday', label: 'Saturday' },
+  ];
+
+  const timeOptions = schedule_time.map(t => ({ value: t, label: `${t}:00` }));
+
   const resetItem = () => {
     setItem({
       SemesterCode: "",
+      SemesterCode2: null,
       ModuleCode: "",
+      ModuleCode2: null,
       StartTime: "",
+      StartTime2: null,
       EndTime: "",
+      EndTime2: null,
       ModuleType: "",
+      ModuleType2: null,
       DayName: "",
+      DayName2: null,
       VenueID: "",
+      VenueID2: null,
       EntryID: "",
       InsertedBy: props.loginData[0].StaffID
     })
@@ -73,7 +105,7 @@ function ManageTimetableSchedule(props) {
         let rows = []
         if (res.data.length > 0) {
           res.data.forEach((row) => {
-            rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+            rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
           });
           setTimetableSemester(res.data);
           setSemesterOptions(rows)
@@ -89,7 +121,7 @@ function ManageTimetableSchedule(props) {
         let rows = [];
         res.data.length > 0 &&
           res.data.forEach((row) => {
-            rows.push({ text: `${row.ModuleName} (${row.ModuleCode})`, id: row.ModuleCode });
+            rows.push({ value: row.ModuleCode, label: `${row.ModuleName} (${row.ModuleCode})` });
           });
         setModuleList(rows);
       })
@@ -105,8 +137,8 @@ function ManageTimetableSchedule(props) {
         res.data.length > 0 &&
           res.data.forEach((row) => {
             rows.push({
-              text: `${row.CampusName} => ${row.BlockName} => ${row.VenueName}`,
-              id: row.VenueID,
+              value: row.VenueID,
+              label: `${row.CampusName} => ${row.BlockName} => ${row.VenueName}`,
             });
           });
 
@@ -123,7 +155,7 @@ function ManageTimetableSchedule(props) {
         let rows = [];
         res.data.length > 0 &&
           res.data.forEach((row) => {
-            rows.push({ text: row.GroupName, id: row.EntryID });
+            rows.push({ value: row.EntryID, label: row.GroupName });
           });
         setGroupList(rows);
       })
@@ -138,8 +170,8 @@ function ManageTimetableSchedule(props) {
         res.data.length > 0 &&
           res.data.forEach((row) => {
             rows.push({
-              text: `${row.StaffName} (${row.StaffID})`,
-              id: row.StaffID,
+              value: row.StaffID,
+              label: `${row.StaffName} (${row.StaffID})`,
             });
           });
         setStaffList(rows);
@@ -162,41 +194,53 @@ function ManageTimetableSchedule(props) {
     }
     else {
       await axios
-          .get(`${serverLink}staff/timetable/timetable/single/${slug}`, token)
-          .then((res) => {
-            const data = res.data;
-            if (data.timetable.length > 0) {
-              setItem({
-                SemesterCode: data.timetable[0].SemesterCode,
-                ModuleCode: data.timetable[0].ModuleCode,
-                StartTime: data.timetable[0].StartTime,
-                EndTime: data.timetable[0].EndTime,
-                ModuleType: data.timetable[0].ModuleType,
-                DayName: data.timetable[0].DayName,
-                VenueID: data.timetable[0].VenueID,
-                EntryID: data.timetable[0].EntryID,
-              })
-            }
+        .get(`${serverLink}staff/timetable/timetable/single/${slug}`, token)
+        .then((res) => {
+          const data = res.data;
+          if (data.timetable.length > 0) {
+            const tt = data.timetable[0];
+            setItem({
+              SemesterCode: tt.SemesterCode,
+              SemesterCode2: { value: tt.SemesterCode, label: tt.SemesterCode },
+              ModuleCode: tt.ModuleCode,
+              ModuleCode2: { value: tt.ModuleCode, label: tt.ModuleCode },
+              StartTime: tt.StartTime,
+              StartTime2: { value: tt.StartTime, label: `${tt.StartTime}:00` },
+              EndTime: tt.EndTime,
+              EndTime2: { value: tt.EndTime, label: `${tt.EndTime}:00` },
+              ModuleType: tt.ModuleType,
+              ModuleType2: { value: tt.ModuleType, label: tt.ModuleType },
+              DayName: tt.DayName,
+              DayName2: { value: tt.DayName, label: tt.DayName },
+              VenueID: tt.VenueID,
+              VenueID2: { value: tt.VenueID, label: tt.VenueID },
+              EntryID: tt.EntryID,
+            })
+          }
 
-            const staff = data.staff;
-            if (staff.length > 0) {
-              staff.forEach(st => {
-                timetableStaff.push(st.StaffID)
-              })
-            }
+          const staff = data.staff;
+          if (staff.length > 0) {
+            const staffValues = staff.map(st => ({
+              value: st.StaffID,
+              label: st.StaffID
+            }));
+            setTimetableStaff(staffValues);
+          }
 
-            const group = data.group;
-            if (group.length > 0) {
-              group.forEach(st => {
-                timetableGroup.push(parseInt(st.GroupID))
-              })
-            }
+          const group = data.group;
+          if (group.length > 0) {
+            const groupValues = group.map(st => ({
+              value: parseInt(st.GroupID),
+              label: st.GroupID
+            }));
+            setTimetableGroup(groupValues);
+          }
 
-            setIsLoading(false);
-          })
-          .catch((err) => {
-            console.log("NETWORK ERROR FETCHING RUNNING MODULE");
-          });
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.log("NETWORK ERROR FETCHING RUNNING MODULE");
+        });
     }
   };
 
@@ -240,73 +284,78 @@ function ManageTimetableSchedule(props) {
       toast.error('Please select venue');
       return false
     }
-    if (timetableStaff.length < 1) {
+
+    const staffIds = timetableStaff.map(s => s.value);
+    const groupIds = timetableGroup.map(g => g.value);
+
+    if (staffIds.length < 1) {
       toast.error('Please select schedule lecturer(s)');
       return false
     }
-    if (timetableGroup.length < 1) {
+    if (groupIds.length < 1) {
       toast.error("Please select schedule student group(s)");
       return false
     }
     toast.info('Submitting... Please wait!');
 
-    timetableStaff.forEach(async (staff, index) => {
+    staffIds.forEach(async (staff, index) => {
       const sendRecord = {
         schedule: item,
-        group: timetableGroup,
+        group: groupIds,
         staff: staff,
       }
 
       await axios.post(`${serverLink}staff/timetable/schedule/check/conflict/staff`, sendRecord, token)
+        .then(res => {
+          const data = res.data
+          if (data.message === 'failed') {
+            toast.error(`STAFF CONFLICT: ${data.data}`);
+            setConflictCheck({
+              ...conflictCheck,
+              staff: true,
+              staff_id: data.data
+            })
+          }
+          if (index + 1 === staffIds.length) {
+            if (conflictCheck.bypass) {
+              setCanSubmit(true)
+            }
+          }
+
+        })
+        .catch(err => {
+          toast.error("NETWORK ERROR. PLEASE CHECK YOUR CONNECTION")
+        })
+    });
+
+    if (conflictCheck.bypass === false) {
+      groupIds.forEach(async (group_id, index) => {
+        const sendRecord = {
+          schedule: item,
+          group: groupIds,
+          group_id: group_id,
+        }
+        await axios.post(`${serverLink}staff/timetable/schedule/check/conflict/group`, sendRecord, token)
           .then(res => {
             const data = res.data
             if (data.message === 'failed') {
-              toast.error(`STAFF CONFLICT: ${data.data}`);
+              const groupLabel = groupList.find(i => i.value === data.data)?.label || data.data;
+              toast.error(`GROUP CONFLICT: ${groupLabel}`);
               setConflictCheck({
                 ...conflictCheck,
-                staff: true,
-                staff_id: data.data
+                group: true,
+                group_id: data.data
               })
             }
-            if (index+1 === timetableStaff.length) {
-              if (conflictCheck.bypass) {
-                setCanSubmit(true)
-              }
+
+            if (index + 1 === groupIds.length) {
+              setCanSubmit(true)
             }
 
           })
           .catch(err => {
             toast.error("NETWORK ERROR. PLEASE CHECK YOUR CONNECTION")
           })
-    });
-
-    if (conflictCheck.bypass === false) {
-      timetableGroup.forEach(async (group_id, index) => {
-        const sendRecord = {
-          schedule: item,
-          group: timetableGroup,
-          group_id: group_id,
-        }
-        await axios.post(`${serverLink}staff/timetable/schedule/check/conflict/group`, sendRecord, token)
-            .then(res => {
-              const data = res.data
-              if (data.message === 'failed') {
-                toast.error(`GROUP CONFLICT: ${groupList.filter(i=>i.id === data.data)[0]['text']}`);
-                setConflictCheck({
-                  ...conflictCheck,
-                  group: true,
-                  group_id: data.data
-                })
-              }
-
-              if (index+1 === timetableGroup.length) {
-                setCanSubmit(true)
-              }
-
-            })
-            .catch(err => {
-              toast.error("NETWORK ERROR. PLEASE CHECK YOUR CONNECTION")
-            })
       })
     }
 
@@ -314,137 +363,76 @@ function ManageTimetableSchedule(props) {
 
   const handleSubmit = async () => {
     item.InsertedBy = props.loginData[0].StaffID
+    const staffIds = timetableStaff.map(s => s.value);
+    const groupIds = timetableGroup.map(g => g.value);
+
     const sendData = {
       schedule: item,
-      group: timetableGroup,
-      staff: timetableStaff
+      group: groupIds,
+      staff: staffIds
     }
     if (item.EntryID === '') {
       await axios.post(`${serverLink}staff/timetable/schedule/add`, sendData, token)
-          .then(res => {
-            const data = res.data
-            const message = data.message;
-            if (message === 'failed_hall_conflict') {
-              toast.error(`${venueList.filter(i=>i.id === parseInt(data.data))[0]['text']} has a schedule class`);
-              setConflictCheck({
-                ...conflictCheck,
-                venue: true,
-                venue_id: data.data
-              })
-            } else if (message === 'success') {
-              toast.success(`Timetable schedule added successfully`);
-              resetItem();
-              setTimetableStaff([]);
-              setTimetableGroup([]);
+        .then(res => {
+          const data = res.data
+          const message = data.message;
+          if (message === 'failed_hall_conflict') {
+            const venueLabel = venueList.find(i => i.value === parseInt(data.data))?.label || data.data;
+            toast.error(`${venueLabel} has a schedule class`);
+            setConflictCheck({
+              ...conflictCheck,
+              venue: true,
+              venue_id: data.data
+            })
+          } else if (message === 'success') {
+            toast.success(`Timetable schedule added successfully`);
+            resetItem();
+            setTimetableStaff([]);
+            setTimetableGroup([]);
 
-            } else {
-              toast.error('Something went wrong. Please check your network and try again!');
-            }
+          } else {
+            toast.error('Something went wrong. Please check your network and try again!');
+          }
 
-          })
-          .catch(err => {
-            toast.error("NETWORK ERROR. PLEASE CHECK YOUR CONNECTION")
-          })
+        })
+        .catch(err => {
+          toast.error("NETWORK ERROR. PLEASE CHECK YOUR CONNECTION")
+        })
     } else {
       await axios.patch(`${serverLink}staff/timetable/schedule/update`, sendData, token)
-          .then(res => {
-            const data = res.data
-            const message = data.message;
-            if (message === 'failed_hall_conflict') {
-              toast.error(`${venueList.filter(i=>i.id === parseInt(data.data))[0]['text']} has a schedule class`);
-              setConflictCheck({
-                ...conflictCheck,
-                venue: true,
-                venue_id: data.data
-              })
-            } else if (message === 'success') {
-              toast.success(`Timetable schedule updated successfully`);
-              navigation('/academics/timetable/timetable-report')
+        .then(res => {
+          const data = res.data
+          const message = data.message;
+          if (message === 'failed_hall_conflict') {
+            const venueLabel = venueList.find(i => i.value === parseInt(data.data))?.label || data.data;
+            toast.error(`${venueLabel} has a schedule class`);
+            setConflictCheck({
+              ...conflictCheck,
+              venue: true,
+              venue_id: data.data
+            })
+          } else if (message === 'success') {
+            toast.success(`Timetable schedule updated successfully`);
+            navigation('/academics/timetable/timetable-report')
 
-            } else {
-              toast.error('Something went wrong. Please check your network and try again!');
-            }
-          })
-          .catch((err) => {
-            console.log("NETWORK ERROR UPDATING TIMETABLE");
-          });
+          } else {
+            toast.error('Something went wrong. Please check your network and try again!');
+          }
+        })
+        .catch((err) => {
+          console.log("NETWORK ERROR UPDATING TIMETABLE");
+        });
     }
   }
 
   useEffect(() => {
-    if(canSubmit) {
+    if (canSubmit) {
       if (!conflictCheck.staff && !conflictCheck.group) {
         handleSubmit();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[canSubmit])
-
-  const onSemesterChange = (e) => {
-    setItem({
-      ...item,
-      SemesterCode: e.value,
-      SemesterCode2: e,
-    })
-  }
-
-  const onEdit = (e) => {
-    const id = e.target.id;
-    let value = e.target.value;
-    if (value !== "") {
-      if (id === "StartTime" || id === "EndTime") {
-        value = parseInt(value);
-      }
-
-      if (id === "StartTime") {
-        setItem({
-          ...item,
-          EndTime: "",
-        });
-      }
-    }
-
-    setItem({
-      ...item,
-      [id]: value,
-    });
-
-    if (id === "SemesterCode" && value === "") {
-      onResetItem();
-    }
-
-    if (id === "ModuleCode") {
-      onLoadModuleGroupData(value);
-    }
-  };
-
-  const onMultiEdit = (e) => {
-    const options = e.target.options;
-    const value = [];
-    for (var i = 0, l = options.length; i < l; i++) {
-      if (options[i].selected) {
-        if (e.target.id === "StudentGroup")
-          value.push(parseInt(options[i].value));
-        else value.push(options[i].value);
-      }
-    }
-
-    if (e.target.id === "StudentGroup") setTimetableGroup(value);
-    else setTimetableStaff(value);
-  };
-
-  const onResetItem = () => {
-    setItem({
-      SemesterCode: "",
-      ModuleCode: "",
-      StaffID: "",
-      StartTime: "",
-      EndTime: "",
-      ModuleType: "",
-      DayName: "",
-      VenueID: "",
-    });
-  };
+  }, [canSubmit])
 
   const onLoadModuleGroupData = async (module_code) => {
     setIsLoading(true);
@@ -459,29 +447,32 @@ function ManageTimetableSchedule(props) {
             i.ModuleCode === module_code
         );
         if (filter.length > 0) {
-          list.push(ii.EntryID);
+          const groupOption = groupList.find(g => g.value === ii.EntryID);
+          if (groupOption) {
+            list.push(groupOption);
+          }
         }
       });
     setTimetableGroup(list);
 
-    await axios.post(`${serverLink}staff/timetable/schedule/check/conflict/bypass`, {ModuleCode: module_code}, token)
-        .then(res => {
-          const data = res.data
-          if (data.message === 'true') {
-            setConflictCheck({
-              ...conflictCheck,
-              bypass: true,
-            })
-          } else {
-            setConflictCheck({
-              ...conflictCheck,
-              bypass: false,
-            })
-          }
-        })
-        .catch(err => {
-          toast.error("NETWORK ERROR. PLEASE CHECK YOUR CONNECTION")
-        })
+    await axios.post(`${serverLink}staff/timetable/schedule/check/conflict/bypass`, { ModuleCode: module_code }, token)
+      .then(res => {
+        const data = res.data
+        if (data.message === 'true') {
+          setConflictCheck({
+            ...conflictCheck,
+            bypass: true,
+          })
+        } else {
+          setConflictCheck({
+            ...conflictCheck,
+            bypass: false,
+          })
+        }
+      })
+      .catch(err => {
+        toast.error("NETWORK ERROR. PLEASE CHECK YOUR CONNECTION")
+      })
 
     setIsLoading(false);
   };
@@ -504,200 +495,163 @@ function ManageTimetableSchedule(props) {
           <div className="card-body p-0">
             <div className="row pt-5">
               <div className="col-md-4">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="SemesterCode">
-                    Select School Semester
-                  </label>
-                  <Select
-                      name="SemesterCode"
-                      value={item.SemesterCode2}
-                      onChange={onSemesterChange}
-                      options={semesterOptions}
-                      placeholder="select Semester"
-                  />
-                </div>
+                <SearchSelect
+                  id="SemesterCode"
+                  label="Select School Semester"
+                  value={item.SemesterCode2}
+                  options={semesterOptions}
+                  onChange={(selected) => {
+                    setItem({
+                      ...item,
+                      SemesterCode: selected?.value || '',
+                      SemesterCode2: selected,
+                    });
+                  }}
+                  placeholder="Select Semester"
+                />
               </div>
 
               <div className="col-md-4">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="ModuleCode">
-                    Select Module
-                  </label>
-                  <Select2
-                    id="ModuleCode"
-                    disabled={item.SemesterCode === ""}
-                    defaultValue={item.ModuleCode}
-                    data={moduleList}
-                    onSelect={onEdit}
-                    options={{
-                      placeholder: "Search Module",
-                    }}
-                  />
-                </div>
+                <SearchSelect
+                  id="ModuleCode"
+                  label="Select Module"
+                  value={item.ModuleCode2}
+                  options={moduleList}
+                  onChange={(selected) => {
+                    setItem({
+                      ...item,
+                      ModuleCode: selected?.value || '',
+                      ModuleCode2: selected,
+                      EndTime: '',
+                      EndTime2: null,
+                    });
+                    if (selected?.value) {
+                      onLoadModuleGroupData(selected.value);
+                    }
+                  }}
+                  isDisabled={item.SemesterCode === ""}
+                  placeholder="Search Module"
+                />
               </div>
 
               <div className="col-md-4">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="ModuleType">
-                    Module Type
-                  </label>
-                  <div className="enhanced-input-wrapper">
-                    <select
-                      name="ModuleType"
-                      id="ModuleType"
-                      className="form-control form-control-lg form-control-solid enhanced-input"
-                      onChange={onEdit}
-                      value={item.ModuleType}
-                    >
-                      <option value="">Select Option</option>
-                      <option value="Lecture">Lecture</option>
-                      <option value="Interactive">Interactive</option>
-                      <option value="Class">Class</option>
-                      <option value="Workshop">Workshop</option>
-                      <option value="Online">Online</option>
-                      <option value="Seminar">Seminar</option>
-                    </select>
-                  </div>
-                </div>
+                <SearchSelect
+                  id="ModuleType"
+                  label="Module Type"
+                  value={item.ModuleType2}
+                  options={moduleTypeOptions}
+                  onChange={(selected) => {
+                    setItem({
+                      ...item,
+                      ModuleType: selected?.value || '',
+                      ModuleType2: selected,
+                    });
+                  }}
+                  placeholder="Select Option"
+                />
               </div>
             </div>
 
             <div className="row">
               <div className="col-md-4">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="DayName">
-                    Day
-                  </label>
-                  <div className="enhanced-input-wrapper">
-                    <select
-                      name="DayName"
-                      id="DayName"
-                      className="form-control form-control-lg form-control-solid enhanced-input"
-                      onChange={onEdit}
-                      value={item.DayName}
-                    >
-                      <option value="">Select Option</option>
-                      <option value="Monday">Monday</option>
-                      <option value="Tuesday">Tuesday</option>
-                      <option value="Wednesday">Wednesday</option>
-                      <option value="Thursday">Thursday</option>
-                      <option value="Friday">Friday</option>
-                      <option value="Saturday">Saturday</option>
-                    </select>
-                  </div>
-                </div>
+                <SearchSelect
+                  id="DayName"
+                  label="Day"
+                  value={item.DayName2}
+                  options={dayOptions}
+                  onChange={(selected) => {
+                    setItem({
+                      ...item,
+                      DayName: selected?.value || '',
+                      DayName2: selected,
+                    });
+                  }}
+                  placeholder="Select Option"
+                />
               </div>
 
               <div className="col-md-4">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="StartTime">
-                    Start Time
-                  </label>
-                  <div className="enhanced-input-wrapper">
-                    <select
-                      name="StartTime"
-                      id="StartTime"
-                      className="form-control form-control-lg form-control-solid enhanced-input"
-                      onChange={onEdit}
-                      value={item.StartTime}
-                    >
-                      <option value="">Select Option</option>
-                      {schedule_time.map((start) => {
-                        return (
-                          <option key={start} value={start}>
-                            {start}:00
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                </div>
+                <SearchSelect
+                  id="StartTime"
+                  label="Start Time"
+                  value={item.StartTime2}
+                  options={timeOptions}
+                  onChange={(selected) => {
+                    setItem({
+                      ...item,
+                      StartTime: selected?.value || '',
+                      StartTime2: selected,
+                      EndTime: '',
+                      EndTime2: null,
+                    });
+                  }}
+                  placeholder="Select Option"
+                />
               </div>
 
               <div className="col-md-4">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="EndTime">
-                    End Time
-                  </label>
-                  <div className="enhanced-input-wrapper">
-                    <select
-                      name="EndTime"
-                      id="EndTime"
-                      className="form-control form-control-lg form-control-solid enhanced-input"
-                      onChange={onEdit}
-                      value={item.EndTime}
-                    >
-                      <option value="">Select Option</option>
-                      {item.StartTime !== "" &&
-                        schedule_time.map((end) => {
-                          if (end > item.StartTime && end <= item.StartTime + 4) {
-                            return (
-                              <option key={end} value={end}>
-                                {end}:00
-                              </option>
-                            );
-                          }
-                        })}
-                    </select>
-                  </div>
-                </div>
+                <SearchSelect
+                  id="EndTime"
+                  label="End Time"
+                  value={item.EndTime2}
+                  options={item.StartTime !== ""
+                    ? timeOptions.filter(t => t.value > item.StartTime && t.value <= item.StartTime + 4)
+                    : []
+                  }
+                  onChange={(selected) => {
+                    setItem({
+                      ...item,
+                      EndTime: selected?.value || '',
+                      EndTime2: selected,
+                    });
+                  }}
+                  placeholder="Select Option"
+                />
               </div>
             </div>
 
             <div className="row">
               <div className="col-md-6">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="VenueID">
-                    Select Venue
-                  </label>
-                  <Select2
-                    id="VenueID"
-                    defaultValue={item.VenueID}
-                    data={venueList}
-                    onSelect={onEdit}
-                    options={{
-                      placeholder: "Search Venue",
-                    }}
-                  />
-                </div>
+                <SearchSelect
+                  id="VenueID"
+                  label="Select Venue"
+                  value={item.VenueID2}
+                  options={venueList}
+                  onChange={(selected) => {
+                    setItem({
+                      ...item,
+                      VenueID: selected?.value || '',
+                      VenueID2: selected,
+                    });
+                  }}
+                  placeholder="Search Venue"
+                />
               </div>
 
               <div className="col-md-6">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="StaffID">
-                    Select Staff
-                  </label>
-                  <Select2
-                    id="StaffID"
-                    multiple
-                    defaultValue={timetableStaff}
-                    data={staffList}
-                    onChange={onMultiEdit}
-                    options={{
-                      placeholder: "Search Staff",
-                    }}
-                  />
-                </div>
+                <SearchSelect
+                  id="StaffID"
+                  label="Select Staff"
+                  value={timetableStaff}
+                  options={staffList}
+                  onChange={(selected) => setTimetableStaff(selected || [])}
+                  isMulti
+                  placeholder="Search Staff"
+                />
               </div>
             </div>
 
             <div className="row">
               <div className="col-md-12">
-                <div className="fv-row mb-6 enhanced-form-group">
-                  <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="StudentGroup">
-                    Select Groups
-                  </label>
-                  <Select2
-                    id="StudentGroup"
-                    multiple
-                    defaultValue={timetableGroup}
-                    data={groupList}
-                    onChange={onMultiEdit}
-                    options={{
-                      placeholder: "Search Group",
-                    }}
-                  />
-                </div>
+                <SearchSelect
+                  id="StudentGroup"
+                  label="Select Groups"
+                  value={timetableGroup}
+                  options={groupList}
+                  onChange={(selected) => setTimetableGroup(selected || [])}
+                  isMulti
+                  placeholder="Search Group"
+                />
               </div>
             </div>
 

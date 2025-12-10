@@ -1,5 +1,5 @@
 import React from "react";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 export default function InventoryItemForm(props) {
     return (
@@ -8,12 +8,12 @@ export default function InventoryItemForm(props) {
                 <div className="col-md-12 pb-3">
                     <div className="form-group">
                         <label htmlFor="item_name">Item Name</label>
-                        <input type="text" id="item_name" className="form-control" value={props.value.item_name} onChange={props.onChange}/>
+                        <input type="text" id="item_name" className="form-control" value={props.value.item_name} onChange={props.onChange} />
                     </div>
                 </div>
                 <div className="col-md-12 pb-3">
                     <label htmlFor="manufacturer_id">Select Manufacturer</label>
-                    <Select
+                    <SearchSelect
                         id="manufacturer_id"
                         name="manufacturer_id"
                         value={props.value.manufacturer_id2}
@@ -24,7 +24,7 @@ export default function InventoryItemForm(props) {
                 </div>
                 <div className="col-md-12 pb-3">
                     <label htmlFor="vendor_id">Select Vendor</label>
-                    <Select
+                    <SearchSelect
                         id="vendor_id"
                         name="vendor_id"
                         value={props.value.vendor_id2}
@@ -35,7 +35,7 @@ export default function InventoryItemForm(props) {
                 </div>
                 <div className="col-md-12 pb-3">
                     <label htmlFor="category_id">Select Category</label>
-                    <Select
+                    <SearchSelect
                         id="category_id"
                         name="category_id"
                         value={props.value.category_id2}
@@ -47,7 +47,7 @@ export default function InventoryItemForm(props) {
 
                 <div className="col-md-12 pb-3">
                     <label htmlFor="sub_category_id">Select Sub Category</label>
-                    <Select
+                    <SearchSelect
                         id="sub_category_id"
                         name="sub_category_id"
                         value={props.value.sub_category_id2}
@@ -60,7 +60,7 @@ export default function InventoryItemForm(props) {
                 {
                     props.isFormLoading ?
                         <button id="kt_docs_formvalidation_text_submit" type="button" className="btn btn-primary">
-                            <span> Please wait... <span className="spinner-border spinner-border-sm align-middle ms-2"/> </span>
+                            <span> Please wait... <span className="spinner-border spinner-border-sm align-middle ms-2" /> </span>
                         </button>
                         :
                         <button type="submit" className="btn btn-lg btn-block btn-primary">Submit</button>

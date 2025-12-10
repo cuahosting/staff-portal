@@ -4,7 +4,7 @@ import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import axios from "axios";
 import { projectName, serverLink, simpleFileUploadAPIKey } from "../../../resources/url";
-import Select2 from "react-select2-wrapper";
+import SearchSelect from "../../common/select/SearchSelect";
 import { toast } from "react-toastify";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import SimpleFileUpload from "react-simple-file-upload";
@@ -62,8 +62,8 @@ function CaptureBiometric(props) {
                             let staff_rows = [];
                             res.data.staff.map((item) => {
                                 staff_rows.push({
-                                    id: item.StaffID,
-                                    text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StaffID})`
+                                    value: item.StaffID,
+                                    label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StaffID})`
                                 })
                             })
                             setStaffList(staff_rows);
@@ -84,8 +84,8 @@ function CaptureBiometric(props) {
                             let students_rows = [];
                             res.data.students.map((item) => {
                                 students_rows.push({
-                                    id: item.StudentID,
-                                    text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
+                                    value: item.StudentID,
+                                    label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
                                 })
                             })
                             setStudentsList(students_rows);
@@ -236,32 +236,31 @@ function CaptureBiometric(props) {
                         <div className="row">
                             <div className="col-lg-6 pt-5">
                                 <label htmlFor="CardType">Card Type</label>
-                                <select
-                                    className="form-control"
+                                <SearchSelect
                                     id="CardType"
-                                    name="CardType"
-                                    value={createRequest.CardType}
-                                    onChange={onEdit}
-                                >
-                                    <option value="">Select Option</option>
-                                    <option value="Staff">Staff</option>
-                                    <option value="Student">Student</option>
-                                </select>
+                                    value={[
+                                        { value: "Staff", label: "Staff" },
+                                        { value: "Student", label: "Student" }
+                                    ].find(op => op.value === createRequest.CardType) || null}
+                                    onChange={(selected) => onEdit({ target: { id: 'CardType', value: selected?.value || '' } })}
+                                    options={[
+                                        { value: "Staff", label: "Staff" },
+                                        { value: "Student", label: "Student" }
+                                    ]}
+                                    placeholder="Select Option"
+                                />
                             </div>
 
                             {createRequest.CardType === "Staff" && (
                                 <div className="col-lg-6 pt-5">
                                     <label htmlFor="UserID">Select Staff</label>
-                                    <Select2
+                                    <SearchSelect
                                         id="UserID"
                                         name="UserID"
-                                        data={staffList}
-                                        value={createRequest.UserID}
-                                        className={"form-control"}
-                                        onSelect={onEdit}
-                                        options={{
-                                            placeholder: "Search Staff",
-                                        }}
+                                        options={staffList}
+                                        value={staffList.find(op => op.value === createRequest.UserID) || null}
+                                        onChange={(selected) => onEdit({ target: { id: "UserID", value: selected?.value || "" } })}
+                                        placeholder="Search Staff"
                                     />
                                 </div >
                             )}
@@ -269,16 +268,13 @@ function CaptureBiometric(props) {
                             {createRequest.CardType === "Student" && (
                                 <div className="col-lg-6 pt-5">
                                     <label htmlFor="UserID">Select Student</label>
-                                    <Select2
+                                    <SearchSelect
                                         id="UserID"
                                         name="UserID"
-                                        data={studentsList}
-                                        value={createRequest.UserID}
-                                        className={"form-control"}
-                                        onSelect={onEdit}
-                                        options={{
-                                            placeholder: "Search Student",
-                                        }}
+                                        options={studentsList}
+                                        value={studentsList.find(op => op.value === createRequest.UserID) || null}
+                                        onChange={(selected) => onEdit({ target: { id: "UserID", value: selected?.value || "" } })}
+                                        placeholder="Search Student"
                                     />
                                 </div>
                             )}
@@ -307,23 +303,24 @@ function CaptureBiometric(props) {
                                             <div className="col-lg-4 pt-5">
                                                 <div className="form-group">
                                                     <label htmlFor="BloodGroup">Blood Group</label>
-                                                    <select
-                                                        className="form-control"
+                                                    <SearchSelect
                                                         id="BloodGroup"
                                                         name="BloodGroup"
-                                                        value={createRequest.BloodGroup}
-                                                        onChange={onEdit}
-                                                    >
-                                                        <option value="">Select Option</option>
-                                                        <option value="A+">A+</option>
-                                                        <option value="A-">A-</option>
-                                                        <option value="B+">B+</option>
-                                                        <option value="B-">B-</option>
-                                                        <option value="AB+">AB+</option>
-                                                        <option value="AB-">AB-</option>
-                                                        <option value="O+">O+</option>
-                                                        <option value="O-">O-</option>
-                                                    </select>
+                                                        value={[
+                                                            { value: "A+", label: "A+" }, { value: "A-", label: "A-" },
+                                                            { value: "B+", label: "B+" }, { value: "B-", label: "B-" },
+                                                            { value: "AB+", label: "AB+" }, { value: "AB-", label: "AB-" },
+                                                            { value: "O+", label: "O+" }, { value: "O-", label: "O-" }
+                                                        ].find(op => op.value === createRequest.BloodGroup) || null}
+                                                        onChange={(selected) => onEdit({ target: { id: "BloodGroup", value: selected?.value || "" } })}
+                                                        options={[
+                                                            { value: "A+", label: "A+" }, { value: "A-", label: "A-" },
+                                                            { value: "B+", label: "B+" }, { value: "B-", label: "B-" },
+                                                            { value: "AB+", label: "AB+" }, { value: "AB-", label: "AB-" },
+                                                            { value: "O+", label: "O+" }, { value: "O-", label: "O-" }
+                                                        ]}
+                                                        placeholder="Select Option"
+                                                    />
                                                 </div>
                                             </div>
                                             <div className="col-lg-4 pt-5">
@@ -407,23 +404,24 @@ function CaptureBiometric(props) {
                                             <div className="col-lg-4 pt-5">
                                                 <div className="form-group">
                                                     <label htmlFor="BloodGroup">Blood Group</label>
-                                                    <select
-                                                        className="form-control"
+                                                    <SearchSelect
                                                         id="BloodGroup"
                                                         name="BloodGroup"
-                                                        value={createRequest.BloodGroup}
-                                                        onChange={onEdit}
-                                                    >
-                                                        <option value="">Select Option</option>
-                                                        <option value="A+">A+</option>
-                                                        <option value="A-">A-</option>
-                                                        <option value="B+">B+</option>
-                                                        <option value="B-">B-</option>
-                                                        <option value="AB+">AB+</option>
-                                                        <option value="AB-">AB-</option>
-                                                        <option value="O+">O+</option>
-                                                        <option value="O-">O-</option>
-                                                    </select>
+                                                        value={[
+                                                            { value: "A+", label: "A+" }, { value: "A-", label: "A-" },
+                                                            { value: "B+", label: "B+" }, { value: "B-", label: "B-" },
+                                                            { value: "AB+", label: "AB+" }, { value: "AB-", label: "AB-" },
+                                                            { value: "O+", label: "O+" }, { value: "O-", label: "O-" }
+                                                        ].find(op => op.value === createRequest.BloodGroup) || null}
+                                                        onChange={(selected) => onEdit({ target: { id: "BloodGroup", value: selected?.value || "" } })}
+                                                        options={[
+                                                            { value: "A+", label: "A+" }, { value: "A-", label: "A-" },
+                                                            { value: "B+", label: "B+" }, { value: "B-", label: "B-" },
+                                                            { value: "AB+", label: "AB+" }, { value: "AB-", label: "AB-" },
+                                                            { value: "O+", label: "O+" }, { value: "O-", label: "O-" }
+                                                        ]}
+                                                        placeholder="Select Option"
+                                                    />
                                                 </div>
                                             </div>
                                             <div className="col-lg-4 pt-5">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -20,6 +20,10 @@ function HRPensionAdministrator(props) {
         field: "sn",
       },
       {
+        label: "Action",
+        field: "action",
+      },
+      {
         label: "Administrator Name",
         field: "name",
       },
@@ -30,10 +34,6 @@ function HRPensionAdministrator(props) {
       {
         label: "Email Address",
         field: "email",
-      },
-      {
-        label: "Action",
-        field: "action",
       },
     ],
     rows: [],
@@ -231,38 +231,31 @@ function HRPensionAdministrator(props) {
       <PageHeader
         title={"Pension Administrators"}
         items={["Human Resources", "Pension", "Pension Administrators"]}
+        buttons={
+          <button
+            type="button"
+            className="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#kt_modal_general"
+            onClick={() =>
+              setCreateItem({
+                ...createItem,
+                admin_name: "",
+                contact_no: "",
+                contact_email: "",
+                entry_id: "",
+              })
+            }
+          >
+            <i className="fa fa-plus me-2"></i>
+            Add Administrator
+          </button>
+        }
       />
       <div className="flex-column-fluid">
         <div className="card">
-          <div className="card-header border-0 pt-6">
-            <div className="card-title" />
-            <div className="card-toolbar">
-              <div
-                className="d-flex justify-content-end"
-                data-kt-customer-table-toolbar="base"
-              >
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateItem({
-                      ...createItem,
-                      admin_name: "",
-                      contact_no: "",
-                      contact_email: "",
-                      entry_id: "",
-                    })
-                  }
-                >
-                  Add Administrator
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="card-body p-0">
-            <Table data={datatable} />
+          <div className="card-body pt-5">
+            <AGTable data={datatable} />
           </div>
         </div>
         <Modal title={"Pension Administrator Form"}>

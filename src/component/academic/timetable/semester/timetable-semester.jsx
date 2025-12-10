@@ -23,6 +23,10 @@ function TimetableSemester(props) {
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Semester Name",
                 field: "SemesterName",
             },
@@ -45,10 +49,6 @@ function TimetableSemester(props) {
             {
                 label: "Status",
                 field: "Status",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
 
         ],
@@ -290,39 +290,31 @@ function TimetableSemester(props) {
             <PageHeader
                 title={"Timetable Semester"}
                 items={["Academics", "Timetable", "Timetable Semester"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setFormData({
+                                ...formData,
+                                SemesterName: "",
+                                SemesterCode: "",
+                                StartDate: "",
+                                EndDate: "",
+                                Description: "",
+                                Status: "",
+                                EntryID: "",
+                            })
+                        }
+                    >
+                        <i className="fa fa-plus me-2"></i>Add Timetable Semester
+                    </button>
+                }
             />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
-                    <div className="card-header border-0 pt-6">
-                        <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setFormData({
-                                            ...formData,
-                                            SemesterName: "",
-                                            SemesterCode: "",
-                                            StartDate: "",
-                                            EndDate: "",
-                                            Description: "",
-                                            Status: "",
-                                            EntryID: "",
-                                        })
-                                    }
-                                >
-                                    Add Timetable Semester
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                     <div className="card-body p-0">
                         <AGTable data={datatable} />
                     </div>

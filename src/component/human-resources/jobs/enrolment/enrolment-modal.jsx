@@ -1,7 +1,6 @@
 import { formatDate, shortCode } from "../../../../resources/constants";
 import { serverLink } from "../../../../resources/url";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../../common/select/SearchSelect";
 import './enrolment.css'
 
 const StaffEnrolmentModal = (props) => {
@@ -176,44 +175,30 @@ const StaffEnrolmentModal = (props) => {
                                                 <div className="col-lg-6 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="DesignationID" className="mb-2">Designation</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="DesignationID"
-                                                            className="form-control"
+                                                            label="Designation"
+                                                            value={props.designations.map(x => ({ value: x.EntryID, label: x.DesignationName })).find(op => op.value === data.DesignationID) || null}
+                                                            options={props.designations.map(x => ({ value: x.EntryID, label: x.DesignationName }))}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'DesignationID', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit}
-                                                        >
-                                                            <option value="">Select Option</option>
-                                                            {props.designations.length > 0 ? (
-                                                                <>
-                                                                    {props.designations.map((item, index) => {
-                                                                        return (
-                                                                            <option key={index} value={item.EntryID}>
-                                                                                {item.DesignationName}
-                                                                            </option>
-                                                                        );
-                                                                    })}
-                                                                </>
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
 
                                                 <div className="col-lg-6 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="StaffType" className="mb-2">Staff Type</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="StaffType"
-                                                            className="form-control"
+                                                            label="Staff Type"
+                                                            value={[{ value: "Casual", label: "Casual" }, { value: "Contract", label: "Contract" }, { value: "Full Time", label: "Full Time" }].find(op => op.value === data.StaffType) || null}
+                                                            options={[{ value: "Casual", label: "Casual" }, { value: "Contract", label: "Contract" }, { value: "Full Time", label: "Full Time" }]}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'StaffType', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit}
-                                                        >
-                                                            <option value="">Select Option</option>
-                                                            <option value={"Casual"}>Casual</option>
-                                                            <option value={"Contract"}>Contract</option>
-                                                            <option value={"Full Time"}>Full Time</option>
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
 
@@ -290,81 +275,45 @@ const StaffEnrolmentModal = (props) => {
                                                 <div className="col-lg-6 col-md-6 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="LineManagerID" className="mb-2">Line Manager</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="LineManagerID"
-                                                            className="form-control"
+                                                            label="Line Manager"
+                                                            value={props.staffList.map(item => ({ value: item.StaffID, label: item.StaffID + " -- " + item.FirstName + " " + item.MiddleName + " " + item.Surname })).find(op => op.value === data.LineManagerID) || null}
+                                                            options={props.staffList.map(item => ({ value: item.StaffID, label: item.StaffID + " -- " + item.FirstName + " " + item.MiddleName + " " + item.Surname }))}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'LineManagerID', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit}
-                                                        >
-                                                            <option value="">Select Option</option>
-                                                            {props.staffList.length > 0 ? (
-                                                                <>
-                                                                    {props.staffList?.map((item, index) => {
-                                                                        return (
-                                                                            <option key={index} value={item.StaffID}>
-                                                                                {item.StaffID} -- {item.FirstName + " " + item.MiddleName + " " + item.Surname}
-                                                                            </option>
-                                                                        );
-                                                                    })}
-                                                                </>
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
 
                                                 <div className="col-lg-6 col-md-6 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="DepartmentCode" className="mb-2">Department</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="DepartmentCode"
-                                                            className="form-control"
+                                                            label="Department"
+                                                            value={props.departmentList.map(item => ({ value: item.DepartmentCode, label: item.DepartmentName })).find(op => op.value === data.DepartmentCode) || null}
+                                                            options={props.departmentList.map(item => ({ value: item.DepartmentCode, label: item.DepartmentName }))}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'DepartmentCode', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit}
-                                                        >
-                                                            <option value="">Select Option</option>
-                                                            {props.departmentList.length > 0 ? (
-                                                                <>
-                                                                    {props.departmentList.map((item, index) => {
-                                                                        return (
-                                                                            <option key={index} value={item.DepartmentCode}>
-                                                                                {item.DepartmentName}
-                                                                            </option>
-                                                                        );
-                                                                    })}
-                                                                </>
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
 
                                                 <div className="col-lg-6 col-md-6 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="CourseCode" className="mb-2">Course</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="CourseCode"
-                                                            className="form-control"
+                                                            label="Course"
+                                                            value={props.courseList.map(item => ({ value: item.CourseCode, label: item.CourseName })).find(op => op.value === data.CourseCode) || null}
+                                                            options={props.courseList.map(item => ({ value: item.CourseCode, label: item.CourseName }))}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'CourseCode', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit}
-                                                        >
-                                                            <option value="">Select Option</option>
-                                                            {props.courseList.length > 0 ? (
-                                                                <>
-                                                                    {props.courseList.map((item, index) => {
-                                                                        return (
-                                                                            <option key={index} value={item.CourseCode}>
-                                                                                {item.CourseName}
-                                                                            </option>
-                                                                        );
-                                                                    })}
-                                                                </>
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div className="col-lg-12 col-md-12 pb-5">
@@ -382,43 +331,43 @@ const StaffEnrolmentModal = (props) => {
                                                 <div className="col-lg-4 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="IsActive" className="mb-2">IsActive ?</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="IsActive"
-                                                            className="form-control"
+                                                            label="Is Active?"
+                                                            value={[{ value: "1", label: "YES" }, { value: "0", label: "NO" }].find(op => op.value === data.IsActive) || null}
+                                                            options={[{ value: "1", label: "YES" }, { value: "0", label: "NO" }]}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'IsActive', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit} >
-                                                            <option value="">Select Option</option>
-                                                            <option value={"1"}>YES</option>
-                                                            <option value={"0"}>NO</option>
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div className="col-lg-4 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="IsAcademicStaff" className="mb-2">Is Academic Staff ?</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="IsAcademicStaff"
-                                                            className="form-control"
+                                                            label="Is Academic Staff?"
+                                                            value={[{ value: "1", label: "YES" }, { value: "0", label: "NO" }].find(op => op.value === data.IsAcademicStaff) || null}
+                                                            options={[{ value: "1", label: "YES" }, { value: "0", label: "NO" }]}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'IsAcademicStaff', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit} >
-                                                            <option value="">Select Option</option>
-                                                            <option value={"1"}>YES</option>
-                                                            <option value={"0"}>NO</option>
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div className="col-lg-4 pb-5">
                                                     <div className="form-group">
                                                         <label htmlFor="IsAdmin" className="mb-2">Is Admin ?</label>
-                                                        <select
+                                                        <SearchSelect
                                                             id="IsAdmin"
-                                                            className="form-control"
+                                                            label="Is Admin?"
+                                                            value={[{ value: "1", label: "YES" }, { value: "0", label: "NO" }].find(op => op.value === data.IsAdmin) || null}
+                                                            options={[{ value: "1", label: "YES" }, { value: "0", label: "NO" }]}
+                                                            onChange={(selected) => props.onEdit({ target: { id: 'IsAdmin', value: selected?.value || '' } })}
+                                                            placeholder="Select Option"
                                                             required
-                                                            onChange={props.onEdit} >
-                                                            <option value="">Select Option</option>
-                                                            <option value={"1"}>YES</option>
-                                                            <option value={"0"}>NO</option>
-                                                        </select>
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div className="col-lg-12 mt-5">

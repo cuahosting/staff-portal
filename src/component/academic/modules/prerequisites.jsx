@@ -7,7 +7,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function ModulePrerequisites(props) {
     const token = props.LoginDetails[0].token
@@ -23,16 +23,16 @@ function ModulePrerequisites(props) {
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Module Name",
                 field: "ModuleCode",
             },
             {
                 label: "Module PreRequisite",
                 field: "PreModuleCode",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -58,8 +58,6 @@ function ModulePrerequisites(props) {
                         let preqmName = props.modulesList.length > 0 ?  props.modulesList.filter(x => x.ModuleCode === preq.PreModuleCode)[0]?.ModuleName : ""
                         rows.push({
                             sn: index + 1,
-                            ModuleCode: preq.ModuleCode + "-" + mName,
-                            PreModuleCode: preq.PreModuleCode + "-" + preqmName,
                             action: (
                                 <button
                                     className="btn btn-link p-0 text-primary" style={{marginRight:15}} title="Edit"
@@ -68,9 +66,9 @@ function ModulePrerequisites(props) {
                                     onClick={() =>
                                         setcreatePreRequisite({
                                             ModuleCode: preq.ModuleCode,
-                                            ModuleCode2: { value: preq.ModuleCode, label: preq.ModuleCode + "-" + mName}, 
+                                            ModuleCode2: { value: preq.ModuleCode, label: preq.ModuleCode + "-" + mName},
                                             PreModuleCode: preq.PreModuleCode,
-                                            PreModuleCode2 : { value: preq.PreModuleCode, label: preq.PreModuleCode + "-" + preqmName} , 
+                                            PreModuleCode2 : { value: preq.PreModuleCode, label: preq.PreModuleCode + "-" + preqmName} ,
                                             EntryID: preq.EntryID,
                                             UpdatedBy: props.InsertedBy
                                         })
@@ -79,6 +77,8 @@ function ModulePrerequisites(props) {
                                     <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen color-blue" />
                                 </button>
                             ),
+                            ModuleCode: preq.ModuleCode + "-" + mName,
+                            PreModuleCode: preq.PreModuleCode + "-" + preqmName,
                         });
                     });
 
@@ -241,7 +241,7 @@ function ModulePrerequisites(props) {
                                         })
                                     }
                                 >
-                                    Add Module Prerquisite
+                                    <i className="fa fa-plus me-2"></i>Add Module Prerquisite
                                 </button>
                             </div>
                         </div>
@@ -253,7 +253,7 @@ function ModulePrerequisites(props) {
                 <Modal title={"Module Prerquisite"} id={"preqModule"}>
                     <div className="fv-row mb-6 enhanced-form-group">
                         <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="ModuleCode">Module Name</label>
-                        <Select
+                        <SearchSelect
                             name="ModuleCode"
                             value={createPreRequisite.ModuleCode2}
                             onChange={onModuleChange}
@@ -263,7 +263,7 @@ function ModulePrerequisites(props) {
                     </div>
                     <div className="fv-row mb-6 enhanced-form-group">
                         <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="PreModuleCode">Module PreRequisite</label>
-                        <Select
+                        <SearchSelect
                             name="ModuleCode"
                             value={createPreRequisite.PreModuleCode2}
                             onChange={onModulePreRequisiteChange}

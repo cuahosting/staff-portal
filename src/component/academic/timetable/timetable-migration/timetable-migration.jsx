@@ -5,12 +5,12 @@ import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import {useNavigate} from "react-router";
+import { useNavigate } from "react-router";
 // eslint-disable-next-line no-unused-vars
 import AGReportTable from "../../../common/table/AGReportTable";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 // eslint-disable-next-line no-unused-vars
-import {showAlert} from "../../../common/sweetalert/sweetalert";
+import { showAlert } from "../../../common/sweetalert/sweetalert";
 
 function TimetableMigration(props) {
     const token = props.loginData[0].token
@@ -54,7 +54,7 @@ function TimetableMigration(props) {
                 let rows = []
                 if (res.data.length > 0) {
                     res.data.forEach((row) => {
-                        rows.push({value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode})
+                        rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                     });
                     setSemesterList(res.data);
                     setSemesterOptions(rows)
@@ -93,7 +93,7 @@ function TimetableMigration(props) {
                     }
                     setIsLoading(false)
                 })
-                .catch(e => {console.log("NETWORK ERROR")})
+                .catch(e => { console.log("NETWORK ERROR") })
         } else {
             toast.error('Please select semester')
             setIsLoading(false)
@@ -123,7 +123,7 @@ function TimetableMigration(props) {
                     }
                     setIsLoading(false)
                 })
-                .catch(e => {console.log("NETWORK ERROR")})
+                .catch(e => { console.log("NETWORK ERROR") })
         } else {
             toast.error('Please select semester')
             setIsLoading(false)
@@ -149,7 +149,7 @@ function TimetableMigration(props) {
         toast.info("please wait while system is running migration...");
         await axios.post(`${serverLink}staff/timetable/migration`, formData, token)
             .then((res) => {
-                if(res.data.message === "exist"){
+                if (res.data.message === "exist") {
                     toast.error(`Sorry, timetable already added for the selected trimester => (${formData.to}).`);
                 } else if (res.data.message === "success") {
                     toast.success("Timetable Migration Completed");
@@ -167,7 +167,7 @@ function TimetableMigration(props) {
     useEffect(() => {
         getSemesterList()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[])
+    }, [])
 
 
     return isLoading ? (
@@ -178,37 +178,37 @@ function TimetableMigration(props) {
                 title={"Timetable Migration"}
                 items={["Academics", "Timetable", "Timetable Migration"]}
             />
-           <div className="row">
-               <div className="col-md-5">
-                   <label htmlFor="SemesterCode">From </label>
-                   <Select
-                       name="SemesterCode"
-                       className="form-select w-100"
-                       value={schoolSemester}
-                       onChange={onSemesterChange}
-                       options={semesterOptions}
-                       placeholder="select Semester"
-                   />
+            <div className="row">
+                <div className="col-md-5">
+                    <label htmlFor="SemesterCode">From </label>
+                    <SearchSelect
+                        name="SemesterCode"
+                        className="form-select w-100"
+                        value={schoolSemester}
+                        onChange={onSemesterChange}
+                        options={semesterOptions}
+                        placeholder="select Semester"
+                    />
 
-               </div>
-               <div className="col-md-5">
-                   <label htmlFor="SemesterCode">To</label>
-                   <Select
-                       name="SemesterCode"
-                       className="form-select w-100"
-                       value={schoolSemester2}
-                       onChange={onSemesterChange2}
-                       options={semesterOptions2}
-                       placeholder="select Semester"
-                   />
+                </div>
+                <div className="col-md-5">
+                    <label htmlFor="SemesterCode">To</label>
+                    <SearchSelect
+                        name="SemesterCode"
+                        className="form-select w-100"
+                        value={schoolSemester2}
+                        onChange={onSemesterChange2}
+                        options={semesterOptions2}
+                        placeholder="select Semester"
+                    />
 
-               </div>
-               <div className="col-md-2">
-                   <br/>
-                   <button className="btn btn-primary form-control" type="button" onClick={run_migration} style={{marginTop: '10px'}}>Run Migration</button>
-                   <br/>
-               </div>
-           </div>
+                </div>
+                <div className="col-md-2">
+                    <br />
+                    <button className="btn btn-primary form-control" type="button" onClick={run_migration} style={{ marginTop: '10px' }}>Run Migration</button>
+                    <br />
+                </div>
+            </div>
         </div>
     );
 }

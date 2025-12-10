@@ -202,7 +202,7 @@ function BankReport(props) {
             />
             <div className="col-md-12">
                 <div className="row">
-                    <div className="col-md-6 pb-3">
+                    <div className="col-md-12 pb-3">
                         <div className="form-group">
                             <label htmlFor="month_id">Select Salary Month</label>
                             <input type="month" id="month_id"
@@ -213,7 +213,7 @@ function BankReport(props) {
                                    required/>
                         </div>
                     </div>
-                    <div className="col-md-6 pb-3">
+                    {/* <div className="col-md-6 pb-3">
                         <div className="form-group">
                             <label htmlFor="month_id">Select Bank</label>
                             <select className="form-control" id="bank" name="bank" value={formData.bank} onChange={onChangeBank}>
@@ -227,7 +227,7 @@ function BankReport(props) {
                                 })}
                             </select>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
             </div>

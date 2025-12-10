@@ -4,9 +4,9 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AgReportTable from "../../common/table/report_table";
+import AgReportTable from "../../common/table/ReportTable";
 import { toast } from "react-toastify";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function AcademicResultByDepartment(props) {
     const token = props.LoginDetails[0].token;
@@ -29,7 +29,7 @@ function AcademicResultByDepartment(props) {
                     let rows = []
                     if (result.data.length > 0) {
                         result.data.forEach((row) => {
-                            rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+                            rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
                         setSemesterOptions(rows)
@@ -84,9 +84,9 @@ function AcademicResultByDepartment(props) {
                 SemesterCode: e.value,
                 SemesterCode2: e
             })
-                getData(e.value,depart);
+            getData(e.value, depart);
 
-        }else{
+        } else {
             setSemeter({
                 ...semester,
                 SemesterCode: "",
@@ -112,17 +112,16 @@ function AcademicResultByDepartment(props) {
             />
             <div className="row">
                 {semesterList.length > 0 &&
-                <div className="col-md-12 mb-4 form-group">
-                    <label htmlFor="_Semester">Select Semester</label>
-                    <Select
-                        id="_Semester"
-                        className="form-select form-select"
-                        value={semester.SemesterCode2}
-                        onChange={onSemesterChange}
-                        options={semesterOptions}
-                        placeholder="select Semester"
-                    />
-                </div>}
+                    <div className="col-md-12 mb-4">
+                        <SearchSelect
+                            id="_Semester"
+                            label="Select Semester"
+                            value={semester.SemesterCode2}
+                            onChange={onSemesterChange}
+                            options={semesterOptions}
+                            placeholder="select Semester"
+                        />
+                    </div>}
 
 
             </div>
@@ -131,7 +130,7 @@ function AcademicResultByDepartment(props) {
                     {
                         <div className="mt-4">
                             {data.length > 0 &&
-                            <AgReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY DEPARTMENT"} />
+                                <AgReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY DEPARTMENT"} />
                             }
                         </div>
                     }

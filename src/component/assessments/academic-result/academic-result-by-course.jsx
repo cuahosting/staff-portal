@@ -4,9 +4,9 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AgReportTable from "../../common/table/report_table";
+import AgReportTable from "../../common/table/ReportTable";
 import { toast } from "react-toastify";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function AcademicResultByCourse(props) {
     const token = props.LoginDetails[0].token;
@@ -33,7 +33,7 @@ function AcademicResultByCourse(props) {
                     let rows = []
                     if (result.data.length > 0) {
                         result.data.forEach((row) => {
-                            rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+                            rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
                         setSemesterOptions(rows)
@@ -103,10 +103,10 @@ function AcademicResultByCourse(props) {
                 SemesterCode: e.value,
                 SemesterCode2: e
             })
-            if (semester.DepartmentCode !== ""){
-                getData(e.value,semester.DepartmentCode);
+            if (semester.DepartmentCode !== "") {
+                getData(e.value, semester.DepartmentCode);
             }
-        }else{
+        } else {
             setSemeter({
                 ...semester,
                 SemesterCode: "",
@@ -123,7 +123,7 @@ function AcademicResultByCourse(props) {
             DepartmentCode2: e,
         })
 
-        getData( semester.SemesterCode,e.value);
+        getData(semester.SemesterCode, e.value);
     }
 
 
@@ -143,24 +143,22 @@ function AcademicResultByCourse(props) {
             />
             <div className="row">
                 {semesterList.length > 0 &&
-                <div className="col-md-6 mb-4 form-group">
-                    <label htmlFor="_Semester">Select Semester</label>
-                    <Select
-                        id="_Semester"
-                        className="form-select form-select"
-                        value={semester.SemesterCode2}
-                        onChange={onSemesterChange}
-                        options={semesterOptions}
-                        placeholder="select Semester"
-                    />
-                </div>}
+                    <div className="col-md-6 mb-4">
+                        <SearchSelect
+                            id="_Semester"
+                            label="Select Semester"
+                            value={semester.SemesterCode2}
+                            onChange={onSemesterChange}
+                            options={semesterOptions}
+                            placeholder="select Semester"
+                        />
+                    </div>}
                 {
                     semester.SemesterCode !== "" ?
-                        <div className="col-md-6 mb-4 form-group">
-                            <label htmlFor="_Semester">Select Course</label>
-                            <Select
+                        <div className="col-md-6 mb-4">
+                            <SearchSelect
                                 name="DepartmentCode"
-                                className="form-select form-select"
+                                label="Select Course"
                                 value={semester.DepartmentCode2}
                                 onChange={onDepartmentChange}
                                 options={departmentOptions}
@@ -176,7 +174,7 @@ function AcademicResultByCourse(props) {
                     {
                         <div className="mt-4">
                             {data.length > 0 &&
-                            <AgReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY COURSE"} />
+                                <AgReportTable columns={columns} data={data} title={"ACADEMIC RESULT BY COURSE"} />
                             }
                         </div>
                     }

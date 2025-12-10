@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from "react";
-import Select from "react-select";
+import React, { useState, useEffect } from "react";
+import SearchSelect from "../../../common/select/SearchSelect";
 import SimpleFileUpload from "react-simple-file-upload";
-import {projectName, simpleFileUploadAPIKey} from "../../../../resources/url";
-import {currencyConverter} from "../../../../resources/constants";
+import { projectName, simpleFileUploadAPIKey } from "../../../../resources/url";
+import { currencyConverter } from "../../../../resources/constants";
 import AGTable from "../../../common/table/AGTable";
 
 export default function InventoryForm(props) {
@@ -31,13 +31,12 @@ export default function InventoryForm(props) {
         <>
             <div className="form-group mb-4 col-md-12">
                 <AGTable data={datatable} paging={false} />
-                <hr/>
+                <hr />
             </div>
             <div className="form-group mb-4 col-md-12">
                 <label htmlFor="VendorID">Select Vendor</label>
-                <Select
+                <SearchSelect
                     id="VendorID"
-                    name="VendorID"
                     value={props.data.VendorID2}
                     onChange={props.onVendorChange}
                     options={props.vendor}
@@ -70,9 +69,8 @@ export default function InventoryForm(props) {
             </div>
             <div className="form-group mb-4 col-md-12">
                 <label htmlFor="LocationID">Select Storage Location</label>
-                <Select
+                <SearchSelect
                     id="LocationID"
-                    name="LocationID"
                     value={props.data.LocationID2}
                     onChange={props.onLocationChange}
                     options={props.location}
@@ -108,19 +106,19 @@ export default function InventoryForm(props) {
 
                 <span className="alert-info">
                     Only .jpg, .png, .jpeg are allowed
-                  </span>
+                </span>
             </div>
 
             <div className="form-group mb-4 col-md-12 alert alert-danger">
                 <h2>Warning!</h2>
                 <p>Are you sure you want to receive the following item?</p>
                 <p>
-                   <b> ITEM NAME: </b> {props.data.ItemName} <br/>
-                    <b> QUANTITY:  </b> {props.data.Quantity} <br/>
-                    <b> UNIT PRICE:  </b> {currencyConverter(props.data.UnitPrice)} <br/>
-                    <b> STORE LOCATION:  </b> {props.data.LocationName} <br/>
-                    <b> VENDOR:  </b> {props.data.VendorName2} <br/>
-                    <b> TOTAL:  </b> {currencyConverter(parseFloat(props.data.UnitPrice) * parseInt(props.data.Quantity))} <br/>
+                    <b> ITEM NAME: </b> {props.data.ItemName} <br />
+                    <b> QUANTITY:  </b> {props.data.Quantity} <br />
+                    <b> UNIT PRICE:  </b> {currencyConverter(props.data.UnitPrice)} <br />
+                    <b> STORE LOCATION:  </b> {props.data.LocationName} <br />
+                    <b> VENDOR:  </b> {props.data.VendorName2} <br />
+                    <b> TOTAL:  </b> {currencyConverter(parseFloat(props.data.UnitPrice) * parseInt(props.data.Quantity))} <br />
                 </p>
             </div>
 
@@ -128,7 +126,7 @@ export default function InventoryForm(props) {
                 <button onClick={props.onSubmit} id="kt_modal_new_address_submit" data-kt-indicator={props.isFormLoading} className="btn btn-primary w-100">
                     <span className="indicator-label">Submit</span>
                     <span className="indicator-progress">Please wait...
-                            <span className="spinner-border spinner-border-sm align-middle ms-2"/>
+                        <span className="spinner-border spinner-border-sm align-middle ms-2" />
                     </span>
                 </button>
             </div>

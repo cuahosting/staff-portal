@@ -6,8 +6,8 @@ import axios from "axios";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Modal from "../../../common/modal/modal";
-import Table from "../../../common/table/table";
-import Select from 'react-select';
+import AGTable from "../../../common/table/AGTable";
+import SearchSelect from "../../../common/select/SearchSelect";
 import { formatDate, formatDateAndTime, TimeTablePeriods } from "../../../../resources/constants";
 
 
@@ -477,11 +477,10 @@ function ExamTimeTableHall(props) {
             <div className="flex-column-fluid">
                 <div className="col-md-12">
                     {semesterList.length > 0 &&
-                        <div className="col-md-12 mb-4 form-group">
-                            <label htmlFor="_Semester">Select Semester</label>
-                            <Select
+                        <div className="col-md-12 mb-4">
+                            <SearchSelect
                                 id="_Semester"
-                                className="form-select form-select"
+                                label="Select Semester"
                                 value={createVenue.SemesterCode2}
                                 onChange={onSemesterChange}
                                 options={semesterOptions}
@@ -564,7 +563,7 @@ function ExamTimeTableHall(props) {
                             <>
                                 <div className="col-md-12 mt-4">
                                     <div className="table-responsive">
-                                        <Table data={datatable} />
+                                        <AGTable data={datatable} />
                                     </div>
                                 </div></>
                         }

@@ -1,4 +1,22 @@
 import React from "react";
+import SearchSelect from "../../../common/select/SearchSelect";
+
+// Options for select fields
+const durationTypeOptions = [
+    { value: 'Months', label: 'Months' },
+    { value: 'Years', label: 'Years' },
+    { value: 'Semesters', label: 'Semesters' },
+];
+
+const yesNoOptions = [
+    { value: '1', label: 'Yes' },
+    { value: '0', label: 'No' },
+];
+
+const applicationTypeOptions = [
+    { value: 'undergraduate', label: 'Undergraduate' },
+    { value: 'postgraduate', label: 'Postgraduate' },
+];
 
 export default function CourseAcademicDetails(props) {
     return (
@@ -20,23 +38,15 @@ export default function CourseAcademicDetails(props) {
                         />
                     </div>
                 </div>
-                <div className="fv-row mb-6 enhanced-form-group col-md-6">
-                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="DurationType">
-                        Duration Type
-                    </label>
-                    <div className="enhanced-input-wrapper">
-                        <select
-                            id="DurationType"
-                            onChange={props.onEdit}
-                            value={props.data.DurationType}
-                            className="form-control form-control-lg form-control-solid enhanced-input"
-                        >
-                            <option>Select Duration Type</option>
-                            <option value="Months">Months</option>
-                            <option value="Years">Years</option>
-                            <option value="Semesters">Semesters</option>
-                        </select>
-                    </div>
+                <div className="col-md-6">
+                    <SearchSelect
+                        id="DurationType"
+                        label="Duration Type"
+                        value={durationTypeOptions.find(opt => opt.value === props.data.DurationType) || null}
+                        options={durationTypeOptions}
+                        onChange={(selected) => props.onEdit({ target: { id: 'DurationType', value: selected?.value || '' } })}
+                        placeholder="Select Duration Type"
+                    />
                 </div>
             </div>
 
@@ -57,41 +67,26 @@ export default function CourseAcademicDetails(props) {
                         />
                     </div>
                 </div>
-                <div className="fv-row mb-6 enhanced-form-group col-md-6">
-                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="IsAwardDegree">
-                        Is Award Degree
-                    </label>
-                    <div className="enhanced-input-wrapper">
-                        <select
-                            id="IsAwardDegree"
-                            onChange={props.onEdit}
-                            value={props.data.IsAwardDegree}
-                            className="form-control form-control-lg form-control-solid enhanced-input"
-                        >
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                        </select>
-                    </div>
+                <div className="col-md-6">
+                    <SearchSelect
+                        id="IsAwardDegree"
+                        label="Is Award Degree"
+                        value={yesNoOptions.find(opt => opt.value === props.data.IsAwardDegree?.toString()) || null}
+                        options={yesNoOptions}
+                        onChange={(selected) => props.onEdit({ target: { id: 'IsAwardDegree', value: selected?.value || '' } })}
+                        placeholder="Select Option"
+                    />
                 </div>
             </div>
 
-            <div className="fv-row mb-6 enhanced-form-group">
-                <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="ApplicationType">
-                    Application Type
-                </label>
-                <div className="enhanced-input-wrapper">
-                    <select
-                        id="ApplicationType"
-                        onChange={props.onEdit}
-                        value={props.data.ApplicationType}
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                    >
-                        <option>Select Application Type</option>
-                        <option value="undergraduate">undergraduate</option>
-                        <option value="postgraduate">postgraduate</option>
-                    </select>
-                </div>
-            </div>
+            <SearchSelect
+                id="ApplicationType"
+                label="Application Type"
+                value={applicationTypeOptions.find(opt => opt.value === props.data.ApplicationType) || null}
+                options={applicationTypeOptions}
+                onChange={(selected) => props.onEdit({ target: { id: 'ApplicationType', value: selected?.value || '' } })}
+                placeholder="Select Application Type"
+            />
         </>
     )
 }

@@ -8,7 +8,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import InventoryItemForm from "./inventory-item-form";
 function InventoryItem(props) {
     let token = props.loginData[0].token
@@ -21,7 +21,7 @@ function InventoryItem(props) {
     const [category, setCategory] = useState({  category_name: "", category_id: "" })
     const [subCategory, setSubCategory] = useState({  sub_category_name: "", sub_category_id: "" })
 
-    const columns = ["S/N", "Item Name", "Manufacturer", "Vendor", "Category", "SubCategory", "Quantity Available", "Edit", "Allocate"];
+    const columns = ["S/N", "Edit", "Allocate", "Item Name", "Manufacturer", "Vendor", "Category", "SubCategory", "Quantity Available"];
     const [tableData,setTableData] = useState([]);
 
     const fetchData = async () => {
@@ -67,7 +67,7 @@ function InventoryItem(props) {
                     const row = [];
                     if (res.data.ItemView.length > 0) {
                         res.data.ItemView.map((r, i) => {
-                            row.push([i+1, r.item_name, getItemName(_manufacturer, "manufacturer", r.manufacturer_id), getItemName(_vendor, "vendor", r.vendor_id), getItemName(_category, "category", r.category_id), getItemName(_subCategory, "sub_category", r.sub_category_id), r.quantity_available,
+                            row.push([i+1,
                                 (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -101,7 +101,8 @@ function InventoryItem(props) {
                                     <Link to={`/human-resources/inventory/allocate`} className="btn btn-sm btn-primary" >
                                         <i className="fa fa-exchange-alt" />
                                     </Link>
-                                )
+                                ),
+                                r.item_name, getItemName(_manufacturer, "manufacturer", r.manufacturer_id), getItemName(_vendor, "vendor", r.vendor_id), getItemName(_category, "category", r.category_id), getItemName(_subCategory, "sub_category", r.sub_category_id), r.quantity_available
                             ])
                         })
                         setTableData(row)
@@ -283,29 +284,28 @@ function InventoryItem(props) {
         <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Inventory Item"} items={["Inventory", "Inventory Item"]} />
+            <PageHeader
+                title={"Inventory Item"}
+                items={["Inventory", "Inventory Item"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setFormData(initialValue)
+                        }
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Add Item
+                    </button>
+                }
+            />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setFormData(initialValue)
-                                    }
-                                >
-                                    Add Item
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div className="card-body p-0">
                         <ReportTable title={"Inventory Item"} columns={columns} data={tableData} />

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../../common/select/SearchSelect";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -12,8 +11,7 @@ import AGTable from "../../../common/table/AGTable";
 import { currencyConverter, encryptData, projectCode } from "../../../../resources/constants";
 import { Link } from "react-router-dom";
 
-function PostPayment(props)
-{
+function PostPayment(props) {
     const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(false);
@@ -155,52 +153,41 @@ function PostPayment(props)
         rows: [],
     });
 
-    const getData = async () =>
-    {
+    const getData = async () => {
         await axios.get(`${serverLink}staff/academics/timetable/semester/list`, token)
-            .then((result) =>
-            {
-                if (result.data.length > 0)
-                {
+            .then((result) => {
+                if (result.data.length > 0) {
                     setSemesterList(result.data)
                 }
-            }).catch((err) =>
-            {
+            }).catch((err) => {
                 console.log("NETWORK ERROR");
             });
 
         await axios.get(`${serverLink}staff/student-manager/student/active`, token)
-            .then((result) =>
-            {
-                if (result.data.length > 0)
-                {
+            .then((result) => {
+                if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((item) =>
-                    {
+                    result.data.map((item) => {
                         rows.push({
-                            id: item.StudentID,
-                            text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
+                            value: item.StudentID,
+                            label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
                         });
                     });
                     setStudentSelectList(rows);
 
                     setStudentList(result.data)
                 }
-            }).catch((err) =>
-            {
+            }).catch((err) => {
                 console.log("NETWORK ERROR");
             });
 
     }
 
-    const getApplicantData = async (id) =>
-    {
+    const getApplicantData = async (id) => {
         setShowOutStanding(0)
         await axios.get(`${serverLink}staff/finance/applicant/details/${btoa(id)}`, token)
-            .then((result) =>
-            {
-                if (result.data.studentData.length > 0)
-                {
+            .then((result) => {
+                if (result.data.studentData.length > 0) {
                     const data = result.data.studentData[0];
                     const other_fee = result.data.otherFee;
                     const payment_history = result.data.paymentHistory;
@@ -228,21 +215,17 @@ function PostPayment(props)
 
                     const dataSet = { CourseCode: data.CourseCode, Level: data.DecisionLevel, Semester: data.DecisionSemester }
                     axios.post(`${serverLink}staff/finance/tuition/details`, dataSet, token)
-                        .then((result) =>
-                        {
-                            if (result.data.length > 0)
-                            {
+                        .then((result) => {
+                            if (result.data.length > 0) {
                                 const res = result.data[0];
                                 let desc, session_desc = '';
                                 let amt, session_amt = 0;
-                                if (studentScholarshipData.length > 0)
-                                {
+                                if (studentScholarshipData.length > 0) {
                                     desc = `Semester Tuition (${studentScholarshipData[0].ScholarshipName})`;
                                     session_desc = `Session Tuition (${studentScholarshipData[0].ScholarshipName})`;
                                     amt = parseFloat(res.SemesterTuition) - (parseFloat(res.SemesterTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
                                     session_amt = parseFloat(res.SessionTuition) - (parseFloat(res.SessionTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
-                                } else
-                                {
+                                } else {
                                     desc = `Semester Tuition`;
                                     session_desc = `Session Tuition`;
                                     amt = res.SemesterTuition;
@@ -292,40 +275,31 @@ function PostPayment(props)
                             document.getElementById("student_details").style.display = 'block';
                             document.getElementById("tab_content").style.display = 'block';
                             document.getElementById("payment_content").style.display = 'block';
-                        }).catch((err) =>
-                        {
+                        }).catch((err) => {
                             console.log("NETWORK ERROR");
                         });
 
-                    if (other_fee.length > 0)
-                    {
+                    if (other_fee.length > 0) {
                         let rows = [];
-                        other_fee.map((item, index) =>
-                        {
+                        other_fee.map((item, index) => {
                             let title = item.Title;
                             let amount = parseFloat(item.Amount);
                             let feeding_discount, hostel_discount = 0;
 
-                            if (title.includes('Feeding'))
-                            {
-                                if (studentScholarshipData.length > 0)
-                                {
+                            if (title.includes('Feeding')) {
+                                if (studentScholarshipData.length > 0) {
                                     feeding_discount = parseFloat(studentScholarshipData[0].FeedingPercentage);
-                                    if (feeding_discount > 0)
-                                    {
+                                    if (feeding_discount > 0) {
                                         title += ` ${studentScholarshipData[0].ScholarshipName}`
                                         amount -= (parseFloat(item.Amount) / 100) * parseFloat(studentScholarshipData[0].FeedingPercentage)
                                     }
                                 }
                             }
 
-                            if (title.includes('Hostel'))
-                            {
-                                if (studentScholarshipData.length > 0)
-                                {
+                            if (title.includes('Hostel')) {
+                                if (studentScholarshipData.length > 0) {
                                     hostel_discount = parseFloat(studentScholarshipData[0].HostelPercentage);
-                                    if (hostel_discount > 0)
-                                    {
+                                    if (hostel_discount > 0) {
                                         title += ` ${studentScholarshipData[0].ScholarshipName}`
                                         amount -= (parseFloat(item.Amount) / 100) * parseFloat(studentScholarshipData[0].HostelPercentage)
                                     }
@@ -357,11 +331,9 @@ function PostPayment(props)
                         });
                     }
 
-                    if (payment_history.length > 0)
-                    {
+                    if (payment_history.length > 0) {
                         let rows = [];
-                        payment_history.map((item, index) =>
-                        {
+                        payment_history.map((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 PaymentID: item.PaymentID,
@@ -387,20 +359,16 @@ function PostPayment(props)
                     const PaymentID = formData.SemesterCode + generate_token(6) + data.ApplicationID.slice(-4);
                     setPaymentRefID(PaymentID)
                 }
-            }).catch((err) =>
-            {
+            }).catch((err) => {
                 console.log("NETWORK ERROR");
             });
     }
 
-    const getStudentData = async (id) =>
-    {
+    const getStudentData = async (id) => {
         setShowOutStanding(0)
         await axios.get(`${serverLink}staff/finance/student/details/${btoa(id)}`, token)
-            .then((result) =>
-            {
-                if (result.data.studentData.length > 0)
-                {
+            .then((result) => {
+                if (result.data.studentData.length > 0) {
                     const data = result.data.studentData[0];
                     const other_fee = result.data.otherFee;
                     const payment_history = result.data.paymentHistory;
@@ -427,21 +395,17 @@ function PostPayment(props)
 
                     const dataSet = { CourseCode: data.CourseCode, StudentID: data.StudentID, Level: data.StudentLevel, Semester: data.StudentSemester }
                     axios.post(`${serverLink}staff/finance/tuition/details`, dataSet, token)
-                        .then((result) =>
-                        {
-                            if (result.data.length > 0)
-                            {
+                        .then((result) => {
+                            if (result.data.length > 0) {
                                 const res = result.data[0];
                                 let desc, session_desc = '';
                                 let amt, session_amt = 0;
-                                if (studentScholarshipData.length > 0)
-                                {
+                                if (studentScholarshipData.length > 0) {
                                     desc = `${projectCode === "ALANSAR_UNIVERSITY_STAFF_PORTAL" ? "Tuition" : "Semester Tuition"} (${studentScholarshipData[0].ScholarshipName})`;
                                     session_desc = `Session Tuition (${studentScholarshipData[0].ScholarshipName})`;
                                     amt = parseFloat(res.SemesterTuition) - (parseFloat(res.SemesterTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
                                     session_amt = parseFloat(res.SessionTuition) - (parseFloat(res.SessionTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
-                                } else
-                                {
+                                } else {
                                     desc = `${projectCode === "ALANSAR_UNIVERSITY_STAFF_PORTAL" ? "Tuition" : "Semester Tuition"} `;
                                     session_desc = `Session Tuition`;
                                     amt = res.SemesterTuition;
@@ -492,8 +456,7 @@ function PostPayment(props)
                                     columns: tuitionDatatable.columns,
                                     rows: rows,
                                 });
-                            } else
-                            {
+                            } else {
                                 setTuitionDatatable({
                                     ...tuitionDatatable,
                                     columns: tuitionDatatable.columns,
@@ -504,40 +467,31 @@ function PostPayment(props)
                             document.getElementById("student_details").style.display = 'block';
                             document.getElementById("tab_content").style.display = 'block';
                             document.getElementById("payment_content").style.display = 'block';
-                        }).catch((err) =>
-                        {
+                        }).catch((err) => {
                             console.log("NETWORK ERROR");
                         });
 
-                    if (other_fee.length > 0)
-                    {
+                    if (other_fee.length > 0) {
                         let rows = [];
-                        other_fee.map((item, index) =>
-                        {
+                        other_fee.map((item, index) => {
                             let title = item.Title;
                             let amount = parseFloat(item.Amount);
                             let feeding_discount, hostel_discount = 0;
 
-                            if (title.includes('Feeding'))
-                            {
-                                if (studentScholarshipData.length > 0)
-                                {
+                            if (title.includes('Feeding')) {
+                                if (studentScholarshipData.length > 0) {
                                     feeding_discount = parseFloat(studentScholarshipData[0].FeedingPercentage);
-                                    if (feeding_discount > 0)
-                                    {
+                                    if (feeding_discount > 0) {
                                         title += ` ${studentScholarshipData[0].ScholarshipName}`
                                         amount -= (parseFloat(item.Amount) / 100) * parseFloat(studentScholarshipData[0].FeedingPercentage)
                                     }
                                 }
                             }
 
-                            if (title.includes('Hostel'))
-                            {
-                                if (studentScholarshipData.length > 0)
-                                {
+                            if (title.includes('Hostel')) {
+                                if (studentScholarshipData.length > 0) {
                                     hostel_discount = parseFloat(studentScholarshipData[0].HostelPercentage);
-                                    if (hostel_discount > 0)
-                                    {
+                                    if (hostel_discount > 0) {
                                         title += ` ${studentScholarshipData[0].ScholarshipName}`
                                         amount -= (parseFloat(item.Amount) / 100) * parseFloat(studentScholarshipData[0].HostelPercentage)
                                     }
@@ -567,8 +521,7 @@ function PostPayment(props)
                             columns: otherFeeDatatable.columns,
                             rows: rows,
                         });
-                    } else
-                    {
+                    } else {
                         setOtherFeeDatatable({
                             ...otherFeeDatatable,
                             columns: otherFeeDatatable.columns,
@@ -576,11 +529,9 @@ function PostPayment(props)
                         });
                     }
 
-                    if (payment_history.length > 0)
-                    {
+                    if (payment_history.length > 0) {
                         let rows = [];
-                        payment_history.map((item, index) =>
-                        {
+                        payment_history.map((item, index) => {
                             rows.push({
                                 sn: index + 1,
                                 PaymentID: item.PaymentID,
@@ -602,8 +553,7 @@ function PostPayment(props)
                             columns: paymentHistoryDatatable.columns,
                             rows: rows,
                         });
-                    } else
-                    {
+                    } else {
                         setPaymentHistoryDatatable({
                             ...paymentHistoryDatatable,
                             columns: paymentHistoryDatatable.columns,
@@ -614,15 +564,13 @@ function PostPayment(props)
                     const PaymentID = formData.SemesterCode + generate_token(6) + data.StudentID.slice(-4);
                     setPaymentRefID(PaymentID)
                 }
-            }).catch((err) =>
-            {
+            }).catch((err) => {
                 console.log("NETWORK ERROR");
             });
     }
 
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         getData();
         document.getElementById("student_id").style.display = 'none';
         document.getElementById("new_student").style.display = 'none';
@@ -634,8 +582,7 @@ function PostPayment(props)
     useEffect(() => { setFormData(formData) }, [change])
     // useEffect(()=>{setPaymentRefID(paymentRefID)}, [change])
 
-    const onTuitionSelect = (amount, name) =>
-    {
+    const onTuitionSelect = (amount, name) => {
         setChange('onTuitionSelect')
         let itemTotal = 0;
         const item_value = parseFloat(amount);
@@ -648,8 +595,7 @@ function PostPayment(props)
 
         itemArray.push(tuitionData);
         setCart(prevState => [...prevState.filter(e => !e.item_name.includes('Tuition')), tuitionData])
-        for (let i = 0; i < itemArray.length; i++)
-        {
+        for (let i = 0; i < itemArray.length; i++) {
             itemTotal += itemArray[i].item_amount
         }
 
@@ -658,32 +604,26 @@ function PostPayment(props)
         setTotalCheckedItems(itemTotal)
     }
 
-    const onOtherFeeChecked = (amount, name, e) =>
-    {
+    const onOtherFeeChecked = (amount, name, e) => {
         setChange('onOtherFeeChecked')
         const item_value = parseFloat(amount);
         const item_name = name;
         let itemTotal = 0;
-        if (e.target.checked)
-        {
+        if (e.target.checked) {
             const tuitionData = { item_name: item_name, item_amount: item_value }
             itemArray.push(tuitionData)
-            for (let i = 0; i < itemArray.length; i++)
-            {
+            for (let i = 0; i < itemArray.length; i++) {
                 itemTotal += itemArray[i].item_amount
             }
             setCart(prevState => [...prevState, tuitionData])
-        } else
-        {
-            const newItem = itemArray.filter((item) =>
-            {
+        } else {
+            const newItem = itemArray.filter((item) => {
                 return item.item_name !== item_name
             });
             itemArray.length = 0;
             itemArray.push(...newItem)
             setCart(prevState => [...prevState.filter(e => e.item_name !== item_name)])
-            for (let i = 0; i < itemArray.length; i++)
-            {
+            for (let i = 0; i < itemArray.length; i++) {
                 itemTotal += itemArray[i].item_amount
             }
             // setAmountDue(amountDue => amountDue - item_value)
@@ -694,11 +634,9 @@ function PostPayment(props)
         setTotalCheckedItems(itemTotal)
     }
 
-    const onEdit = (e) =>
-    {
+    const onEdit = (e) => {
 
-        if (e.target.name === 'UserType')
-        {
+        if (e.target.name === 'UserType') {
             setFormData({
                 ...formData,
                 ApplicationID: "",
@@ -706,22 +644,19 @@ function PostPayment(props)
                 AppID: "",
                 UserType: "",
             })
-            if (e.target.value === 'Returning Student')
-            {
+            if (e.target.value === 'Returning Student') {
                 document.getElementById("student_id").style.display = 'block';
                 document.getElementById("new_student").style.display = 'none';
                 document.getElementById("student_details").style.display = 'none';
                 document.getElementById("tab_content").style.display = 'none';
                 document.getElementById("payment_content").style.display = 'none';
-            } else if (e.target.value === 'New Student')
-            {
+            } else if (e.target.value === 'New Student') {
                 document.getElementById("new_student").style.display = 'block';
                 document.getElementById("student_id").style.display = 'none';
                 document.getElementById("student_details").style.display = 'none';
                 document.getElementById("tab_content").style.display = 'none';
                 document.getElementById("payment_content").style.display = 'none';
-            } else
-            {
+            } else {
 
             }
         }
@@ -742,17 +677,14 @@ function PostPayment(props)
         //     }
         // }
 
-        if (e.target.name === 'AmountPaid')
-        {
-            if (e.target.value !== '')
-            {
+        if (e.target.name === 'AmountPaid') {
+            if (e.target.value !== '') {
                 let formatter = new Intl.NumberFormat('en-US', {
                     style: 'currency',
                     currency: 'NGN',
                 });
 
-                setTimeout(() =>
-                {
+                setTimeout(() => {
                     const amount_paid = e.target.value;
                     let amount_due = amountDue.toString();
 
@@ -776,18 +708,15 @@ function PostPayment(props)
 
     };
 
-    const handleStudentChange = (e) =>
-    {
+    const handleStudentChange = (e) => {
         document.getElementById("student_details").style.display = 'none';
         document.getElementById("tab_content").style.display = 'none';
         document.getElementById("payment_content").style.display = 'none';
-        if (e.target.value !== '')
-        {
+        if (e.target.value !== '') {
             const filter_student = studentList.filter(
                 (i) => i.StudentID === e.target.value
             );
-            if (filter_student.length > 0)
-            {
+            if (filter_student.length > 0) {
                 selectedStudent.StudentID = filter_student[0].StudentID;
                 const id = filter_student[0].StudentID;
                 getStudentData(id);
@@ -797,40 +726,34 @@ function PostPayment(props)
 
     };
 
-    const handleApplicantChange = (e) =>
-    {
+    const handleApplicantChange = (e) => {
         document.getElementById("student_details").style.display = 'none';
         document.getElementById("tab_content").style.display = 'none';
         document.getElementById("payment_content").style.display = 'none';
-        if (e.target.value !== '')
-        {
+        if (e.target.value !== '') {
             const id = formData.ApplicationID;
             getApplicantData(id);
             setChange(id)
         }
     };
 
-    const generate_token = (length) =>
-    {
+    const generate_token = (length) => {
         //edit the token allowed characters
         let a = "1234567890".split("");
         let b = [];
-        for (let i = 0; i < length; i++)
-        {
+        for (let i = 0; i < length; i++) {
             let j = (Math.random() * (a.length - 1)).toFixed(0);
             b[i] = a[j];
         }
         return b.join("");
     }
 
-    const onTriggerSubmit = async () =>
-    {
+    const onTriggerSubmit = async () => {
         setIsSubmitLoading(true)
         onSubmit();
     }
 
-    const onSubmit = async () =>
-    {
+    const onSubmit = async () => {
         let outstanding = outStandingAmount;
         let check_outstanding = outStandingAmount;
         let amount_due = amountDue.toString();
@@ -852,32 +775,27 @@ function PostPayment(props)
             PaymentID: paymentRefID,
         });
         setChange("UpdateMyState");
-        setFormData((state) =>
-        {
+        setFormData((state) => {
             return state;
         }
         )
 
-        if (formData.SemesterCode.toString().trim() === "")
-        {
+        if (formData.SemesterCode.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Please select the payment semester", "error");
             return false;
         }
 
-        if (formData.AmountPaid.toString().trim() === "")
-        {
+        if (formData.AmountPaid.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Please enter the amount paid", "error");
             return false;
         }
 
-        if (formData.PaymentMethod.toString().trim() === "")
-        {
+        if (formData.PaymentMethod.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Please select the payment method", "error");
             return false;
         }
 
-        if (paymentRefID.toString().trim() === "")
-        {
+        if (paymentRefID.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Payment reference cannot be empty, please reload the page and try again!", "error");
             return false;
         }
@@ -887,12 +805,9 @@ function PostPayment(props)
         else
             outstanding = parseFloat(amount_due) - parseFloat(amount_paid);
 
-        if (parseFloat(amount_paid) > check_outstanding)
-        {
-            if (check_outstanding < 0)
-            {
-                if (itemArray.length < 1)
-                {
+        if (parseFloat(amount_paid) > check_outstanding) {
+            if (check_outstanding < 0) {
+                if (itemArray.length < 1) {
                     let append_data = {
                         item_name: 'Account Credit',
                         item_amount: amount_paid
@@ -903,10 +818,8 @@ function PostPayment(props)
             }
         }
 
-        if (check_outstanding > 0)
-        {
-            let newArray = itemArray.filter(function (item)
-            {
+        if (check_outstanding > 0) {
+            let newArray = itemArray.filter(function (item) {
                 return item.item_name !== 'Outstanding'
             });
             itemArray.length = 0;
@@ -923,20 +836,15 @@ function PostPayment(props)
         let sendData = { ...formData, TotalExpectedAmount: amount_expected, AmountDue: amountDue, OutStandingAmount: outstanding, PaymentID: paymentRefID, cartItems: [...cart] };
         await axios
             .post(`${serverLink}staff/finance/post-payment`, sendData, token)
-            .then((result) =>
-            {
-                if (result.data.message === "success")
-                {
+            .then((result) => {
+                if (result.data.message === "success") {
                     axios.post(`${serverLink}staff/finance/post-payment-details`, sendData, token)
-                        .then(result =>
-                        {
-                            if (result.data.message === "success")
-                            {
+                        .then(result => {
+                            if (result.data.message === "success") {
                                 toast.success("Payment Posted Successfully");
                                 setShowSuccess(true)
                                 setChange("UpdateNewData");
-                            } else
-                            {
+                            } else {
                                 showAlert(
                                     "ERROR",
                                     "Something went wrong. Please try again!",
@@ -944,13 +852,11 @@ function PostPayment(props)
                                 );
                             }
                         })
-                        .catch(err =>
-                        {
+                        .catch(err => {
                             console.error('ERROR', err);
                         });
 
-                } else
-                {
+                } else {
                     showAlert(
                         "ERROR",
                         "Something went wrong. Please try again!",
@@ -959,8 +865,7 @@ function PostPayment(props)
                 }
                 setIsSubmitLoading(false)
             })
-            .catch((error) =>
-            {
+            .catch((error) => {
                 setIsSubmitLoading(false)
                 showAlert(
                     "NETWORK ERROR",
@@ -970,26 +875,20 @@ function PostPayment(props)
             });
     }
 
-    const onAllowResult = async () =>
-    {
+    const onAllowResult = async () => {
         let sendData = { StudentID: formData.StudentID, InsertedBy: formData.InsertedBy }
         let studentName = `${formData.FirstName} ${formData.MiddleName} ${formData.Surname}`
         showConfirm(
             "CONFIRM UNBLOCKING",
             `Are you sure you want to unblock ${studentName} for Result?`,
             "warning"
-        ).then(async (IsConfirmed) =>
-        {
-            if (IsConfirmed)
-            {
+        ).then(async (IsConfirmed) => {
+            if (IsConfirmed) {
                 await axios.post(`${serverLink}staff/finance/allow-student-result`, sendData, token)
-                    .then(result =>
-                    {
-                        if (result.data.message === "success")
-                        {
+                    .then(result => {
+                        if (result.data.message === "success") {
                             toast.success("Result Access Granted Successfully");
-                        } else
-                        {
+                        } else {
                             showAlert(
                                 "ERROR",
                                 "Something went wrong. Please try again!",
@@ -997,37 +896,29 @@ function PostPayment(props)
                             );
                         }
                     })
-                    .catch(err =>
-                    {
+                    .catch(err => {
                         console.error('ERROR', err);
                     })
-            } else
-            {
+            } else {
 
             }
         });
     }
 
-    const onAllowRegistration = async () =>
-    {
+    const onAllowRegistration = async () => {
         let sendData = { StudentID: formData.StudentID, InsertedBy: formData.InsertedBy };
         let studentName = `${formData.FirstName} ${formData.MiddleName} ${formData.Surname}`
         showConfirm(
             "CONFIRM UNBLOCKING",
             `Are you sure you want to unblock ${studentName} for Registration?`,
             "warning"
-        ).then(async (IsConfirmed) =>
-        {
-            if (IsConfirmed)
-            {
+        ).then(async (IsConfirmed) => {
+            if (IsConfirmed) {
                 await axios.post(`${serverLink}staff/finance/allow-student-registration`, sendData, token)
-                    .then(result =>
-                    {
-                        if (result.data.message === "success")
-                        {
+                    .then(result => {
+                        if (result.data.message === "success") {
                             toast.success("Registration Access Granted Successfully");
-                        } else
-                        {
+                        } else {
                             showAlert(
                                 "ERROR",
                                 "Something went wrong. Please try again!",
@@ -1035,12 +926,10 @@ function PostPayment(props)
                             );
                         }
                     })
-                    .catch(err =>
-                    {
+                    .catch(err => {
                         console.error('ERROR', err);
                     })
-            } else
-            {
+            } else {
 
             }
         });
@@ -1060,47 +949,36 @@ function PostPayment(props)
                         <div className="row mt-1">
                             <div className="col-md-3">
                                 <div className="form-group mb-4">
-                                    <label htmlFor="SemesterCode">Select Semester</label>
-                                    <select
-                                        id={"SemesterCode"}
-                                        name={"SemesterCode"}
-                                        onChange={onEdit}
-                                        value={formData.SemesterCode}
-                                        className={"form-control"}
-                                    >
-                                        <option>Select Semester</option>
-                                        {
-                                            semesterList.length > 0 && semesterList.map((semester, index) =>
-                                            {
-                                                return <option key={index} value={semester.SemesterCode}>{semester.Description}</option>
-                                            })
-                                        }
-
-                                    </select>
+                                    <SearchSelect
+                                        id="SemesterCode"
+                                        label="Select Semester"
+                                        value={semesterList.map(s => ({ value: s.SemesterCode, label: s.Description })).find(op => op.value === formData.SemesterCode) || null}
+                                        options={semesterList.map(s => ({ value: s.SemesterCode, label: s.Description }))}
+                                        onChange={(selected) => onEdit({ target: { name: 'SemesterCode', value: selected?.value || '' } })}
+                                        placeholder="Select Semester"
+                                    />
                                 </div>
                                 <div className="form-group mb-4">
-                                    <label htmlFor="UserType">Select User Type</label>
-                                    <select
-                                        id={"UserType"}
-                                        name={"UserType"}
-                                        onChange={onEdit}
-                                        value={formData.UserType}
-                                        className={"form-control"}
-                                    >
-                                        <option value="">Select User Type</option>
-                                        <option value="Returning Student">Returning Student</option>
-                                        <option value="New Student">New Student</option>
-                                    </select>
+                                    <SearchSelect
+                                        id="UserType"
+                                        label="Select User Type"
+                                        value={formData.UserType ? { value: formData.UserType, label: formData.UserType } : null}
+                                        options={[
+                                            { value: "Returning Student", label: "Returning Student" },
+                                            { value: "New Student", label: "New Student" }
+                                        ]}
+                                        onChange={(selected) => onEdit({ target: { name: 'UserType', value: selected?.value || '' } })}
+                                        placeholder="Select User Type"
+                                    />
                                 </div>
                                 <div className="form-group mb-4" id="student_id">
-                                    <label htmlFor="StudentID">Select Student</label>
-                                    <Select2
-                                        defaultValue={selectedStudent.StudentID}
-                                        data={studentSelectList}
-                                        onChange={handleStudentChange}
-                                        options={{
-                                            placeholder: "Search Student",
-                                        }}
+                                    <SearchSelect
+                                        id="StudentID"
+                                        label="Select Student"
+                                        value={studentSelectList.find(s => s.value === selectedStudent.StudentID) || null}
+                                        options={studentSelectList}
+                                        onChange={(selected) => handleStudentChange({ target: { value: selected?.value || '' } })}
+                                        placeholder="Search Student"
                                     />
                                     {/*<select*/}
                                     {/*    id={"StudentID"}*/}
@@ -1132,18 +1010,17 @@ function PostPayment(props)
                                         />
                                     </div>
                                     <div className="form-group mb-4">
-                                        <label htmlFor="UserType">Select Admission Type</label>
-                                        <select
-                                            id={"AdmissionType"}
-                                            name={"AdmissionType"}
-                                            onChange={handleApplicantChange}
-                                            value={formData.AdmissionType}
-                                            className={"form-control"}
-                                        >
-                                            <option value="">Select Admission Type</option>
-                                            <option value="undergraduate">Undergraduate</option>
-                                            <option value="postgraduate">Postgraduate</option>
-                                        </select>
+                                        <SearchSelect
+                                            id="AdmissionType"
+                                            label="Select Admission Type"
+                                            value={formData.AdmissionType ? { value: formData.AdmissionType, label: formData.AdmissionType.charAt(0).toUpperCase() + formData.AdmissionType.slice(1) } : null}
+                                            options={[
+                                                { value: "undergraduate", label: "Undergraduate" },
+                                                { value: "postgraduate", label: "Postgraduate" }
+                                            ]}
+                                            onChange={(selected) => handleApplicantChange({ target: { name: 'AdmissionType', value: selected?.value || '' } })}
+                                            placeholder="Select Admission Type"
+                                        />
                                     </div>
                                 </div>
                                 <div id="student_details">
@@ -1322,20 +1199,19 @@ function PostPayment(props)
                                     />
                                 </div>
                                 <div className="form-group mb-4">
-                                    <label htmlFor="PaymentMethod">Payment Method</label>
-                                    <select
-                                        id={"PaymentMethod"}
-                                        name={"PaymentMethod"}
-                                        onChange={onEdit}
-                                        value={formData.PaymentMethod}
-                                        className={"form-control"}
-                                    >
-                                        <option value="">Select Payment Method</option>
-                                        <option value="Bank">Bank</option>
-                                        <option value="Bank Draft">Bank Draft</option>
-                                        <option value="Transfer">Transfer</option>
-                                        <option value="Trimester Credit">Trimester Credit</option>
-                                    </select>
+                                    <SearchSelect
+                                        id="PaymentMethod"
+                                        label="Payment Method"
+                                        value={formData.PaymentMethod ? { value: formData.PaymentMethod, label: formData.PaymentMethod } : null}
+                                        options={[
+                                            { value: "Bank", label: "Bank" },
+                                            { value: "Bank Draft", label: "Bank Draft" },
+                                            { value: "Transfer", label: "Transfer" },
+                                            { value: "Trimester Credit", label: "Trimester Credit" }
+                                        ]}
+                                        onChange={(selected) => onEdit({ target: { name: 'PaymentMethod', value: selected?.value || '' } })}
+                                        placeholder="Select Payment Method"
+                                    />
                                 </div>
                                 <div className="form-group mb-4">
                                     <label htmlFor="PaymentID">Payment Reference</label>
@@ -1382,8 +1258,7 @@ function PostPayment(props)
                                                 </thead>
                                                 <tbody>
                                                     {
-                                                        cart.map((item, index) =>
-                                                        {
+                                                        cart.map((item, index) => {
                                                             return (
                                                                 <tr key={index}><td>{index + 1}</td><td>{item.item_name}</td><td>{item.item_amount}</td></tr>
                                                             )
@@ -1404,8 +1279,7 @@ function PostPayment(props)
     );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails,
     };

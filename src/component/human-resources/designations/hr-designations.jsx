@@ -20,12 +20,12 @@ function HRDesignations(props) {
                 field: "sn",
             },
             {
-                label: "Designation Name",
-                field: "name",
-            },
-            {
                 label: "Action",
                 field: "action",
+            },
+            {
+                label: "Designation Name",
+                field: "name",
             },
         ],
         rows: [],
@@ -215,6 +215,7 @@ function HRDesignations(props) {
                             })
                         }
                     >
+                        <i className="fa fa-plus me-2"></i>
                         Add Designation
                     </button>
                 }

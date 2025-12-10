@@ -4,7 +4,7 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 import { useReactToPrint } from "react-to-print";
 import './style.css';
 
@@ -33,9 +33,16 @@ const titleStyle = {
     marginBottom: "0", // Removed margin between the titles
 };
 
+// Helper function to convert names to Title Case
+const toTitleCase = (str) => {
+    if (!str) return '';
+    return str.toLowerCase().split(' ').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+};
 
-function CAAcknowledgementByCourse(props)
-{
+
+function CAAcknowledgementByCourse(props) {
     const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
@@ -55,18 +62,13 @@ function CAAcknowledgementByCourse(props)
         DepartmentCode2: "",
     })
 
-    const getSemesters = async () =>
-    {
-        try
-        {
+    const getSemesters = async () => {
+        try {
             await axios.get(`${serverLink}staff/timetable/timetable/semester`, token)
-                .then((result) =>
-                {
+                .then((result) => {
                     let rows = []
-                    if (result.data.length > 0)
-                    {
-                        result.data.map((row) =>
-                        {
+                    if (result.data.length > 0) {
+                        result.data.map((row) => {
                             rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
@@ -74,24 +76,19 @@ function CAAcknowledgementByCourse(props)
                     }
                     setIsLoading(false)
                 })
-        } catch (error)
-        {
+        } catch (error) {
             console.log(error)
         }
 
     }
 
-    const getCourses = async () =>
-    {
+    const getCourses = async () => {
         await axios
             .get(`${serverLink}staff/assessment/exam/module/all`, token)
-            .then((result) =>
-            {
+            .then((result) => {
                 let rows = [];
-                if (result.data.length > 0)
-                {
-                    result.data.map((row) =>
-                    {
+                if (result.data.length > 0) {
+                    result.data.map((row) => {
                         rows.push({ value: row.ModuleCode, label: row.ModuleName + (` (${row.ModuleCode})`) })
                     });
                     setDepartmentsOptions(rows)
@@ -101,12 +98,10 @@ function CAAcknowledgementByCourse(props)
             });
     };
 
-    const getData = async (semester, course) =>
-    {
+    const getData = async (semester, course) => {
         setIsLoading(true)
         await axios.get(`${serverLink}staff/assessment/exam/get-student-scores/${semester}/${course}`, token)
-            .then((result) =>
-            {
+            .then((result) => {
                 let rows = [];
                 setAssessmentSettings(result.data.settings)
                 setModuleDetails(result.data.module)
@@ -114,28 +109,23 @@ function CAAcknowledgementByCourse(props)
                 setIsLoading(false);
                 setData(result.data.data)
             })
-            .catch((err) =>
-            {
+            .catch((err) => {
                 console.log(err)
                 console.log("NETWORK ERROR");
             });
     }
 
-    const onSemesterChange = async (e) =>
-    {
-        if (e.value !== "")
-        {
+    const onSemesterChange = async (e) => {
+        if (e.value !== "") {
             setSemeter({
                 ...semester,
                 SemesterCode: e.value,
                 SemesterCode2: e
             })
-            if (semester.DepartmentCode !== "")
-            {
+            if (semester.DepartmentCode !== "") {
                 getData(e.value, semester.DepartmentCode);
             }
-        } else
-        {
+        } else {
             setSemeter({
                 ...semester,
                 SemesterCode: "",
@@ -145,8 +135,7 @@ function CAAcknowledgementByCourse(props)
         }
     }
 
-    const onDepartmentChange = (e) =>
-    {
+    const onDepartmentChange = (e) => {
         setSemeter({
             ...semester,
             DepartmentCode: e.value,
@@ -157,16 +146,13 @@ function CAAcknowledgementByCourse(props)
     }
 
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         getSemesters();
         getCourses();
     }, [""]);
 
-    const onPrintPage = () =>
-    {
-        setTimeout(() =>
-        {
+    const onPrintPage = () => {
+        setTimeout(() => {
             handlePrint();
         }, 1000);
     };
@@ -183,38 +169,40 @@ function CAAcknowledgementByCourse(props)
                 title={"CA SUMMARY BY MODULE"}
                 items={["Assessment", "CA SUMMARY ", " BY MODULE"]}
             />
-            <div className="row">
-                {semesterList.length > 0 &&
-                    <div className="col-md-6 mb-4 form-group">
-                        <label htmlFor="_Semester">Select Semester</label>
-                        <Select
-                            id="_Semester"
-                            className="form-select form-select"
-                            value={semester.SemesterCode2}
-                            onChange={onSemesterChange}
-                            options={semesterOptions}
-                            placeholder="select Semester"
-                        />
-                    </div>}
-                {
-                    semester.SemesterCode !== "" ?
-                        <div className="col-md-6 mb-4 form-group">
-                            <label htmlFor="_Semester">Select Module</label>
-                            <Select
-                                name="DepartmentCode"
-                                className="form-select form-select"
-                                value={semester.DepartmentCode2}
-                                onChange={onDepartmentChange}
-                                options={departmentOptions}
-                                placeholder="select Module"
-                            />
+            <div className="flex-column-fluid">
+                <div className="card card-no-border">
+                    <div className="card-body p-4">
+                        <div className="row">
+                            {semesterList.length > 0 &&
+                                <div className="col-md-6 mb-4">
+                                    <SearchSelect
+                                        id="_Semester"
+                                        label="Select Semester"
+                                        value={semester.SemesterCode2}
+                                        onChange={onSemesterChange}
+                                        options={semesterOptions}
+                                        placeholder="select Semester"
+                                    />
+                                </div>}
+                            {
+                                semester.SemesterCode !== "" ?
+                                    <div className="col-md-6 mb-4">
+                                        <SearchSelect
+                                            id="DepartmentCode"
+                                            label="Select Module"
+                                            value={semester.DepartmentCode2}
+                                            onChange={onDepartmentChange}
+                                            options={departmentOptions}
+                                            placeholder="select Module"
+                                        />
+                                    </div>
+                                    : <></>
+                            }
                         </div>
-                        : <></>
-                }
+                    </div>
+                </div>
 
-            </div>
-            <div className="flex-column-fluid mb-2">
-                <div className="row">
+                <div className="row mt-4">
                     {
                         data.length > 0 ?
                             <>
@@ -290,32 +278,31 @@ function CAAcknowledgementByCourse(props)
                                             </p>
                                         </div>
                                         <div className="mt-4">
-                                            <table className="table">
+                                            <table className="table table-bordered table-striped table-hover" style={{ fontSize: '14px' }}>
                                                 <thead>
-                                                    <tr className="bg-secondary">
-                                                        <th width="5%" align="left">SN</th>
-                                                        <th width="25%" align="left">Student_ID</th>
-                                                        <th width="30%" align="left">Student Name</th>
+                                                    <tr className="bg-primary text-white" style={{ backgroundColor: '#4e73df' }}>
+                                                        <th width="5%" align="center" style={{ padding: '12px', fontWeight: 'bold' }}>SN</th>
+                                                        <th width="15%" align="left" style={{ padding: '12px', fontWeight: 'bold' }}>Student ID</th>
+                                                        <th width="25%" align="left" style={{ padding: '12px', fontWeight: 'bold' }}>Student Name</th>
                                                         {assessmentSettings.map((r, index) => (
-                                                            <th key={index} >
+                                                            <th key={index} align="center" style={{ padding: '12px', fontWeight: 'bold' }}>
                                                                 {r.CAName}<br />
-                                                                {r.CAMarked} | {r.CAPerCon}%
+                                                                <small style={{ fontWeight: 'normal' }}>{r.CAMarked} | {r.CAPerCon}%</small>
                                                             </th>
                                                         ))}
-                                                        <th width="10%" align="left">Total</th>
+                                                        <th width="10%" align="center" style={{ padding: '12px', fontWeight: 'bold' }}>Total</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {
-                                                        data.map((item, index) =>
-                                                        {
+                                                        data.map((item, index) => {
                                                             return (
                                                                 <tr key={index}>
-                                                                    <td>{index + 1}</td>
-                                                                    <td>{item.StudentID}</td>
-                                                                    <td>{item.StudentName}</td>
-                                                                    {item.Scores.map(e => <td>{e}</td>)}
-                                                                    <td>{item.TotalScore}</td>
+                                                                    <td style={{ padding: '10px', textAlign: 'center' }}>{index + 1}</td>
+                                                                    <td style={{ padding: '10px' }}>{item.StudentID}</td>
+                                                                    <td style={{ padding: '10px' }}>{toTitleCase(item.StudentName)}</td>
+                                                                    {item.Scores.map((e, i) => <td key={i} style={{ padding: '10px', textAlign: 'center' }}>{e}</td>)}
+                                                                    <td style={{ padding: '10px', textAlign: 'center', fontWeight: 'bold' }}>{item.TotalScore}</td>
                                                                 </tr>
                                                             )
                                                         })
@@ -345,8 +332,7 @@ function CAAcknowledgementByCourse(props)
     );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         LoginDetails: state.LoginDetails,
     };

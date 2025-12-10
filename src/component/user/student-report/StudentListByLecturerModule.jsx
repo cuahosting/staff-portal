@@ -3,11 +3,10 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
 const StudentListByLecturerModule = (props) => {
   const token = props.login[0].token;
@@ -80,9 +79,9 @@ const StudentListByLecturerModule = (props) => {
         .then((response) => {
           let rows = [];
           response.data.length > 0 &&
-          response.data.map((row) => {
-            rows.push({ text: row.ModuleName + "--" + row.ModuleCode, id: row.ModuleCode});
-          });
+            response.data.map((row) => {
+              rows.push({ value: row.ModuleCode, label: row.ModuleName + " -- " + row.ModuleCode });
+            });
           setModuleList(rows);
           setIsLoading(false);
         })
@@ -93,7 +92,7 @@ const StudentListByLecturerModule = (props) => {
     getModuleListByLecturer();
   }, []);
 
-  const handleSubmit = async (e) => {};
+  const handleSubmit = async (e) => { };
   return isLoading ? (
     <Loader />
   ) : (
@@ -110,19 +109,17 @@ const StudentListByLecturerModule = (props) => {
                 <form>
                   <div className="row fv-row">
                     <div className="col-md-12 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
-                        Select Module
-                      </label>
-
-                      <Select2
-                    id="code"
-                    data={moduleList}
-                    value={moduleCode.code}
-                    onSelect={handleChange}
-                    options={{
-                      placeholder: "Search Module",
-                    }}
-                  />
+                      <SearchSelect
+                        id="code"
+                        label="Select Module"
+                        value={moduleList.find(m => m.value === moduleCode.code) || null}
+                        options={moduleList}
+                        onChange={(selected) => {
+                          handleChange({ target: { id: 'code', value: selected?.value || '' }, preventDefault: () => { } });
+                        }}
+                        placeholder="Search Module"
+                        required
+                      />
                       {/* <select
                         className="form-select"
                         data-placeholder="Select Module"

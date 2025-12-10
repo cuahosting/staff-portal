@@ -6,7 +6,7 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import Select2 from "react-select2-wrapper";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function InitiateClearance(props) {
   const token = props.loginData.token;
@@ -44,8 +44,8 @@ function InitiateClearance(props) {
           let rows = [];
           result.map((item) => {
             rows.push({
-              id: item.StudentID,
-              text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
+              value: item.StudentID,
+              label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
             });
           });
           setStudentSelectList(rows);
@@ -61,7 +61,7 @@ function InitiateClearance(props) {
   }, []);
   const handleChange = (e) => {
     const filter_student = studentList.filter(
-      (i) => i.StudentID === e.target.value
+      (i) => i.StudentID === e.value
     );
     if (filter_student.length > 0) {
       selectedStudent.StudentID = filter_student[0].StudentID;
@@ -81,13 +81,11 @@ function InitiateClearance(props) {
             <div className="row g-3">
               <div className="col-sm-3">
                 <label htmlFor="hostelId">Select Student</label>
-                <Select2
-                  defaultValue={selectedStudent.StudentID}
-                  data={studentSelectList}
+                <SearchSelect
+                  value={studentSelectList.find(op => op.value === selectedStudent.StudentID) || null}
                   onChange={handleChange}
-                  options={{
-                    placeholder: "Search Student",
-                  }}
+                  options={studentSelectList}
+                  placeholder="Search Student"
                 />
               </div>
               <div class="col-sm-3">

@@ -8,12 +8,11 @@ import Modal from "../../../common/modal/modal";
 import { connect } from "react-redux";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import Select from 'react-select';
+import SearchSelect from "../../../common/select/SearchSelect";
 
 
 
-function HRPayrollManageAllowanceAndDeduction(props)
-{
+function HRPayrollManageAllowanceAndDeduction(props) {
     const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +20,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
     const [ledgerSelect, setLedgerSelect] = useState([]);
     const [staffList, setStaffList] = useState([]);
     const [staffSelect, setStaffSelect] = useState([]);
-    const columns = ["Staff ID", "Staff Name", "Post Type", "Ledger Account", "Start Date", "End Date", "Frequency", "Amount", "Status", "Added By", "Action"]
+    const columns = ["SN", "Action", "Staff ID", "Staff Name", "Post Type", "Ledger Account", "Start Date", "End Date", "Frequency", "Amount", "Status", "Added By"]
     const [data, setData] = useState([]);
     const [createItem, setCreateItem] = useState({
         staff_id: "",
@@ -36,8 +35,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
         entry_id: "",
     })
 
-    const onClear = () =>
-    {
+    const onClear = () => {
         setCreateItem({
             ...createItem,
             staff_id: "",
@@ -54,50 +52,37 @@ function HRPayrollManageAllowanceAndDeduction(props)
         })
     };
 
-    const getRecord = async () =>
-    {
+    const getRecord = async () => {
         await axios
             .get(`${serverLink}staff/hr/payroll/ledger/list`, token)
-            .then((result) =>
-            {
+            .then((result) => {
                 const data = result.data;
                 setLedgerList(data)
-                if (data.length > 0)
-                {
+                if (data.length > 0) {
                     let ledger_list = [];
-                    data.map(item =>
-                    {
+                    data.map(item => {
                         ledger_list.push({ value: item.EntryID, label: item.Description, id: 'ledger_account' })
                     })
                     setLedgerSelect(ledger_list);
                 }
             })
-            .catch((err) =>
-            {
+            .catch((err) => {
                 console.log("NETWORK ERROR");
             });
 
         await axios
             .get(`${serverLink}staff/hr/payroll/entry/list`, token)
-            .then((result) =>
-            {
-                if (result.data.length > 0)
-                {
+            .then((result) => {
+                if (result.data.length > 0) {
                     let rows = [];
-                    result.data.map((item, index) =>
-                    {
+                    result.data.map((item, index) => {
                         rows.push([
-                            item.StaffID, item.StaffName, item.PostType, item.Description,
-                            formatDateAndTime(item.StartDate, "month_and_year"),
-                            formatDateAndTime(item.EndDate, "month_and_year"),
-                            item.Frequency, currencyConverter(item.Amount),
-                            item.Status, item.InsertedBy,
+                            index + 1,
                             <button
                                 className={"btn btn-sm btn-primary"}
                                 data-bs-toggle="modal"
                                 data-bs-target="#kt_modal_general"
-                                onClick={async () =>
-                                {
+                                onClick={async () => {
 
                                     setCreateItem({
                                         staff_id: item.StaffID,
@@ -115,26 +100,28 @@ function HRPayrollManageAllowanceAndDeduction(props)
                                 }
 
                                 }
-                            ><i className="fa fa-pen" /></button>]
+                            ><i className="fa fa-pen" /></button>,
+                            item.StaffID, item.StaffName, item.PostType, item.Description,
+                            formatDateAndTime(item.StartDate, "month_and_year"),
+                            formatDateAndTime(item.EndDate, "month_and_year"),
+                            item.Frequency, currencyConverter(item.Amount),
+                            item.Status, item.InsertedBy]
                         )
                     });
                     setData(rows)
                 }
                 setIsLoading(false);
             })
-            .catch((err) =>
-            {
+            .catch((err) => {
                 console.log("NETWORK ERROR");
             });
 
         await axios
             .get(`${serverLink}staff/report/staff/list/status/1`, token)
-            .then((result) =>
-            {
+            .then((result) => {
                 const data = result.data;
                 setStaffList(data)
-                if (data.length > 0)
-                {
+                if (data.length > 0) {
                     // let _list = [];
                     // data.map(item => {
                     //     _list.push({ value: item.StaffID, label: item.StaffName, id: 'staff_id' })
@@ -142,107 +129,88 @@ function HRPayrollManageAllowanceAndDeduction(props)
 
                     let rows = [];
                     data.length > 0 &&
-                        data.map((row) =>
-                        {
+                        data.map((row) => {
                             rows.push({ value: row.StaffID, label: row.StaffID + "--" + row.StaffName });
                         });
                     setStaffSelect(rows);
                 }
             })
-            .catch((err) =>
-            {
+            .catch((err) => {
                 console.log("NETWORK ERROR");
             });
     };
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         getRecord();
     }, []);
 
-    const onEdit = (e) =>
-    {
+    const onEdit = (e) => {
         setCreateItem({
             ...createItem,
             [e.target.id]: e.target.value,
         });
     };
-    const handleStaffEdit = (e) =>
-    {
+    const handleStaffEdit = (e) => {
         setCreateItem({
             ...createItem,
-            staff_id: e.value,
+            staff_id: e?.value || "",
             staff: e
         })
     }
 
-    const onSubmit = async () =>
-    {
-        if (createItem.staff_id === "")
-        {
+    const onSubmit = async () => {
+        if (createItem.staff_id === "") {
             showAlert("EMPTY FIELD", "Please select the staff", "error");
             return false;
         }
 
-        if (createItem.post_type === "")
-        {
+        if (createItem.post_type === "") {
             showAlert("EMPTY FIELD", "Please select the post type", "error");
             return false;
         }
 
-        if (createItem.ledger_account === "")
-        {
+        if (createItem.ledger_account === "") {
             showAlert("EMPTY FIELD", "Please select the ledger account", "error");
             return false;
         }
 
-        if (createItem.frequency === "")
-        {
+        if (createItem.frequency === "") {
             showAlert("EMPTY FIELD", "Please select the frequency", "error");
             return false;
         }
 
-        if (createItem.start_date === "")
-        {
+        if (createItem.start_date === "") {
             showAlert("EMPTY FIELD", "Please select the start date", "error");
             return false;
         }
 
-        if (createItem.end_date === "")
-        {
+        if (createItem.end_date === "") {
             showAlert("EMPTY FIELD", "Please select the end date", "error");
             return false;
         }
 
-        if (createItem.frequency === 'Once')
-        {
-            if (createItem.start_date !== createItem.end_date)
-            {
+        if (createItem.frequency === 'Once') {
+            if (createItem.start_date !== createItem.end_date) {
                 showAlert("EMPTY FIELD", "Please check your start and end date. You can't select more than one month for a frequency of once!", "error");
                 return false;
             }
         }
 
-        if (createItem.status === "")
-        {
+        if (createItem.status === "") {
             showAlert("EMPTY FIELD", "Please select the status", "error");
             return false;
         }
 
-        if (createItem.amount === "")
-        {
+        if (createItem.amount === "") {
             showAlert("EMPTY FIELD", "Please enter the amount", "error");
             return false;
         }
 
-        if (createItem.entry_id === "")
-        {
+        if (createItem.entry_id === "") {
             toast.warning("adding, please wait...")
             await axios.post(`${serverLink}staff/hr/payroll/entry/add`, createItem, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
+                .then((result) => {
+                    if (result.data.message === "success") {
                         toast.success("Record Added Successfully");
                         document.getElementById("closeModal").click()
                         getRecord();
@@ -258,8 +226,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
                             inserted_by: props.loginData[0].StaffID,
                             entry_id: "",
                         });
-                    } else
-                    {
+                    } else {
                         showAlert(
                             "ERROR",
                             "Something went wrong. Please try again!",
@@ -267,8 +234,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
                         );
                     }
                 })
-                .catch((error) =>
-                {
+                .catch((error) => {
                     showAlert(
                         "NETWORK ERROR",
                         "Please check your connection and try again!",
@@ -276,14 +242,11 @@ function HRPayrollManageAllowanceAndDeduction(props)
                     );
                 });
         }
-        else
-        {
+        else {
             toast.warning("updating, please wait...")
             await axios.patch(`${serverLink}staff/hr/payroll/entry/update`, createItem, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
+                .then((result) => {
+                    if (result.data.message === "success") {
                         toast.success("Record Updated Successfully");
                         document.getElementById("closeModal").click()
                         getRecord();
@@ -299,8 +262,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
                             inserted_by: props.loginData[0].StaffID,
                             entry_id: "",
                         });
-                    } else
-                    {
+                    } else {
                         showAlert(
                             "ERROR",
                             "Something went wrong. Please try again!",
@@ -308,8 +270,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
                         );
                     }
                 })
-                .catch((error) =>
-                {
+                .catch((error) => {
                     showAlert(
                         "NETWORK ERROR",
                         "Please check your connection and try again!",
@@ -358,25 +319,14 @@ function HRPayrollManageAllowanceAndDeduction(props)
                     <div className="col-md-6">
                         <div className="form-group">
                             <label htmlFor="staff_id">Select Staff</label>
-                            <Select
+                            <SearchSelect
                                 isDisabled={createItem.staff !== "" ? true : false}
-                                name="StaffID"
+                                id="staff"
                                 value={createItem.staff}
                                 onChange={handleStaffEdit}
                                 options={staffSelect}
                                 placeholder="select staff"
                             />
-                            {/* <select className={"form-control"} id="staff_id" onChange={onEdit} value={createItem.staff_id}>
-                                <option value="">Select Option</option>
-                               
-
-                                {
-                                    staffList.length > 0 &&
-                                    staffList.map((item, index) => {
-                                        return <option key={index} value={item.StaffID}>{item.StaffName} ({item.StaffID})</option>
-                                    })
-                                }
-                            </select> */}
                             {/*<Select*/}
                             {/*    id={"staff_id"}*/}
                             {/*    options={staffSelect}*/}
@@ -388,11 +338,13 @@ function HRPayrollManageAllowanceAndDeduction(props)
                     <div className="col-md-6">
                         <div className="form-group">
                             <label htmlFor="post_type">Select Post Type</label>
-                            <select id="post_type" className="form-select" onChange={onEdit} value={createItem.post_type}>
-                                <option value="">Select Option</option>
-                                <option value="Allowance">Allowance</option>
-                                <option value="Deduction">Deduction</option>
-                            </select>
+                            <SearchSelect
+                                id="post_type"
+                                onChange={(selected) => onEdit({ target: { id: 'post_type', value: selected?.value || '' } })}
+                                value={[{ label: 'Allowance', value: 'Allowance' }, { label: 'Deduction', value: 'Deduction' }].find(op => op.value === createItem.post_type) || null}
+                                options={[{ label: 'Allowance', value: 'Allowance' }, { label: 'Deduction', value: 'Deduction' }]}
+                                placeholder="Select Option"
+                            />
                         </div>
                     </div>
                 </div>
@@ -401,16 +353,13 @@ function HRPayrollManageAllowanceAndDeduction(props)
                     <div className="col-md-6">
                         <div className="form-group">
                             <label htmlFor="ledger_account">Select Ledger Account</label>
-                            <select className={"form-control"} id="ledger_account" onChange={onEdit} value={createItem.ledger_account}>
-                                <option value="">Select Option</option>
-                                {
-                                    ledgerList.length > 0 &&
-                                    ledgerList.map((item, index) =>
-                                    {
-                                        return <option key={index} value={item.EntryID}>{item.Description} ({item.AccountNumber})</option>
-                                    })
-                                }
-                            </select>
+                            <SearchSelect
+                                id="ledger_account"
+                                onChange={(selected) => onEdit({ target: { id: 'ledger_account', value: selected?.value || '' } })}
+                                value={ledgerList ? ledgerList.map(item => ({ label: `${item.Description} (${item.AccountNumber})`, value: item.EntryID })).find(op => op.value === createItem.ledger_account) || null : null}
+                                options={ledgerList ? ledgerList.map(item => ({ label: `${item.Description} (${item.AccountNumber})`, value: item.EntryID })) : []}
+                                placeholder="Select Option"
+                            />
                             {/*<Select*/}
                             {/*    id={"ledger_account"}*/}
                             {/*    defaultValue={createItem.ledger_account}*/}
@@ -422,13 +371,13 @@ function HRPayrollManageAllowanceAndDeduction(props)
                     <div className="col-md-6">
                         <div className="form-group">
                             <label htmlFor="frequency">Select Frequency</label>
-                            <select id="frequency" className="form-select" onChange={onEdit} value={createItem.frequency}>
-                                <option value="">Select Option</option>
-                                <option value="Once">Once</option>
-                                <option value="Monthly">Monthly</option>
-                                <option value="Quarterly">Quarterly</option>
-                                <option value="Annually">Annually</option>
-                            </select>
+                            <SearchSelect
+                                id="frequency"
+                                onChange={(selected) => onEdit({ target: { id: 'frequency', value: selected?.value || '' } })}
+                                value={[{ label: 'Once', value: 'Once' }, { label: 'Monthly', value: 'Monthly' }, { label: 'Quarterly', value: 'Quarterly' }, { label: 'Annually', value: 'Annually' }].find(op => op.value === createItem.frequency) || null}
+                                options={[{ label: 'Once', value: 'Once' }, { label: 'Monthly', value: 'Monthly' }, { label: 'Quarterly', value: 'Quarterly' }, { label: 'Annually', value: 'Annually' }]}
+                                placeholder="Select Option"
+                            />
                         </div>
                     </div>
                 </div>
@@ -447,10 +396,13 @@ function HRPayrollManageAllowanceAndDeduction(props)
                 <div className="row mb-5">
                     <div className="col-md-6">
                         <label htmlFor="status">Select Status</label>
-                        <select id="status" className="form-select" onChange={onEdit} value={createItem.status}>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
+                        <SearchSelect
+                            id="status"
+                            onChange={(selected) => onEdit({ target: { id: 'status', value: selected?.value || '' } })}
+                            value={[{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }].find(op => op.value === createItem.status) || null}
+                            options={[{ label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }]}
+                            placeholder="Select Status"
+                        />
                     </div>
 
                     <div className="col-md-6">
@@ -469,8 +421,7 @@ function HRPayrollManageAllowanceAndDeduction(props)
     );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails,
     };

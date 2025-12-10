@@ -5,9 +5,8 @@ import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
-import ReportTable from "../../common/table/report_table";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function StaffListByModule(props) {
   const token = props.login[0].token;
@@ -43,9 +42,9 @@ function StaffListByModule(props) {
         .then((res) => {
           let rows = [];
           res.data.length > 0 &&
-          res.data.map((row) => {
-            rows.push({ text: row.ModuleName + "--" + row.ModuleCode, id: row.ModuleCode});
-          });
+            res.data.map((row) => {
+              rows.push({ value: row.ModuleCode, label: row.ModuleName + " -- " + row.ModuleCode });
+            });
           const result = rows;
           setModuleList(result);
           if (result.length > 0) {
@@ -127,15 +126,18 @@ function StaffListByModule(props) {
                         Select Module
                       </label>
 
-                      <Select2
-                    id="moduleCode"
-                    data={moduleList}
-                    onSelect={handleChange}
-                    options={{
-                      placeholder: "Search Course",
-                    }}
-                  />
-                      
+                      <SearchSelect
+                        id="moduleCode"
+                        label="Select Module"
+                        value={moduleList.find(m => m.value === module.moduleCode) || null}
+                        options={moduleList}
+                        onChange={(selected) => {
+                          handleChange({ target: { id: 'moduleCode', value: selected?.value || '' }, preventDefault: () => { } });
+                        }}
+                        placeholder="Search Course"
+                        required
+                      />
+
                       {/* <select
                         className="form-select"
                         data-placeholder="Select Module"

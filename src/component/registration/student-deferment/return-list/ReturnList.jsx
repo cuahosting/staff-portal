@@ -15,7 +15,7 @@ import {
   projectEmail,
   projectPhone,
 } from "../../../../resources/url";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 
 function ReturnList(props) {
   const token = props.loginData.token;

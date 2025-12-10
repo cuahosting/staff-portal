@@ -7,7 +7,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import InventoryLocationForm from "./inventory-location-form";
 function InventoryLocation(props) {
     let token = props.loginData[0].token
@@ -17,7 +17,7 @@ function InventoryLocation(props) {
         location_id: '', location_name: '', description: '',  submitted_by: '', updated_by: ''}
     const [formData, setFormData] = useState(initialValue);
 
-    const columns = ["S/N", "Location Name", "Description", "Updated By", "Action"];
+    const columns = ["S/N", "Action", "Location Name", "Description", "Updated By"];
     const [tableData,setTableData] = useState([]);
 
     const fetchData = async () => {
@@ -28,7 +28,7 @@ function InventoryLocation(props) {
                     const row = [];
                     if (res.data.Location.length > 0) {
                         res.data.Location.map((r, i) => {
-                            row.push([i+1, r.location_name, r.description, r.updated_by,
+                            row.push([i+1,
                                 (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -47,7 +47,8 @@ function InventoryLocation(props) {
                                     >
                                         <i className="fa fa-pen" />
                                     </button>
-                                )
+                                ),
+                                r.location_name, r.description, r.updated_by
                             ])
                         })
                         setTableData(row)
@@ -159,29 +160,28 @@ function InventoryLocation(props) {
         <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Inventory Location"} items={["Inventory", "Inventory Location"]} />
+            <PageHeader
+                title={"Inventory Location"}
+                items={["Inventory", "Inventory Location"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setFormData(initialValue)
+                        }
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Add Location
+                    </button>
+                }
+            />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setFormData(initialValue)
-                                    }
-                                >
-                                    Add Location
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div className="card-body p-0">
                         <ReportTable title={"Inventory Location"} columns={columns} data={tableData} />

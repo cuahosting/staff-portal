@@ -5,20 +5,15 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import { toast } from "react-toastify";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import Select from 'react-select';
-import makeAnimated from 'react-select/animated';
+import SearchSelect from "../../../common/select/SearchSelect";
 import AGTable from "../../../common/table/AGTable";
 const randomToken = require('random-token');
 
 
-function ProcessResult(props)
-{
+function ProcessResult(props) {
     const token = props.loginData.token;
 
     const [isLoading, setIsLoading] = useState(true);
-    const animatedComponents = makeAnimated();
     const [semesterList, setSemesterList] = useState([]);
     const [resultList, setResultList] = useState([]);
     const [resultFilter, setResultFilter] = useState([]);
@@ -42,14 +37,11 @@ function ProcessResult(props)
         rows: []
     });
 
-    const getRecord = async () =>
-    {
+    const getRecord = async () => {
         await axios.get(`${serverLink}staff/assessment/exam/process/result/data`, token)
-            .then(res =>
-            {
+            .then(res => {
                 const data = res.data;
-                if (data.message === 'success')
-                {
+                if (data.message === 'success') {
                     const semester_list = data.semester_list;
                     const grade_type = data.grade_type;
                     const module_list = data.module_list;
@@ -58,31 +50,25 @@ function ProcessResult(props)
                     setGradeSettingList(data.grade_list);
 
                     let semester_rows = [];
-                    if (semester_list.length > 0)
-                    {
-                        semester_list.map(sem =>
-                        {
-                            semester_rows.push({ id: sem.SemesterCode, text: sem.SemesterName })
+                    if (semester_list.length > 0) {
+                        semester_list.map(sem => {
+                            semester_rows.push({ value: sem.SemesterCode, label: sem.SemesterName })
                         })
                     }
                     setSemesterList(semester_rows);
 
                     let grade_rows = [];
-                    if (grade_type.length > 0)
-                    {
-                        grade_type.map(item =>
-                        {
-                            grade_rows.push({ id: item.GradeType, text: item.GradeType })
+                    if (grade_type.length > 0) {
+                        grade_type.map(item => {
+                            grade_rows.push({ value: item.GradeType, label: item.GradeType })
                         })
                     }
                     setGradeSettingSelect(grade_rows);
 
                     let module_rows = [];
-                    if (module_list.length > 0)
-                    {
+                    if (module_list.length > 0) {
                         module_rows.push({ value: 'all', label: `Select All` })
-                        module_list.map(item =>
-                        {
+                        module_list.map(item => {
                             module_rows.push({ value: item.ModuleCode, label: `${item.ModuleName} (${item.ModuleCode})` })
                         })
                     }
@@ -90,19 +76,16 @@ function ProcessResult(props)
 
                     setIsLoading(false)
 
-                } else
-                {
+                } else {
                     toast.error("Error fetching processing data")
                 }
             })
-            .catch(err =>
-            {
+            .catch(err => {
                 toast.error("NETWORK ERROR")
             })
     }
 
-    const handleChange = (e) =>
-    {
+    const handleChange = (e) => {
         const id = e.target.id;
         const value = e.target.value;
 
@@ -118,15 +101,12 @@ function ProcessResult(props)
         });
     }
 
-    const handleModuleChange = (e) =>
-    {
+    const handleModuleChange = (e) => {
 
         let rows = [];
         let table_rows = [];
-        if (e.length > 0)
-        {
-            e.map(r =>
-            {
+        if (e.length > 0) {
+            e.map(r => {
                 rows.push(r.value)
             })
         }
@@ -134,15 +114,11 @@ function ProcessResult(props)
 
         let filter_results = [];
         let index_counter = 1;
-        if (rows.length > 0)
-        {
-            rows.map(r =>
-            {
+        if (rows.length > 0) {
+            rows.map(r => {
                 const filter = resultList.filter(i => i.ModuleCode === r && i.SemesterCode === semesterCode);
-                if (filter.length > 0)
-                {
-                    filter.map((p, index) =>
-                    {
+                if (filter.length > 0) {
+                    filter.map((p, index) => {
                         table_rows.push({
                             sn: index_counter,
                             StudentID: p.StudentID || 'N/A',
@@ -165,64 +141,52 @@ function ProcessResult(props)
         setResultFilter(filter_results)
     }
 
-    const onProcessResult = async () =>
-    {
+    const onProcessResult = async () => {
         let result_to_process = [];
 
-        moduleCode.map(module =>
-        {
+        moduleCode.map(module => {
             const module_result = resultList.filter(i => i.ModuleCode === module);
-            if (module_result.length > 0)
-            {
-                module_result.map(rs =>
-                {
+            if (module_result.length > 0) {
+                module_result.map(rs => {
                     result_to_process.push(rs)
                 })
             }
         });
 
-        result_to_process.map(result =>
-        {
+        result_to_process.map(result => {
             result.Status = 0;
             result.UpdatedBy = props.loginData.StaffID;
             result.TransactionID = randomToken(20);
-            if (result.CAPerCon === null && result.ExamPerCon === null)
-            {
+            if (result.CAPerCon === null && result.ExamPerCon === null) {
                 result.StudentGrade = 'Incomplete';
                 result.Decision = 'RM';
             }
-            else
-            {
-                if (result.CAPerCon === 100)
-                {
+            else {
+                if (result.CAPerCon === 100) {
                     const grade = getResultGrade(result.CAScore);
                     result.ExamScore = 0;
                     result.Total = result.CAScore;
                     result.StudentGrade = grade.grade;
                     result.Decision = grade.decision;
                 }
-                else if (result.ExamPerCon === 100)
-                {
+                else if (result.ExamPerCon === 100) {
                     const grade = getResultGrade(result.ExamScore);
                     result.CAScore = 0;
                     result.Total = result.ExamScore;
                     result.StudentGrade = grade.grade;
                     result.Decision = grade.decision;
                 }
-                else
-                {
+                else {
                     let ca_total;
                     if (result.CAScore === null || result.CAScore === 0)
                         ca_total = 0;
-                    else
-                    {
+                    else {
                         ca_total = result.CAScore;
                     }
                     let exam_total;
                     if (result.ExamScore === null || result.ExamScore === 0)
                         exam_total = 0;
-                    else
-                    {
+                    else {
                         exam_total = result.ExamScore;
                     }
                     let total = (Math.round(ca_total * 10) / 10) + (Math.round(exam_total * 10) / 10)
@@ -235,36 +199,28 @@ function ProcessResult(props)
             }
         })
 
-        result_to_process.map(async (result, index) =>
-        {
+        result_to_process.map(async (result, index) => {
             await axios.patch(`${serverLink}staff/assessment/exam/process/result`, result, token)
-                .then(res =>
-                {
-                    if (res.data.message === 'success')
-                    {
+                .then(res => {
+                    if (res.data.message === 'success') {
                         toast.success(`${result.StudentID}'s ${result.ModuleTitle} result processed successfully`)
-                    } else
-                    {
+                    } else {
                         toast.error(`${result.StudentID}'s ${result.ModuleTitle} result not processed. Try again!`)
                     }
                     setCounter(index + 1)
                 })
-                .catch(err =>
-                {
+                .catch(err => {
                     toast.error("Network error")
                 })
         })
 
     }
 
-    const getResultGrade = (total) =>
-    {
+    const getResultGrade = (total) => {
         const grade_list = gradeSettingList.filter(i => i.GradeType === gradeSetting && total >= i.MinRange && total <= i.MaxRange);
-        if (grade_list.length > 0)
-        {
+        if (grade_list.length > 0) {
             return { grade: grade_list[0].Grade, decision: grade_list[0].Decision }
-        } else
-        {
+        } else {
             return { grade: 'Incomplete', decision: 'RM' }
         }
     }
@@ -281,14 +237,13 @@ function ProcessResult(props)
                             <div className="col-md-4">
                                 <div className="form-group">
                                     <label htmlFor="SemesterCode">Select Semester</label>
-                                    <Select2
+                                    <SearchSelect
                                         id="SemesterCode"
-                                        defaultValue={semesterCode}
-                                        data={semesterList}
-                                        onSelect={handleChange}
-                                        options={{
-                                            placeholder: "Select Semester",
-                                        }}
+                                        label="Select Semester"
+                                        value={semesterList.find(op => op.value === semesterCode) || null}
+                                        options={semesterList}
+                                        onChange={(selected) => handleChange({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                        placeholder="Select Semester"
                                     />
                                 </div>
                             </div>
@@ -296,14 +251,13 @@ function ProcessResult(props)
                             <div className="col-md-4">
                                 <div className="form-group">
                                     <label htmlFor="GradeSetting">Select Grade Setting</label>
-                                    <Select2
+                                    <SearchSelect
                                         id="GradeSetting"
-                                        defaultValue={gradeSetting}
-                                        data={gradeSettingSelect}
-                                        onSelect={handleChange}
-                                        options={{
-                                            placeholder: "Select Grade Setting",
-                                        }}
+                                        label="Select Grade Setting"
+                                        value={gradeSettingSelect.find(op => op.value === gradeSetting) || null}
+                                        options={gradeSettingSelect}
+                                        onChange={(selected) => handleChange({ target: { id: 'GradeSetting', value: selected?.value || '' } })}
+                                        placeholder="Select Grade Setting"
                                     />
                                 </div>
                             </div>
@@ -311,19 +265,19 @@ function ProcessResult(props)
                             <div className="col-md-4">
                                 <div className="form-group">
                                     <label htmlFor="ModuleCode">Select Module</label>
-                                    <Select
-                                        defaultValue={moduleCode}
-                                        components={animatedComponents}
+                                    <SearchSelect
+                                        value={moduleListSelect.filter(op => moduleCode.includes(op.value))}
                                         options={moduleListSelect}
+                                        label="Select Module"
                                         isMulti
                                         isDisabled={semesterCode === '' || gradeSetting === ''}
-                                        onChange={selected =>
-                                        {
-                                            selected.length &&
+                                        onChange={selected => {
+                                            selected &&
                                                 selected.find(option => option.value === "all")
                                                 ? handleModuleChange(moduleListSelect.slice(1))
                                                 : handleModuleChange((selected))
                                         }}
+                                        placeholder="Select Module"
                                     />
 
                                 </div>
@@ -348,10 +302,8 @@ function ProcessResult(props)
                                                 <tbody>
                                                     {
                                                         gradeSettingList.length > 0 &&
-                                                        gradeSettingList.map((item, index) =>
-                                                        {
-                                                            if (item.GradeType === gradeSetting)
-                                                            {
+                                                        gradeSettingList.map((item, index) => {
+                                                            if (item.GradeType === gradeSetting) {
                                                                 return <tr key={index}>
                                                                     <td>{item.Grade}</td>
                                                                     <td>{item.MinRange} - {item.MaxRange}</td>
@@ -404,8 +356,7 @@ function ProcessResult(props)
     )
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails[0],
     };

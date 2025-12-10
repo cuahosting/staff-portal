@@ -4,7 +4,7 @@ import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import { serverLink } from "../../../resources/url";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import Modal from "../../common/modal/modal";
 import {showAlert} from "../../common/sweetalert/sweetalert";
 import {toast} from "react-toastify";
@@ -412,7 +412,7 @@ function InternshipManager(props) {
                         <br />
 
                         {studentsDatatable.rows.length > 0 ? (
-                            <Table data={studentsDatatable} />
+                            <AGTable data={studentsDatatable} />
                         ): (
                             <div className="alert alert-info col-md-12">Kindly select semester to view students internship for approval or the selected semester has no students.</div>
                         )}

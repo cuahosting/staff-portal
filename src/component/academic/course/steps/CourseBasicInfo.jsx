@@ -1,6 +1,13 @@
 import React from "react";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 export default function CourseBasicInfo(props) {
+    // Convert departmentList to options format for SearchSelect
+    const departmentOptions = props.departmentList.map(dept => ({
+        value: dept.DepartmentCode,
+        label: dept.DepartmentName
+    }));
+
     return (
         <>
             <div className="fv-row mb-6 enhanced-form-group">
@@ -26,10 +33,10 @@ export default function CourseBasicInfo(props) {
                 </label>
                 <div className="enhanced-input-wrapper">
                     <input
-                        style={{textTransform:'uppercase'}}
+                        style={{ textTransform: 'uppercase' }}
                         type="text"
                         id="CourseCode"
-                        disabled={props.data.EntryID !== "" ? true: false}
+                        disabled={props.data.EntryID !== "" ? true : false}
                         onChange={props.onEdit}
                         value={props.data.CourseCode}
                         className="form-control form-control-lg form-control-solid enhanced-input"
@@ -39,26 +46,14 @@ export default function CourseBasicInfo(props) {
                 </div>
             </div>
 
-            <div className="fv-row mb-6 enhanced-form-group">
-                <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="DepartmentCode">
-                    Department
-                </label>
-                <div className="enhanced-input-wrapper">
-                    <select
-                        id="DepartmentCode"
-                        onChange={props.onEdit}
-                        value={props.data.DepartmentCode}
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                    >
-                        <option>Select Department</option>
-                        {
-                            props.departmentList.length > 0 && props.departmentList.map((department, index) => {
-                                return <option key={index} value={department.DepartmentCode}>{department.DepartmentName}</option>
-                            })
-                        }
-                    </select>
-                </div>
-            </div>
+            <SearchSelect
+                id="DepartmentCode"
+                label="Department"
+                value={departmentOptions.find(opt => opt.value === props.data.DepartmentCode) || null}
+                options={departmentOptions}
+                onChange={(selected) => props.onEdit({ target: { id: 'DepartmentCode', value: selected?.value || '' } })}
+                placeholder="Select Department"
+            />
         </>
     )
 }

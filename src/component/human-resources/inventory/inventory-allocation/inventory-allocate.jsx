@@ -8,7 +8,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import {useParams} from "react-router-dom";
 import InventoryAllocateForm from "./inventory-allocate-form";
 function InventoryAllocation(props) {

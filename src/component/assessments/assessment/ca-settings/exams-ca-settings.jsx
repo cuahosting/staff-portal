@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -443,7 +443,7 @@ function EXAMSCASettings(props) {
                     <div className="col-lg-12 col-md-12 pt-5">
                         <div className="form-group">
                             <label htmlFor="ModuleCode">Module</label>
-                            <Select
+                            <SearchSelect
                                 options={moduleOptions}
                                 value={createEXAMSCASettings.ModuleCode2}
                                 onChange={onModuleChange}

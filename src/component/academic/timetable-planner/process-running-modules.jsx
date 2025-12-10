@@ -7,8 +7,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert, showConfirm, showConfirmAndContinue } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 import AGReportTable from "../../common/table/AGReportTable";
 // eslint-disable-next-line no-unused-vars
 import { showContentAlert } from "../../common/sweetalert/sweetalert";
@@ -19,7 +18,7 @@ function ProcessRunningModules(props) {
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState('off')
     const [showTable, setshowTable] = useState(false);
-    const columns = ["sn", "ModuleCode", "Modulename", "ModuleLevel", "ModuleSemester", "SchoolSemester", "CourseName", "CreditLoad", "Status", "IsApproved"]
+    const columns = ["Code", "Name", "Level", "Semester", "School Semester", "Course", "Credit Load", "Status", "Is Approved"]
     const [t_data, set_T_Data] = useState([])
     const [semesterList, setSemesterList] = useState([]);
     const [moduleList, setModuleList] = useState([]);
@@ -36,7 +35,7 @@ function ProcessRunningModules(props) {
                 let rows = [];
                 res.data.length > 0 &&
                     res.data.forEach((row) => {
-                        rows.push({ text: row.SemesterName, id: row.SemesterCode });
+                        rows.push({ label: row.SemesterName, value: row.SemesterCode });
                     });
                 setSemesterList(rows);
             })
@@ -59,7 +58,6 @@ function ProcessRunningModules(props) {
                 if (result.data.length > 0) {
                     result.data.forEach((item, index) => {
                         rows.push([
-                            index + 1,
                             item.ModuleCode,
                             item.Modulename,
                             item.ModuleLevel + " Level",
@@ -67,7 +65,7 @@ function ProcessRunningModules(props) {
                             item.SchoolSemester,
                             item.CourseName,
                             item.CreditLoad,
-                            <span className={item.Status.toString() === "1" ? "badge badge-primary" : item.Status.toString() === "2"? "badge badge-success" : "badge badge-secondary"}>
+                            <span className={item.Status.toString() === "1" ? "badge badge-primary" : item.Status.toString() === "2" ? "badge badge-success" : "badge badge-secondary"}>
                                 {item.Status.toString() === "1" ? "Submitted by HOD" : item.Status.toString() === "2" ? "Approved by Dean" : "Not submitted"}
                             </span>,
                             <span className={item.IsApproved.toString() === "1" ? "badge badge-success" : "badge badge-danger"}>
@@ -174,48 +172,39 @@ function ProcessRunningModules(props) {
             <PageHeader
                 title={"Registration"}
                 items={["Registration", "Modules", "Missing Modules"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => {
+                            showConfirm(
+                                "CONFIRM CLEARING",
+                                `Are you sure you want to clear running modules?, this will clear all modules running for this semester`,
+                                "warning"
+                            ).then(async (IsConfirmed) => {
+                                if (IsConfirmed) {
+                                    handleClearRunningModules()
+                                }
+                            });
+                        }}
+                    >
+                        Clear Running Modules
+                    </button>
+                }
             />
             <div className="flex-column-fluid">
 
                 <div className="card card-no-border">
-                    <div className="card-header border-0 pt-0">
-                        <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => {
-                                        showConfirm(
-                                            "CONFIRM CLEARING",
-                                            `Are you sure you want to clear running modules?, this will clear all modules running for this semester`,
-                                            "warning"
-                                        ).then(async (IsConfirmed) => {
-                                            if (IsConfirmed) {
-                                                handleClearRunningModules()
-                                            } else {
-
-                                            }
-                                        });
-                                    }}
-                                >
-                                    Clear Running Modules
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                     <div className="card-body p-0">
                         <div className="row col-md 12 mt-4">
                             <div className="col-md-12 mt-2 mb-2">
-                                <label htmlFor="SemesterCode">School Semester</label>
-                                <Select2
+                                <SearchSelect
                                     id="SemesterCode"
-                                    value={data.SemesterCode}
-                                    data={semesterList}
-                                    onSelect={onEdit}
-                                    options={{
-                                        placeholder: "Search semester",
-                                    }}
+                                    label="School Semester"
+                                    value={semesterList.find(op => op.value === data.SemesterCode) || null}
+                                    options={semesterList}
+                                    onChange={(selected) => onEdit({ target: { id: 'SemesterCode', value: selected?.value || '' }, preventDefault: () => { } })}
+                                    placeholder="Search semester"
                                 />
                             </div>
                         </div>
@@ -234,10 +223,6 @@ function ProcessRunningModules(props) {
                                 </>
 
                             }
-                        </div>
-
-                        <div className="col-md-12 mt-3 mb-3" style={{ overflowX: 'auto' }}>
-
                         </div>
                     </div>
                 </div>

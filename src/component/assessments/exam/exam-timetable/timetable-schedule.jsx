@@ -7,8 +7,8 @@ import axios from "axios";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Modal from "../../../common/modal/modal";
-import AGTable from "../../../common/table/table";
-import Select from 'react-select';
+import AGTable from "../../../common/table/AGTable";
+import SearchSelect from "../../../common/select/SearchSelect";
 import { formatDate, formatDateAndTime, TimeTablePeriods } from "../../../../resources/constants";
 
 function ExamTimeTableSchedule(props) {
@@ -90,7 +90,7 @@ function ExamTimeTableSchedule(props) {
                     let rows = []
                     if (result.data.length > 0) {
                         result.data.map((row) => {
-                            rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+                            rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
                         setSemesterOptions(rows)
@@ -102,67 +102,67 @@ function ExamTimeTableSchedule(props) {
             console.log('NETWORK ERROR')
         }
     }
-    
-    const getTimetable =async(semester)=>{
+
+    const getTimetable = async (semester) => {
         setIsLoading(true)
         await axios.get(`${serverLink}staff/timetable/exam-timetable/schedule/list/${semester}`, token)
-        .then((result) => {
-            if (result.data.length > 0) {
-                let rows = [];
-                result.data.map((exam, index) => {
-                    const sem = semesterList.length > 0 ? semesterList.filter(x => x.SemesterCode === exam.SemesterCode) : []
-                    rows.push({
-                        sn: index + 1,
-                        EntryID: exam.EntryID,
-                        ModuleCode: exam.ModuleCode,
-                        ModuleName: exam.ModuleName,
-                        SemesterCode: exam.SemesterCode,
-                        ExamDate: formatDate(exam.ExamDate), //  formatDateAndTime(exam.ExamDate, "date"),
-                        StartTime: TimeTablePeriods.filter(x => x.value.toString() === exam.StartTime.toString())[0].label,
-                        EndTime: TimeTablePeriods.filter(x => x.value.toString() === exam.EndTime.toString())[0].label,
-                        action: (
-                            <button
-                                className="btn btn-sm btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#kt_modal_general"
-                                onClick={() => {
-                                    setcreateSchedule({
-                                        ...createSchedule,
-                                        EntryID: exam.EntryID,
-                                        ModuleCode: exam.ModuleCode,
-                                        ModuleCodeVal: { value: exam.ModuleCode, label: exam.ModuleCode + " - " + exam.ModuleName },
-                                        SemesterCode: exam.SemesterCode,
-                                        SemesterCode2 : { value: sem[0]?.SemesterCode, label: sem[0]?.SemesterName +"- "+sem[0]?.SemesterCode },
-                                        ExamDate: exam.ExamDate,
-                                        StartTime: exam.StartTime,
-                                        EndTime: exam.EndTime,
-                                    });
-                                }
-                                }
-                            >
-                                <i className="fa fa-pen" />
-                            </button>
-                        ),
+            .then((result) => {
+                if (result.data.length > 0) {
+                    let rows = [];
+                    result.data.map((exam, index) => {
+                        const sem = semesterList.length > 0 ? semesterList.filter(x => x.SemesterCode === exam.SemesterCode) : []
+                        rows.push({
+                            sn: index + 1,
+                            EntryID: exam.EntryID,
+                            ModuleCode: exam.ModuleCode,
+                            ModuleName: exam.ModuleName,
+                            SemesterCode: exam.SemesterCode,
+                            ExamDate: formatDate(exam.ExamDate), //  formatDateAndTime(exam.ExamDate, "date"),
+                            StartTime: TimeTablePeriods.filter(x => x.value.toString() === exam.StartTime.toString())[0].label,
+                            EndTime: TimeTablePeriods.filter(x => x.value.toString() === exam.EndTime.toString())[0].label,
+                            action: (
+                                <button
+                                    className="btn btn-sm btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#kt_modal_general"
+                                    onClick={() => {
+                                        setcreateSchedule({
+                                            ...createSchedule,
+                                            EntryID: exam.EntryID,
+                                            ModuleCode: exam.ModuleCode,
+                                            ModuleCodeVal: { value: exam.ModuleCode, label: exam.ModuleCode + " - " + exam.ModuleName },
+                                            SemesterCode: exam.SemesterCode,
+                                            SemesterCode2: { value: sem[0]?.SemesterCode, label: sem[0]?.SemesterName + "- " + sem[0]?.SemesterCode },
+                                            ExamDate: exam.ExamDate,
+                                            StartTime: exam.StartTime,
+                                            EndTime: exam.EndTime,
+                                        });
+                                    }
+                                    }
+                                >
+                                    <i className="fa fa-pen" />
+                                </button>
+                            ),
+                        });
                     });
-                });
 
-                setDatatable({
-                    ...datatable,
-                    columns: datatable.columns,
-                    rows: rows,
-                });
-                setIsLoading(false)
-                setshowBody(true)
-            }else{
+                    setDatatable({
+                        ...datatable,
+                        columns: datatable.columns,
+                        rows: rows,
+                    });
+                    setIsLoading(false)
+                    setshowBody(true)
+                } else {
+                    setIsLoading(false);
+                    toast.error('no record')
+                    setshowBody(false)
+                }
                 setIsLoading(false);
-                toast.error('no record')
-                setshowBody(false)
-            }
-            setIsLoading(false);
-        })
-        .catch((err) => {
-            console.log("NETWORK ERROR");
-        });
+            })
+            .catch((err) => {
+                console.log("NETWORK ERROR");
+            });
     }
     const onModuleChange = (e) => {
         setcreateSchedule({
@@ -217,7 +217,7 @@ function ExamTimeTableSchedule(props) {
             showAlert("TIME ERROR", "StartTime cannot be same and EndTime", "error");
             return false;
         }
-        if (parseInt(createSchedule.EndTime) - parseInt(createSchedule.StartTime)  > 4) {
+        if (parseInt(createSchedule.EndTime) - parseInt(createSchedule.StartTime) > 4) {
             showAlert("TIME ERROR", "Exam time cannot be more than four hours", "error");
             return false;
         }
@@ -274,7 +274,7 @@ function ExamTimeTableSchedule(props) {
                             EntryID: "",
                             ModuleCode: "",
                             SemesterCode: "",
-                            SemesterCode2:"",
+                            SemesterCode2: "",
                             ExamDate: "",
                             StartTime: "",
                             EndTime: "",
@@ -333,71 +333,61 @@ function ExamTimeTableSchedule(props) {
             <PageHeader
                 title={"Exam Timetable Schedule"}
                 items={["Assessment", "Exam Timetable", "Timetable"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setcreateSchedule({
+                                ...createSchedule,
+                                EntryID: "",
+                                ModuleCode: "",
+                                ModuleCodeVal: { value: "", label: "" },
+                                SemesterCode2: "",
+                                ExamDate: "",
+                                StartTime: "",
+                                EndTime: "",
+                                InsertedBy: props.LoginDetails[0].StaffID
+                            })
+                        }
+                    >
+                        Add Timetable
+                    </button>
+                }
             />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
-                    <div className="card-header border-0 pt-6">
-                        <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setcreateSchedule({
-                                            ...createSchedule,
-                                            EntryID: "",
-                                            ModuleCode:"",
-                                            ModuleCodeVal:{ value: "", label: "" },
-                                            SemesterCode2: "",
-                                            ExamDate: "",
-                                            StartTime: "",
-                                            EndTime: "",
-                                            InsertedBy: props.LoginDetails[0].StaffID
-                                        })
-                                    }
-                                >
-                                    Add Timetable
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                     <div className="card-body p-0">
                         <div className="col-md-12">
                             {semesterList.length > 0 &&
-                                <div className="col-md-12 mb-4 form-group">
-                                    <label htmlFor="_Semester">Select Semester</label>
-                                    <Select
+                                <div className="col-md-12 mb-4">
+                                    <SearchSelect
                                         id="_Semester"
-                                        className="form-select form-select"
+                                        label="Select Semester"
                                         value={createSchedule.SemesterCode2}
                                         onChange={onSemesterChange}
                                         options={semesterOptions}
                                         placeholder="select Semester"
                                     />
-                                    
+
                                 </div>}
                         </div>
-                      {
-                        showBody === true &&
-                        <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                        <AGTable data={datatable} />
-                    </div>
-                      }
+                        {
+                            showBody === true &&
+                            <div className="col-md-12" style={{ overflowX: 'auto' }}>
+                                <AGTable data={datatable} />
+                            </div>
+                        }
                     </div>
                 </div>
                 <Modal title={"Timetable"}>
                     <div className="row">
                         <div className="col-md-12 form-group">
                             <label htmlFor="SemesterCode">Semester</label>
-                            <Select
+                            <SearchSelect
                                 id="_Semester"
-                                className="form-select form-select"
                                 value={createSchedule.SemesterCode2}
                                 onChange={onEditSemester}
                                 options={semesterOptions}
@@ -408,7 +398,7 @@ function ExamTimeTableSchedule(props) {
 
                         <div className=" col-md-12 form-group mt-4">
                             <label htmlFor="ModuleCode">Module</label>
-                            <Select
+                            <SearchSelect
                                 name="ModuleCode"
                                 value={createSchedule.ModuleCodeVal}
                                 onChange={onModuleChange}
@@ -430,45 +420,23 @@ function ExamTimeTableSchedule(props) {
 
                         <div className="col-md-6 mt-4">
                             <label htmlFor="StartTime">Start Time</label>
-                            <select id="StartTime" onChange={onEdit}
-                                value={createSchedule.StartTime}
-                                className="form-select"
-                                data-kt-select2="true"
-                                data-placeholder="Select option"
-                                data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                                <option value={""}>-select start time-</option>
-                                {TimeTablePeriods.length > 0 ?
-                                    <>
-                                        {TimeTablePeriods.map((x, y) => {
-                                            return (
-                                                <option key={y} value={x.value}>{x.label}</option>
-                                            )
-                                        })}
-                                    </>
-                                    :
-                                    <></>}
-                            </select>
+                            <SearchSelect
+                                id="StartTime"
+                                onChange={(selected) => onEdit({ target: { id: 'StartTime', value: selected?.value || '' } })}
+                                value={TimeTablePeriods.find(op => op.value == createSchedule.StartTime) || null}
+                                options={TimeTablePeriods}
+                                placeholder="Select start time"
+                            />
                         </div>
                         <div className="col-md-6 mt-4">
                             <label htmlFor="EndTime">End Time</label>
-                            <select id="EndTime" onChange={onEdit}
-                                value={createSchedule.EndTime}
-                                className="form-select"
-                                data-kt-select2="true"
-                                data-placeholder="Select option"
-                                data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                                <option value={""}>-select end time-</option>
-                                {TimeTablePeriods.length > 0 ?
-                                    <>
-                                        {TimeTablePeriods.map((x, y) => {
-                                            return (
-                                                <option key={y} value={x.value}>{x.label}</option>
-                                            )
-                                        })}
-                                    </>
-                                    :
-                                    <></>}
-                            </select>
+                            <SearchSelect
+                                id="EndTime"
+                                onChange={(selected) => onEdit({ target: { id: 'EndTime', value: selected?.value || '' } })}
+                                value={TimeTablePeriods.find(op => op.value == createSchedule.EndTime) || null}
+                                options={TimeTablePeriods}
+                                placeholder="Select end time"
+                            />
                         </div>
                     </div>
 

@@ -3,7 +3,7 @@ import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import { encryptData, formatDate, formatDateAndTime } from "../../../resources/constants";
 import { Link } from "react-router-dom";
 
@@ -21,7 +21,7 @@ function JobApplications(props) {
     )
     const [department, setDepartment] = useState(props.DepartmentList.length > 0 ? props.DepartmentList : [])
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["SN", "Name", "Email", "Position", "Department", "Faculty", "Applied On", "Status", "Action"]
+    const columns = ["SN", "Action", "Name", "Email", "Position", "Department", "Faculty", "Applied On", "Status"]
 
     const [data, setData] = useState([])
     const [createApplicant, setApplicant] = useState({
@@ -66,6 +66,7 @@ function JobApplications(props) {
                             const _facs = facultyList?.filter(x => x.FacultyCode.toLowerCase() === item.Faculty.toLowerCase());
                             rows.push([
                                 index + 1,
+                                <Link className="btn btn-sm btn-primary" to={`/human-resources/jobs/applications/${encryptData(item.EntryID.toString())}`}><i className="fa fa-pen" /></Link>,
                                 item.FirstName + " " + item.MiddleName + " " + item.Surname,
                                 item.EmailAddress,
                                 item.Position,
@@ -80,8 +81,7 @@ function JobApplications(props) {
                                         item.Status === "0" ? "Pending" :
                                             item.Status === "1" ? "Invited" :
                                                 item.Status === "2" ? "Rejected" : "Accepted"
-                                    }</label>,
-                                <Link className="btn btn-sm btn-primary" to={`/human-resources/jobs/applications/${encryptData(item.EntryID.toString())}`}><i className="fa fa-pen" /></Link>
+                                    }</label>
                             ])
                         })
                         setData(rows)

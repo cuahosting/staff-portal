@@ -13,7 +13,7 @@ function HRGeneralLedger(props) {
     const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["S/N", "Account Number", "Description", "Account Type", "Balance/Income", "Updated By", "Date", "Action"];
+    const columns = ["S/N", "Action", "Account Number", "Description", "Account Type", "Balance/Income", "Updated By", "Date"];
     const [data, setData] = useState([]);
 
     const [createItem, setCreateItem] = useState({
@@ -45,12 +45,6 @@ function HRGeneralLedger(props) {
                     result.data.map((item, index) => {
                         rows.push([
                             index + 1,
-                            item.AccountNumber,
-                            item.Description,
-                            item.AccountType,
-                            item.BalanceOrIncome,
-                            item.StaffName,
-                            formatDateAndTime(item.InsertedDate, 'date'),
                             <button
                                 className="btn btn-sm btn-primary"
                                 data-bs-toggle="modal"
@@ -66,7 +60,13 @@ function HRGeneralLedger(props) {
                                 }
                             >
                                 <i className="fa fa-pen" />
-                            </button>
+                            </button>,
+                            item.AccountNumber,
+                            item.Description,
+                            item.AccountType,
+                            item.BalanceOrIncome,
+                            item.StaffName,
+                            formatDateAndTime(item.InsertedDate, 'date')
                         ]);
                     });
                     setData(rows);

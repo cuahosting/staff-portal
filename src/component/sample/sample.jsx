@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Modal from "../common/modal/modal";
 import PageHeader from "../common/pageheader/pageheader";
-import Table from "../common/table/table";
+import AGTable from "../common/table/AGTable";
 function Sample() {
   const [datatable, setDatatable] = useState({
     columns: [
@@ -68,7 +68,7 @@ function Sample() {
             </div>
           </div>
           <div className="card-body p-0">
-            <Table data={datatable} />
+            <AGTable data={datatable} />
           </div>
         </div>
         <Modal title={"Add User"}></Modal>

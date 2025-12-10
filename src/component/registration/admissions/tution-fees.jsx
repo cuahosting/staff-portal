@@ -8,7 +8,7 @@ import Loader from '../../common/loader/loader';
 import Modal from '../../common/modal/modal';
 import PageHeader from '../../common/pageheader/pageheader';
 import { showAlert } from '../../common/sweetalert/sweetalert';
-import ReportTable from '../../common/table/report_table';
+import ReportTable from '../../common/table/ReportTable';
 
 function TuitionFee(props)
 {

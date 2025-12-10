@@ -6,8 +6,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function AddStaffQualifications(props) {
   const token = props.loginData[0].token;
@@ -68,7 +67,7 @@ function AddStaffQualifications(props) {
         let rows = [];
         response.data.length > 0 &&
           response.data.map((row) => {
-            rows.push({ text: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + "" + row.Surname, id: row.StaffID });
+            rows.push({ label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + "" + row.Surname, value: row.StaffID });
           });
         setStaffList(rows);
         setIsLoading(false);
@@ -139,10 +138,12 @@ function AddStaffQualifications(props) {
     getQualification().then((r) => { });
   };
 
-  const handleStaffEdit = (e) => {
+
+
+  const handleSelectChange = (id, selected) => {
     setAddStaffQualifications({
       ...addStaffQualifications,
-      [e.target.id]: e.target.value,
+      [id]: selected?.value || ""
     });
   }
 
@@ -184,64 +185,25 @@ function AddStaffQualifications(props) {
               <div className="col-lg-4 col-md-4 pt-5">
                 <div className="form-group">
                   <label htmlFor="StaffID">StaffID</label>
-                  <Select2
+                  <SearchSelect
                     id="StaffID"
-                    value={addStaffQualifications.StaffID}
-                    data={staffList}
-                    onSelect={handleStaffEdit}
-                    options={{
-                      placeholder: "Search staff",
-                    }}
+                    value={staffList.find(op => op.value === addStaffQualifications.StaffID) || null}
+                    options={staffList}
+                    onChange={(selected) => handleSelectChange('StaffID', selected)}
+                    placeholder="Search staff"
                   />
-                  {/* <select
-                    id="StaffID"
-                    name="StaffID"
-                    value={addStaffQualifications.StaffID}
-                    className="form-control"
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {staffList ? (
-                      <>
-                        {staffList.map((item, index) => {
-                          return (
-                            <option key={index} value={item.StaffID}>
-                              {item.StaffID}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select> */}
                 </div>
               </div>
               <div className="col-lg-4 col-md-4 pt-5">
                 <div className="form-group">
                   <label htmlFor="QualificationID">Qualification Title</label>
-                  <select
+                  <SearchSelect
                     id="QualificationID"
-                    name="QualificationID"
-                    value={addStaffQualifications.QualificationID}
-                    className="form-control"
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {qualifications ? (
-                      <>
-                        {qualifications.map((item, index) => {
-                          return (
-                            <option key={index} value={item.EntryID}>
-                              {item.QualificationTitle}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
+                    value={qualifications.map(q => ({ value: q.EntryID, label: q.QualificationTitle })).find(op => op.value === addStaffQualifications.QualificationID) || null}
+                    options={qualifications.map(q => ({ value: q.EntryID, label: q.QualificationTitle }))}
+                    onChange={(selected) => handleSelectChange('QualificationID', selected)}
+                    placeholder="Select Option"
+                  />
                 </div>
               </div>
               <div className="col-lg-4 col-md-4 pt-5">

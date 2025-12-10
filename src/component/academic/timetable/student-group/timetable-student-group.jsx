@@ -23,6 +23,10 @@ function TimetableStudentGroup(props) {
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Group Name",
                 field: "GroupName",
             },
@@ -41,10 +45,6 @@ function TimetableStudentGroup(props) {
             {
                 label: "Course Semester",
                 field: "CourseSemester",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
 
         ],
@@ -293,38 +293,30 @@ function TimetableStudentGroup(props) {
             <PageHeader
                 title={"Timetable Student Group"}
                 items={["Academics", "Timetable", "Student Group"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setFormData({
+                                ...formData,
+                                GroupName: "",
+                                GroupCode: "",
+                                CourseCode: "",
+                                CourseLevel: "",
+                                CourseSemester: "",
+                                EntryID: "",
+                            })
+                        }
+                    >
+                        <i className="fa fa-plus me-2"></i>Add Student Group
+                    </button>
+                }
             />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
-                    <div className="card-header border-0 pt-6">
-                        <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setFormData({
-                                            ...formData,
-                                            GroupName: "",
-                                            GroupCode: "",
-                                            CourseCode: "",
-                                            CourseLevel: "",
-                                            CourseSemester: "",
-                                            EntryID: "",
-                                        })
-                                    }
-                                >
-                                    Add Student Group
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                     <div className="card-body p-0">
                         <AGTable data={datatable} />
                     </div>

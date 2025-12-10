@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { serverLink } from "../../../resources/url";
 import { useEffect } from "react";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 
 
 const ComplainTypes = (props) => {

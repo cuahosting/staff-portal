@@ -4,12 +4,11 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AgReportTable from "../../common/table/report_table";
+import AgReportTable from "../../common/table/ReportTable";
 import { toast } from "react-toastify";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
-function AcademicResultByStudent(props)
-{
+function AcademicResultByStudent(props) {
     const token = props.LoginDetails[0].token;
     const depart = props.LoginDetails[0].DepartmentCode;
 
@@ -23,18 +22,13 @@ function AcademicResultByStudent(props)
         SemesterCode2: "",
     })
 
-    const getSemesters = async () =>
-    {
-        try
-        {
+    const getSemesters = async () => {
+        try {
             await axios.get(`${serverLink}staff/timetable/timetable/semester`, token)
-                .then((result) =>
-                {
+                .then((result) => {
                     let rows = []
-                    if (result.data.length > 0)
-                    {
-                        result.data.map((row) =>
-                        {
+                    if (result.data.length > 0) {
+                        result.data.map((row) => {
                             rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
@@ -42,19 +36,15 @@ function AcademicResultByStudent(props)
                     }
                     setIsLoading(false)
                 })
-        } catch (error)
-        {
+        } catch (error) {
             console.log(error)
         }
     }
 
-    const getDepartmentStudents = async () =>
-    {
-        try
-        {
+    const getDepartmentStudents = async () => {
+        try {
             await axios.get(`${serverLink}staff/assessment/exam/result/students/${DepartmentCode}`, token)
-                .then((result) =>
-                {
+                .then((result) => {
                     let rows = []
                     // if (result.data.length > 0) {
                     //     result.data.map((row) => {
@@ -65,24 +55,19 @@ function AcademicResultByStudent(props)
                     // }
                     setIsLoading(false)
                 })
-        } catch (error)
-        {
+        } catch (error) {
             console.log(error)
         }
 
     }
 
-    const getData = async (semester, department) =>
-    {
+    const getData = async (semester, department) => {
         setIsLoading(true)
         await axios.get(`${serverLink}staff/assessment/exam/result/by/department/${semester}/${department}`, token)
-            .then((result) =>
-            {
+            .then((result) => {
                 let rows = [];
-                if (result.data.length > 0)
-                {
-                    result.data.map((exam, index) =>
-                    {
+                if (result.data.length > 0) {
+                    result.data.map((exam, index) => {
                         rows.push([
                             index + 1,
                             exam.StudentID,
@@ -98,25 +83,21 @@ function AcademicResultByStudent(props)
                     });
                     setIsLoading(false)
                 }
-                else
-                {
+                else {
                     toast.error('no record');
                     setIsLoading(false)
                 }
                 setIsLoading(false);
                 setData(rows)
             })
-            .catch((err) =>
-            {
+            .catch((err) => {
                 console.log(err)
                 console.log("NETWORK ERROR");
             });
     }
 
-    const onSemesterChange = async (e) =>
-    {
-        if (e.value !== "")
-        {
+    const onSemesterChange = async (e) => {
+        if (e.value !== "") {
             setSemeter({
                 ...semester,
                 SemesterCode: e.value,
@@ -124,8 +105,7 @@ function AcademicResultByStudent(props)
             })
             getData(e.value, depart);
 
-        } else
-        {
+        } else {
             setSemeter({
                 ...semester,
                 SemesterCode: "",
@@ -136,8 +116,7 @@ function AcademicResultByStudent(props)
     }
 
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         getDepartmentStudents();
         getSemesters();
     }, [""]);
@@ -152,11 +131,10 @@ function AcademicResultByStudent(props)
             />
             <div className="row">
                 {semesterList.length > 0 &&
-                    <div className="col-md-12 mb-4 form-group">
-                        <label htmlFor="_Semester">Select Semester</label>
-                        <Select
+                    <div className="col-md-12 mb-4">
+                        <SearchSelect
                             id="_Semester"
-                            className="form-select form-select"
+                            label="Select Semester"
                             value={semester.SemesterCode2}
                             onChange={onSemesterChange}
                             options={semesterOptions}
@@ -181,8 +159,7 @@ function AcademicResultByStudent(props)
     );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         LoginDetails: state.LoginDetails,
     };

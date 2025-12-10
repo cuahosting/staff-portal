@@ -9,7 +9,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { formatDateAndTime, currencyConverter } from "../../../../resources/constants";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function HrGrossPayManagement(props) {
   const token = props.loginData[0].token;
@@ -121,10 +121,14 @@ function HrGrossPayManagement(props) {
   // Handle staff selection in update modal
   const handleStaffSelect = (selected) => {
     if (selected) {
+      // Find the original option to ensure we get the grossPay property
+      // In case SearchSelect or data transformation strips extra properties
+      const originalOption = staffOptions.find(opt => opt.value === selected.value);
+
       setUpdateForm({
         ...updateForm,
         StaffID: selected.value,
-        CurrentGrossPay: selected.grossPay,
+        CurrentGrossPay: originalOption ? originalOption.grossPay : 0,
       });
     } else {
       setUpdateForm({
@@ -346,12 +350,11 @@ function HrGrossPayManagement(props) {
           <div className="row">
             <div className="col-12 mb-4">
               <label className="form-label fs-6 fw-bolder text-dark">Select Staff</label>
-              <Select
+              <SearchSelect
                 options={staffOptions}
                 onChange={handleStaffSelect}
                 value={staffOptions.find((opt) => opt.value === updateForm.StaffID) || null}
                 placeholder="Search by Staff ID or Name..."
-                isClearable
               />
             </div>
             {updateForm.StaffID && (
@@ -517,9 +520,8 @@ function HrGrossPayManagement(props) {
                       <td>{currencyConverter(item.NewGrossPay)}</td>
                       <td>
                         <span
-                          className={`badge ${
-                            item.UpdateMethod === "MANUAL" ? "bg-primary" : "bg-info"
-                          }`}
+                          className={`badge ${item.UpdateMethod === "MANUAL" ? "bg-primary" : "bg-info"
+                            }`}
                         >
                           {item.UpdateMethod}
                         </span>

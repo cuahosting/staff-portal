@@ -7,7 +7,7 @@ import { connect } from "react-redux/es/exports";
 import { useParams } from "react-router";
 import { useEffect } from "react";
 import Loader from "../../../common/loader/loader";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 
 
 

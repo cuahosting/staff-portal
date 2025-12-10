@@ -305,7 +305,7 @@ function HrPayrollSendPayslips(props) {
                                         )}
                                     </div>
                                     {selectedMonth && emailStats.pending > 0 && (
-                                        <div className="col-lg-6 d-flex align-items-end">
+                                        <div className="col-lg-6 d-flex align-items-center">
                                             <button
                                                 className="btn btn-primary btn-lg w-100"
                                                 onClick={sendAllPayslips}

@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import AGTable from "../../common/table/AGTable";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function DeanApproval(props) {
   const token = props.login[0].token;
@@ -40,6 +40,10 @@ function DeanApproval(props) {
         field: "sn",
       },
       {
+        label: "Action",
+        field: "Action"
+      },
+      {
         label: "Module Code",
         field: "code",
       },
@@ -70,10 +74,6 @@ function DeanApproval(props) {
       {
         label: "Status",
         field: "Status"
-      },
-      {
-        label: "Action",
-        field: "Action"
       }
     ],
     rows: [],
@@ -141,6 +141,7 @@ function DeanApproval(props) {
 
 
   const onCourseChange = (e) => {
+    if (!e) return;
     setCourseCode({
       ...courseCode,
       courseCode: e.value,
@@ -149,6 +150,7 @@ function DeanApproval(props) {
   }
 
   const onSemesterChange = (e) => {
+    if (!e) return;
     setCourseCode({
       ...courseCode,
       schoolSemester: e.value,
@@ -183,6 +185,9 @@ function DeanApproval(props) {
             const l3 = module.Lecturers.split(" ,")[2] === "No Name" ? "--" : module.Lecturers.split(" ,")[2];
             rows.push({
               sn: index + 1,
+              Action: <button className="btn btn-link p-0 text-primary" style={{ fontSize: '22px' }} title="Edit" onClick={() => { onApproveSingle(module) }}>
+                <i className="fa fa-arrow-right" />
+              </button>,
               code: module.ModuleCode,
               module: module.ModuleName,
               level: module.ModuleLevel,
@@ -192,10 +197,7 @@ function DeanApproval(props) {
               moduleType: module.ModuleType,
               Status: module.Status === 0 ? <span className="badge badge-secondary">Not Approved</span>
                 : module.Status === 1 ? <span className="badge badge-info">Approved by HOD</span>
-                  : <span className="badge badge-success">Approved by Dean</span>,
-              Action: <button className="btn btn-link p-0 text-primary" style={{ fontSize: '22px' }} title="Edit" onClick={() => { onApproveSingle(module) }}>
-                <i className="fa fa-arrow-right" />
-              </button>
+                  : <span className="badge badge-success">Approved by Dean</span>
             });
           });
           setDatatable({
@@ -291,15 +293,14 @@ function DeanApproval(props) {
                 <form onSubmit={handleSubmit}>
                   <div className="row fv-row">
                     <div className="col-md-4 fv-row mb-6 enhanced-form-group">
-                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
-                        Select Programme/Course
-                      </label>
-                      <Select
-                        name="courseCode"
+                      <SearchSelect
+                        id="courseCode"
+                        label="Select Programme/Course"
                         value={courseCode.courseCode2}
                         onChange={onCourseChange}
                         options={courseOptions}
                         placeholder="Select a programme/Course"
+                        required
                       />
                       {/*<select*/}
                       {/*  className="form-select"*/}
@@ -318,15 +319,14 @@ function DeanApproval(props) {
                       {/*</select>*/}
                     </div>
                     <div className="col-md-4 fv-row mb-6 enhanced-form-group">
-                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
-                        Select School Semester
-                      </label>
-                      <Select
-                        name="schoolSemester"
+                      <SearchSelect
+                        id="schoolSemester"
+                        label="Select School Semester"
                         value={courseCode.schoolSemester2}
                         onChange={onSemesterChange}
                         options={semesterOptions}
                         placeholder="select Semester"
+                        required
                       />
                       {/*<select*/}
                       {/*  className="form-select"*/}

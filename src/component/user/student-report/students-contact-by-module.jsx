@@ -4,10 +4,9 @@ import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function StudentsConstactByModule(props) {
   const token = props.login[0].token;
@@ -37,9 +36,9 @@ function StudentsConstactByModule(props) {
         .then((res) => {
           let rows = [];
           res.data.length > 0 &&
-          res.data.map((row) => {
-            rows.push({ text: row.ModuleName + "--" + row.ModuleCode, id: row.ModuleCode});
-          });
+            res.data.map((row) => {
+              rows.push({ value: row.ModuleCode, label: row.ModuleName + " -- " + row.ModuleCode });
+            });
           setModuleList(rows);
           const result = res.data;
           if (result.length > 0) {
@@ -109,19 +108,17 @@ function StudentsConstactByModule(props) {
                 <form>
                   <div className="row fv-row">
                     <div className="col-md-12 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
-                        Select Module
-                      </label>
-
-                      <Select2
-                    id="moduleCode"
-                    data={moduleList}
-                    value={module.moduleCode}
-                    onSelect={handleChange}
-                    options={{
-                      placeholder: "Search Module",
-                    }}
-                  />
+                      <SearchSelect
+                        id="moduleCode"
+                        label="Select Module"
+                        value={moduleList.find(m => m.value === module.moduleCode) || null}
+                        options={moduleList}
+                        onChange={(selected) => {
+                          handleChange({ target: { id: 'moduleCode', value: selected?.value || '' }, preventDefault: () => { } });
+                        }}
+                        placeholder="Search Module"
+                        required
+                      />
                       {/* <select
                         className="form-select"
                         data-placeholder="Select Module"

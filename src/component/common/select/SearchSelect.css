@@ -1,0 +1,55 @@
+/**
+ * SearchSelect Component Styles
+ */
+
+.search-select-wrapper {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.search-select-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #181c32;
+    margin-bottom: 0.5rem;
+}
+
+.search-select-required {
+    color: #f1416c;
+    margin-left: 4px;
+}
+
+/* Ensure menu appears above everything */
+.search-select__menu-portal {
+    z-index: 9999 !important;
+}
+
+/* Additional focus styling */
+.search-select__control--is-focused {
+    border-color: #009ef7 !important;
+    box-shadow: 0 0 0 3px rgba(0, 158, 247, 0.15) !important;
+}
+
+/* Disabled state */
+.search-select__control--is-disabled {
+    background-color: #f5f5f5 !important;
+    cursor: not-allowed !important;
+}
+
+/* Loading state */
+.search-select__loading-indicator {
+    color: #009ef7 !important;
+}
+
+/* Print styles - hide dropdowns in print */
+@media print {
+    .search-select-wrapper {
+        page-break-inside: avoid;
+    }
+
+    .search-select__dropdown-indicator,
+    .search-select__clear-indicator {
+        display: none !important;
+    }
+}

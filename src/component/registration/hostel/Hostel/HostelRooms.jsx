@@ -6,16 +6,17 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { formatDateAndTime } from "../../../../resources/constants";
 import { CommentsDisabledOutlined } from "@mui/icons-material";
 
 import { useForm } from "react-hook-form";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function HostelRooms(props) {
   const token = props.loginData.token;
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit, setValue, watch } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [hostelRoomBeds, setHostelRoomBeds] = useState([]);
   const [hostelRooms, setHostelRooms] = useState([]);
@@ -25,7 +26,7 @@ function HostelRooms(props) {
   const [roomBedDets, setRoomBedDets] = useState({
     floor: "",
     roomId: "",
-    Capacity:"",
+    Capacity: "",
     roomNo: "",
     hosteFor: "",
   });
@@ -84,8 +85,8 @@ function HostelRooms(props) {
                 item.HostelName,
                 item.RoomNo,
                 item.FloorName,
-                item.HostelFor+" Hostel",
-                item.Capacity+" Bed(s)",
+                item.HostelFor + " Hostel",
+                item.Capacity + " Bed(s)",
                 <>
                   <button
                     onClick={() => {
@@ -120,7 +121,7 @@ function HostelRooms(props) {
                         roomId: item.EntryID, //HostelID
                         Capacity: item.Capacity,
                         hostelId: item.HostelID,
-                        roomNo:item.RoomNo,
+                        roomNo: item.RoomNo,
                         hosteFor: item.HostelFor,
                       });
                       setBedNumber("");
@@ -155,7 +156,7 @@ function HostelRooms(props) {
 
   const addBedToRoom = async (e) => {
     e.preventDefault();
-    if(roomBedDets.Capacity-hostelRoomBeds.length==0){
+    if (roomBedDets.Capacity - hostelRoomBeds.length == 0) {
       toast.error("Room is Filled Up");
       setreadyToShow(false);
       return false;
@@ -325,7 +326,7 @@ function HostelRooms(props) {
                 ></button>
               </div>
               <div class="modal-body">
-                <h2>Add a bed to Room {roomBedDets.roomNo} | Room Capcity:{roomBedDets.Capacity} | Slot Available :{roomBedDets.Capacity-hostelRoomBeds.length}</h2>
+                <h2>Add a bed to Room {roomBedDets.roomNo} | Room Capcity:{roomBedDets.Capacity} | Slot Available :{roomBedDets.Capacity - hostelRoomBeds.length}</h2>
                 <div class="row g-3">
                   <div class="col-sm-3">
                     <label htmlFor="hostelId">Room No.</label>
@@ -362,21 +363,21 @@ function HostelRooms(props) {
                   </div>
                   <div class="col-sm-3">
                     <br />
-                    {readyToShow?(
-                    <button
-                      type="button"
-                      onClick={addBedToRoom}
-                      class="btn btn-primary"
-                    >
-                      Add to Room
-                    </button>):(
+                    {readyToShow ? (
                       <button
-                      type="button"
-                      disabled
-                      class="btn btn-primary"
-                    >
-                      Room is Filled Up
-                    </button>
+                        type="button"
+                        onClick={addBedToRoom}
+                        class="btn btn-primary"
+                      >
+                        Add to Room
+                      </button>) : (
+                      <button
+                        type="button"
+                        disabled
+                        class="btn btn-primary"
+                      >
+                        Room is Filled Up
+                      </button>
                     )}
                   </div>
                   <div style={{ marginTop: "50px" }} className="row">
@@ -393,19 +394,15 @@ function HostelRooms(props) {
           <form onSubmit={handleSubmit(addHostelRoom)} novalidate>
             <div className="form-group">
               <label htmlFor="hostelId">Hostel Name</label>
-              <select
-                {...register("hostelId")}
+              <SearchSelect
                 id="hostelId"
+                label="Hostel Name"
+                value={hostelList.map((item) => ({ value: `${item.EntryID}`, label: item.HostelName })).find(op => op.value === watch("hostelId")) || null}
+                options={hostelList.map((item) => ({ value: `${item.EntryID}`, label: item.HostelName }))}
+                onChange={(selected) => setValue("hostelId", selected?.value)}
+                placeholder="Select Hostel Name"
                 required
-                className="form-control"
-              >
-                <option value="">Select Hostel Name</option>
-                {hostelList.map((item) => (
-                  <option value={`${item.EntryID}`} key={item.EntryID}>
-                    {item.HostelName}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="form-group pt-5">
@@ -421,17 +418,15 @@ function HostelRooms(props) {
 
             <div className="form-group pt-5">
               <label htmlFor="roomNumber">Floor Name</label>
-              <select
-                {...register("floorName")}
+              <SearchSelect
                 id="floorName"
+                label="Floor Name"
+                value={[{ value: "Ground", label: "Ground" }, { value: "First", label: "First" }, { value: "Second", label: "Second" }].find(op => op.value === watch("floorName")) || null}
+                options={[{ value: "Ground", label: "Ground" }, { value: "First", label: "First" }, { value: "Second", label: "Second" }]}
+                onChange={(selected) => setValue("floorName", selected?.value)}
+                placeholder="Select Floor Name"
                 required
-                className="form-control"
-              >
-                <option value="">Select Floor Name</option>
-                <option value="Ground">Ground</option>
-                <option value="First">First</option>
-                <option value="Second">Second</option>
-              </select>
+              />
             </div>
 
             <div className="form-group pt-5">

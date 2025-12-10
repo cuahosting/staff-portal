@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select from 'react-select';
+import SearchSelect from "../../common/select/SearchSelect";
 
 
 
-function AddEditStaffPensionRecord(props)
-{
+function AddEditStaffPensionRecord(props) {
   const token = props.loginData[0]?.token;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -58,20 +57,15 @@ function AddEditStaffPensionRecord(props)
   const [stList, setStList] = useState([])
 
 
-  const getStaffPensionRecords = async () =>
-  {
+  const getStaffPensionRecords = async () => {
     const stlist = []
-    getStaff().then(async (r) =>
-    {
+    getStaff().then(async (r) => {
       await axios
         .get(`${serverLink}staff/hr/staff-management/staff/pension/records`, token)
-        .then((result) =>
-        {
-          if (result.data.length > 0)
-          {
+        .then((result) => {
+          if (result.data.length > 0) {
             let rows = [];
-            result.data.map((pension, index) =>
-            {
+            result.data.map((pension, index) => {
               rows.push({
                 sn: index + 1,
                 EntryID: pension.EntryID,
@@ -85,8 +79,7 @@ function AddEditStaffPensionRecord(props)
                     className="btn btn-sm btn-primary"
                     data-bs-toggle="modal"
                     data-bs-target="#kt_modal_general"
-                    onClick={() =>
-                    {
+                    onClick={() => {
 
                       // setCreateStaffPensionRecord({
                       //   ...createStaffPensionRecord,
@@ -97,8 +90,7 @@ function AddEditStaffPensionRecord(props)
                       //   PensionAdminID: "",
                       // })
 
-                      if (r.length > 0)
-                      {
+                      if (r.length > 0) {
                         const staff_list = r.filter(x => x.StaffID === pension.StaffID)[0];
                         setCreateStaffPensionRecord({
                           StaffID: pension.StaffID,
@@ -126,8 +118,7 @@ function AddEditStaffPensionRecord(props)
 
           setIsLoading(false);
         })
-        .catch((err) =>
-        {
+        .catch((err) => {
           console.log("NETWORK ERROR");
         });
     });
@@ -135,46 +126,38 @@ function AddEditStaffPensionRecord(props)
 
   };
 
-  const getStaff = async () =>
-  {
+  const getStaff = async () => {
     return await axios
       .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         setStList(response.data)
         let rows = [];
         response.data.length > 0 &&
-          response.data.map((row) =>
-          {
+          response.data.map((row) => {
             rows.push({ value: row.StaffID, label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname })
           });
         setStaffList(rows);
         setIsLoading(false);
         return response.data
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
 
-  const getPensionAdministrators = async () =>
-  {
+  const getPensionAdministrators = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/pension/administrators/list`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         setPensionAdministratorsList(response.data);
         setIsLoading(false);
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
 
-  const onEdit = (e) =>
-  {
+  const onEdit = (e) => {
     setCreateStaffPensionRecord({
       ...createStaffPensionRecord,
       [e.target.id]: e.target.value,
@@ -182,35 +165,29 @@ function AddEditStaffPensionRecord(props)
   };
 
 
-  const handleStaffEdit = (e) =>
-  {
+  const handleStaffEdit = (e) => {
     setCreateStaffPensionRecord({
       ...createStaffPensionRecord,
-      StaffID: e.value,
+      StaffID: e?.value || "",
       Staff: e
     })
   }
 
-  const onSubmit = async () =>
-  {
-    if (createStaffPensionRecord.RSAPin === "")
-    {
+  const onSubmit = async () => {
+    if (createStaffPensionRecord.RSAPin === "") {
       showAlert("EMPTY FIELD", "Please enter RSAPin", "error").then((r) => { });
       return false;
     }
 
-    if (createStaffPensionRecord.EntryID === "")
-    {
+    if (createStaffPensionRecord.EntryID === "") {
       toast.info("Submitting. Please wait...");
       await axios
         .post(
           `${serverLink}staff/hr/staff-management/add/staff/pension/record`,
           createStaffPensionRecord, token
         )
-        .then((result) =>
-        {
-          if (result.data.message === "success")
-          {
+        .then((result) => {
+          if (result.data.message === "success") {
             toast.success("Pension record added successfully");
             document.getElementById("pension-close").click()
             getStaffPensionRecords();
@@ -221,15 +198,13 @@ function AddEditStaffPensionRecord(props)
               RSAPin: "",
               PensionAdminID: "",
             });
-          } else if (result.data.message === "exist")
-          {
+          } else if (result.data.message === "exist") {
             showAlert(
               "PENSION EXIST",
               "Staff pension record already exist!",
               "error"
             );
-          } else
-          {
+          } else {
             showAlert(
               "ERROR",
               "Something went wrong. Please try again!",
@@ -237,26 +212,22 @@ function AddEditStaffPensionRecord(props)
             );
           }
         })
-        .catch((error) =>
-        {
+        .catch((error) => {
           showAlert(
             "NETWORK ERROR",
             "Please check your connection and try again!",
             "error"
           );
         });
-    } else
-    {
+    } else {
       toast.info("Updating. Please wait...");
       await axios
         .patch(
           `${serverLink}staff/hr/staff-management/update/staff/pension/record`,
           createStaffPensionRecord, token
         )
-        .then((result) =>
-        {
-          if (result.data.message === "success")
-          {
+        .then((result) => {
+          if (result.data.message === "success") {
             toast.success("Pension record updated successfully");
             document.getElementById("pension-close").click()
             getStaffPensionRecords();
@@ -267,8 +238,7 @@ function AddEditStaffPensionRecord(props)
               RSAPin: "",
               PensionAdminID: "",
             });
-          } else
-          {
+          } else {
             showAlert(
               "ERROR",
               "Something went wrong. Please try again!",
@@ -276,8 +246,7 @@ function AddEditStaffPensionRecord(props)
             );
           }
         })
-        .catch((error) =>
-        {
+        .catch((error) => {
           showAlert(
             "NETWORK ERROR",
             "Please check your connection and try again!",
@@ -287,8 +256,7 @@ function AddEditStaffPensionRecord(props)
     }
   };
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     getStaffPensionRecords().then((r) => { });
 
     getPensionAdministrators().then((r) => { });
@@ -335,16 +303,16 @@ function AddEditStaffPensionRecord(props)
             </div>
           </div>
           <div className="card-body p-0">
-            <Table data={staffPensionRecordDatatable} />
+            <AGTable data={staffPensionRecordDatatable} />
           </div>
         </div>
         <Modal title={"Staff Pension Record Form"} close="pension-close">
           <div className="col-lg-12 col-md-12">
             <div className="form-group">
               <label htmlFor="StaffID">StaffID</label>
-              <Select
+              <SearchSelect
                 isDisabled={createStaffPensionRecord.Staff !== "" ? true : false}
-                name="StaffID"
+                id="StaffID"
                 value={createStaffPensionRecord.Staff}
                 onChange={handleStaffEdit}
                 options={staffList}
@@ -378,29 +346,13 @@ function AddEditStaffPensionRecord(props)
           <div className="col-lg-12 col-md-12 pt-5">
             <div className="form-group">
               <label htmlFor="PensionAdminID">Pension Administrator</label>
-              <select
+              <SearchSelect
                 id="PensionAdminID"
-                name="PensionAdminID"
-                value={createStaffPensionRecord.PensionAdminID}
-                className="form-control"
-                onChange={onEdit}
-              >
-                <option value="">Select Option</option>
-                {pensionAdministratorsList ? (
-                  <>
-                    {pensionAdministratorsList.map((item, index) =>
-                    {
-                      return (
-                        <option key={index} value={item.EntryID}>
-                          {item.AdminName}
-                        </option>
-                      );
-                    })}
-                  </>
-                ) : (
-                  ""
-                )}
-              </select>
+                value={pensionAdministratorsList ? pensionAdministratorsList.map(item => ({ label: item.AdminName, value: item.EntryID })).find(op => op.value === createStaffPensionRecord.PensionAdminID) || null : null}
+                onChange={(selected) => onEdit({ target: { id: 'PensionAdminID', value: selected?.value || '' } })}
+                options={pensionAdministratorsList ? pensionAdministratorsList.map(item => ({ label: item.AdminName, value: item.EntryID })) : []}
+                placeholder="Select Option"
+              />
             </div>
           </div>
           <div className="col-lg-12 col-md-12 pt-5">
@@ -428,8 +380,7 @@ function AddEditStaffPensionRecord(props)
   );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails,
   };

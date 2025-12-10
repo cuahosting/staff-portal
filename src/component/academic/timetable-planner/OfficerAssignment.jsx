@@ -7,10 +7,7 @@ import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { connect } from "react-redux";
 import AGTable from "../../common/table/AGTable";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-// eslint-disable-next-line no-unused-vars
-import Select from 'react-select';
+import SearchSelect from "../../common/select/SearchSelect";
 
 function OfficerAssignment(props) {
   const token = props.login[0].token;
@@ -40,6 +37,10 @@ function OfficerAssignment(props) {
         field: "sn",
       },
       {
+        label: "",
+        field: "action",
+      },
+      {
         label: "StaffID",
         field: "staffID",
       },
@@ -56,10 +57,6 @@ function OfficerAssignment(props) {
         label: "Course Name",
         field: "courseName",
       },
-      {
-        label: "",
-        field: "action",
-      },
     ],
     rows: [],
   });
@@ -72,7 +69,7 @@ function OfficerAssignment(props) {
           let rows = [];
           response.data.length > 0 &&
             response.data.forEach((row) => {
-              rows.push({ text: row.FirstName + " " + row.MiddleName + " " + row.Surname, id: row.StaffID });
+              rows.push({ value: row.StaffID, label: row.FirstName + " " + row.MiddleName + " " + row.Surname });
             });
           //setStaff(rows)
           setStaffList(rows)
@@ -95,7 +92,7 @@ function OfficerAssignment(props) {
           let rows = [];
           response.data.length > 0 &&
             response.data.forEach((row) => {
-              rows.push({ text: row.CourseName, id: row.CourseCode });
+              rows.push({ value: row.CourseCode, label: row.CourseName });
             });
           //setCourses(rows)
           setCourseList(rows)
@@ -120,18 +117,18 @@ function OfficerAssignment(props) {
           response.data.forEach((course, index) => {
             rows.push({
               sn: index + 1,
+              action: (
+                <button
+                  onClick={() => handleDelete(course.EntryID)}
+                  className="btn btn-link p-0 text-danger" title="Delete"
+                >
+                  <i style={{ fontSize: '15px', color: "red" }} className="fa fa-trash" />
+                </button>
+              ),
               staffID: course.StaffID,
               staffName: course.StaffName,
               courseCode: course.CourseCode,
               courseName: course.CourseName,
-              action: (
-                <button
-                  onClick={() => handleDelete(course.EntryID)}
-                  className="btn btn-link p-0 text-danger" style={{ fontSize: '22px' }} title="Delete"
-                >
-                  Delete
-                </button>
-              ),
             });
           });
 
@@ -189,7 +186,7 @@ function OfficerAssignment(props) {
   };
 
   const handleDelete = async (EntryID) => {
-    showConfirm("warning", "Are you sure?", "warning").then(async(confirm) => {
+    showConfirm("warning", "Are you sure?", "warning").then(async (confirm) => {
       if (confirm) {
         await axios
           .delete(`${serverLink}staff/academics/timetable-planner/officer-assignment/${EntryID}`, token)
@@ -237,66 +234,30 @@ function OfficerAssignment(props) {
               <div className="row">
                 <form onSubmit={handleSubmit}>
                   <div className="row fv-row">
-                    <div className="col-md-4 fv-row mb-6 enhanced-form-group">
-                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
-                        Select Programme/Course
-                      </label>
-                      {/* <select
-                        className="form-select"
-                        data-placeholder="Select a programme"
+                    <div className="col-md-4">
+                      <SearchSelect
                         id="courseCode"
-                        required
-                        value={data.courseCode}
-                        onChange={handleChange}
-                      >
-                        <option value="">Select option</option>
-
-                        {courseList.map((course, index) => (
-                          <option key={index} value={course.CourseCode}>
-                            {course.CourseName}
-                          </option>
-                        ))}
-                      </select> */}
-                      <Select2
-                        id="courseCode"
-                        //disabled={item.SemesterCode === ""}
-
-                        value={data.courseCode}
-                        data={courseList}
-                        onSelect={handleChange}
-                        options={{
-                          placeholder: "Search Course",
+                        label="Select Programme/Course"
+                        value={courseList.find(c => c.value === data.courseCode) || null}
+                        options={courseList}
+                        onChange={(selected) => {
+                          handleChange({ target: { id: 'courseCode', value: selected?.value || '' }, preventDefault: () => { } });
                         }}
+                        placeholder="Search Course"
+                        required
                       />
                     </div>
-                    <div className="col-md-4 fv-row mb-6 enhanced-form-group">
-                      <label className="form-label fs-6 fw-bolder text-dark enhanced-label required">
-                        Select Staff
-                      </label>
-                      {/* <select
-                        className="form-select"
-                        data-placeholder="Select a staff"
+                    <div className="col-md-4">
+                      <SearchSelect
                         id="staffID"
-                        required
-                        value={data.staffID}
-                        onChange={handleChange}
-                      >
-                        <option value="">Select option</option>
-                        {staffList.map((staff, index) => (
-                          <option key={index} value={staff.StaffID}>
-                            {`${staff.FirstName} ${staff.MiddleName} ${staff.Surname}`}
-                          </option>
-                        ))}
-                      </select> */}
-                      <Select2
-                        id="staffID"
-                        //disabled={item.SemesterCode === ""}
-                        value={data.staffID}
-                        data={staffList}
-                        onSelect={handleChange}
-                        options={{
-                          placeholder: "Search staff",
+                        label="Select Staff"
+                        value={staffList.find(s => s.value === data.staffID) || null}
+                        options={staffList}
+                        onChange={(selected) => {
+                          handleChange({ target: { id: 'staffID', value: selected?.value || '' }, preventDefault: () => { } });
                         }}
+                        placeholder="Search staff"
+                        required
                       />
                     </div>
                     <div className="col-md-4">

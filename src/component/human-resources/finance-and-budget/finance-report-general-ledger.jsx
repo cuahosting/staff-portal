@@ -5,7 +5,7 @@ import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
 import {toast} from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import {currencyConverter, formatDateAndTime, sumObjectArray} from "../../../resources/constants";
 
 function FinanceReportGeneralLedger(props) {

@@ -4,12 +4,11 @@ import { serverLink } from "../../../resources/url";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import AgReportTable from "../../common/table/report_table";
+import AgReportTable from "../../common/table/ReportTable";
 import { toast } from "react-toastify";
-import Select from "react-select";
+import SearchSelect from "../../common/select/SearchSelect";
 
-function AcademicResultByModule(props)
-{
+function AcademicResultByModule(props) {
     const token = props.LoginDetails[0].token;
     const staff = props.LoginDetails[0].StaffID;
 
@@ -28,21 +27,17 @@ function AcademicResultByModule(props)
         ModuleCode2: "",
     })
 
-    const getModules = async () =>
-    {
+    const getModules = async () => {
         await axios
             .get(`${serverLink}staff/assessment/exam/module/${staff}`, token)
-            .then((result) =>
-            {
+            .then((result) => {
                 let rows = [];
-                if (result.data.length > 0)
-                {
+                if (result.data.length > 0) {
                     const mapFromRes = new Map(result.data.map(c => [c.ModuleCode, c]));
 
                     const uniqueModules = [...mapFromRes.values()];
 
-                    uniqueModules.forEach((row) =>
-                    {
+                    uniqueModules.forEach((row) => {
                         rows.push({ value: row.ModuleCode, label: row.ModuleName + ` (${row.ModuleCode})` })
                     });
                     setModulesOptions(rows)
@@ -54,17 +49,13 @@ function AcademicResultByModule(props)
 
     };
 
-    const getData = async (module) =>
-    {
+    const getData = async (module) => {
         setIsLoading(true)
         await axios.get(`${serverLink}staff/assessment/exam/result/by/module/${module}`, token)
-            .then((result) =>
-            {
+            .then((result) => {
                 let rows = [];
-                if (result.data.length > 0)
-                {
-                    result.data.forEach((exam, index) =>
-                    {
+                if (result.data.length > 0) {
+                    result.data.forEach((exam, index) => {
                         rows.push([
                             index + 1,
                             exam.StudentID,
@@ -80,16 +71,14 @@ function AcademicResultByModule(props)
                     });
                     setIsLoading(false)
                 }
-                else
-                {
+                else {
                     toast.error('no record');
                     setIsLoading(false)
                 }
                 setIsLoading(false);
                 setData(rows)
             })
-            .catch((err) =>
-            {
+            .catch((err) => {
                 console.log(err)
                 console.log("NETWORK ERROR");
             });
@@ -97,8 +86,7 @@ function AcademicResultByModule(props)
 
 
 
-    const onDepartmentChange = (e) =>
-    {
+    const onDepartmentChange = (e) => {
         setModuleCode({
             ...moduleCode,
             ModuleCode: e.value,
@@ -108,8 +96,7 @@ function AcademicResultByModule(props)
     }
 
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         getModules();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -124,11 +111,10 @@ function AcademicResultByModule(props)
             />
             <div className="row">
                 {
-                    <div className="col-md-12 mb-4 form-group">
-                        <label htmlFor="_Semester">Select Module</label>
-                        <Select
+                    <div className="col-md-12 mb-4">
+                        <SearchSelect
                             name="ModuleCode"
-                            className="form-select form-select"
+                            label="Select Module"
                             value={moduleCode.ModuleCode2}
                             onChange={onDepartmentChange}
                             options={moduleOptions}
@@ -153,8 +139,7 @@ function AcademicResultByModule(props)
     );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         LoginDetails: state.LoginDetails,
     };

@@ -5,15 +5,15 @@ import axios from "axios";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { formatDate, formatDateAndTime, TimeTablePeriods } from "../../../../resources/constants";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { toast } from "react-toastify";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function ExamTimeTableReport(props) {
     const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["S/N", "ModuleCode", "ModuleName", "SemesterCode", "Exam Date", "StartTime", "EndTime", "Hall", "Capacity", "Students"];
+    const columns = ["Code", "Name", "Semester", "Exam Date", "Start Time", "End Time", "Hall", "Capacity", "Students"];
     const [data, setData] = useState([]);
     const [semesterList, setSemesterList] = useState([]);
     const [semesterOptions, setSemesterOptions] = useState([]);
@@ -29,7 +29,7 @@ function ExamTimeTableReport(props) {
                     let rows = []
                     if (result.data.length > 0) {
                         result.data.map((row) => {
-                            rows.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+                            rows.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                         });
                         setSemesterList(result.data);
                         setSemesterOptions(rows)
@@ -50,14 +50,13 @@ function ExamTimeTableReport(props) {
                 if (result.data.length > 0) {
                     result.data.map((exam, index) => {
                         rows.push([
-                            index + 1,
                             exam.ModuleCode,
                             exam.ModuleName,
                             exam.SemesterCode,
                             formatDate(exam.ExamDate), // formatDateAndTime(exam.ExamDate, "date"),
                             TimeTablePeriods.filter(x => x.value.toString() === exam.StartTime.toString())[0].label,
                             TimeTablePeriods.filter(x => x.value.toString() === exam.EndTime.toString())[0].label,
-                            exam.CampusName+" - "+exam.BlockName+" - "+exam.VenueName,
+                            exam.CampusName + " - " + exam.BlockName + " - " + exam.VenueName,
                             exam.Capacity,
                             exam.Students
                         ]);
@@ -84,7 +83,7 @@ function ExamTimeTableReport(props) {
                 SemesterCode2: e
             })
             getData(e.value);
-        }else{
+        } else {
             setSemeter({
                 SemesterCode: "",
                 SemesterCode2: ""
@@ -106,12 +105,11 @@ function ExamTimeTableReport(props) {
             />
             <div className="col-md-12">
                 {semesterList.length > 0 &&
-                    <div className="col-md-12 mb-4 form-group">
-                        <label htmlFor="_Semester">Select Semester</label>
-                        <Select
+                    <div className="col-md-12 mb-4">
+                        <SearchSelect
                             id="_Semester"
-                            className="form-select form-select"
-                            value={semester.SemesterCode2}
+                            label="Select Semester"
+                            value={semesterList.find(op => op.value === semester.SemesterCode2?.value) || null}
                             onChange={onSemesterChange}
                             options={semesterOptions}
                             placeholder="select Semester"
@@ -122,8 +120,8 @@ function ExamTimeTableReport(props) {
                 <div className="row">
                     {
                         <div className="mt-4">
-                           {data.length > 0 &&
-                            <ReportTable columns={columns} data={data} title={"Exam Timetable Report"} />
+                            {data.length > 0 &&
+                                <ReportTable columns={columns} data={data} title={"Exam Timetable Report"} />
                             }
                         </div>
                     }

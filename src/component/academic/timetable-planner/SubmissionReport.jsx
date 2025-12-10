@@ -8,6 +8,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import AGTable from "../../common/table/AGTable";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function SubmissionReport(props) {
   const token = props.login[0].token;
@@ -75,7 +76,7 @@ function SubmissionReport(props) {
             rows.push({
               sn: index + 1,
               course: course.CourseName,
-              status: course.Status.toString() === "1" ? "Submitted by HOD" : course.Status.toString() === "2"? "Approved by Dean" : "Not submitted",
+              status: course.Status.toString() === "1" ? "Submitted by HOD" : course.Status.toString() === "2" ? "Approved by Dean" : "Not submitted",
             });
           });
           setDatatable({
@@ -117,25 +118,16 @@ function SubmissionReport(props) {
               <div className="row">
                 <form onSubmit={handleSubmit}>
                   <div className="row fv-row">
-                    <div className="col-md-8 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
-                        Select School Semester
-                      </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select school semester"
+                    <div className="col-md-8">
+                      <SearchSelect
                         id="schoolSemester"
-                        value={semester.schoolSemester}
+                        label="Select School Semester"
+                        value={allSemester.map(semester => ({ value: semester.SemesterCode, label: semester.SemesterName })).find(s => s.value === semester.schoolSemester) || null}
+                        options={allSemester.map(semester => ({ value: semester.SemesterCode, label: semester.SemesterName }))}
+                        onChange={(selected) => handleChange({ target: { id: 'schoolSemester', value: selected?.value || '' } })}
+                        placeholder="Select school semester"
                         required
-                        onChange={handleChange}
-                      >
-                        <option value="">Select option</option>
-                        {allSemester.map((semester, index) => (
-                          <option key={index} value={semester.SemesterCode}>
-                            {semester.SemesterName}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                     <div className="col-md-4">
                       <div className="row ">

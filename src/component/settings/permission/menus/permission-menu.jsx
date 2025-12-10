@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -891,7 +891,7 @@ function PermissionMenus(props)
                     Add Main Menu
                   </button>
                 </div>
-                <Table data={mainMenuDatatable} />
+                <AGTable data={mainMenuDatatable} />
               </div>
 
               <div className="tab-pane fade" id="sub_menu" role="tabpanel">
@@ -911,7 +911,7 @@ function PermissionMenus(props)
                 </div>
 
 
-                <Table data={subMenuDatatable} />
+                <AGTable data={subMenuDatatable} />
               </div>
 
               <div className="tab-pane fade" id="sub_sub_menu" role="tabpanel">
@@ -930,7 +930,7 @@ function PermissionMenus(props)
                   </button>
                 </div>
 
-                <Table data={subSubMenuDatatable} />
+                <AGTable data={subSubMenuDatatable} />
               </div>
             </div>
           </div>

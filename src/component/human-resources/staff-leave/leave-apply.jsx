@@ -7,8 +7,8 @@ import { serverLink } from "../../../resources/url";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
-import ReportTable from "../../common/table/report_table";
-import Select from 'react-select';
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
 import { formatDate, formatDateAndTime } from "../../../resources/constants";
@@ -21,7 +21,7 @@ const StaffLeaveApply = (props) => {
 
     const editorRef = React.createRef();
     const [isLoading, setIsLoading] = useState(true);
-    const columns = ["SN", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage", "Action"];
+    const columns = ["SN", "Action", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage"];
     const [data, setData] = useState([]);
     const [StaffList, setStaffList] = useState([]);
     // Hardcode available leave types for now
@@ -72,8 +72,7 @@ const StaffLeaveApply = (props) => {
                         const taken = {};
                         result.data
                             .filter(x => x.ApplicationStatus === 1)
-                            .forEach((x) =>
-                            {
+                            .forEach((x) => {
                                 taken[x.LeaveType] = (taken[x.LeaveType] || 0) + Number(x.DaysTaken || 0);
                             });
                         setDaysTakenByType(taken);
@@ -82,6 +81,20 @@ const StaffLeaveApply = (props) => {
                             const staffLabel = item.ReliefStaffID ? `${item.ReliefStaffID}` : props.loginDetails[0].StaffID;
                             rows.push([
                                 index + 1,
+                                (
+                                    <>
+                                        {
+                                            item.ActionStage === 1 ?
+                                                <button className="btn btn-sm btn-primary" onClick={() => { handleBegin(item) }}  >
+                                                    Begin</button>
+                                                : item.ActionStage === 2 ?
+                                                    <button className="btn btn-sm btn-primary" onClick={() => { handleResume(item) }}  >
+                                                        Resume</button>
+                                                    :
+                                                    <>--</>
+                                        }
+                                    </>
+                                ),
                                 staffLabel,
                                 item.LeaveType,
                                 formatDateAndTime(item.StartDate, "date"),
@@ -96,31 +109,7 @@ const StaffLeaveApply = (props) => {
                                     {
                                         item.ActionStage === 0 ? "Pending Approval" : item.ActionStage === 1 ? "Approved" : item.ActionStage === 2 ? "Started" : item.ActionStage === 3 ? "Completed" : "Denied"
                                     }
-                                </label>,
-                                (
-                                    <>
-                                        {
-                                            item.ActionStage === 1 ?
-                                                <button className="btn btn-sm btn-primary" onClick={() => { handleBegin(item) }}  >
-                                                    Begin</button>
-                                                :
-                                                <>--</>
-                                        }
-                                    </>
-                                ),
-                                (
-                                    <>
-                                        {
-                                            item.ActionStage === 2 ?
-                                                <button className="btn btn-sm btn-primary" onClick={() => { handleResume(item) }}  >
-                                                    Resume</button>
-                                                :
-                                                <>--</>
-                                        }
-                                    </>
-                                )
-
-
+                                </label>
                             ])
                         })
                     }
@@ -402,12 +391,13 @@ const StaffLeaveApply = (props) => {
                                 <form onSubmit={onSubmit} >
                                     <div className="form-group">
                                         <label htmlFor="LeaveType">LeaveType</label>
-                                        <select className="form-select" id="LeaveType" onChange={onEdit} value={leave.LeaveType}>
-                                            <option value={""}>-select leave type-</option>
-                                            {leaveCategory.map((cat, idx) => (
-                                                <option key={idx} value={cat.Name}>{cat.Name}</option>
-                                            ))}
-                                        </select>
+                                        <SearchSelect
+                                            id="LeaveType"
+                                            value={leaveCategory.map(c => ({ label: c.Name, value: c.Name })).find(c => c.value === leave.LeaveType) || null}
+                                            onChange={(selected) => onEdit({ target: { id: 'LeaveType', value: selected?.value || '' } })}
+                                            options={leaveCategory.map(c => ({ label: c.Name, value: c.Name }))}
+                                            placeholder="-select leave type-"
+                                        />
                                     </div>
                                     <br />
                                     <div className="row col-md-12">
@@ -454,11 +444,12 @@ const StaffLeaveApply = (props) => {
                                     <br />
                                     <div className="form-group">
                                         <label htmlFor="ReliefStaffID">Relief Staff</label>
-                                        <Select
-                                            name="staffID"
+                                        <SearchSelect
+                                            id="ReliefStaffID"
                                             value={leave.ReliefStaffID2}
                                             onChange={onStaffChange}
                                             options={StaffList}
+                                            placeholder="Select Relief Staff"
                                         />
                                     </div>
                                     <br />

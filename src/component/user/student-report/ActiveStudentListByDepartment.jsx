@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
 
@@ -84,7 +85,7 @@ const ActiveStudentListByDepartment = (props) => {
     getDepartments();
   }, []);
 
-  const handleSubmit = async (e) => {};
+  const handleSubmit = async (e) => { };
 
   return isLoading ? (
     <Loader />
@@ -105,22 +106,15 @@ const ActiveStudentListByDepartment = (props) => {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Department
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select Department"
+                      <SearchSelect
                         id="code"
-                        onChange={handleChange}
-                        value={departmentCode.code}
+                        label="Select Department"
+                        value={departmentList.map(d => ({ value: d.DepartmentCode, label: d.DepartmentName })).find(s => s.value === departmentCode.code) || null}
+                        options={departmentList.map(d => ({ value: d.DepartmentCode, label: d.DepartmentName }))}
+                        onChange={(selected) => handleChange({ target: { id: 'code', value: selected?.value || '' }, preventDefault: () => { } })}
+                        placeholder="Select Department"
                         required
-                      >
-                        <option value="">Select option</option>
-                        {departmentList.map((d, i) => (
-                          <option key={i} value={d.DepartmentCode}>
-                            {" "}
-                            {d.DepartmentName}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   </div>
                 </form>

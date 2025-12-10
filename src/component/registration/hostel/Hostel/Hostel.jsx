@@ -6,9 +6,9 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { formatDateAndTime } from "../../../../resources/constants";
-import Select from 'react-select';
+import SearchSelect from "../../../common/select/SearchSelect";
 
 
 
@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 function Hostel(props) {
   const token = props.loginData.token;
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit, setValue, watch } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [entry_id, setEntryId] = useState("");
   const [hostels, setHostels] = useState([]);
@@ -56,7 +56,7 @@ function Hostel(props) {
                   onClick={() => {
                     let man3 = {
                       value: `${item.ManagerID}?${item.ManagerEmail}?${item.ManagerPhone}`,
-                      label: `${item.ManagerID}--${item.FirstName +" "+ item.Surname}`,
+                      label: `${item.ManagerID}--${item.FirstName + " " + item.Surname}`,
                       key: item.ManagerID
                     }
                     setEntryId(item.EntryID);
@@ -232,16 +232,15 @@ function Hostel(props) {
           <form onSubmit={handleSubmit(addHostel)} novalidate>
             <div className="form-group">
               <label htmlFor="hostelFor">Hostel For</label>
-              <select
+              <SearchSelect
                 id="hostelFor"
-                {...register("hostelFor")}
+                label="Hostel For"
+                value={[{ value: "Male", label: "Male" }, { value: "Female", label: "Female" }].find(op => op.value === watch("hostelFor")) || null}
+                options={[{ value: "Male", label: "Male" }, { value: "Female", label: "Female" }]}
+                onChange={(selected) => setValue("hostelFor", selected?.value)}
+                placeholder="Select Hostel For"
                 required
-                className="form-control"
-              >
-                <option value="">Select Hostel For</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
+              />
             </div>
 
             <div className="form-group pt-5">
@@ -256,13 +255,12 @@ function Hostel(props) {
             </div>
             <div className="form-group pt-5">
               <label htmlFor="manager">Manager</label>
-              <Select
-                name="manager"
+              <SearchSelect
                 id="manager"
-                key={manager.key}
+                label="Manager"
                 value={manager}
-                onChange={getStaffEmailAndPhone}
                 options={staffList}
+                onChange={getStaffEmailAndPhone}
                 placeholder="select staff"
               />
 

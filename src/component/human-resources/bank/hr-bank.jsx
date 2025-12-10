@@ -20,16 +20,16 @@ function HRBank(props) {
         field: "sn",
       },
       {
+        label: "Action",
+        field: "action",
+      },
+      {
         label: "Bank Name",
         field: "name",
       },
       {
         label: "Sort Code",
         field: "sort_code",
-      },
-      {
-        label: "Action",
-        field: "action",
       },
     ],
     rows: [],
@@ -227,6 +227,7 @@ function HRBank(props) {
               })
             }
           >
+            <i className="fa fa-plus me-2"></i>
             Add Bank
           </button>
         }

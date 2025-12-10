@@ -6,11 +6,24 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
-function AddStaffNOK(props)
-{
+// Options for relationship dropdown
+const relationshipOptions = [
+  { value: 'Wife', label: 'Wife' },
+  { value: 'Husband', label: 'Husband' },
+  { value: 'Mother', label: 'Mother' },
+  { value: 'Sister', label: 'Sister' },
+  { value: 'Son', label: 'Son' },
+  { value: 'Brother', label: 'Brother' },
+  { value: 'Father', label: 'Father' },
+  { value: 'Daughter', label: 'Daughter' },
+  { value: 'Uncle', label: 'Uncle' },
+  { value: 'Aunty', label: 'Aunty' },
+  { value: 'N/A', label: 'N/A' },
+];
+
+function AddStaffNOK(props) {
   const token = props.loginData[0].token;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -21,8 +34,7 @@ function AddStaffNOK(props)
   });
   // eslint-disable-next-line no-unused-vars
   const [qualifications, setQualifications] = useState([]);
-  const addForm = () =>
-  {
+  const addForm = () => {
     setAddNOK(true);
     setAddStaffNOK({
       StaffID: "",
@@ -51,104 +63,83 @@ function AddStaffNOK(props)
     InsertDate: "",
   });
 
-  const getData = async () =>
-  {
+  const getData = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         setData(response.data);
       })
-      .catch((error) =>
-      {
+      .catch((error) => {
         console.log("NETWORK ERROR", error);
       });
   };
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     getStaff().then((r) => { });
     getData().then((r) => { });
     getStaffBank().then((r) => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const deleteItem = async (id, image) =>
-  {
-    if (id)
-    {
+  const deleteItem = async (id, image) => {
+    if (id) {
       toast.info(`Deleting... Please wait!`);
       await axios
         .delete(`${serverLink}application/pg/document/delete/${id}/${image}`, token)
-        .then((res) =>
-        {
-          if (res.data.message === "success")
-          {
+        .then((res) => {
+          if (res.data.message === "success") {
             // props.update_app_data();
             toast.success(`Deleted`);
-          } else
-          {
+          } else {
             toast.error(
               `Something went wrong. Please check your connection and try again!`
             );
           }
         })
-        .catch((error) =>
-        {
+        .catch((error) => {
           console.log("NETWORK ERROR", error);
         });
     }
   };
 
-  const getStaff = async () =>
-  {
+  const getStaff = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         let rows = [];
         response.data.length > 0 &&
-          response.data.map((row) =>
-          {
-            rows.push({ text: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname, id: row.StaffID });
+          response.data.map((row) => {
+            rows.push({ value: row.StaffID, label: row.StaffID + " -- " + row.FirstName + " " + row.MiddleName + " " + row.Surname });
           });
         setStaffList(rows);
         setIsLoading(false);
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
 
-  const getStaffBank = async () =>
-  {
+  const getStaffBank = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/qualifications/`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         setQualifications(response.data);
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
 
-  const onSubmit = async (e) =>
-  {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    for (let key in addStaffNOK)
-    {
+    for (let key in addStaffNOK) {
       if (
         addStaffNOK.hasOwnProperty(key) &&
         key !== "InsertBy" &&
         key !== "InsertDate" &&
         key !== "MiddleName"
-      )
-      {
-        if (addStaffNOK[key] === "")
-        {
+      ) {
+        if (addStaffNOK[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
           return false;
         }
@@ -162,31 +153,25 @@ function AddStaffNOK(props)
         addStaffNOK, token
 
       )
-      .then((res) =>
-      {
-        if (res.data.message === "exist")
-        {
+      .then((res) => {
+        if (res.data.message === "exist") {
           toast.error(
             `NOK Has Already Been Added for the Staff, Kindly View Staff to Modify the Record`
           );
-        } else if (res.data.message === "success")
-        {
+        } else if (res.data.message === "success") {
           toast.success("NOK Added Successfully");
           setAddNOK(false);
-        } else
-        {
+        } else {
           console.log("error", res);
           toast.error(`Something went wrong. Please try again!`);
         }
       })
-      .catch((error) =>
-      {
+      .catch((error) => {
         console.log("NETWORK ERROR", error);
       });
   };
 
-  const onEdit = (e) =>
-  {
+  const onEdit = (e) => {
     const id = e.target.id;
     const value = e.target.value;
 
@@ -198,8 +183,7 @@ function AddStaffNOK(props)
     getStaffBank().then((r) => { });
   };
 
-  const handleStaffEdit = (e) =>
-  {
+  const handleStaffEdit = (e) => {
     setAddStaffNOK({
       ...addStaffNOK,
       [e.target.id]: e.target.value,
@@ -237,40 +221,19 @@ function AddStaffNOK(props)
           {addNOK ? (
             <div className="row">
               <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="StaffID">StaffID</label>
-                  <Select2
-                    id="StaffID"
-                    value={addStaffNOK.StaffID}
-                    data={staffList}
-                    onSelect={handleStaffEdit}
-                    options={{
-                      placeholder: "Search staff",
-                    }}
-                  />
-                  {/* <select
-                    id="StaffID"
-                    name="StaffID"
-                    value={addStaffNOK.StaffID}
-                    className="form-control"
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {staffList ? (
-                      <>
-                        {staffList.map((item, index) => {
-                          return (
-                            <option key={index} value={item.StaffID}>
-                              {item.StaffID}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select> */}
-                </div>
+                <SearchSelect
+                  id="StaffID"
+                  label="Staff ID"
+                  value={staffList.find(s => s.value === addStaffNOK.StaffID) || null}
+                  options={staffList}
+                  onChange={(selected) => {
+                    setAddStaffNOK({
+                      ...addStaffNOK,
+                      StaffID: selected?.value || '',
+                    });
+                  }}
+                  placeholder="Search staff"
+                />
               </div>
               <div className="col-lg-6 pt-5">
                 <div className="form-group">
@@ -312,29 +275,20 @@ function AddStaffNOK(props)
                 </div>
               </div>
               <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Relationship">Relationship</label>
-                  <select
-                    id="Relationship"
-                    className="form-control"
-                    required
-                    value={addStaffNOK.Relationship}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    <option value="Wife">Wife</option>
-                    <option value="Husband">Husband</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Son">Son</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Father">Father</option>
-                    <option value="Daughter">Daughter</option>
-                    <option value="Uncle">Uncle</option>
-                    <option value="Aunty">Aunty</option>
-                    <option value="N/A">N/A</option>
-                  </select>
-                </div>
+                <SearchSelect
+                  id="Relationship"
+                  label="Relationship"
+                  value={relationshipOptions.find(r => r.value === addStaffNOK.Relationship) || null}
+                  options={relationshipOptions}
+                  onChange={(selected) => {
+                    setAddStaffNOK({
+                      ...addStaffNOK,
+                      Relationship: selected?.value || '',
+                    });
+                  }}
+                  placeholder="Select Relationship"
+                  required
+                />
               </div>
               <div className="col-lg-4 pt-5">
                 <div className="form-group">
@@ -525,8 +479,7 @@ function AddStaffNOK(props)
   );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails,
   };

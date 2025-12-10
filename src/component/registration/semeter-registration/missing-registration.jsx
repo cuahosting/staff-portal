@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function MissingRegistrationModule(props) {
     const token = props.LoginDetails[0].token;
@@ -57,9 +56,9 @@ function MissingRegistrationModule(props) {
         StudentID: "",
         SemesterCode: "",
         ModuleCode: "",
-        StudentLevel:"",
-        StudentSemester:"",
-        ModuleStatus:""
+        StudentLevel: "",
+        StudentSemester: "",
+        ModuleStatus: ""
     })
     const getData = async () => {
         await axios.get(`${serverLink}staff/registration/missing-reg-module/student-list`, token)
@@ -67,7 +66,7 @@ function MissingRegistrationModule(props) {
                 let rows = [];
                 res.data.length > 0 &&
                     res.data.map((row) => {
-                        rows.push({ text: row.StudentName+"("+row.StudentID+")", id: row.StudentID });
+                        rows.push({ label: row.StudentName + "(" + row.StudentID + ")", value: row.StudentID });
                     });
                 setStudentsList(rows);
             })
@@ -80,7 +79,7 @@ function MissingRegistrationModule(props) {
                 let rows = [];
                 res.data.length > 0 &&
                     res.data.map((row) => {
-                        rows.push({ text: row.SemesterName, id: row.SemesterCode });
+                        rows.push({ label: row.SemesterName, value: row.SemesterCode });
                     });
                 setSemesterList(rows);
             })
@@ -93,7 +92,7 @@ function MissingRegistrationModule(props) {
                 let rows = [];
                 res.data.length > 0 &&
                     res.data.map((row) => {
-                        rows.push({ text: row.ModuleCode + " - " + row.ModuleName, id: row.ModuleCode });
+                        rows.push({ label: row.ModuleCode + " - " + row.ModuleName, value: row.ModuleCode });
                     });
                 setModuleList(rows);
             })
@@ -197,9 +196,9 @@ function MissingRegistrationModule(props) {
 
     const handleSubmit = async () => {
         console.log(data)
-        if(data.ModuleCode === "" || data.SemesterCode === "" || data.StudentLevel === "" || data.StudentSemester ==="" || data.ModuleStatus ===""){
+        if (data.ModuleCode === "" || data.SemesterCode === "" || data.StudentLevel === "" || data.StudentSemester === "" || data.ModuleStatus === "") {
             toast.error('Please select all fields...')
-        }else{
+        } else {
             try {
                 toast.info('please wait ...')
                 await axios.post(`${serverLink}staff/registration/missing-reg-module/modules/add`, data, token)
@@ -213,9 +212,9 @@ function MissingRegistrationModule(props) {
                     })
             } catch (error) {
                 console.log('NETWORK ERROR')
-            } 
+            }
         }
-       
+
     }
 
     const handleRemove = async (e) => {
@@ -252,91 +251,91 @@ function MissingRegistrationModule(props) {
                     <div className="card-body p-0">
                         <div className="row col-md 12 mt-4">
                             <div className="col-md-4 mt-2 mb-2">
-                                <label htmlFor="StudentID">Student</label>
-                                <Select2
+                                <SearchSelect
                                     id="StudentID"
-                                    value={data.StudentID}
-                                    data={studentsList}
-                                    onSelect={onEdit}
-                                    options={{
-                                        placeholder: "Search student",
+                                    label="Student"
+                                    value={studentsList.find(s => s.value === data.StudentID) || null}
+                                    options={studentsList}
+                                    onChange={(selected) => {
+                                        onEdit({ target: { id: 'StudentID', value: selected?.value || '' } });
                                     }}
+                                    placeholder="Search student"
                                 />
                             </div>
                             {
                                 showForm &&
                                 <>
                                     <div className="col-md-4 mt-2 mb-2">
-                                        <label htmlFor="SemesterCode">School Semester</label>
-                                        <Select2
+                                        <SearchSelect
                                             id="SemesterCode"
-                                            value={data.SemesterCode}
-                                            data={semesterList}
-                                            onSelect={onEdit}
-                                            options={{
-                                                placeholder: "Search semester",
+                                            label="School Semester"
+                                            value={semesterList.find(s => s.value === data.SemesterCode) || null}
+                                            options={semesterList}
+                                            onChange={(selected) => {
+                                                onEdit({ target: { id: 'SemesterCode', value: selected?.value || '' } });
                                             }}
+                                            placeholder="Search semester"
                                         />
                                     </div>
                                     <div className="col-md-4 mt-2 mb-2">
-                                        <label htmlFor="ModuleCode">Module</label>
-                                        <Select2
+                                        <SearchSelect
                                             id="ModuleCode"
-                                            value={data.ModuleCode}
-                                            data={moduleList}
-                                            onSelect={onEdit}
-                                            options={{
-                                                placeholder: "Search Module",
+                                            label="Module"
+                                            value={moduleList.find(m => m.value === data.ModuleCode) || null}
+                                            options={moduleList}
+                                            onChange={(selected) => {
+                                                onEdit({ target: { id: 'ModuleCode', value: selected?.value || '' } });
                                             }}
+                                            placeholder="Search Module"
                                         />
                                     </div>
 
                                     <div className="col-md-4 mt-2 mb-2">
-                                        <label htmlFor="StudentLevel">Student Level</label>
-                                        <select id="StudentLevel" onChange={onEdit}
-                                            value={data.StudentLevel}
-                                            className="form-select"
-                                            data-kt-select2="true"
-                                            data-placeholder="Select option"
-                                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                                            <option value={""}>-select StudentLevel-</option>
-                                            <option value={"100"}>100 Level</option>
-                                            <option value={"200"}>200 Level</option>
-                                            <option value={"300"}>300 Level</option>
-                                            <option value={"400"}>400 Level</option>
-                                            <option value={"500"}>500 Level</option>
-                                            <option value={"600"}>600 Level</option>
-                                            <option value={"700"}>700 Level</option>
-                                            <option value={"800"}>800 Level</option>
-                                        </select>
+                                        <SearchSelect
+                                            id="StudentLevel"
+                                            label="Student Level"
+                                            value={data.StudentLevel ? { value: data.StudentLevel, label: data.StudentLevel + " Level" } : null}
+                                            options={[
+                                                { value: "100", label: "100 Level" },
+                                                { value: "200", label: "200 Level" },
+                                                { value: "300", label: "300 Level" },
+                                                { value: "400", label: "400 Level" },
+                                                { value: "500", label: "500 Level" },
+                                                { value: "600", label: "600 Level" },
+                                                { value: "700", label: "700 Level" },
+                                                { value: "800", label: "800 Level" }
+                                            ]}
+                                            onChange={(selected) => onEdit({ target: { id: 'StudentLevel', value: selected?.value || '' } })}
+                                            placeholder="Select StudentLevel"
+                                        />
                                     </div>
 
                                     <div className="col-md-4 mt-2 mb-2">
-                                        <label htmlFor="StudentSemester">Student Semester</label>
-                                        <select id="StudentSemester" onChange={onEdit}
-                                            value={data.StudentSemester}
-                                            className="form-select"
-                                            data-kt-select2="true"
-                                            data-placeholder="Select option"
-                                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                                            <option value={""}>-select StudentLevel-</option>
-                                            <option value={"First"}>First Semester</option>
-                                            <option value={"Second"}>Second Semester</option>
-                                        </select>
+                                        <SearchSelect
+                                            id="StudentSemester"
+                                            label="Student Semester"
+                                            value={data.StudentSemester ? { value: data.StudentSemester, label: data.StudentSemester + " Semester" } : null}
+                                            options={[
+                                                { value: "First", label: "First Semester" },
+                                                { value: "Second", label: "Second Semester" }
+                                            ]}
+                                            onChange={(selected) => onEdit({ target: { id: 'StudentSemester', value: selected?.value || '' } })}
+                                            placeholder="Select StudentSemester"
+                                        />
                                     </div>
 
                                     <div className="col-md-4 mt-2 mb-2">
-                                        <label htmlFor="ModuleStatus">Module Status</label>
-                                        <select id="ModuleStatus" onChange={onEdit}
-                                            value={data.ModuleStatus}
-                                            className="form-select"
-                                            data-kt-select2="true"
-                                            data-placeholder="Select option"
-                                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                                            <option value={""}>-select ModuleStatus-</option>
-                                            <option value={"Fresh"}>Fresh</option>
-                                            <option value={"Resit"}>Resit</option>
-                                        </select>
+                                        <SearchSelect
+                                            id="ModuleStatus"
+                                            label="Module Status"
+                                            value={data.ModuleStatus ? { value: data.ModuleStatus, label: data.ModuleStatus } : null}
+                                            options={[
+                                                { value: "Fresh", label: "Fresh" },
+                                                { value: "Resit", label: "Resit" }
+                                            ]}
+                                            onChange={(selected) => onEdit({ target: { id: 'ModuleStatus', value: selected?.value || '' } })}
+                                            placeholder="Select ModuleStatus"
+                                        />
                                     </div>
                                     <div className="col-md-12">
                                         <button className="btn btn-primary" type="submit" onClick={handleSubmit}> Add Module</button>
@@ -349,7 +348,7 @@ function MissingRegistrationModule(props) {
                         <div className="col-md-12 mt-3 mb-3" style={{ overflowX: 'auto' }}>
                             {
                                 regModules.length > 0 &&
-                                <Table data={datatable} />
+                                <AGTable data={datatable} />
                             }
                         </div>
                     </div>

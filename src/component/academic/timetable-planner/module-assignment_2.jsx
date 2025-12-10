@@ -7,10 +7,7 @@ import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
-// eslint-disable-next-line no-unused-vars
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import Select from 'react-select';
+import SearchSelect from "../../common/select/SearchSelect";
 
 function ModuleAssignment2(props) {
   const token = props.LoginDetails[0].token;
@@ -26,16 +23,16 @@ function ModuleAssignment2(props) {
         field: "sn",
       },
       {
+        label: "",
+        field: "action",
+      },
+      {
         label: "Module Name",
         field: "ModuleName",
       },
       {
         label: "Module Code",
         field: "ModuleCode",
-      },
-      {
-        label: "",
-        field: "action",
       },
     ],
     rows: [],
@@ -47,16 +44,16 @@ function ModuleAssignment2(props) {
         field: "sn",
       },
       {
+        label: "",
+        field: "action",
+      },
+      {
         label: "Module Name",
         field: "ModuleName",
       },
       {
         label: "Module Code",
         field: "ModuleCode",
-      },
-      {
-        label: "",
-        field: "action",
       },
     ],
     rows: [],
@@ -109,8 +106,6 @@ function ModuleAssignment2(props) {
           result.data.forEach((item, index) => {
             rows.push({
               sn: index + 1,
-              ModuleName: item.ModuleName,
-              ModuleCode: item.ModuleCode,
               action: (
                 <button type="submit"
                   onClick={() => {
@@ -121,6 +116,8 @@ function ModuleAssignment2(props) {
                   Add
                 </button>
               ),
+              ModuleName: item.ModuleName,
+              ModuleCode: item.ModuleCode,
             });
           });
           setIsLoading(false);
@@ -141,7 +138,7 @@ function ModuleAssignment2(props) {
       ...fdata,
       [e.target.id]: e.target.value
     })
-    if(e.target.id==="CourseCode"){
+    if (e.target.id === "CourseCode") {
       setfData({
         ...fdata,
         CourseCode: e.target.value,
@@ -151,7 +148,7 @@ function ModuleAssignment2(props) {
     }
   };
 
-  const onCourseCodeChange=(e)=>{
+  const onCourseCodeChange = (e) => {
     setfData({
       ...fdata,
       CourseCode: e,
@@ -181,8 +178,6 @@ function ModuleAssignment2(props) {
           result.data.forEach((module, index) => {
             rows.push({
               sn: index + 1,
-              ModuleName: module.ModuleName,
-              ModuleCode: module.ModuleCode,
               action: (
                 <button type="submit"
                   id="RemoveButton"
@@ -194,6 +189,8 @@ function ModuleAssignment2(props) {
                   Remove
                 </button>
               ),
+              ModuleName: module.ModuleName,
+              ModuleCode: module.ModuleCode,
             });
           });
         }
@@ -275,110 +272,88 @@ function ModuleAssignment2(props) {
                 {
                   courseList.length > 0 &&
                   <div className="fv-row mb-6 enhanced-form-group">
-                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="CourseCode">
-                      Course
-                    </label>
-                    <Select
+                    <SearchSelect
                       id="CourseCode"
+                      label="Course"
                       value={fdata.CourseCode}
                       onChange={onCourseCodeChange}
                       options={fdata.Courses}
+                      required
                     />
                   </div>
                 }
                 <h3 className="mt-10"> <p>Select settings for module assignments</p></h3>
                 <div className="col-md-3">
                   <div className="fv-row mb-6 enhanced-form-group">
-                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="Level">
-                      Course Level
-                    </label>
-                    <div className="enhanced-input-wrapper">
-                      <select
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                        id="Level"
-                        data-placeholder="Select option"
-                        onChange={onEdit}
-                      >
-                        <option value="">Select option</option>
-                        <option value="100">100 Level</option>
-                        <option value="200">200 Level</option>
-                        <option value="300">300 Level</option>
-                        <option value="400">400 Level</option>
-                        <option value="500">500 Level</option>
-                        <option value="600">600 Level</option>
-                        <option value="700">700 Level</option>
-                        <option value="800">800 Level</option>
-                        <option value="900">900 Level</option>
-                      </select>
-                    </div>
+                    <SearchSelect
+                      id="Level"
+                      label="Course Level"
+                      value={fdata.Level ? { value: fdata.Level, label: fdata.Level + " Level" } : null}
+                      options={[
+                        { value: "100", label: "100 Level" },
+                        { value: "200", label: "200 Level" },
+                        { value: "300", label: "300 Level" },
+                        { value: "400", label: "400 Level" },
+                        { value: "500", label: "500 Level" },
+                        { value: "600", label: "600 Level" },
+                        { value: "700", label: "700 Level" },
+                        { value: "800", label: "800 Level" },
+                        { value: "900", label: "900 Level" }
+                      ]}
+                      onChange={(selected) => onEdit({ target: { id: "Level", value: selected?.value || "" } })}
+                      placeholder="Select option"
+                      required
+                    />
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="fv-row mb-6 enhanced-form-group">
-                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="ModuleSemester">
-                      Module Semester
-                    </label>
-                    <div className="enhanced-input-wrapper">
-                      <select
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                        data-placeholder="Select Semester"
-                        id="ModuleSemester"
-                        onChange={onEdit}
-                      >
-                        <option value="">Select option</option>
-                        <option value="First">First Semester</option>
-                        <option value="Second">Second Semester</option>
-                      </select>
-                    </div>
+                    <SearchSelect
+                      id="ModuleSemester"
+                      label="Module Semester"
+                      value={fdata.ModuleSemester ? { value: fdata.ModuleSemester, label: fdata.ModuleSemester + " Semester" } : null}
+                      options={[
+                        { value: "First", label: "First Semester" },
+                        { value: "Second", label: "Second Semester" }
+                      ]}
+                      onChange={(selected) => onEdit({ target: { id: "ModuleSemester", value: selected?.value || "" } })}
+                      placeholder="Select Semester"
+                      required
+                    />
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="fv-row mb-6 enhanced-form-group">
-                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="SchoolSemester">
-                      School Semester
-                    </label>
-                    <div className="enhanced-input-wrapper">
-                      <select
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                        data-placeholder="Select Semester"
-                        id="SchoolSemester"
-                        onChange={onEdit}
-                      >
-                        <option value="">Select option</option>
-                        {
-                          semesterList.length > 0 &&
-                          semesterList.map((x, y) => {
-                            return (
-                              <option value={x.SemesterCode} key={y}>{x.SemesterName}</option>
-                            )
-                          })
-                        }
-                      </select>
-                    </div>
+                    <SearchSelect
+                      id="SchoolSemester"
+                      label="School Semester"
+                      value={semesterList.find(s => s.SemesterCode === fdata.SchoolSemester) ? { value: fdata.SchoolSemester, label: semesterList.find(s => s.SemesterCode === fdata.SchoolSemester).SemesterName } : null}
+                      options={semesterList.map(s => ({ value: s.SemesterCode, label: s.SemesterName }))}
+                      onChange={(selected) => onEdit({ target: { id: "SchoolSemester", value: selected?.value || "" } })}
+                      placeholder="Select Semester"
+                      required
+                    />
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="fv-row mb-6 enhanced-form-group">
-                    <label className="form-label fs-6 fw-bolder text-dark enhanced-label required" htmlFor="ModuleType">
-                      Module Type
-                    </label>
-                    <div className="enhanced-input-wrapper">
-                      <select
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                        data-placeholder="Select Semester"
-                        id="ModuleType"
-                        onChange={onEdit}
-                      >
-                        <option value="">Select option</option>
-                        <option value="Lecture">Lecture</option>
-                        <option value="Interactive">Interactive</option>
-                        <option value="Class">Class</option>
-                        <option value="Workshop">Workshop</option>
-                        <option value="Online">Online</option>
-                        <option value="Seminar">Seminar</option>
-                        <option value="Core">Core</option>
-                      </select>
-                    </div>
+                    <SearchSelect
+                      id="ModuleType"
+                      label="Module Type"
+                      value={fdata.ModuleType ? { value: fdata.ModuleType, label: fdata.ModuleType } : null}
+                      options={[
+                        { value: "Lecture", label: "Lecture" },
+                        { value: "Interactive", label: "Interactive" },
+                        { value: "Class", label: "Class" },
+                        { value: "Workshop", label: "Workshop" },
+                        { value: "Online", label: "Online" },
+                        { value: "Seminar", label: "Seminar" },
+                        { value: "Core", label: "Core" }
+                      ]}
+                      onChange={(selected) => onEdit({ target: { id: "ModuleType", value: selected?.value || "" } })}
+                      placeholder="Select Module Type"
+                      required
+                    />
                   </div>
                 </div>
 

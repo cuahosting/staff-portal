@@ -3,13 +3,12 @@ import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
-import {currencyConverter, formatDate, formatDateAndTime, sumObjectArray} from "../../../resources/constants";
+import { currencyConverter, formatDate, formatDateAndTime, sumObjectArray } from "../../../resources/constants";
 import Modal from "../../common/modal/modal";
 import AGTable from "../../common/table/AGTable";
 import swal from "sweetalert";
-import Select from "react-select";
 
 function FinanceMyBudget(props) {
     const token = props.LoginDetails[0].token;
@@ -33,25 +32,25 @@ function FinanceMyBudget(props) {
     const [accountList, setAccountList] = useState([]);
     const [budgetTrackerList, setBudgetTrackerList] = useState([]);
     const [budgetItems, setBudgetItems] = useState([]);
-    const formInitialize = {entry_id:'', department_code: props.LoginDetails[0].DepartmentCode, year_id:'', amount:0, allocated_amount:0, balance_amount:0, status:'submitted', inserted_by: props.LoginDetails[0].StaffID}
+    const formInitialize = { entry_id: '', department_code: props.LoginDetails[0].DepartmentCode, year_id: '', amount: 0, allocated_amount: 0, balance_amount: 0, status: 'submitted', inserted_by: props.LoginDetails[0].StaffID }
     const [selectedBudget, setSelectedBudget] = useState(formInitialize);
-    const selectedItemInitialize = {entry_id:'', budget_id:'', item_name:'', item_description:'', quantity:'',amount:'',total:'',inserted_by: props.LoginDetails[0].StaffID}
+    const selectedItemInitialize = { entry_id: '', budget_id: '', item_name: '', item_description: '', quantity: '', amount: '', total: '', inserted_by: props.LoginDetails[0].StaffID }
     const [selectedItem, setSelectedItem] = useState([]);
     //For budget item list that people select to add a new budget
-    const [budgetSelectValue, setBudgetSelectValue] = useState({entry_id: '', item_name:'', account_id:''});
+    const [budgetSelectValue, setBudgetSelectValue] = useState({ entry_id: '', item_name: '', account_id: '' });
 
     const getBudgetYear = (year_list, year_id) => {
-        const list = year_list.filter(r=>r.EntryID === year_id);
+        const list = year_list.filter(r => r.EntryID === year_id);
         return list.length > 0 ? `${formatDateAndTime(list[0].StartDate, 'date')} to ${formatDateAndTime(list[0].EndDate, 'date')}` : 'No Date'
     }
 
     const getActiveAccountYear = () => {
-        const years = yearList.filter(e=>e.IsActive === 1);
+        const years = yearList.filter(e => e.IsActive === 1);
         return years.length > 0 ? years[0].EntryID : 0;
     }
 
     const getAccountName = (account_id) => {
-        const account = accountList.filter(e=>e.EntryID === account_id);
+        const account = accountList.filter(e => e.EntryID === account_id);
         return account.length > 0 ? `${account[0].AccountName} (${account[0].AccountType})` : 0;
     }
 
@@ -74,7 +73,7 @@ function FinanceMyBudget(props) {
                         let rows = [];
                         budget_list.map((item, index) => {
                             rows.push({
-                                sn: index+1,
+                                sn: index + 1,
                                 year: getBudgetYear(year_list, item.YearID),
                                 amount: currencyConverter(item.Amount),
                                 allocatedAmount: currencyConverter(item.AllocatedAmount),
@@ -85,20 +84,21 @@ function FinanceMyBudget(props) {
                                 decisionDate: formatDateAndTime(item.DecisionDate, 'date'),
                                 action: (
                                     <>
-                                        <button className="btn btn-primary btn-sm" style={{marginRight:15}} data-bs-toggle="modal" data-bs-target="#kt_modal_general"
-                                                onClick={()=>handleOnEdit(item, budget_items)}
+                                        <button className="btn btn-primary btn-sm" style={{ marginRight: 15 }} data-bs-toggle="modal" data-bs-target="#kt_modal_general"
+                                            onClick={() => handleOnEdit(item, budget_items)}
                                         ><i className="fa fa-pen" /></button>
                                         {
                                             item.Status === 'submitted' &&
                                             <button className="btn btn-danger btn-sm"
-                                                    onClick={()=>{
-                                                        swal({title: "Are you sure?", text: "Once deleted, you will not be able to recover the budget!", icon: "warning", buttons: true, dangerMode: true,
-                                                        }).then((willDelete) => {
-                                                            if (willDelete) {
-                                                                handleBudgetDelete(item.EntryID);
-                                                            }
-                                                        });
-                                                    }}
+                                                onClick={() => {
+                                                    swal({
+                                                        title: "Are you sure?", text: "Once deleted, you will not be able to recover the budget!", icon: "warning", buttons: true, dangerMode: true,
+                                                    }).then((willDelete) => {
+                                                        if (willDelete) {
+                                                            handleBudgetDelete(item.EntryID);
+                                                        }
+                                                    });
+                                                }}
                                             ><i className="fa fa-trash" /></button>
                                         }
                                     </>
@@ -121,12 +121,12 @@ function FinanceMyBudget(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         let error_checker = 0;
-        if (selectedItem.length === 0) {toast.error("Enter the budget item(s)");error_checker=1;}
-        selectedItem.map((r,i) => {
-            if (r.item_name === '') {toast.error(`Please enter item ${i+1} name`); error_checker=1;}
-            if (r.description === '') {toast.error(`Please enter item ${i+1} description`);error_checker=1;}
-            if (r.amount === '') {toast.error(`Please enter item ${i+1} amount`);error_checker=1;}
-            if (r.quantity === '') {toast.error(`Please enter item ${i+1} quantity`);error_checker=1;}
+        if (selectedItem.length === 0) { toast.error("Enter the budget item(s)"); error_checker = 1; }
+        selectedItem.map((r, i) => {
+            if (r.item_name === '') { toast.error(`Please enter item ${i + 1} name`); error_checker = 1; }
+            if (r.description === '') { toast.error(`Please enter item ${i + 1} description`); error_checker = 1; }
+            if (r.amount === '') { toast.error(`Please enter item ${i + 1} amount`); error_checker = 1; }
+            if (r.quantity === '') { toast.error(`Please enter item ${i + 1} quantity`); error_checker = 1; }
         });
 
         if (error_checker === 1) return false
@@ -174,8 +174,8 @@ function FinanceMyBudget(props) {
 
     const handleSubmitBudgetItem = async (e) => {
         e.preventDefault();
-        if (budgetSelectValue.item_name.trim() === '') {toast.error("Enter the item name");return false;}
-        if (budgetSelectValue.account_id === '') {toast.error("Please select account");return false;}
+        if (budgetSelectValue.item_name.trim() === '') { toast.error("Enter the item name"); return false; }
+        if (budgetSelectValue.account_id === '') { toast.error("Please select account"); return false; }
         toast.info("Submitting...");
 
         if (budgetSelectValue.entry_id === '') {
@@ -183,7 +183,7 @@ function FinanceMyBudget(props) {
                 .then(res => {
                     if (res.data.message === 'success') {
                         toast.success("Budget Item Added Successfully");
-                        setBudgetSelectValue({entry_id: '', item_name:'', account_id: ''});
+                        setBudgetSelectValue({ entry_id: '', item_name: '', account_id: '' });
                         getData();
                     } else {
                         toast.error(res.data.message)
@@ -197,7 +197,7 @@ function FinanceMyBudget(props) {
                 .then(res => {
                     if (res.data.message === 'success') {
                         toast.success("Budget Item Updated Successfully");
-                        setBudgetSelectValue({entry_id: '', item_name:'', account_id: ''});
+                        setBudgetSelectValue({ entry_id: '', item_name: '', account_id: '' });
                         getData();
                     } else {
                         toast.error(res.data.message)
@@ -210,12 +210,12 @@ function FinanceMyBudget(props) {
     }
 
     const handleOnEdit = (item, bug_items) => {
-        setSelectedBudget({entry_id:item.EntryID, department_code: item.DepartmentCode, year_id:item.YearID, amount:item.Amount, allocated_amount:item.AllocatedAmount, balance_amount:item.BalanceAmount, status:'submitted', inserted_by: item.InsertedBy});
-        const budget_items = bug_items.filter(r=>r.BudgetID === item.EntryID);
+        setSelectedBudget({ entry_id: item.EntryID, department_code: item.DepartmentCode, year_id: item.YearID, amount: item.Amount, allocated_amount: item.AllocatedAmount, balance_amount: item.BalanceAmount, status: 'submitted', inserted_by: item.InsertedBy });
+        const budget_items = bug_items.filter(r => r.BudgetID === item.EntryID);
         if (budget_items.length > 0) {
             const items = [];
             budget_items.map(r => {
-                items.push({entry_id:r.EntryID, budget_id:r.BudgetID, item_name:r.ItemName, item_description:r.ItemDescription, quantity:r.Quantity,amount:r.Amount,total:r.Total,inserted_by: props.LoginDetails[0].StaffID})
+                items.push({ entry_id: r.EntryID, budget_id: r.BudgetID, item_name: r.ItemName, item_description: r.ItemDescription, quantity: r.Quantity, amount: r.Amount, total: r.Total, inserted_by: props.LoginDetails[0].StaffID })
             })
             setSelectedItem(items)
         }
@@ -225,8 +225,8 @@ function FinanceMyBudget(props) {
     const handleDelete = async (item, index) => {
         const filter_selected_item = selectedItem[index];
         let items = [];
-        selectedItem.map((r,i) => {
-            if (i!==index) {
+        selectedItem.map((r, i) => {
+            if (i !== index) {
                 items.push(r)
             }
         })
@@ -266,7 +266,7 @@ function FinanceMyBudget(props) {
     }
 
     const onAddBudgetItem = () => {
-        setSelectedItem([...selectedItem,selectedItemInitialize])
+        setSelectedItem([...selectedItem, selectedItemInitialize])
     }
     const handleItemChange = (e) => {
         const id = e.target.id;
@@ -274,7 +274,7 @@ function FinanceMyBudget(props) {
         const index = id.split("-")[2];
 
         const item_record = selectedItem;
-        item_record.map((r,i) => {
+        item_record.map((r, i) => {
             if (i === parseInt(index)) {
                 if (id.includes("item-name")) {
                     r.item_name = value;
@@ -285,7 +285,7 @@ function FinanceMyBudget(props) {
                 } else {
                     r.quantity = value;
                 }
-                r.total = r.quantity*r.amount
+                r.total = r.quantity * r.amount
             }
         });
         setSelectedItem([...item_record])
@@ -297,25 +297,25 @@ function FinanceMyBudget(props) {
     }, []);
 
     return isLoading ? (
-            <Loader />
-        ) :
+        <Loader />
+    ) :
         (
             <>
                 <Modal large title={selectedBudget.entry_id === '' ? `Add New Budget: ${getBudgetYear(yearList, getActiveAccountYear())}` : `Update Budget: ${getBudgetYear(yearList, selectedBudget.year_id)}`}>
                     <div className="row">
                         <h3 className="mb-3">Budget Items</h3>
                         {
-                            selectedItem.length > 0 && selectedItem.map((r,i) => {
+                            selectedItem.length > 0 && selectedItem.map((r, i) => {
                                 return (
                                     <div key={i} className="row mb-3">
                                         <div className="col-md-3">
                                             <div className="form-group">
-                                                <label htmlFor={`item-name-${i}`}>Item {i+1} Name</label>
+                                                <label htmlFor={`item-name-${i}`}>Item {i + 1} Name</label>
                                                 <select id={`item-name-${i}`} className="form-control" value={r.item_name} onChange={handleItemChange}>
                                                     <option value="">Select Option</option>
                                                     {
                                                         budgetItems.length > 0 &&
-                                                        budgetItems.map((r,i) => {
+                                                        budgetItems.map((r, i) => {
                                                             return <option key={i} value={r.ItemName}>{r.ItemName}</option>
                                                         })
                                                     }
@@ -324,27 +324,27 @@ function FinanceMyBudget(props) {
                                         </div>
                                         <div className="col-md-4">
                                             <div className="form-group">
-                                                <label htmlFor={`item-description-${i}`}>Item {i+1} Description</label>
-                                                <input type="text" className="form-control" id={`item-description-${i}`} value={r.item_description} onChange={handleItemChange}/>
+                                                <label htmlFor={`item-description-${i}`}>Item {i + 1} Description</label>
+                                                <input type="text" className="form-control" id={`item-description-${i}`} value={r.item_description} onChange={handleItemChange} />
                                             </div>
                                         </div>
                                         <div className="col-md-2">
                                             <div className="form-group">
-                                                <label htmlFor={`item-amount-${i}`}>Item {i+1} Unit Price</label>
-                                                <input type="number" className="form-control" id={`item-amount-${i}`} value={r.amount} onChange={handleItemChange}/>
+                                                <label htmlFor={`item-amount-${i}`}>Item {i + 1} Unit Price</label>
+                                                <input type="number" className="form-control" id={`item-amount-${i}`} value={r.amount} onChange={handleItemChange} />
                                             </div>
                                         </div>
                                         <div className="col-md-2">
                                             <div className="form-group">
-                                                <label htmlFor={`item-quantity-${i}`}>Item {i+1} Quantity</label>
-                                                <input type="number" className="form-control" id={`item-quantity-${i}`} value={r.quantity} onChange={handleItemChange}/>
+                                                <label htmlFor={`item-quantity-${i}`}>Item {i + 1} Quantity</label>
+                                                <input type="number" className="form-control" id={`item-quantity-${i}`} value={r.quantity} onChange={handleItemChange} />
                                             </div>
                                         </div>
                                         {
                                             (selectedBudget.status === 'submitted' || selectedBudget.status === 'reviewed') &&
-                                                <div className="col-md-1">
-                                                    <button className="btn btn-danger btn-sm mt-8" onClick={()=>handleDelete(r, i)}><i className="fa fa-trash" /></button>
-                                                </div>
+                                            <div className="col-md-1">
+                                                <button className="btn btn-danger btn-sm mt-8" onClick={() => handleDelete(r, i)}><i className="fa fa-trash" /></button>
+                                            </div>
                                         }
                                     </div>
                                 )
@@ -355,108 +355,108 @@ function FinanceMyBudget(props) {
                     {
                         (selectedBudget.status === 'submitted' || selectedBudget.status === 'reviewed') &&
                         <>
-                            <button className="btn btn-primary w-75" onClick={handleSubmit} disabled={selectedItem.length===0}>Submit</button>
+                            <button className="btn btn-primary w-75" onClick={handleSubmit} disabled={selectedItem.length === 0}>Submit</button>
                             <button type="button" className="btn btn-info w-25" onClick={onAddBudgetItem}>Add Item</button>
                         </>
                     }
 
                     {
                         selectedItem.length > 0 &&
-                            <div className="col-md-12 table-responsive">
-                                <table className="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>S/N</th>
-                                            <th>Item Name</th>
-                                            <th>Item Description</th>
-                                            <th>Unit Price</th>
-                                            <th>Qty</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                        <div className="col-md-12 table-responsive">
+                            <table className="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>S/N</th>
+                                        <th>Item Name</th>
+                                        <th>Item Description</th>
+                                        <th>Unit Price</th>
+                                        <th>Qty</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     {
-                                        selectedItem.map((r,i) => {
+                                        selectedItem.map((r, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td>{i+1}</td>
+                                                    <td>{i + 1}</td>
                                                     <td>{r.item_name}</td>
                                                     <td>{r.item_description}</td>
                                                     <td>{currencyConverter(r.amount)}</td>
                                                     <td>{r.quantity}</td>
-                                                    <td>{currencyConverter(r.quantity*r.amount)}</td>
+                                                    <td>{currencyConverter(r.quantity * r.amount)}</td>
                                                 </tr>
                                             )
                                         })
                                     }
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th></th>
-                                            <th></th>
-                                            <th></th>
-                                            <th></th>
-                                            <th>TOTAL</th>
-                                            <th>{currencyConverter(selectedItem.map(item => item.amount*item.quantity).reduce((prev, next) => prev + next))}</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th>TOTAL</th>
+                                        <th>{currencyConverter(selectedItem.map(item => item.amount * item.quantity).reduce((prev, next) => prev + next))}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     }
 
                     {
-                        budgetTrackerList.filter(e=>e.BudgetID === selectedBudget.entry_id).length > 0 &&
+                        budgetTrackerList.filter(e => e.BudgetID === selectedBudget.entry_id).length > 0 &&
                         <div className="col-md-12 mt-5 table-responsive">
                             <h2>BUDGET TRACKER</h2>
                             <table className="table table-striped">
                                 <thead>
-                                <tr>
-                                    <th>S/N</th>
-                                    <th>Action</th>
-                                    <th>Amount</th>
-                                    <th>Inserted By</th>
-                                    <th>Received By</th>
-                                    <th>InsertedDate</th>
-                                </tr>
+                                    <tr>
+                                        <th>S/N</th>
+                                        <th>Action</th>
+                                        <th>Amount</th>
+                                        <th>Inserted By</th>
+                                        <th>Received By</th>
+                                        <th>InsertedDate</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {
-                                    budgetTrackerList.filter(e=>e.BudgetID === selectedBudget.entry_id).map((r,i) => {
-                                        return (
-                                            <tr key={i}>
-                                                <td>{i+1}</td>
-                                                <td>{r.Action}</td>
-                                                <td>{currencyConverter(r.Amount)}</td>
-                                                <td>{r.InsertedBy}</td>
-                                                <td>{r.ReceivedBy}</td>
-                                                <td>{formatDateAndTime(r.InsertedDate, 'date_and_time')}</td>
-                                            </tr>
-                                        )
-                                    })
-                                }
+                                    {
+                                        budgetTrackerList.filter(e => e.BudgetID === selectedBudget.entry_id).map((r, i) => {
+                                            return (
+                                                <tr key={i}>
+                                                    <td>{i + 1}</td>
+                                                    <td>{r.Action}</td>
+                                                    <td>{currencyConverter(r.Amount)}</td>
+                                                    <td>{r.InsertedBy}</td>
+                                                    <td>{r.ReceivedBy}</td>
+                                                    <td>{formatDateAndTime(r.InsertedDate, 'date_and_time')}</td>
+                                                </tr>
+                                            )
+                                        })
+                                    }
                                 </tbody>
                             </table>
                         </div>
                     }
                 </Modal>
-                
+
                 <Modal id="kt_modal_general_item" large title={'Budget Items'}>
                     <div className="row">
                         <div className="col-md-6 mb-3">
                             <div className="form-group">
                                 <label htmlFor="year_id">{budgetSelectValue.entry_id === '' ? 'Add' : 'Update'} Budget Item</label>
-                                <input type="text" className="form-control" value={budgetSelectValue.item_name} onChange={(e) => {setBudgetSelectValue({...budgetSelectValue, item_name: e.target.value})}}/>
+                                <input type="text" className="form-control" value={budgetSelectValue.item_name} onChange={(e) => { setBudgetSelectValue({ ...budgetSelectValue, item_name: e.target.value }) }} />
                             </div>
                         </div>
 
                         <div className="col-md-6 mb-3">
                             <div className="form-group">
                                 <label htmlFor="account_type">Select Account Type</label>
-                                <select id="account_type" className="form-control" value={budgetSelectValue.account_id} onChange={(e) => {setBudgetSelectValue({...budgetSelectValue, account_id: e.target.value})}}>
+                                <select id="account_type" className="form-control" value={budgetSelectValue.account_id} onChange={(e) => { setBudgetSelectValue({ ...budgetSelectValue, account_id: e.target.value }) }}>
                                     <option value="">Select Option</option>
                                     {
                                         accountList.length > 0 &&
-                                        accountList.map((r,i) => {
+                                        accountList.map((r, i) => {
                                             return <option key={i} value={r.EntryID}>{`${r.AccountName} (${r.AccountType})`}</option>
                                         })
                                     }
@@ -468,29 +468,29 @@ function FinanceMyBudget(props) {
 
                     {
                         budgetItems.length > 0 &&
-                            <div className="col-md-12 mt-5 table-responsive">
-                                <h2>Budget Items</h2>
-                                <table className="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>S/N</th>
-                                            <th>Item Name</th>
-                                            <th>Account</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                        <div className="col-md-12 mt-5 table-responsive">
+                            <h2>Budget Items</h2>
+                            <table className="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>S/N</th>
+                                        <th>Item Name</th>
+                                        <th>Account</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     {
-                                        budgetItems.map((r,i) => {
+                                        budgetItems.map((r, i) => {
                                             return (
                                                 <tr key={i}>
-                                                    <td>{i+1}</td>
+                                                    <td>{i + 1}</td>
                                                     <td>{r.ItemName}</td>
                                                     <td>{getAccountName(r.AccountID)}</td>
                                                     <td>
                                                         {
                                                             parseInt(props.LoginDetails[0].IsAdmin) === 1 ?
-                                                                <button className="btn btn-info btn-sm" onClick={()=>{setBudgetSelectValue({...budgetSelectValue, entry_id: r.EntryID, item_name: r.ItemName, account_id: r.AccountID})}}><i className="fa fa-pen" /></button>
+                                                                <button className="btn btn-info btn-sm" onClick={() => { setBudgetSelectValue({ ...budgetSelectValue, entry_id: r.EntryID, item_name: r.ItemName, account_id: r.AccountID }) }}><i className="fa fa-pen" /></button>
                                                                 : '--'
                                                         }
                                                     </td>
@@ -498,22 +498,22 @@ function FinanceMyBudget(props) {
                                             )
                                         })
                                     }
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
+                        </div>
                     }
                 </Modal>
 
-                <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width:'100%' }}>
+                <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width: '100%' }}>
                     <div className="">
                         <PageHeader
                             title={"MY BUDGET"}
                             items={["Human-Resources", "Finance & Budget", "My Budget"]}
                         />
-                        <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"  onClick={()=>{ setSelectedBudget({...formInitialize, year_id: getActiveAccountYear()}); setSelectedItem([]) }}>Add New Budget <i className="fa fa-plus" /></button>
+                        <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => { setSelectedBudget({ ...formInitialize, year_id: getActiveAccountYear() }); setSelectedItem([]) }}>Add New Budget <i className="fa fa-plus" /></button>
 
-                        <button className="btn btn-info btn-sm pull-right" data-bs-toggle="modal" data-bs-target="#kt_modal_general_item"  onClick={()=>{ setBudgetSelectValue({entry_id: '', item_name: ''}) }}>Add Budget Item <i className="fa fa-plus" /></button>
-                        <div className="row col-md-12" style={{width:'100%'}}>
+                        <button className="btn btn-info btn-sm pull-right" data-bs-toggle="modal" data-bs-target="#kt_modal_general_item" onClick={() => { setBudgetSelectValue({ entry_id: '', item_name: '' }) }}>Add Budget Item <i className="fa fa-plus" /></button>
+                        <div className="row col-md-12" style={{ width: '100%' }}>
                             <AGTable data={budgetDatatable} />
                         </div>
                     </div>

@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
 

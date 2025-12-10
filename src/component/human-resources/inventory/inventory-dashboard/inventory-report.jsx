@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -179,7 +179,7 @@ function InventoryReport(props) {
                             <h3>Inventory Item List</h3>
                             <div className="card">
                                 <div className="card-body pt-1 mt-2">
-                                    <Table id="inventory" data={datatable} />
+                                    <AGTable data={datatable} />
                                 </div>
                             </div>
                         </div>

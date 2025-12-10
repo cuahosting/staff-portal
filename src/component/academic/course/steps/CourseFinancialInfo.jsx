@@ -1,4 +1,11 @@
 import React from "react";
+import SearchSelect from "../../../common/select/SearchSelect";
+
+// Options for IsGens select
+const isGensOptions = [
+    { value: '1', label: 'Yes' },
+    { value: '0', label: 'No' },
+];
 
 export default function CourseFinancialInfo(props) {
     return (
@@ -38,23 +45,14 @@ export default function CourseFinancialInfo(props) {
                 </div>
             </div>
 
-            <div className="fv-row mb-6 enhanced-form-group">
-                <label className="form-label fs-6 fw-bolder text-dark enhanced-label" htmlFor="IsGens">
-                    Is Gens
-                </label>
-                <div className="enhanced-input-wrapper">
-                    <select
-                        id="IsGens"
-                        onChange={props.onEdit}
-                        value={props.data.IsGens}
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                    >
-                        <option>Select Option</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                    </select>
-                </div>
-            </div>
+            <SearchSelect
+                id="IsGens"
+                label="Is Gens"
+                value={isGensOptions.find(opt => opt.value === props.data.IsGens?.toString()) || null}
+                options={isGensOptions}
+                onChange={(selected) => props.onEdit({ target: { id: 'IsGens', value: selected?.value || '' } })}
+                placeholder="Select Option"
+            />
         </>
     )
 }

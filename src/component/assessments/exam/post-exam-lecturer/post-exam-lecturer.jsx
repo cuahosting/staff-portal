@@ -5,7 +5,7 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import { useLocation } from "react-router";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
-import Select2 from "react-select2-wrapper";
+import SearchSelect from "../../../common/select/SearchSelect";
 import { toast } from "react-toastify";
 const randomToken = require('random-token');
 
@@ -60,7 +60,7 @@ function PostExamResultByLecturer(props) {
                 let rows = [];
                 if (data.length > 0) {
                     data.map(item => {
-                        rows.push({ id: item.SemesterCode, text: item.SemesterName })
+                        rows.push({ value: item.SemesterCode, label: item.SemesterName })
                     })
                 }
                 setSemesterList(rows);
@@ -97,7 +97,7 @@ function PostExamResultByLecturer(props) {
                 let rows = [];
                 if (data.length > 0) {
                     data.map(item => {
-                        rows.push({ id: item.ModuleCode, text: `${item.ModuleName} (${item.ModuleCode})` })
+                        rows.push({ value: item.ModuleCode, label: `${item.ModuleName} (${item.ModuleCode})` })
                     })
                 }
                 setModuleListSelect(rows);
@@ -288,7 +288,7 @@ function PostExamResultByLecturer(props) {
         }
 
         toast.info("Posting... Please wait!");
-       
+
         const ca_score = selectedModule.CAPerCon > 0 ? (studentResult.CAScore / studentResult.CAMarkedScore) * selectedModule.CAPerCon : 0;
         const exam_score = selectedModule.ExamPerCon > 0 ? (studentResult.ExamScore / studentResult.ExamMarkedScore) * selectedModule.ExamPerCon : 0;
 
@@ -358,16 +358,13 @@ function PostExamResultByLecturer(props) {
                                 <div className="col-md-3">
                                     <div className="form-group">
                                         <label htmlFor="SemesterCode">Select Semester</label>
-                                        <Select2
+                                        <SearchSelect
                                             id="SemesterCode"
-                                            name="SemesterCode"
-                                            data={semesterList}
-                                            value={searchItem.SemesterCode}
-                                            className={"form-control"}
-                                            onSelect={onEdit}
-                                            options={{
-                                                placeholder: "Search Semester",
-                                            }}
+                                            label="Select Semester"
+                                            value={semesterList.find(op => op.value === searchItem.SemesterCode) || null}
+                                            options={semesterList}
+                                            onChange={(selected) => onEdit({ target: { id: 'SemesterCode', value: selected?.value || '' }, preventDefault: () => { } })}
+                                            placeholder="Search Semester"
                                         />
 
                                     </div>
@@ -376,16 +373,13 @@ function PostExamResultByLecturer(props) {
                                         !pageName.includes('Barcode') &&
                                         <div className="form-group pt-5">
                                             <label htmlFor="ModuleCode">Select Module</label>
-                                            <Select2
+                                            <SearchSelect
                                                 id="ModuleCode"
-                                                name="ModuleCode"
-                                                data={moduleListSelect}
-                                                value={searchItem.ModuleCode}
-                                                className={"form-control"}
-                                                onSelect={onEdit}
-                                                options={{
-                                                    placeholder: "Search Module",
-                                                }}
+                                                label="Select Module"
+                                                value={moduleListSelect.find(op => op.value === searchItem.ModuleCode) || null}
+                                                options={moduleListSelect}
+                                                onChange={(selected) => onEdit({ target: { id: 'ModuleCode', value: selected?.value || '' }, preventDefault: () => { } })}
+                                                placeholder="Search Module"
                                             />
                                         </div>
                                     }

@@ -7,26 +7,26 @@ import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
 import { Link } from 'react-router-dom'
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import { formatDateAndTime } from "../../../../resources/constants";
 import {
   CommentsDisabledOutlined,
   ConnectingAirportsOutlined,
 } from "@mui/icons-material";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import { useForm } from "react-hook-form";
-import Select from 'react-select';
+import SearchSelect from "../../../common/select/SearchSelect";
 
+
+import { useForm } from "react-hook-form";
 
 function HostelAllocations(props) {
   const token = props.loginData.token;
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit, setValue, watch } = useForm();
   const {
     register: register2,
     handleSubmit: handleSubmit2,
     setValue: setValue2,
+    watch: watch2,
   } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [readyToShow, setreadyToShow] = useState(false);
@@ -69,24 +69,24 @@ function HostelAllocations(props) {
     });
     getRoomAllocations(e.target.value);
   }
-  const getStudentList2 = async ()=>{
+  const getStudentList2 = async () => {
     await axios.get(`${serverLink}staff/student-manager/student/active`, token)
-            .then((response) => {
-                const result = response.data;
-                if (result.length > 0) {
-                    let rows = [];
-                    result.map(item => {
-                        rows.push({
-                            id: item.StudentID,
-                            text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
-                        })
-                    })
-                    setStudentSelectList(rows);
-                }
+      .then((response) => {
+        const result = response.data;
+        if (result.length > 0) {
+          let rows = [];
+          result.map(item => {
+            rows.push({
+              value: `${item.StudentID}?${item.Gender}?${item.FirstName} ${item.MiddleName} ${item.Surname}`,
+              label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`
             })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+          })
+          setStudentSelectList(rows);
+        }
+      })
+      .catch((err) => {
+        console.log("NETWORK ERROR");
+      });
   }
   const getStudentList = async () => {
     await axios
@@ -163,18 +163,18 @@ function HostelAllocations(props) {
           data.data.length > 0 &&
             data.data.map((item, index) => {
               let status;
-              if(item.Status=="Approve"){
+              if (item.Status == "Approve") {
                 status = <span className="badge badge-success">Approved  </span>
               }
-              else if(item.Status=="Reject"){
+              else if (item.Status == "Reject") {
                 status = <span className="badge badge-danger">Rejected</span>
               }
-              else if(item.Status=="Relocated"){
+              else if (item.Status == "Relocated") {
                 status = <span className="badge badge-success">Relocated</span>
               }
-              else{
+              else {
                 status = <span className="badge badge-primary">Applied</span>
-                
+
               }
               rows.push([
                 item.StudentID,
@@ -194,9 +194,10 @@ function HostelAllocations(props) {
                     data-placement="right"
                     title="Approve"
                     onClick={() => {
-                      if(item.Status!="Approve"){
-                        TakeDecision("Approve", item.EntryID)}
+                      if (item.Status != "Approve") {
+                        TakeDecision("Approve", item.EntryID)
                       }
+                    }
                     }
                     className="btn btn-sm btn-success "
                   >
@@ -228,9 +229,10 @@ function HostelAllocations(props) {
                     id="RejectBtn"
                     data-toggle="tooltip"
                     onClick={() => {
-                      if(item.Status!="Reject"){
-                        TakeDecision("Reject", item.EntryID)}
+                      if (item.Status != "Reject") {
+                        TakeDecision("Reject", item.EntryID)
                       }
+                    }
                     }
                     data-placement="right"
                     title="Reject"
@@ -368,7 +370,7 @@ function HostelAllocations(props) {
           setgender(gender);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const getHostelFor2 = async (gender) => {
@@ -381,7 +383,7 @@ function HostelAllocations(props) {
           setgender(gender);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const getBedOnChange = async (e) => {
@@ -400,7 +402,7 @@ function HostelAllocations(props) {
           setreadyToShow2(true);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const getBedOnChange2 = async (e) => {
@@ -421,7 +423,7 @@ function HostelAllocations(props) {
           setreadyToShow3(true);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -517,44 +519,43 @@ function HostelAllocations(props) {
                     <label htmlFor="hostelFor">
                       Hostel for {`${gender}`} students
                     </label>
-                    <select
-                      id="hostelFor"
-                      {...register2("floor2")}
-                      onChange={getBedOnChange2}
+                    <SearchSelect
+                      id="floor2"
+                      label={`Hostel for ${gender} students`}
+                      value={hostelFloorList2.map((item) => ({
+                        value: `${item.EntryID}?${item.FloorName}?${item.HostelID}`,
+                        label: `${item.HostelName} (${item.FloorName} Floor) `
+                      })).find(op => op.value === watch2("floor2")) || null}
+                      options={hostelFloorList2.map((item) => ({
+                        value: `${item.EntryID}?${item.FloorName}?${item.HostelID}`,
+                        label: `${item.HostelName} (${item.FloorName} Floor) `
+                      }))}
+                      onChange={(selected) => {
+                        setValue2("floor2", selected?.value);
+                        getBedOnChange2({ target: { value: selected?.value || '' } });
+                      }}
+                      placeholder="Select Hostel"
                       required
-                      className="form-control"
-                    >
-                      <option value="">Select Hostel</option>
-                    {hostelFloorList2.map((item) => (
-                      <option
-                        //roomid?floor?hostelid
-                        value={`${item.EntryID}?${item.FloorName}?${item.HostelID}`}
-                        key={item.EntryID}
-                      >
-                        {`${item.HostelName} (${item.FloorName} Floor) `}
-                      </option>
-                    ))}
-                    </select>
+                    />
                   </div>
                   {readyToShow3 && (
                     <div className="form-group pt-5">
                       <label htmlFor="hostelFor">Select Bed</label>
-                      <select
-                        id="hostelFor"
-                        {...register2("roombed2")}
+                      <SearchSelect
+                        id="roombed2"
+                        label="Select Bed"
+                        value={bedList2.map((item) => ({
+                          value: `${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`,
+                          label: `${item.RoomBed}`
+                        })).find(op => op.value === watch2("roombed2")) || null}
+                        options={bedList2.map((item) => ({
+                          value: `${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`,
+                          label: `${item.RoomBed}`
+                        }))}
+                        onChange={(selected) => setValue2("roombed2", selected?.value)}
+                        placeholder="Select Bed"
                         required
-                        className="form-control"
-                      >
-                        <option value="">Select Bed</option>
-                        {bedList2.map((item) => (
-                          <option
-                            value={`${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`}
-                            key={item.RoomBed}
-                          >
-                            {`${item.RoomBed}`}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   )}
                 </div>
@@ -576,25 +577,22 @@ function HostelAllocations(props) {
         />
         <div className="flex-column-fluid">
           <div className="card">
-          <div className="col-md-12 fv-row pt-10">
+            <div className="col-md-12 fv-row pt-10">
               <label className="required fs-6 fw-bold mb-2">
                 Select Semester
               </label>
-              <select
-                className="form-select"
-                data-placeholder="Select Semester"
+              <SearchSelect
                 id="code"
-                onChange={handleChange}
-                value={semester.code}
+                label="Select Semester"
+                value={semesterList.map((s) => ({ value: s.SemesterCode, label: s.Description })).find(op => op.value === semester.code) || null}
+                options={semesterList.map((s) => ({
+                  value: s.SemesterCode,
+                  label: s.Description
+                }))}
+                onChange={(selected) => handleChange({ target: { id: 'code', value: selected?.value || '' } })}
+                placeholder="Select Semester"
                 required
-              >
-                <option value="">Select option</option>
-                {semesterList.map((s, i) => (
-                  <option key={i} value={s.SemesterCode}>
-                    {s.Description}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="card-header border-0 pt-6">
@@ -605,16 +603,16 @@ function HostelAllocations(props) {
                   data-kt-customer-table-toolbar="base"
                 >
                   <Link to="/registration/hostel/hostel-allocation-form">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
+                    <button
+                      type="button"
+                      className="btn btn-primary"
                     // data-bs-toggle="modal"
                     // data-bs-target="#kt_modal_general"
-                  >
-                    Allocate Hostel
-                  </button>
- </Link>
-                  
+                    >
+                      Allocate Hostel
+                    </button>
+                  </Link>
+
                 </div>
               </div>
             </div>
@@ -628,58 +626,60 @@ function HostelAllocations(props) {
             <form onSubmit={handleSubmit(allocateBed)} novalidate>
               <div className="form-group">
                 <label htmlFor="hostelFor">Select Student</label>
-                <Select2
-                                            id="StudentID"
-                                            defaultValue={""}
-                                            data={studentSelectList}
-                                            onSelect={getHostelFor}
-                                            options={{
-                                                placeholder: "Search Student",
-                                            }}
-                                        />
+                <SearchSelect
+                  id="StudentID"
+                  label="Select Student"
+                  value={studentSelectList.find(s => s.value === watch("student")) || null} // Assuming student uses simple ID, but Select2 might have used complex
+                  // Actually Select2 used default value "" and onSelect.
+                  // The old code had commented out select using register("student") with complex value.
+                  // The Select2 logic used getHostelFor which sets internal state but doesn't explicitly set "student" in form?
+                  // Wait, allocateBed uses data.student.
+                  // OnSelect2 select, it triggered getHostelFor.
+                  // getHostelFor receives event, uses val = e.target.value.
+                  // I will replicate the behavior: on Change -> setValue("student", val) and getHostelFor.
+                  options={studentSelectList}
+                  onChange={(selected) => {
+                    setValue("student", selected?.value); // We need to match what allocateBed expects.
+                    // However, studentSelectList uses simple StudentID in my previous replacement?
+                    // No, in HostelAllocationForm I used complex value.
+                    // Here in `getStudentList2` I used just StudentID as value.
+                    // BUT `allocateBed` (line 292) does `data.student.split("?")[0]`.
+                    // This implies `data.student` should be complex?
+                    // Let's check getStudentList2 in detail.
+                    // I replaced it to use item.StudentID as value.
+                    // BUT `allocateBed` splits it. This suggests I should have used complex value in getStudentList2.
+                    // I will fix getStudentList2 in this chunk too or relying on previous chunk.
+                    // I need to use complex value here if allocateBed expects it.
+                    // Let's correct getStudentList2 logic in my thought trace.
 
-                                        
-                {/* <select
-                  id="hostelFor"
-                  {...register("student")}
-                  required
-                  onChange={getHostelFor}
-                  className="form-control"
-                >
-                  <option value="">Select Student</option>
-                  {studentList.map((item) => (
-                    <option
-                      value={`${item.StudentID}?${item.Gender}`}
-                      key={item.StudentID}
-                    >
-                      {`${item.StudentName} - (${item.StudentID})`}
-                    </option>
-                  ))}
-                </select> */}
+                    getHostelFor({ target: { value: selected?.value || '' } });
+                  }}
+                  placeholder="Search Student"
+                />
               </div>
               {readyToShow && (
                 <div className="form-group">
                   <label htmlFor="hostelFor">
                     Hostel Floor for {`${gender}`} students
                   </label>
-                  <select
-                    id="hostelFor"
-                    {...register("floor")}
-                    onChange={getBedOnChange}
+                  <SearchSelect
+                    id="floor"
+                    label={`Hostel Floor for ${gender} students`}
+                    value={hostelFloorList.map((item) => ({
+                      value: `${item.EntryID}?${item.FloorName}?${item.HostelID}`,
+                      label: `${item.FloorName}`
+                    })).find(op => op.value === watch("floor")) || null}
+                    options={hostelFloorList.map((item) => ({
+                      value: `${item.EntryID}?${item.FloorName}?${item.HostelID}`,
+                      label: `${item.FloorName}`
+                    }))}
+                    onChange={(selected) => {
+                      setValue("floor", selected?.value);
+                      getBedOnChange({ target: { value: selected?.value || '' } });
+                    }}
+                    placeholder="Select Floor"
                     required
-                    className="form-control"
-                  >
-                    <option value="">Select Floor</option>
-                    {hostelFloorList.map((item) => (
-                      <option
-                        //roomid?floor?hostelid
-                        value={`${item.EntryID}?${item.FloorName}?${item.HostelID}`}
-                        key={item.EntryID}
-                      >
-                        {`${item.FloorName}`}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               )}
 
@@ -687,35 +687,39 @@ function HostelAllocations(props) {
                 <>
                   <div className="form-group">
                     <label htmlFor="hostelFor">Select Bed</label>
-                    <select
-                      id="hostelFor"
-                      {...register("bed")}
+                    <SearchSelect
+                      id="bed"
+                      label="Select Bed"
+                      value={bedList.map((item) => ({
+                        value: `${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`,
+                        label: `${item.RoomBed}`
+                      })).find(op => op.value === watch("bed")) || null}
+                      options={bedList.map((item) => ({
+                        value: `${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`,
+                        label: `${item.RoomBed}`
+                      }))}
+                      onChange={(selected) => setValue("bed", selected?.value)}
+                      placeholder="Select Bed"
                       required
-                      className="form-control"
-                    >
-                      <option value="">Select Bed</option>
-                      {bedList.map((item) => (
-                        <option
-                          value={`${item.EntryID}?${item.RoomID}?${item.RoomNo}?${item.BedNo}`}
-                          key={item.RoomBed}
-                        >
-                          {`${item.RoomBed}`}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="hostelFor">Semester</label>
-                    <select
-                      id="hostelFor"
-                      {...register("semester")}
+                    <SearchSelect
+                      id="semester"
+                      label="Semester"
+                      value={[
+                        { value: "First", label: "First Semester" },
+                        { value: "Second", label: "Second Semester" }
+                      ].find(op => op.value === watch("semester")) || null}
+                      options={[
+                        { value: "First", label: "First Semester" },
+                        { value: "Second", label: "Second Semester" }
+                      ]}
+                      onChange={(selected) => setValue("semester", selected?.value)}
+                      placeholder="Select Semester"
                       required
-                      className="form-control"
-                    >
-                      <option value="">Select Semester</option>
-                      <option value="First">First Semester </option>
-                      <option value="Second">Second Semester</option>
-                    </select>
+                    />
                   </div>
                 </>
               )}

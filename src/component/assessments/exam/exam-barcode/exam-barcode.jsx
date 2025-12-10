@@ -6,15 +6,13 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import Select2 from "react-select2-wrapper";
-import "react-select2-wrapper/css/select2.css";
-import LinearProgressWithLabel from "../../../common/linear-progress-bar/linear-progress-bar";
-import Box from "@mui/material/Box";
-import AGTable from "../../../common/table/table";
-import Select from 'react-select';
+import SearchSelect from "../../../common/select/SearchSelect";
 import { formatDateAndTime } from "../../../../resources/constants";
 import { useReactToPrint } from 'react-to-print';
 import Barcode from "react-hooks-barcode";
+import Box from "@mui/material/Box";
+import LinearProgressWithLabel from "../../../common/linear-progress-bar/linear-progress-bar";
+import AGTable from "../../../common/table/AGTable";
 
 
 
@@ -63,6 +61,10 @@ function ExamBarcode(props) {
                 field: "sn",
             },
             {
+                label: "print",
+                field: "action"
+            },
+            {
                 label: "Exam Hall",
                 field: "HallName",
             },
@@ -98,10 +100,6 @@ function ExamBarcode(props) {
                 label: "Date Generated",
                 field: "InsertedDate",
             },
-            {
-                label: "print",
-                field: "action"
-            }
         ],
         rows: [],
     });
@@ -114,11 +112,11 @@ function ExamBarcode(props) {
                     let rows = [];
                     let row_set = [];
                     result.data.map((item => {
-                        rows.push({ id: item.SemesterCode, text: item.SemesterName })
+                        rows.push({ value: item.SemesterCode, label: item.SemesterName })
                     }))
 
                     result.data.map((row) => {
-                        row_set.push({ value: row.SemesterCode, label: row.SemesterName +"- "+row.SemesterCode })
+                        row_set.push({ value: row.SemesterCode, label: row.SemesterName + "- " + row.SemesterCode })
                     });
 
                     setSemesterList(result.data);
@@ -132,7 +130,7 @@ function ExamBarcode(props) {
                 if (result.data.length > 0) {
                     let rows = [];
                     result.data.map((item => {
-                        rows.push({ id: item.StudentID, text: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})` })
+                        rows.push({ value: item.StudentID, label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})` })
                     }))
                     setStudentList(rows)
                 }
@@ -145,7 +143,7 @@ function ExamBarcode(props) {
                 if (result.data.length > 0) {
                     let rows = [];
                     result.data.map((item => {
-                        rows.push({ id: item.ModuleCode, text: `${item.ModuleName} (${item.ModuleCode})` })
+                        rows.push({ value: item.ModuleCode, label: `${item.ModuleName} (${item.ModuleCode})` })
                     }))
                     setModuleList(rows)
                 }
@@ -172,15 +170,6 @@ function ExamBarcode(props) {
                         studentData.push(item.StudentID);
                         rows.push({
                             sn: index + 1,
-                            HallName: item.HallName,
-                            SeatNo: item.SeatNo,
-                            StudentID: item.StudentID,
-                            StudentName: item.StudentName,
-                            ModuleCode: item.ModuleCode,
-                            ModuleName: item.ModuleName,
-                            IsPresent: item.IsPresent === 1 ? 'Attended' : 'Not Attended',
-                            StaffName: item.StaffName,
-                            InsertedDate: formatDateAndTime(item.InsertedDate, 'date'),
                             action: (
                                 <button type="button" className="btn btn-sm btn-primary" onClick={() => {
                                     setPrintValue(item.Barcode)
@@ -194,7 +183,16 @@ function ExamBarcode(props) {
                                     <i className="fa fa-print" />
 
                                 </button>
-                            )
+                            ),
+                            HallName: item.HallName,
+                            SeatNo: item.SeatNo,
+                            StudentID: item.StudentID,
+                            StudentName: item.StudentName,
+                            ModuleCode: item.ModuleCode,
+                            ModuleName: item.ModuleName,
+                            IsPresent: item.IsPresent === 1 ? 'Attended' : 'Not Attended',
+                            StaffName: item.StaffName,
+                            InsertedDate: formatDateAndTime(item.InsertedDate, 'date'),
                         });
                     });
                     setGeneralDatatable({
@@ -204,7 +202,7 @@ function ExamBarcode(props) {
                     });
                     setLoading(false)
                     setshowBody(true)
-                }else{
+                } else {
                     setGeneralDatatable({
                         ...generalDatatable,
                         columns: generalDatatable.columns,
@@ -238,6 +236,19 @@ function ExamBarcode(props) {
             setFormData({
                 ...formData,
                 [e.target.id]: e.target.value,
+            });
+        }
+    }
+
+    const handleSelectChange = (id, selected) => {
+        if (id === "ModuleCode") {
+            // Selected is array of objects for multi-select
+            const values = selected ? selected.map(op => op.value) : [];
+            setSelectedModules(values);
+        } else {
+            setFormData({
+                ...formData,
+                [id]: selected?.value || ""
             });
         }
     }
@@ -304,7 +315,7 @@ function ExamBarcode(props) {
         setShowProgress2(true)
 
         let sendData = { ...formData, StudentData: studentData, ModuleCode: selectedModules }
-        await axios.post(`${serverLink}staff/timetable/exam/barcode/module`, sendData,  token,{
+        await axios.post(`${serverLink}staff/timetable/exam/barcode/module`, sendData, token, {
             onUploadProgress: (progressEvent) => {
                 let percentCompleted = Math.floor(progressEvent.loaded / progressEvent.total * 100)
                 setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + percentCompleted));
@@ -425,18 +436,17 @@ function ExamBarcode(props) {
 
 
     return (
-        isLoading ? <Loader /> :   <div className="d-flex flex-column flex-row-fluid">
+        isLoading ? <Loader /> : <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
                 title={"Exam Barcode"}
                 items={["Assessment", "Exam", "Exam Barcode"]}
             />
             <div className="flex-column-fluid" >
                 {semesterOptions.length > 0 &&
-                    <div className="col-md-12 mb-4 form-group">
-                        <label htmlFor="_Semester">Select Semester</label>
-                        <Select
+                    <div className="col-md-12 mb-4">
+                        <SearchSelect
                             id="_Semester"
-                            className="form-select form-select"
+                            label="Select Semester"
                             value={createSchedule.SemesterCode2}
                             onChange={onSemesterChange}
                             options={semesterOptions}
@@ -457,7 +467,7 @@ function ExamBarcode(props) {
                                 marginRight: 'auto',
                             }}
                         >
-                            <Loader/>
+                            <Loader />
                         </div>
                         :
                         showBody === true &&
@@ -465,25 +475,25 @@ function ExamBarcode(props) {
                             <div className="card-body">
                                 {showForm &&
                                     <div className="col-md-12 m-5 pt-5" id="exam_barcode" ref={componentRef}
-                                         style={{textAlign: 'center'}}>
-                                        <Barcode value={printValue} className="mt-5 pt-5"/>
+                                        style={{ textAlign: 'center' }}>
+                                        <Barcode value={printValue} className="mt-5 pt-5" />
                                     </div>
                                 }
                                 <ul className="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-bold mb-8">
 
                                     <li className="nav-item">
                                         <a className="nav-link text-active-primary pb-4 active" data-bs-toggle="tab"
-                                           href="#semester">General</a>
+                                            href="#semester">General</a>
                                     </li>
 
                                     <li className="nav-item">
                                         <a className="nav-link text-active-primary pb-4" data-kt-countup-tabs="true"
-                                           data-bs-toggle="tab" href="#module">Module</a>
+                                            data-bs-toggle="tab" href="#module">Module</a>
                                     </li>
 
                                     <li className="nav-item">
                                         <a className="nav-link text-active-primary pb-4" data-bs-toggle="tab"
-                                           href="#student">Student</a>
+                                            href="#student">Student</a>
                                     </li>
 
                                 </ul>
@@ -493,63 +503,51 @@ function ExamBarcode(props) {
                                     <div className="tab-pane fade active show" id="semester" role="tabpanel">
                                         <div className="d-flex col-md-12">
                                             <div className="col-md-11 form-group">
-                                                <Select2
+                                                <SearchSelect
                                                     id="SemesterCode"
-                                                    name="SemesterCode"
-                                                    data={semesterList}
-                                                    className={"form-control"}
-                                                    value={formData.SemesterCode}
-                                                    onSelect={onEdit}
-                                                    options={{
-                                                        placeholder: "Search Semester",
-                                                    }}
+                                                    value={semesterList.find(op => op.value === formData.SemesterCode) || null}
+                                                    options={semesterList}
+                                                    onChange={(selected) => handleSelectChange('SemesterCode', selected)}
+                                                    placeholder="Search Semester"
                                                 />
                                             </div>
                                             <div>
                                                 <button
                                                     className="btn btn-light btn-active-light-primary fw-bolder flex-shrink-0"
-                                                    onClick={onSubmit} style={{marginLeft: '10px'}}>Generate
+                                                    onClick={onSubmit} style={{ marginLeft: '10px' }}>Generate
                                                 </button>
                                             </div>
                                         </div>
                                         {
                                             showProgress ?
-                                                <Box sx={{width: '100%', marginTop: '20px'}}>
-                                                    <LinearProgressWithLabel value={progress}/>
+                                                <Box sx={{ width: '100%', marginTop: '20px' }}>
+                                                    <LinearProgressWithLabel value={progress} />
                                                 </Box>
                                                 : <></>
                                         }
-                                        <AGTable data={generalDatatable}/>
+                                        <AGTable data={generalDatatable} />
                                     </div>
                                     <div className="tab-pane fade" id="module" role="tabpanel">
                                         <div className={"row"}>
-                                            <div className="form-group col-md-5 mb-4">
-                                                <label htmlFor="SemesterCode2">Semester</label>
-                                                <Select2
+                                            <div className="col-md-5 mb-4">
+                                                <SearchSelect
                                                     id="SemesterCode2"
-                                                    name="SemesterCode2"
-                                                    data={semesterList}
-                                                    value={formData.SemesterCode2}
-                                                    className={"form-control"}
-                                                    onSelect={onEdit}
-                                                    options={{
-                                                        placeholder: "Search Semester",
-                                                    }}
+                                                    label="Semester"
+                                                    value={semesterList.find(op => op.value === formData.SemesterCode2) || null}
+                                                    options={semesterList}
+                                                    onChange={(selected) => handleSelectChange('SemesterCode2', selected)}
+                                                    placeholder="Search Semester"
                                                 />
                                             </div>
-                                            <div className="form-group col-md-5 mb-4">
-                                                <label htmlFor="ModuleCode">Module</label>
-                                                <Select2
+                                            <div className="col-md-5 mb-4">
+                                                <SearchSelect
                                                     id="ModuleCode"
-                                                    name="ModuleCode"
-                                                    data={moduleList}
-                                                    defaultValue={selectedModules}
-                                                    multiple
-                                                    className={"form-control"}
-                                                    onSelect={onEdit}
-                                                    options={{
-                                                        placeholder: "Search Module",
-                                                    }}
+                                                    label="Module"
+                                                    value={moduleList.filter(op => selectedModules.includes(op.value))}
+                                                    options={moduleList}
+                                                    isMulti
+                                                    onChange={(selected) => handleSelectChange('ModuleCode', selected)}
+                                                    placeholder="Search Module"
                                                 />
                                             </div>
                                             <div className="form-group  col-md-2 pt-6 ">
@@ -560,55 +558,43 @@ function ExamBarcode(props) {
                                         </div>
                                         {
                                             showProgress2 ?
-                                                <Box sx={{width: '100%', marginTop: '20px'}}>
-                                                    <LinearProgressWithLabel value={progress}/>
+                                                <Box sx={{ width: '100%', marginTop: '20px' }}>
+                                                    <LinearProgressWithLabel value={progress} />
                                                 </Box>
                                                 : <></>
                                         }
-                                        <AGTable data={generalDatatable}/>
+                                        <AGTable data={generalDatatable} />
                                     </div>
                                     <div className="tab-pane fade" id="student" role="tabpanel">
                                         <div className={"row"}>
-                                            <div className="form-group col-md-3 mb-4">
-                                                <label htmlFor="SemesterCode3">Semester</label>
-                                                <Select2
+                                            <div className="col-md-3 mb-4">
+                                                <SearchSelect
                                                     id="SemesterCode3"
-                                                    name="SemesterCode3"
-                                                    data={semesterList}
-                                                    value={formData.SemesterCode3}
-                                                    className={"form-control"}
-                                                    onSelect={onEdit}
-                                                    options={{
-                                                        placeholder: "Search Semester",
-                                                    }}
+                                                    label="Semester"
+                                                    value={semesterList.find(op => op.value === formData.SemesterCode3) || null}
+                                                    options={semesterList}
+                                                    onChange={(selected) => handleSelectChange('SemesterCode3', selected)}
+                                                    placeholder="Search Semester"
                                                 />
                                             </div>
-                                            <div className="form-group col-md-3 mb-4">
-                                                <label htmlFor="ModuleCode2">Module</label>
-                                                <Select2
+                                            <div className="col-md-3 mb-4">
+                                                <SearchSelect
                                                     id="ModuleCode2"
-                                                    name="ModuleCode2"
-                                                    data={moduleList}
-                                                    value={formData.ModuleCode2}
-                                                    className={"form-control"}
-                                                    onSelect={onEdit}
-                                                    options={{
-                                                        placeholder: "Search Module",
-                                                    }}
+                                                    label="Module"
+                                                    value={moduleList.find(op => op.value === formData.ModuleCode2) || null}
+                                                    options={moduleList}
+                                                    onChange={(selected) => handleSelectChange('ModuleCode2', selected)}
+                                                    placeholder="Search Module"
                                                 />
                                             </div>
-                                            <div className="form-group col-md-3 mb-4">
-                                                <label htmlFor="StudentID">Student</label>
-                                                <Select2
+                                            <div className="col-md-3 mb-4">
+                                                <SearchSelect
                                                     id="StudentID"
-                                                    name="StudentID"
-                                                    data={studentList}
-                                                    value={formData.StudentID}
-                                                    className={"form-control"}
-                                                    onSelect={onEdit}
-                                                    options={{
-                                                        placeholder: "Search Student",
-                                                    }}
+                                                    label="Student"
+                                                    value={studentList.find(op => op.value === formData.StudentID) || null}
+                                                    options={studentList}
+                                                    onChange={(selected) => handleSelectChange('StudentID', selected)}
+                                                    placeholder="Search Student"
                                                 />
                                             </div>
                                             <div className="form-group  col-md-3 pt-6 ">
@@ -619,17 +605,17 @@ function ExamBarcode(props) {
                                         </div>
                                         {
                                             showProgress3 ?
-                                                <Box sx={{width: '100%', marginTop: '20px'}}>
-                                                    <LinearProgressWithLabel value={progress}/>
+                                                <Box sx={{ width: '100%', marginTop: '20px' }}>
+                                                    <LinearProgressWithLabel value={progress} />
                                                 </Box>
                                                 : <></>
                                         }
-                                        <AGTable data={generalDatatable}/>
+                                        <AGTable data={generalDatatable} />
                                     </div>
                                 </div>
                             </div>
                             <div className="card-header border-0 pt-6">
-                                <div className="card-title"/>
+                                <div className="card-title" />
                                 <div className="card-toolbar">
                                 </div>
 
@@ -641,7 +627,7 @@ function ExamBarcode(props) {
                             }}>
 
                                 {
-                                    isLoading ? <Loader/> : ""
+                                    isLoading ? <Loader /> : ""
                                 }
 
                             </div>

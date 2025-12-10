@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import { currencyConverter, formatDate, formatDateAndTime } from "../../../resources/constants";
 import Modal from "../../common/modal/modal";
-import ReportTable from "../../common/table/report_table";
-import Select from "react-select";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import { Rtt } from "@mui/icons-material";
 
 
@@ -62,7 +62,7 @@ function FinanceBudgetReport(props) {
 
     const onYearChange = (e) => {
         getReport(e)
-        
+
     }
 
     const onStaffChange = (e) => {
@@ -276,7 +276,7 @@ function FinanceBudgetReport(props) {
                                     <input type="number" step={"any"} name="Amount" id="Amount" className="form-control" value={formData.Amount} onChange={onEdit} />
                                 </div>
                                 <div className="col-md-6 mt-5">
-                                    <Select
+                                    <SearchSelect
                                         id="RecievedBy"
                                         className="form-select form-select"
                                         value={formData.RecievedBy}
@@ -315,7 +315,7 @@ function FinanceBudgetReport(props) {
                         />
                         <div className="row col-md-12">
                             <label htmlFor="BudgetYear">Select Budget Year</label>
-                            <Select
+                            <SearchSelect
                                 id="BudgetYear"
                                 className="form-select form-select"
                                 value={formData.year}

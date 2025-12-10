@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -24,6 +24,10 @@ function InventorySettings(props)
             {
                 label: "S/N",
                 field: "sn",
+            },
+            {
+                label: "Action",
+                field: "action",
             },
             {
                 label: "Manufacturer Name",
@@ -49,10 +53,6 @@ function InventorySettings(props)
                 label: "Added By",
                 field: "SubmittedBy",
             },
-            {
-                label: "Action",
-                field: "action",
-            },
         ],
         rows: [],
     });
@@ -71,6 +71,10 @@ function InventorySettings(props)
             {
                 label: "S/N",
                 field: "sn",
+            },
+            {
+                label: "Action",
+                field: "action",
             },
             {
                 label: "Vendor Name",
@@ -96,10 +100,6 @@ function InventorySettings(props)
                 label: "Added By",
                 field: "SubmittedBy",
             },
-            {
-                label: "Action",
-                field: "action",
-            },
         ],
         rows: [],
     });
@@ -120,6 +120,10 @@ function InventorySettings(props)
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Category Name",
                 field: "CategoryName",
             },
@@ -130,10 +134,6 @@ function InventorySettings(props)
             {
                 label: "Added By",
                 field: "SubmittedBy",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -152,6 +152,10 @@ function InventorySettings(props)
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Category Name",
                 field: "CategoryID",
             },
@@ -166,10 +170,6 @@ function InventorySettings(props)
             {
                 label: "Added By",
                 field: "SubmittedBy",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -189,6 +189,10 @@ function InventorySettings(props)
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Location Name",
                 field: "LocationName",
             },
@@ -199,10 +203,6 @@ function InventorySettings(props)
             {
                 label: "Inserted By",
                 field: "SubmittedBy",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -219,6 +219,10 @@ function InventorySettings(props)
             {
                 label: "S/N",
                 field: "sn",
+            },
+            {
+                label: "Action",
+                field: "action",
             },
             {
                 label: "Item Name",
@@ -243,10 +247,6 @@ function InventorySettings(props)
             {
                 label: "Quantity Available",
                 field: "QuantityAvailable",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -1281,7 +1281,7 @@ function InventorySettings(props)
                                         Add Manufacturer
                                     </button>
                                 </div>
-                                <Table data={manufacturerDatatable} />
+                                <AGTable data={manufacturerDatatable} />
                             </div>
                             <div className="tab-pane fade" id="vendor_tab" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -1305,7 +1305,7 @@ function InventorySettings(props)
                                         Add Vendor
                                     </button>
                                 </div>
-                                <Table data={vendorDatatable} />
+                                <AGTable data={vendorDatatable} />
                             </div>
                             <div className="tab-pane fade" id="category_tab" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -1326,7 +1326,7 @@ function InventorySettings(props)
                                         Add Category
                                     </button>
                                 </div>
-                                <Table data={categoryDatatable} />
+                                <AGTable data={categoryDatatable} />
                             </div>
                             <div className="tab-pane fade" id="sub_category_tab" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -1348,7 +1348,7 @@ function InventorySettings(props)
                                         Add Sub Category
                                     </button>
                                 </div>
-                                <Table data={subCategoryDatatable} />
+                                <AGTable data={subCategoryDatatable} />
                             </div>
                             <div className="tab-pane fade" id="location_tab" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -1369,7 +1369,7 @@ function InventorySettings(props)
                                         Add Location
                                     </button>
                                 </div>
-                                <Table data={locationDatatable} />
+                                <AGTable data={locationDatatable} />
                             </div>
                             <div className="tab-pane fade" id="item_tab" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -1394,7 +1394,7 @@ function InventorySettings(props)
                                         Add Item
                                     </button>
                                 </div>
-                                <Table data={itemDatatable} />
+                                <AGTable data={itemDatatable} />
                             </div>
 
                         </div>

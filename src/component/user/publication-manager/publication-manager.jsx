@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -928,7 +928,7 @@ function PublicationManager(props) {
                                         Add Publication
                                     </button>
                                 </div>
-                                <Table data={blogDatatable} />
+                                <AGTable data={blogDatatable} />
                             </div>
                             <div className="tab-pane fade" id="book" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -942,7 +942,7 @@ function PublicationManager(props) {
                                         Add Publication
                                     </button>
                                 </div>
-                                <Table data={bookDatatable} />
+                                <AGTable data={bookDatatable} />
                             </div>
                             <div className="tab-pane fade" id="book_chapter" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -956,7 +956,7 @@ function PublicationManager(props) {
                                         Add Publication
                                     </button>
                                 </div>
-                                <Table data={bookChapterDatatable} />
+                                <AGTable data={bookChapterDatatable} />
                             </div>
                             <div className="tab-pane fade" id="conference_paper" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -970,7 +970,7 @@ function PublicationManager(props) {
                                         Add Publication
                                     </button>
                                 </div>
-                                <Table data={conferenceDatatable} />
+                                <AGTable data={conferenceDatatable} />
                             </div>
                             <div className="tab-pane fade" id="journal" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -984,7 +984,7 @@ function PublicationManager(props) {
                                         Add Publication
                                     </button>
                                 </div>
-                                <Table data={journalDatatable} />
+                                <AGTable data={journalDatatable} />
                             </div>
                             <div className="tab-pane fade" id="newspaper" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -998,7 +998,7 @@ function PublicationManager(props) {
                                         Add Publication
                                     </button>
                                 </div>
-                                <Table data={newspaperDatatable} />
+                                <AGTable data={newspaperDatatable} />
                             </div>
                             <div className="tab-pane fade" id="patent" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -1012,7 +1012,7 @@ function PublicationManager(props) {
                                         Add Publication
                                     </button>
                                 </div>
-                                <Table data={patentDatatable} />
+                                <AGTable data={patentDatatable} />
                             </div>
                         </div>
                     </div>

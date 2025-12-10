@@ -5,7 +5,7 @@ import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 
 function AllPaymentReport(props) {
   const token = props.login[0].token;

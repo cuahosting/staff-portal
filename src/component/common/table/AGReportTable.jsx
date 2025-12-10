@@ -1,106 +1,47 @@
-import React, { useRef, useMemo } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import { ModuleRegistry, AllCommunityModule, themeQuartz } from 'ag-grid-community';
+/**
+ * AGReportTable - Now using custom DataTable component
+ *
+ * This component provides backward compatibility for components using the
+ * AGReportTable interface while using DataTable under the hood.
+ *
+ * Props:
+ * - title: string - Table title (displayed in header)
+ * - columns: string[] - Array of column header strings
+ * - data: any[][] - Array of row arrays
+ * - row_count: number - Rows per page (optional, default 50)
+ * - pagination: boolean - Enable pagination (optional, default true)
+ */
+
+import React, { useMemo, useRef } from 'react';
 import ReactToPrint from 'react-to-print';
+import DataTable from './DataTable';
 import { projectLogo } from '../../../resources/constants';
 
-// Register AG Grid modules
-ModuleRegistry.registerModules([AllCommunityModule]);
-
-// Configure theme with enhanced spacing and header styling
-const myTheme = themeQuartz.withParams({
-  // Browser and color scheme
-  browserColorScheme: "light",
-
-  // Overall spacing and compactness
-  spacing: 10,
-
-  // Row dimensions (accommodates images)
-  rowHeight: 60,
-  rowVerticalPaddingScale: 1.0,
-
-  // Cell padding
-  cellHorizontalPadding: 12,
-
-  // Enhanced header styling
-  headerHeight: 56,
-  headerFontSize: 15,
-  headerFontWeight: 600,
-  headerTextColor: '#1a1a1a',
-  headerBackgroundColor: '#f8f9fa',
-  headerCellHoverBackgroundColor: '#e9ecef',
-  headerVerticalPaddingScale: 1.1,
-
-  // Header borders
-  headerColumnBorder: {
-    width: 1,
-    style: 'solid',
-    color: '#dee2e6'
-  },
-
-  // Typography
-  fontSize: 14,
-  fontFamily: 'system-ui, -apple-system, sans-serif',
-
-  // Colors
-  accentColor: '#1976d2',
-  backgroundColor: '#ffffff',
-  foregroundColor: '#212121',
-
-  // Borders
-  borderRadius: 4,
-  wrapperBorderRadius: 8,
-});
-
-/**
- * AG Grid wrapper component that replaces the existing ReportTable component
- * Maintains compatibility with existing array-of-arrays data structure
- * @param {string} title - Table title
- * @param {Array} columns - Array of column names
- * @param {Array} data - Array of arrays (row data)
- * @param {number} row_count - Rows per page (default: 20)
- * @param {boolean} pagination - Enable/disable pagination (default: true)
- * @param {string} height - Table height (default: '600px')
- */
 export default function AGReportTable({
   title,
   columns,
   data,
-  row_count = 20,
+  row_count = 50,
   pagination = true,
-  height = '600px'
 }) {
-  const gridRef = useRef();
   const printRef = useRef();
 
-  // Convert columns array to AG Grid column definitions
-  const columnDefs = useMemo(() => {
+  // Convert string columns to DataTable format
+  const tableColumns = useMemo(() => {
     if (!columns) return [];
 
     return columns.map((col, idx) => ({
+      label: col,
       field: `col${idx}`,
-      headerName: col,
-      sortable: true,
-      filter: true,
-      resizable: true,
-      flex: 1,
-      minWidth: 100,
-      // Handle JSX elements (like action buttons)
-      cellRenderer: (params) => {
-        if (React.isValidElement(params.value)) {
-          return params.value;
-        }
-        return params.value;
-      },
     }));
   }, [columns]);
 
   // Convert data array of arrays to objects
-  const rowData = useMemo(() => {
+  const tableRows = useMemo(() => {
     if (!data) return [];
 
-    return data.map((row) => {
-      const obj = {};
+    return data.map((row, rowIdx) => {
+      const obj = { sn: rowIdx + 1 };
       row.forEach((cell, idx) => {
         obj[`col${idx}`] = cell;
       });
@@ -108,53 +49,11 @@ export default function AGReportTable({
     });
   }, [data]);
 
-  // Export to CSV
-  const onExportCSV = () => {
-    if (gridRef.current && gridRef.current.api) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      gridRef.current.api.exportDataAsCsv({
-        fileName: `${title}-${timestamp}.csv`,
-        skipColumnGroupHeaders: true,
-        skipRowGroups: true,
-      });
-    }
-  };
-
-  // Copy data to clipboard
-  const onCopyData = () => {
-    if (gridRef.current && gridRef.current.api) {
-      gridRef.current.api.selectAll();
-      const selectedData = [];
-      gridRef.current.api.forEachNodeAfterFilterAndSort((node) => {
-        selectedData.push(node.data);
-      });
-
-      // Convert to tab-separated format
-      const headers = columnDefs.map(col => col.headerName).join('\t');
-      const rows = selectedData.map(row =>
-        columnDefs.map(col => {
-          const value = row[col.field];
-          // Skip JSX elements
-          return React.isValidElement(value) ? '' : (value || '');
-        }).join('\t')
-      ).join('\n');
-
-      const textToCopy = headers + '\n' + rows;
-
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        alert('Data copied to clipboard!');
-      });
-
-      gridRef.current.api.deselectAll();
-    }
-  };
-
-  // Default column properties
-  const defaultColDef = useMemo(() => ({
-    sortable: true,
-    filter: true,
-    resizable: true,
-  }), []);
+  // Prepare data for DataTable
+  const tableData = useMemo(() => ({
+    columns: [{ label: 'S/N', field: 'sn' }, ...tableColumns],
+    rows: tableRows,
+  }), [tableColumns, tableRows]);
 
   return (
     <div ref={printRef} style={{ width: '100%' }}>
@@ -167,32 +66,12 @@ export default function AGReportTable({
         </p>
       </div>
 
-      {/* Title for screen view */}
-      {title && (
-        <div className="no-print">
-          <h3 style={{ marginBottom: '15px' }}>{title}</h3>
-        </div>
-      )}
-
-      {/* Export and Print buttons */}
-      <div style={{ marginBottom: '10px', padding: '10px' }} className="no-print">
-        <button
-          onClick={onExportCSV}
-          className="btn btn-sm btn-primary me-2"
-          title="Export to CSV"
-        >
-          <i className="fa fa-download me-1"></i> Export CSV
-        </button>
-        <button
-          onClick={onCopyData}
-          className="btn btn-sm btn-secondary me-2"
-          title="Copy to clipboard"
-        >
-          <i className="fa fa-copy me-1"></i> Copy Data
-        </button>
+      {/* Title and Print button for screen view */}
+      <div className="no-print d-flex justify-content-between align-items-center mb-3">
+        {title && <h3 className="mb-0">{title}</h3>}
         <ReactToPrint
           trigger={() => (
-            <button className="btn btn-sm btn-info" title="Print">
+            <button className="btn btn-sm btn-light-info" title="Print">
               <i className="fa fa-print me-1"></i> Print
             </button>
           )}
@@ -201,24 +80,8 @@ export default function AGReportTable({
         />
       </div>
 
-      {/* AG Grid */}
-      <div style={{ height, width: '100%' }}>
-        <AgGridReact
-          ref={gridRef}
-          theme={myTheme}
-          rowData={rowData}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          pagination={pagination}
-          paginationPageSize={row_count}
-          paginationPageSizeSelector={[5, 10, 20, 50, 100, 200, 500, 1000]}
-          animateRows={true}
-          suppressCellFocus={true}
-          enableCellTextSelection={true}
-          ensureDomOrder={true}
-          domLayout="normal"
-        />
-      </div>
+      {/* DataTable */}
+      <DataTable data={tableData} paging={pagination} pageSize={row_count} />
 
       {/* Print-specific CSS */}
       <style>{`
@@ -228,12 +91,6 @@ export default function AGReportTable({
           }
           .print-only {
             display: block !important;
-          }
-          .ag-theme-quartz {
-            height: auto !important;
-          }
-          .ag-root-wrapper {
-            height: auto !important;
           }
         }
         @media screen {

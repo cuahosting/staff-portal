@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
@@ -10,13 +10,12 @@ import { connect } from "react-redux";
 import { serverLink } from "../../../resources/url";
 import { formatDate, formatDateAndTime, encryptData, projectDomain, removeSpace } from "../../../resources/constants";
 import { Link } from "react-router-dom";
-import Select from 'react-select';
+import SearchSelect from "../../common/select/SearchSelect";
 import { projectName, simpleFileUploadAPIKey } from "../../../resources/url";
 import SimpleFileUpload from "react-simple-file-upload";
 
 
-function AddEditStaff(props)
-{
+function AddEditStaff(props) {
   const token = props.loginData[0].token;
   const isAdmin = String(props.loginData?.[0]?.IsAdmin || "0") === "1";
 
@@ -149,39 +148,31 @@ function AddEditStaff(props)
   const [stateList, setStateList] = useState([]);
   const [lgaList, setLgaList] = useState([]);
 
-  const getData = async () =>
-  {
+  const getData = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         setData(response.data);
         let nat = [];
         response.data.country.length > 0 &&
-          response.data.country.map((row) =>
-          {
+          response.data.country.map((row) => {
             nat.push({ value: row.EntryID, label: row.Country })
           })
         setNaytionalities(nat)
       })
 
-      .catch((error) =>
-      {
+      .catch((error) => {
         console.log("NETWORK ERROR", error);
       });
   };
 
-  const getStaff = async () =>
-  {
+  const getStaff = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((result) =>
-      {
-        if (result.data.length > 0)
-        {
+      .then((result) => {
+        if (result.data.length > 0) {
           let rows = [];
-          result.data.map((staff, index) =>
-          {
+          result.data.map((staff, index) => {
             rows.push({
               sn: index + 1,
               EntryID: staff.EntryID,
@@ -249,8 +240,7 @@ function AddEditStaff(props)
                   className="btn btn-sm btn-primary"
                   data-bs-toggle="modal"
                   data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                  {
+                  onClick={() => {
                     setNewId(staff.StaffID);
                     const nat = nationalities.filter(x => x.value === staff.NationalityID)[0];
                     setCreateStaff({
@@ -360,24 +350,20 @@ function AddEditStaff(props)
         }
         setIsLoading(false);
       })
-      .catch((err) =>
-      {
+      .catch((err) => {
         console.log("NETWORK ERROR");
       });
   };
-  const handleNationalityChange = (e) =>
-  {
+  const handleNationalityChange = (e) => {
     console.log(e)
-    if (e.id === "NationalityID")
-    {
+    if (e.id === "NationalityID") {
       setStateList(
         data.state.filter((item) => item.NationalityID === parseInt(e.value))
       );
       setLgaList([]);
     }
 
-    if (e.id === "StateID")
-    {
+    if (e.id === "StateID") {
       setLgaList(data.lga.filter((item) => item.StateID === parseInt(e.value)));
     }
 
@@ -388,23 +374,18 @@ function AddEditStaff(props)
     })
   }
 
-  const onEdit = (e) =>
-  {
+  const onEdit = (e) => {
     const id = e.target.id;
     const value = id === "file" ? e.target.files[0] : e.target.value;
-    if (e.target.id === "file")
-    {
+    if (e.target.id === "file") {
       const file = e.target.files[0]
-      if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg")
-      {
+      if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") {
 
-      } else
-      {
+      } else {
         toast.error("Only .png, .jpg and .jpeg format allowed!");
         return;
       }
-      if (file.size > 1000000)
-      {
+      if (file.size > 1000000) {
         toast.error("max file size is 1mb")
         return;
 
@@ -417,16 +398,14 @@ function AddEditStaff(props)
       return;
     }
 
-    if (id === "NationalityID")
-    {
+    if (id === "NationalityID") {
       setStateList(
         data.state.filter((item) => item.NationalityID === parseInt(value))
       );
       setLgaList([]);
     }
 
-    if (id === "StateID")
-    {
+    if (id === "StateID") {
       setLgaList(data.lga.filter((item) => item.StateID === parseInt(value)));
     }
 
@@ -475,8 +454,7 @@ function AddEditStaff(props)
     return formData;
   };
 
-  const getInsertedUserID = async () =>
-  {
+  const getInsertedUserID = async () => {
     setInsertUser(
       props.loginData[0].StaffID.length > 0
         ? props.loginData[0].StaffID
@@ -484,12 +462,10 @@ function AddEditStaff(props)
     );
   };
 
-  const getLastStaffID = async () =>
-  {
+  const getLastStaffID = async () => {
     await axios
       .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
-      .then((response) =>
-      {
+      .then((response) => {
         setLastId(response.data.lastId[0].StaffID);
 
         const indexOfId = lastId.split("E")[1];
@@ -499,20 +475,16 @@ function AddEditStaff(props)
           String(lastIndex).padStart(places, "0");
         setNewId(`E${padStaffID(lastIndex, 4)}`);
       })
-      .catch((error) =>
-      {
+      .catch((error) => {
         console.log("NETWORK ERROR", error);
       });
   };
 
-  const onSubmit = async (e) =>
-  {
+  const onSubmit = async (e) => {
     e.preventDefault();
     // Non-admins can only edit social info on their own profile
-    if (!isAdmin)
-    {
-      if (!createStaff.EntryID || createStaff.StaffID !== props.loginData[0].StaffID)
-      {
+    if (!isAdmin) {
+      if (!createStaff.EntryID || createStaff.StaffID !== props.loginData[0].StaffID) {
         showAlert("UNAUTHORIZED", "You can only update your social profile.", "error");
         return;
       }
@@ -539,26 +511,21 @@ function AddEditStaff(props)
           socialPayload,
           token
         )
-        .then((result) =>
-        {
-          if (result.data.message === "success")
-          {
+        .then((result) => {
+          if (result.data.message === "success") {
             toast.success("Profile updated");
             getStaff();
-          } else
-          {
+          } else {
             showAlert("ERROR", "Unable to update profile. Please try again!", "error");
           }
         })
-        .catch(() =>
-        {
+        .catch(() => {
           showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
         });
 
       return;
     }
-    for (let key in createStaff)
-    {
+    for (let key in createStaff) {
       if (
         createStaff.hasOwnProperty(key) &&
         key !== "AddedDate" &&
@@ -601,10 +568,8 @@ function AddEditStaff(props)
         key !== "file2" &&
         key !== "file" &&
         key != "update_passport"
-      )
-      {
-        if (createStaff[key] === "")
-        {
+      ) {
+        if (createStaff[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
           return false;
         }
@@ -617,13 +582,11 @@ function AddEditStaff(props)
     // }
 
 
-    if (createStaff.EntryID === "")
-    {
+    if (createStaff.EntryID === "") {
       toast.info("Adding new staff. Please wait..");
 
 
-      if (createStaff.EmailAddress !== "")
-      {
+      if (createStaff.EmailAddress !== "") {
         const sendData = {
           EntryID: createStaff.EntryID,
           StaffID: newId,
@@ -697,10 +660,8 @@ function AddEditStaff(props)
               }
             }
           )
-          .then(async (res) =>
-          {
-            if (res.data.message === "success")
-            {
+          .then(async (res) => {
+            if (res.data.message === "success") {
               toast.success("Staff Added Successfully");
               getLastStaffID();
               getData();
@@ -767,17 +728,14 @@ function AddEditStaff(props)
                 update_passport: false
               });
               getLastStaffID();
-            } else if (res.data.message === "exist")
-            {
+            } else if (res.data.message === "exist") {
               toast.error("Staff ID already exists!");
-            } else
-            {
+            } else {
               console.log("Error from insert", res);
               toast.error(`Something went wrong submitting your document!`);
             }
           })
-          .catch((error) =>
-          {
+          .catch((error) => {
             console.log("Error", error);
             if (error.response && error.response.data) {
               if (error.response.data.error === "File size exceeds 1MB limit") {
@@ -791,17 +749,14 @@ function AddEditStaff(props)
               toast.error("Network error. Please check your connection.");
             }
           });
-      } else
-      {
+      } else {
         toast.error(
           `Image format not supported. Kindly format and try again!`
         );
       }
 
-    } else
-    {
-      if (createStaff.DateOfBirth === "2008-12-30T23:00:00.000Z")
-      {
+    } else {
+      if (createStaff.DateOfBirth === "2008-12-30T23:00:00.000Z") {
         await showAlert(
           "ERROR",
           "DateOfBirth Can't be empty and other related date fields",
@@ -830,17 +785,14 @@ function AddEditStaff(props)
             }
           }
         )
-        .then(async (result) =>
-        {
-          if (result.data.message === "success")
-          {
+        .then(async (result) => {
+          if (result.data.message === "success") {
             toast.success("Staff Updated Successfully");
             getStaff();
             getLastStaffID();
             getData();
             getInsertedUserID();
-          } else
-          {
+          } else {
             showAlert(
               "ERROR",
               "Something went wrong. Please try again!",
@@ -848,8 +800,7 @@ function AddEditStaff(props)
             );
           }
         })
-        .catch((error) =>
-        {
+        .catch((error) => {
           console.log("Error", error);
           if (error.response && error.response.data) {
             if (error.response.data.error === "File size exceeds 1MB limit") {
@@ -866,19 +817,16 @@ function AddEditStaff(props)
     }
   };
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     getLastStaffID().then((r) => { });
     getStaff().then((r) => { });
     getData().then((r) => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePassportUpload = (url) =>
-  {
+  const handlePassportUpload = (url) => {
     console.log(url)
-    if (url !== '')
-    {
+    if (url !== '') {
       setCreateStaff({
         ...createStaff,
         file2: url
@@ -966,7 +914,7 @@ function AddEditStaff(props)
             </div>
           </div>
           <div className="card-body p-0">
-            <Table data={datatable} />
+            <AGTable data={datatable} />
           </div>
         </div>
         <Modal
@@ -978,14 +926,14 @@ function AddEditStaff(props)
         >
           <form onSubmit={onSubmit} >
             <fieldset disabled={!isAdmin}>
-            <h5>Basic Information</h5>
-            <hr />
+              <h5>Basic Information</h5>
+              <hr />
 
-            <div className="row">
-              <div className="col-lg-12">
-                <div className="form-group">
-                  <label htmlFor="file">Passport (optional) <strong className="text-danger"><small>File must not exceed 1mb</small></strong> </label>
-                  {/* <SimpleFileUpload
+              <div className="row">
+                <div className="col-lg-12">
+                  <div className="form-group">
+                    <label htmlFor="file">Passport (optional) <strong className="text-danger"><small>File must not exceed 1mb</small></strong> </label>
+                    {/* <SimpleFileUpload
                     apiKey={simpleFileUploadAPIKey}
                     tag={`${projectName}-passport`}
                     onSuccess={handlePassportUpload}
@@ -995,788 +943,629 @@ function AddEditStaff(props)
                     width="100%"
                     height="100"
                   /> */}
-                  <input
-                    type="file"
-                    accept=".pdf, .jpg, .png, .jpeg"
-                    id="file"
-                    name="file"
-                    className="form-control"
-                    placeholder="file"
-                    onChange={onEdit}
-                  />
-                  <span className="alert-info">
-                    Only .pdf, .jpg, .png, .jpeg are allowed
-                  </span>
+                    <input
+                      type="file"
+                      accept=".pdf, .jpg, .png, .jpeg"
+                      id="file"
+                      name="file"
+                      className="form-control"
+                      placeholder="file"
+                      onChange={onEdit}
+                    />
+                    <span className="alert-info">
+                      Only .pdf, .jpg, .png, .jpeg are allowed
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="TitleID">Title</label>
-                  <select
-                    id="TitleID"
-                    className="form-control"
-                    required
-                    value={createStaff.TitleID}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.title ? (
-                      <>
-                        {data.title.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.EntryID}>
-                              {item.TitleName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="TitleID">Title</label>
+                    <SearchSelect
+                      id="TitleID"
+                      value={data.title ? data.title.map(item => ({ label: item.TitleName, value: item.EntryID })).find(op => op.value === createStaff.TitleID) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'TitleID', value: selected?.value || '' } })}
+                      options={data.title ? data.title.map(item => ({ label: item.TitleName, value: item.EntryID })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="FirstName">First Name</label>
+                    <input
+                      type="text"
+                      id="FirstName"
+                      className="form-control"
+                      placeholder="First Name*"
+                      required
+                      value={createStaff.FirstName}
+                      onChange={onEdit}
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="MiddleName">Middle Name</label>
+                    <input
+                      type="text"
+                      id="MiddleName"
+                      className="form-control"
+                      placeholder="Middle Name"
+                      value={createStaff.MiddleName}
+                      onChange={onEdit}
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="Surname">Surname</label>
+                    <input
+                      type="text"
+                      id="Surname"
+                      className="form-control"
+                      placeholder="Surname"
+                      value={createStaff.Surname}
+                      onChange={onEdit}
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="PhoneNumber">Phone Number</label>
+                    <input
+                      type="tel"
+                      id="PhoneNumber"
+                      className="form-control"
+                      placeholder="Phone Number*"
+                      required
+                      value={createStaff.PhoneNumber}
+                      onChange={onEdit}
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="EmailAddress">Email Address</label>
+                    <input
+                      type="email"
+                      id="EmailAddress"
+                      className="form-control"
+                      placeholder="Email Address"
+                      value={createStaff.EmailAddress}
+                      onChange={onEdit}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="DateOfBirth">Date of Birth</label>
+                    <input
+                      type="date"
+                      id="DateOfBirth"
+                      className="form-control"
+                      placeholder="Date of Birth*"
+                      required
+                      max={`${currentYear - 13}-01-01`}
+                      value={formatDate(createStaff.DateOfBirth)}
+                      onChange={onEdit}
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="Religion">Religion</label>
+                    <SearchSelect
+                      id="Religion"
+                      value={[{ label: 'Islam', value: 'Islam' }, { label: 'Christianity', value: 'Christianity' }, { label: 'Others', value: 'Others' }].find(op => op.value === createStaff.Religion) || null}
+                      onChange={(selected) => onEdit({ target: { id: 'Religion', value: selected?.value || '' } })}
+                      options={[{ label: 'Islam', value: 'Islam' }, { label: 'Christianity', value: 'Christianity' }, { label: 'Others', value: 'Others' }]}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-4 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="Gender">Gender</label>
+                    <SearchSelect
+                      id="Gender"
+                      value={[{ label: 'Female', value: 'Female' }, { label: 'Male', value: 'Male' }, { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.Gender) || null}
+                      onChange={(selected) => onEdit({ target: { id: 'Gender', value: selected?.value || '' } })}
+                      options={[{ label: 'Female', value: 'Female' }, { label: 'Male', value: 'Male' }, { label: 'N/A', value: 'N/A' }]}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="NationalityID">Nationality</label>
+                    <SearchSelect
+                      id="NationalityID"
+                      value={data.country ? data.country.map(item => ({ label: item.Country, value: item.EntryID })).find(op => op.value === createStaff.NationalityID) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'NationalityID', value: selected?.value || '' } })}
+                      options={data.country ? data.country.map(item => ({ label: item.Country, value: item.EntryID })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="StateID">State of Origin</label>
+                    <SearchSelect
+                      id="StateID"
+                      value={stateList ? stateList.map(item => ({ label: item.StateName, value: item.EntryID })).find(op => op.value === createStaff.StateID) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'StateID', value: selected?.value || '' } })}
+                      options={stateList ? stateList.map(item => ({ label: item.StateName, value: item.EntryID })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="LgaID">Local Government</label>
+                    <SearchSelect
+                      id="LgaID"
+                      value={lgaList ? lgaList.map(item => ({ label: item.LgaName, value: item.EntryID })).find(op => op.value === createStaff.LgaID) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'LgaID', value: selected?.value || '' } })}
+                      options={lgaList ? lgaList.map(item => ({ label: item.LgaName, value: item.EntryID })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="MaritalStatus">Marital Status</label>
+                    <SearchSelect
+                      id="MaritalStatus"
+                      value={[{ label: 'Married', value: 'Married' }, { label: 'Single', value: 'Single' }, { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.MaritalStatus) || null}
+                      onChange={(selected) => onEdit({ target: { id: 'MaritalStatus', value: selected?.value || '' } })}
+                      options={[{ label: 'Married', value: 'Married' }, { label: 'Single', value: 'Single' }, { label: 'N/A', value: 'N/A' }]}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="col-lg-12 col-md-12 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="ContactAddress">Contact Address</label>
+                    <textarea
+                      className="form-control"
+                      rows="3"
+                      id="ContactAddress"
+                      placeholder="Contact Address"
+                      required
+                      value={createStaff.ContactAddress}
+                      onChange={onEdit}
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="FirstName">First Name</label>
-                  <input
-                    type="text"
-                    id="FirstName"
-                    className="form-control"
-                    placeholder="First Name*"
-                    required
-                    value={createStaff.FirstName}
-                    onChange={onEdit}
-                  />
+              <h5 className="pt-10">Administrative Details</h5>
+              <hr />
+              <div className="row">
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="StaffType">Staff Type</label>
+                    <SearchSelect
+                      id="StaffType"
+                      value={data.stafftype ? data.stafftype.map(item => ({ label: item.TypeName, value: item.TypeName })).find(op => op.value === createStaff.StaffType) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'StaffType', value: selected?.value || '' } })}
+                      options={data.stafftype ? data.stafftype.map(item => ({ label: item.TypeName, value: item.TypeName })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="MiddleName">Middle Name</label>
-                  <input
-                    type="text"
-                    id="MiddleName"
-                    className="form-control"
-                    placeholder="Middle Name"
-                    value={createStaff.MiddleName}
-                    onChange={onEdit}
-                  />
-                </div>
-              </div>
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Surname">Surname</label>
-                  <input
-                    type="text"
-                    id="Surname"
-                    className="form-control"
-                    placeholder="Surname"
-                    value={createStaff.Surname}
-                    onChange={onEdit}
-                  />
-                </div>
-              </div>
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="PhoneNumber">Phone Number</label>
-                  <input
-                    type="tel"
-                    id="PhoneNumber"
-                    className="form-control"
-                    placeholder="Phone Number*"
-                    required
-                    value={createStaff.PhoneNumber}
-                    onChange={onEdit}
-                  />
-                </div>
-              </div>
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="EmailAddress">Email Address</label>
-                  <input
-                    type="email"
-                    id="EmailAddress"
-                    className="form-control"
-                    placeholder="Email Address"
-                    value={createStaff.EmailAddress}
-                    onChange={onEdit}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="col-lg-4 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="DateOfBirth">Date of Birth</label>
-                  <input
-                    type="date"
-                    id="DateOfBirth"
-                    className="form-control"
-                    placeholder="Date of Birth*"
-                    required
-                    max={`${currentYear - 13}-01-01`}
-                    value={formatDate(createStaff.DateOfBirth)}
-                    onChange={onEdit}
-                  />
-                </div>
-              </div>
-              <div className="col-lg-4 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Religion">Religion</label>
-                  <select
-                    id="Religion"
-                    className="form-control"
-                    value={createStaff.Religion}
-                    onChange={onEdit}
-                    required
-                  >
-                    <option value="">Select Option</option>
-                    <option value="Islam">Islam</option>
-                    <option value="Christianity">Christianity</option>
-                    <option value="Others">Others</option>
-                  </select>
-                </div>
-              </div>
-              <div className="col-lg-4 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Gender">Gender</label>
-                  <select
-                    id="Gender"
-                    className="form-control"
-                    required
-                    value={createStaff.Gender}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                    <option value="N/A">N/A</option>
-                  </select>
-                </div>
-              </div>
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="NationalityID">Nationality</label>
 
-                  {/* <Select
-                    name="NationalityID"
-                    id="NationalityID"
-                    value={createStaff.NationalityID2}
-                    onChange={handleNationalityChange}
-                    options={nationalities}
-                    placeholder="select staff"
-                  /> */}
-                  <select
-                    id="NationalityID"
-                    className="form-control"
-                    required
-                    value={createStaff.NationalityID}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.country ? (
-                      <>
-                        {data.country.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.EntryID}>
-                              {item.Country}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="DesignationID">Designation</label>
+                    <SearchSelect
+                      id="DesignationID"
+                      value={data.designation ? data.designation.map(item => ({ label: item.DesignationName, value: item.EntryID })).find(op => op.value === createStaff.DesignationID) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'DesignationID', value: selected?.value || '' } })}
+                      options={data.designation ? data.designation.map(item => ({ label: item.DesignationName, value: item.EntryID })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="StateID">State of Origin</label>
-                  <select
-                    id="StateID"
-                    className="form-control"
-                    required
-                    value={createStaff.StateID}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {stateList ? (
-                      <>
-                        {stateList.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.EntryID}>
-                              {item.StateName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                    <option value="Others">Others</option>
-                  </select>
-                </div>
-              </div>
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="LgaID">Local Government</label>
-                  <select
-                    id="LgaID"
-                    className="form-control"
-                    required
-                    value={createStaff.LgaID}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {lgaList ? (
-                      <>
-                        {lgaList.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.EntryID}>
-                              {item.LgaName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                    <option value="Others">Others</option>
-                  </select>
-                </div>
-              </div>
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="MaritalStatus">Marital Status</label>
-                  <select
-                    id="MaritalStatus"
-                    className="form-control"
-                    required
-                    value={createStaff.MaritalStatus}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    <option value="Married">Married</option>
-                    <option value="Single">Single</option>
-                    <option value="N/A">N/A</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-12 col-md-12 pt-5">
-              <div className="form-group">
-                <label htmlFor="ContactAddress">Contact Address</label>
-                <textarea
-                  className="form-control"
-                  rows="3"
-                  id="ContactAddress"
-                  placeholder="Contact Address"
-                  required
-                  value={createStaff.ContactAddress}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <h5 className="pt-10">Administrative Details</h5>
-            <hr />
-            <div className="row">
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="StaffType">Staff Type</label>
-                  <select
-                    id="StaffType"
-                    className="form-control"
-                    required
-                    value={createStaff.StaffType}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.stafftype ? (
-                      <>
-                        {data.stafftype.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.TypeName}>
-                              {item.TypeName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
-                </div>
-              </div>
 
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="DesignationID">Designation</label>
-                  <select
-                    id="DesignationID"
-                    className="form-control"
-                    required
-                    value={createStaff.DesignationID}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.designation ? (
-                      <>
-                        {data.designation.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.EntryID}>
-                              {item.DesignationName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
+                <div className="col-lg-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="GrossPay">Gross Pay</label>
+                    <input
+                      type="float"
+                      id="GrossPay"
+                      className="form-control"
+                      placeholder="Gross Pay"
+                      value={createStaff.GrossPay}
+                      onChange={onEdit}
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="GrossPay">Gross Pay</label>
-                  <input
-                    type="float"
-                    id="GrossPay"
-                    className="form-control"
-                    placeholder="Gross Pay"
-                    value={createStaff.GrossPay}
-                    onChange={onEdit}
-                    required
-                  />
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="DateOfFirstEmployment">
+                      Date Of First Employment
+                    </label>
+                    <input
+                      type="date"
+                      id="DateOfFirstEmployment"
+                      className="form-control"
+                      placeholder="Date Of First Employment"
+                      required
+                      value={formatDate(createStaff.DateOfFirstEmployment)}
+                      onChange={onEdit}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="DateOfFirstEmployment">
-                    Date Of First Employment
-                  </label>
-                  <input
-                    type="date"
-                    id="DateOfFirstEmployment"
-                    className="form-control"
-                    placeholder="Date Of First Employment"
-                    required
-                    value={formatDate(createStaff.DateOfFirstEmployment)}
-                    onChange={onEdit}
-                  />
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="DateOfCurrentEmployment">
+                      Date Of Current Employment
+                    </label>
+                    <input
+                      type="date"
+                      id="DateOfCurrentEmployment"
+                      className="form-control"
+                      placeholder="Date Of Current Employment"
+                      value={formatDate(createStaff.DateOfCurrentEmployment)}
+                      onChange={onEdit}
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="DateOfCurrentEmployment">
-                    Date Of Current Employment
-                  </label>
-                  <input
-                    type="date"
-                    id="DateOfCurrentEmployment"
-                    className="form-control"
-                    placeholder="Date Of Current Employment"
-                    value={formatDate(createStaff.DateOfCurrentEmployment)}
-                    onChange={onEdit}
-                    required
-                  />
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="ContractStartDate">Contract Start Date</label>
+                    <input
+                      type="date"
+                      id="ContractStartDate"
+                      required
+                      className="form-control"
+                      placeholder="Contract Start Date"
+                      value={formatDate(createStaff.ContractStartDate)}
+                      onChange={onEdit}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="ContractStartDate">Contract Start Date</label>
-                  <input
-                    type="date"
-                    id="ContractStartDate"
-                    required
-                    className="form-control"
-                    placeholder="Contract Start Date"
-                    value={formatDate(createStaff.ContractStartDate)}
-                    onChange={onEdit}
-                  />
+                <div className="col-lg-6 col-md-6 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="ContractEndDate">Contract End Date</label>
+                    <input
+                      type="date"
+                      required
+                      id="ContractEndDate"
+                      className="form-control"
+                      placeholder="Contract End Date"
+                      value={createStaff.ContractEndDate}
+                      //value={formatDate(createStaff.ContractEndDate)}
+                      onChange={onEdit}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="ContractEndDate">Contract End Date</label>
-                  <input
-                    type="date"
-                    required
-                    id="ContractEndDate"
-                    className="form-control"
-                    placeholder="Contract End Date"
-                    value={createStaff.ContractEndDate}
-                    //value={formatDate(createStaff.ContractEndDate)}
-                    onChange={onEdit}
-                  />
+                <div className="col-lg-4 col-md-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="LineManagerID">Line Manager</label>
+                    <SearchSelect
+                      id="LineManagerID"
+                      value={data.linemanager ? data.linemanager.map(item => ({ label: `${item.StaffID} -- ${item.FirstName} ${item.MiddleName} ${item.Surname}`, value: item.StaffID })).find(op => op.value === createStaff.LineManagerID) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'LineManagerID', value: selected?.value || '' } })}
+                      options={data.linemanager ? data.linemanager.map(item => ({ label: `${item.StaffID} -- ${item.FirstName} ${item.MiddleName} ${item.Surname}`, value: item.StaffID })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-4 col-md-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="LineManagerID">Line Manager</label>
-                  <select
-                    id="LineManagerID"
-                    className="form-control"
-                    required
-                    value={createStaff.LineManagerID}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.linemanager ? (
-                      <>
-                        {data.linemanager.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.StaffID}>
-                              {item.StaffID} -- {item.FirstName} {item.MiddleName} {item.Surname}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
+                <div className="col-lg-4 col-md-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="DepartmentCode">Department</label>
+                    <SearchSelect
+                      id="DepartmentCode"
+                      value={data.department ? data.department.map(item => ({ label: item.DepartmentName, value: item.DepartmentCode })).find(op => op.value === createStaff.DepartmentCode) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'DepartmentCode', value: selected?.value || '' } })}
+                      options={data.department ? data.department.map(item => ({ label: item.DepartmentName, value: item.DepartmentCode })) : []}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-4 col-md-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="DepartmentCode">Department</label>
-                  <select
-                    id="DepartmentCode"
-                    className="form-control"
-                    required
-                    value={createStaff.DepartmentCode}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.department ? (
-                      <>
-                        {data.department.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.DepartmentCode}>
-                              {item.DepartmentName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </select>
+                <div className="col-lg-4 col-md-4 pt-5">
+                  <div className="form-group">
+                    <label htmlFor="CourseCode">Course</label>
+                    <SearchSelect
+                      id="CourseCode"
+                      value={data.course ? [...data.course.map(item => ({ label: item.CourseName, value: item.CourseCode })), { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.CourseCode) || null : null}
+                      onChange={(selected) => onEdit({ target: { id: 'CourseCode', value: selected?.value || '' } })}
+                      options={data.course ? [...data.course.map(item => ({ label: item.CourseName, value: item.CourseCode })), { label: 'N/A', value: 'N/A' }] : [{ label: 'N/A', value: 'N/A' }]}
+                      placeholder="Select Option"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-4 col-md-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="CourseCode">Course</label>
-                  <select
-                    id="CourseCode"
-                    className="form-control"
-                    required
-                    value={createStaff.CourseCode}
-                    onChange={onEdit}
-                  >
-                    <option value="">Select Option</option>
-                    {data.course ? (
-                      <>
-                        {data.course.map((item, index) =>
-                        {
-                          return (
-                            <option key={index} value={item.CourseCode}>
-                              {item.CourseName}
-                            </option>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      ""
-                    )}
-                    <option value="N/A">N/A</option>
-                  </select>
-                </div>
               </div>
-
-            </div>
             </fieldset>
             <h5 className="pt-10">Social Networks (optional section)</h5>
             <hr />
 
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Facebook">Facebook</label>
-                  <input
-                    type="text"
-                    id="Facebook"
-                    className="form-control"
-                    placeholder="Facebook"
-                    value={createStaff.Facebook}
-                    onChange={onEdit}
-                  />
-                </div>
+            <div className="col-lg-4 pt-5">
+              <div className="form-group">
+                <label htmlFor="Facebook">Facebook</label>
+                <input
+                  type="text"
+                  id="Facebook"
+                  className="form-control"
+                  placeholder="Facebook"
+                  value={createStaff.Facebook}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Twitter">Twitter</label>
-                  <input
-                    type="text"
-                    id="Twitter"
-                    className="form-control"
-                    placeholder="Twitter"
-                    value={createStaff.Twitter}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-4 pt-5">
+              <div className="form-group">
+                <label htmlFor="Twitter">Twitter</label>
+                <input
+                  type="text"
+                  id="Twitter"
+                  className="form-control"
+                  placeholder="Twitter"
+                  value={createStaff.Twitter}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-4 pt-5">
-                <div className="form-group">
-                  <label htmlFor="LinkedIn">LinkedIn</label>
-                  <input
-                    type="text"
-                    id="Linkedin"
-                    className="form-control"
-                    placeholder="LinkedIn"
-                    value={createStaff.Linkedin}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-4 pt-5">
+              <div className="form-group">
+                <label htmlFor="LinkedIn">LinkedIn</label>
+                <input
+                  type="text"
+                  id="Linkedin"
+                  className="form-control"
+                  placeholder="LinkedIn"
+                  value={createStaff.Linkedin}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Scholar">Scholar</label>
-                  <input
-                    type="text"
-                    id="Scholar"
-                    className="form-control"
-                    placeholder="Scholar"
-                    value={createStaff.Scholar}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-6 pt-5">
+              <div className="form-group">
+                <label htmlFor="Scholar">Scholar</label>
+                <input
+                  type="text"
+                  id="Scholar"
+                  className="form-control"
+                  placeholder="Scholar"
+                  value={createStaff.Scholar}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Researchgate">Researchgate</label>
-                  <input
-                    type="text"
-                    id="Researchgate"
-                    className="form-control"
-                    placeholder="Researchgate"
-                    value={createStaff.Researchgate}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-6 pt-5">
+              <div className="form-group">
+                <label htmlFor="Researchgate">Researchgate</label>
+                <input
+                  type="text"
+                  id="Researchgate"
+                  className="form-control"
+                  placeholder="Researchgate"
+                  value={createStaff.Researchgate}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Academia">Academia</label>
-                  <input
-                    type="text"
-                    id="Academia"
-                    className="form-control"
-                    placeholder="Academia"
-                    value={createStaff.Academia}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-6 pt-5">
+              <div className="form-group">
+                <label htmlFor="Academia">Academia</label>
+                <input
+                  type="text"
+                  id="Academia"
+                  className="form-control"
+                  placeholder="Academia"
+                  value={createStaff.Academia}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Orcid">Orcid</label>
-                  <input
-                    type="text"
-                    id="Orcid"
-                    className="form-control"
-                    placeholder="Orcid"
-                    value={createStaff.Orcid}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-6 pt-5">
+              <div className="form-group">
+                <label htmlFor="Orcid">Orcid</label>
+                <input
+                  type="text"
+                  id="Orcid"
+                  className="form-control"
+                  placeholder="Orcid"
+                  value={createStaff.Orcid}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-6 col-md-12 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Biography"> Biography</label>
-                  <textarea
-                    className="form-control"
-                    rows="3"
-                    id="Biography"
-                    placeholder="Biography"
-                    value={createStaff.Biography}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-6 col-md-12 pt-5">
+              <div className="form-group">
+                <label htmlFor="Biography"> Biography</label>
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  id="Biography"
+                  placeholder="Biography"
+                  value={createStaff.Biography}
+                  onChange={onEdit}
+                />
               </div>
-              <div className="col-lg-6 col-md-12 pt-5">
-                <div className="form-group">
-                  <label htmlFor="Research">Research</label>
-                  <textarea
-                    className="form-control"
-                    rows="3"
-                    id="Research"
-                    placeholder="Research"
-                    value={createStaff.Research}
-                    onChange={onEdit}
-                  />
-                </div>
+            </div>
+            <div className="col-lg-6 col-md-12 pt-5">
+              <div className="form-group">
+                <label htmlFor="Research">Research</label>
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  id="Research"
+                  placeholder="Research"
+                  value={createStaff.Research}
+                  onChange={onEdit}
+                />
               </div>
+            </div>
 
-              {/*<h5 className="pt-10">Next of Kin Details</h5>*/}
-              {/*<hr />*/}
+            {/*<h5 className="pt-10">Next of Kin Details</h5>*/}
+            {/*<hr />*/}
 
-              {/*<div className="col-lg-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="NFirstName">First Name</label>*/}
-              {/*    <input*/}
-              {/*      type="text"*/}
-              {/*      id="NFirstName"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="First Name"*/}
-              {/*      value={createStaff.NFirstName}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="NSurname">Surname</label>*/}
-              {/*    <input*/}
-              {/*      type="text"*/}
-              {/*      id="NSurname"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="Surname"*/}
-              {/*      value={createStaff.NSurname}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="NMiddleName">Middle Name</label>*/}
-              {/*    <input*/}
-              {/*      type="text"*/}
-              {/*      id="NMiddleName"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="Middle Name"*/}
-              {/*      value={createStaff.NMiddleName}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="Relationship">Relationship</label>*/}
-              {/*    <select*/}
-              {/*      id="Relationship"*/}
-              {/*      className="form-control"*/}
-              {/*      */}
-              {/*      value={createStaff.Relationship}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    >*/}
-              {/*      <option value="">Select Option</option>*/}
-              {/*      <option value="Wife">Wife</option>*/}
-              {/*      <option value="Husband">Husband</option>*/}
-              {/*      <option value="Mother">Mother</option>*/}
-              {/*      <option value="Sister">Sister</option>*/}
-              {/*      <option value="Son">Son</option>*/}
-              {/*      <option value="Brother">Brother</option>*/}
-              {/*      <option value="Father">Father</option>*/}
-              {/*      <option value="Daughter">Daughter</option>*/}
-              {/*      <option value="Uncle">Uncle</option>*/}
-              {/*      <option value="Aunty">Aunty</option>*/}
-              {/*      <option value="N/A">N/A</option>*/}
-              {/*    </select>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="NPhoneNumber">PhoneNumber</label>*/}
-              {/*    <input*/}
-              {/*      type="number"*/}
-              {/*      id="NPhoneNumber"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="Phone Number"*/}
-              {/*      value={createStaff.NPhoneNumber}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-4 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="NEmailAddress">Email Address</label>*/}
-              {/*    <input*/}
-              {/*      type="email"*/}
-              {/*      id="NEmailAddress"*/}
-              {/*      className="form-control"*/}
-              {/*      placeholder="Email Address"*/}
-              {/*      value={createStaff.NEmailAddress}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-              {/*<div className="col-lg-12 col-md-12 pt-5">*/}
-              {/*  <div className="form-group">*/}
-              {/*    <label htmlFor="NContactAddress">Contact Address</label>*/}
-              {/*    <textarea*/}
-              {/*      className="form-control"*/}
-              {/*      rows="3"*/}
-              {/*      id="NContactAddress"*/}
-              {/*      placeholder="Contact Address"*/}
-              {/*      required*/}
-              {/*      value={createStaff.NContactAddress}*/}
-              {/*      onChange={onEdit}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</div>*/}
+            {/*<div className="col-lg-4 pt-5">*/}
+            {/*  <div className="form-group">*/}
+            {/*    <label htmlFor="NFirstName">First Name</label>*/}
+            {/*    <input*/}
+            {/*      type="text"*/}
+            {/*      id="NFirstName"*/}
+            {/*      className="form-control"*/}
+            {/*      placeholder="First Name"*/}
+            {/*      value={createStaff.NFirstName}*/}
+            {/*      onChange={onEdit}*/}
+            {/*    />*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<div className="col-lg-4 pt-5">*/}
+            {/*  <div className="form-group">*/}
+            {/*    <label htmlFor="NSurname">Surname</label>*/}
+            {/*    <input*/}
+            {/*      type="text"*/}
+            {/*      id="NSurname"*/}
+            {/*      className="form-control"*/}
+            {/*      placeholder="Surname"*/}
+            {/*      value={createStaff.NSurname}*/}
+            {/*      onChange={onEdit}*/}
+            {/*    />*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<div className="col-lg-4 pt-5">*/}
+            {/*  <div className="form-group">*/}
+            {/*    <label htmlFor="NMiddleName">Middle Name</label>*/}
+            {/*    <input*/}
+            {/*      type="text"*/}
+            {/*      id="NMiddleName"*/}
+            {/*      className="form-control"*/}
+            {/*      placeholder="Middle Name"*/}
+            {/*      value={createStaff.NMiddleName}*/}
+            {/*      onChange={onEdit}*/}
+            {/*    />*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<div className="col-lg-4 pt-5">*/}
+            {/*  <div className="form-group">*/}
+            {/*    <label htmlFor="Relationship">Relationship</label>*/}
+            {/*    <select*/}
+            {/*      id="Relationship"*/}
+            {/*      className="form-control"*/}
+            {/*      */}
+            {/*      value={createStaff.Relationship}*/}
+            {/*      onChange={onEdit}*/}
+            {/*    >*/}
+            {/*      <option value="">Select Option</option>*/}
+            {/*      <option value="Wife">Wife</option>*/}
+            {/*      <option value="Husband">Husband</option>*/}
+            {/*      <option value="Mother">Mother</option>*/}
+            {/*      <option value="Sister">Sister</option>*/}
+            {/*      <option value="Son">Son</option>*/}
+            {/*      <option value="Brother">Brother</option>*/}
+            {/*      <option value="Father">Father</option>*/}
+            {/*      <option value="Daughter">Daughter</option>*/}
+            {/*      <option value="Uncle">Uncle</option>*/}
+            {/*      <option value="Aunty">Aunty</option>*/}
+            {/*      <option value="N/A">N/A</option>*/}
+            {/*    </select>*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<div className="col-lg-4 pt-5">*/}
+            {/*  <div className="form-group">*/}
+            {/*    <label htmlFor="NPhoneNumber">PhoneNumber</label>*/}
+            {/*    <input*/}
+            {/*      type="number"*/}
+            {/*      id="NPhoneNumber"*/}
+            {/*      className="form-control"*/}
+            {/*      placeholder="Phone Number"*/}
+            {/*      value={createStaff.NPhoneNumber}*/}
+            {/*      onChange={onEdit}*/}
+            {/*    />*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<div className="col-lg-4 pt-5">*/}
+            {/*  <div className="form-group">*/}
+            {/*    <label htmlFor="NEmailAddress">Email Address</label>*/}
+            {/*    <input*/}
+            {/*      type="email"*/}
+            {/*      id="NEmailAddress"*/}
+            {/*      className="form-control"*/}
+            {/*      placeholder="Email Address"*/}
+            {/*      value={createStaff.NEmailAddress}*/}
+            {/*      onChange={onEdit}*/}
+            {/*    />*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+            {/*<div className="col-lg-12 col-md-12 pt-5">*/}
+            {/*  <div className="form-group">*/}
+            {/*    <label htmlFor="NContactAddress">Contact Address</label>*/}
+            {/*    <textarea*/}
+            {/*      className="form-control"*/}
+            {/*      rows="3"*/}
+            {/*      id="NContactAddress"*/}
+            {/*      placeholder="Contact Address"*/}
+            {/*      required*/}
+            {/*      value={createStaff.NContactAddress}*/}
+            {/*      onChange={onEdit}*/}
+            {/*    />*/}
+            {/*  </div>*/}
+            {/*</div>*/}
 
-              <h5 className="pt-10">Account Status</h5>
-              <hr />
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="IsAcademicStaff">Is Academic Staff?</label>
-                  <select
-                    id="IsAcademicStaff"
-                    className="form-control"
-                    value={createStaff.IsAcademicStaff}
-                    onChange={onEdit}
-                    required
-                  >
-                    <option value="">Select Option</option>
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
-                  </select>
-                </div>
+            <h5 className="pt-10">Account Status</h5>
+            <hr />
+            <div className="col-lg-6 col-md-6 pt-5">
+              <div className="form-group">
+                <label htmlFor="IsAcademicStaff">Is Academic Staff?</label>
+                <select
+                  id="IsAcademicStaff"
+                  className="form-control"
+                  value={createStaff.IsAcademicStaff}
+                  onChange={onEdit}
+                  required
+                >
+                  <option value="">Select Option</option>
+                  <option value="1">Yes</option>
+                  <option value="0">No</option>
+                </select>
               </div>
-              <div className="col-lg-6 col-md-6 pt-5">
-                <div className="form-group">
-                  <label htmlFor="IsActive">Is Staff Active?</label>
-                  <select
-                    id="IsActive"
-                    className="form-control"
-                    value={createStaff.IsActive}
-                    onChange={onEdit}
-                    required
-                  >
-                    <option value="">Select Option</option>
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
-                  </select>
-                </div>
+            </div>
+            <div className="col-lg-6 col-md-6 pt-5">
+              <div className="form-group">
+                <label htmlFor="IsActive">Is Staff Active?</label>
+                <select
+                  id="IsActive"
+                  className="form-control"
+                  value={createStaff.IsActive}
+                  onChange={onEdit}
+                  required
+                >
+                  <option value="">Select Option</option>
+                  <option value="1">Yes</option>
+                  <option value="0">No</option>
+                </select>
               </div>
-            
+            </div>
+
 
             <div className="form-group pt-10">
               <button type="submit" className="btn btn-primary w-100">
@@ -1790,8 +1579,7 @@ function AddEditStaff(props)
   );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails,
   };

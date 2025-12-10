@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -9,7 +9,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
 import { connect } from "react-redux";
-import Select from "react-select";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function FinanceSettings(props) {
     const token = props.loginData[0].token;
@@ -821,7 +821,7 @@ function FinanceSettings(props) {
         }
     };
 
-    const onActivate = async (item) =>  {
+    const onActivate = async (item) => {
         const sendData = {
             ...enrolmentFormData,
             StudentID: item.StudentID,
@@ -946,7 +946,7 @@ function FinanceSettings(props) {
                                         Add Tuition Fee
                                     </button>
                                 </div>
-                                <Table data={tuitionDatatable} />
+                                <AGTable data={tuitionDatatable} />
                             </div>
                             <div className="tab-pane fade" id="other_fee_tab" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -969,7 +969,7 @@ function FinanceSettings(props) {
                                         Add Other Fee
                                     </button>
                                 </div>
-                                <Table data={otherFeeDatatable} />
+                                <AGTable data={otherFeeDatatable} />
                             </div>
                             <div className="tab-pane fade" id="scholarship_tab" role="tabpanel">
                                 <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
@@ -992,19 +992,17 @@ function FinanceSettings(props) {
                                         Add Scholarship
                                     </button>
                                 </div>
-                                <Table data={scholarshipDatatable} />
+                                <AGTable data={scholarshipDatatable} />
                             </div>
                             <div className="tab-pane fade" id="enrol_scholarship_tab" role="tabpanel">
                                 <div className={"row"}>
                                     <div className="form-group col-md-5 mb-4">
                                         <label htmlFor="StudentID">Student</label>
-                                        <Select
+                                        <SearchSelect
                                             options={studentOptions}
                                             onChange={onStudentSelect}
                                             value={studentOptions.find(option => option.value === enrolmentFormData.StudentID) || null}
                                             placeholder="Search and select student..."
-                                            isClearable
-                                            isSearchable
                                         />
                                     </div>
                                     <div className="form-group col-md-5 mb-4">
@@ -1030,7 +1028,7 @@ function FinanceSettings(props) {
                                         </button>
                                     </div>
                                 </div>
-                                <Table data={enrolmentDatatable} />
+                                <AGTable data={enrolmentDatatable} />
                             </div>
                         </div>
                     </div>

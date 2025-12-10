@@ -1,20 +1,18 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import axios from "axios";
-import {serverLink} from "../../../resources/url";
-import {toast} from "react-toastify";
-import "react-select2-wrapper/css/select2.css";
-import AgReportTable from "../../common/table/report_table";
-import { showConfirm } from "../../common/sweetalert/sweetalert";
-import Select2 from "react-select2-wrapper";
-import {formatDateAndTime} from "../../../resources/constants";
+import { serverLink } from "../../../resources/url";
+import { toast } from "react-toastify";
+import SearchSelect from "../../common/select/SearchSelect";
+import AgReportTable from "../../common/table/ReportTable";
+import { formatDateAndTime } from "../../../resources/constants";
 
 function ResultActivityTracker(props) {
     const token = props.loginData.token;
 
-    const [isLoading,setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [semesterList, setSemesterList] = useState([]);
     const [semesterCode, setSemesterCode] = useState("");
     const [resultList, setResultList] = useState([]);
@@ -28,7 +26,7 @@ function ResultActivityTracker(props) {
                 let rows = [];
                 if (data.length > 0) {
                     data.map(item => {
-                        rows.push({id: item.SemesterCode, text: item.SemesterName})
+                        rows.push({ value: item.SemesterCode, label: item.SemesterName })
                     })
                 }
                 setIsLoading(false)
@@ -51,7 +49,7 @@ function ResultActivityTracker(props) {
                     if (data.data.length > 0) {
                         data.data.map((row, index) => {
                             rows.push([
-                                (index+1), row.StudentID, row.ModuleCode, row.ModuleTitle, row.PrevCAScore, row.CurCAScore, row.PrevExamScore, row.CurExamScore,
+                                (index + 1), row.StudentID, row.ModuleCode, row.ModuleTitle, row.PrevCAScore, row.CurCAScore, row.PrevExamScore, row.CurExamScore,
                                 row.PrevTotal, row.CurTotal, row.PrevGrade, row.CurGrade, row.ActionBy, formatDateAndTime(row.ActionDate, 'date_and_time')])
                         })
                     } else {
@@ -68,11 +66,11 @@ function ResultActivityTracker(props) {
             })
     }
 
-    useEffect(() => {getRecords()},[]);
+    useEffect(() => { getRecords() }, []);
 
-    return isLoading ? <Loader/> : (
+    return isLoading ? <Loader /> : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Result Activity Tracker"} items={["Assessment", "Exams Reports", "Result Activity Tracker"]}/>
+            <PageHeader title={"Result Activity Tracker"} items={["Assessment", "Exams Reports", "Result Activity Tracker"]} />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-body">
@@ -80,16 +78,13 @@ function ResultActivityTracker(props) {
                             <div className="col-md-12">
                                 <div className="form-group">
                                     <label htmlFor="SemesterCode">Select Semester</label>
-                                    <Select2
+                                    <SearchSelect
                                         id="SemesterCode"
-                                        name="SemesterCode"
-                                        data={semesterList}
-                                        value={semesterCode}
-                                        className={"form-control"}
-                                        onSelect={searchResult}
-                                        options={{
-                                            placeholder: "Search Semester",
-                                        }}
+                                        label="Select Semester"
+                                        value={semesterList.find(op => op.value === semesterCode) || null}
+                                        options={semesterList}
+                                        onChange={(selected) => searchResult({ target: { value: selected?.value || '' } })}
+                                        placeholder="Search Semester"
                                     />
                                 </div>
                             </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../common/pageheader/pageheader";
-import Table from "../../common/table/table";
+import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
@@ -166,7 +166,7 @@ function AttendanceList(props)
                         <div className="card-title" />
                     </div>
                     <div className="card-body p-0">
-                        <Table data={datatable} />
+                        <AGTable data={datatable} />
                     </div>
                 </div>
             </div>

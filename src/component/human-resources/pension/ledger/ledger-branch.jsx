@@ -13,7 +13,7 @@ function LedgerBranch(props) {
     const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState("off");
-    const columns = ["SN", "Branch Code", "Branch Name", "Inserted By", "Inserted Date", "Action"];
+    const columns = ["SN", "Action", "Branch Code", "Branch Name", "Inserted By", "Inserted Date"];
     const [data, setData] = useState([]);
 
     const [branches, setBranches] = useState({
@@ -30,10 +30,6 @@ function LedgerBranch(props) {
                 res.data.map((x, i) => {
                     rows.push([
                         i + 1,
-                        x.BranchCode,
-                        x.BranchName,
-                        x.InsertedBy,
-                        formatDateAndTime(x.InsertedDate, "date"),
                         <button
                             className="btn btn-sm btn-primary"
                             data-bs-toggle="modal"
@@ -48,7 +44,11 @@ function LedgerBranch(props) {
                             }}
                         >
                             <i className="fa fa-pen" />
-                        </button>
+                        </button>,
+                        x.BranchCode,
+                        x.BranchName,
+                        x.InsertedBy,
+                        formatDateAndTime(x.InsertedDate, "date")
                     ]);
                 });
                 setData(rows);

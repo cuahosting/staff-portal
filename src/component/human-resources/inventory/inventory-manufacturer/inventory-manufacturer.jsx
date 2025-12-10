@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import Table from "../../../common/table/table";
+import AGTable from "../../../common/table/AGTable";
 import axios from "axios";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import CourseForm from "./inventory-manufacturer-form";
 import swal from "sweetalert";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import InventoryManufacturerForm from "./inventory-manufacturer-form";
 function InventoryManufacturer(props) {
     let token = props.loginData[0].token
@@ -23,7 +23,7 @@ function InventoryManufacturer(props) {
 
     const [manufacturerList, setManufacturerList] = useState([]);
 
-    const columns = ["S/N", "Manufacturer Name", "Email Address", "Phone", "Address", "Description", "Updated By", "Action"];
+    const columns = ["S/N", "Action", "Manufacturer Name", "Email Address", "Phone", "Address", "Description", "Updated By"];
     const [tableData,setTableData] = useState([]);
 
     const fetchData = async () => {
@@ -33,7 +33,7 @@ function InventoryManufacturer(props) {
                     const row = [];
                     if (res.data.response.length > 0) {
                         res.data.response.map((r, i) => {
-                            row.push([i+1, r.manufacturer_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by,
+                            row.push([i+1,
                                 (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -57,7 +57,8 @@ function InventoryManufacturer(props) {
                                     >
                                         <i className="fa fa-pen" />
                                     </button>
-                                )
+                                ),
+                                r.manufacturer_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by
                             ])
                         })
                         setTableData(row)
@@ -175,29 +176,28 @@ function InventoryManufacturer(props) {
         <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Inventory Manufacturer"} items={["Inventory", "Inventory Manufacturer"]} />
+            <PageHeader
+                title={"Inventory Manufacturer"}
+                items={["Inventory", "Inventory Manufacturer"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() =>
+                            setFormData(initialValue)
+                        }
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Add Manufacturer
+                    </button>
+                }
+            />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
                         <div className="card-title" />
-                        <div className="card-toolbar">
-                            <div
-                                className="d-flex justify-content-end"
-                                data-kt-customer-table-toolbar="base"
-                            >
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setFormData(initialValue)
-                                    }
-                                >
-                                    Add Manufacturer
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div className="card-body p-0">
                         <ReportTable title={"Inventory Manufacturer"} columns={columns} data={tableData} />

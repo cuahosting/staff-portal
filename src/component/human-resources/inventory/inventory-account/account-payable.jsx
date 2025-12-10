@@ -6,7 +6,7 @@ import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import AccountPayableDetails from "./account-payable-details";
 import {currencyConverter, InventoryEmailTemplates} from "../../../../resources/constants";
 import {showAlert} from "../../../common/sweetalert/sweetalert";

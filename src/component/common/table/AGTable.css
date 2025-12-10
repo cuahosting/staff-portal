@@ -1,0 +1,141 @@
+/* AG Grid Table Wrapper Styles */
+.ag-grid-wrapper {
+  background: #fff;
+  border-radius: 0.475rem;
+}
+
+/* Toolbar */
+.ag-grid-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  gap: 1rem;
+}
+
+.ag-grid-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ag-grid-toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Search Box */
+.ag-grid-search {
+  position: relative;
+  width: 200px;
+}
+
+.ag-grid-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #A1A5B7;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.ag-grid-search input {
+  padding-left: 36px !important;
+  background-color: #F5F8FA;
+  border: 1px solid #F5F8FA;
+  border-radius: 0.475rem;
+  font-size: 13px;
+  color: #181C32;
+  transition: all 0.2s ease;
+}
+
+.ag-grid-search input:focus {
+  background-color: #fff;
+  border-color: #009EF7;
+  box-shadow: none;
+}
+
+.ag-grid-search input::placeholder {
+  color: #A1A5B7;
+}
+
+/* Grid Container */
+.ag-grid-container {
+  height: 520px;
+  width: 100%;
+  border: 1px solid #EFF2F5;
+  border-radius: 0.475rem;
+  overflow: hidden;
+}
+
+/* Cell Styles */
+.ag-cell-sn {
+  text-align: center !important;
+  color: #A1A5B7 !important;
+  font-weight: 500 !important;
+}
+
+.ag-cell-action {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+/* Override AG Grid Defaults for cleaner look */
+.ag-grid-wrapper .ag-root-wrapper {
+  border: none !important;
+  border-radius: 0.475rem;
+}
+
+.ag-grid-wrapper .ag-header {
+  border-bottom: 1px solid #EFF2F5;
+}
+
+.ag-grid-wrapper .ag-header-cell {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.ag-grid-wrapper .ag-cell {
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
+.ag-grid-wrapper .ag-row {
+  border-color: #EFF2F5;
+}
+
+.ag-grid-wrapper .ag-row:last-child {
+  border-bottom: none;
+}
+
+/* Pagination Styling */
+.ag-grid-wrapper .ag-paging-panel {
+  border-top: 1px solid #EFF2F5;
+  color: #A1A5B7;
+  font-size: 13px;
+  padding: 12px 16px;
+}
+
+.ag-grid-wrapper .ag-paging-button {
+  color: #A1A5B7;
+}
+
+.ag-grid-wrapper .ag-paging-button:hover {
+  color: #009EF7;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .ag-grid-container {
+    height: auto !important;
+    border: none;
+  }
+}

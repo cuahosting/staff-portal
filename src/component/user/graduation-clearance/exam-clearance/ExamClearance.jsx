@@ -6,8 +6,8 @@ import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
 import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
-import ReportTable from "../../../common/table/report_table";
-import Table from "../../../common/table/table";
+import ReportTable from "../../../common/table/ReportTable";
+import AGTable from "../../../common/table/AGTable";
 import { formatDateAndTime } from "../../../../resources/constants";
 import { CommentsDisabledOutlined } from "@mui/icons-material";
 
@@ -220,7 +220,7 @@ function ExamClearance(props) {
                 ></button>
               </div>
               <div class="modal-body">
-                <Table data={datatable} />
+                <AGTable data={datatable} />
               </div>
             </div>
           </div>

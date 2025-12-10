@@ -4,7 +4,8 @@ import axios from "axios";
 import { serverLink } from "../../../resources/url";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import { connect } from "react-redux";
 
 function NumberOfStudentsPerModule(props) {
@@ -91,21 +92,15 @@ function NumberOfStudentsPerModule(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select School Semester
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select school semester"
+                      <SearchSelect
                         id="code"
+                        label="Select School Semester"
+                        value={allSemester.map(semester => ({ value: semester.SemesterCode, label: semester.SemesterName })).find(s => s.value === semester.code) || null}
+                        options={allSemester.map(semester => ({ value: semester.SemesterCode, label: semester.SemesterName }))}
+                        onChange={(selected) => handleChange({ target: { id: 'code', value: selected?.value || '' }, preventDefault: () => { } })}
+                        placeholder="Select school semester"
                         required
-                        onChange={handleChange}
-                        value={semester.code}
-                      >
-                        <option value="">Select option</option>
-                        {allSemester.map((semester, index) => (
-                          <option key={index} value={semester.SemesterCode}>
-                            {semester.SemesterName}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   </div>
                 </form>

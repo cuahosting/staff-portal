@@ -32,6 +32,10 @@ function Modules(props) {
                 field: "sn",
             },
             {
+                label: "Action",
+                field: "action",
+            },
+            {
                 label: "Module Code",
                 field: "ModuleCode",
             },
@@ -58,10 +62,6 @@ function Modules(props) {
             {
                 label: "ExamPerCon",
                 field: "ExamPerCon",
-            },
-            {
-                label: "Action",
-                field: "action",
             },
         ],
         rows: [],
@@ -128,15 +128,6 @@ function Modules(props) {
                     result.data.forEach((modules, index) => {
                         rows.push({
                             sn: index + 1,
-                            EntryID: modules.EntryID,
-                            ModuleCode: modules.ModuleCode,
-                            ModuleName: modules.ModuleName,
-                            CourseName: modules.CourseName,
-                            ModuleType: modules.ModuleType,
-                            DepartmentCode: modules.CourseCode,
-                            CreditUnit: modules.CreditUnit,
-                            CAPerCon: modules.CAPerCon,
-                            ExamPerCon: modules.ExamPerCon,
                             action: (
                                 <>
                                     <button
@@ -182,6 +173,15 @@ function Modules(props) {
                                     </button>
                                 </>
                             ),
+                            EntryID: modules.EntryID,
+                            ModuleCode: modules.ModuleCode,
+                            ModuleName: modules.ModuleName,
+                            CourseName: modules.CourseName,
+                            ModuleType: modules.ModuleType,
+                            DepartmentCode: modules.CourseCode,
+                            CreditUnit: modules.CreditUnit,
+                            CAPerCon: modules.CAPerCon,
+                            ExamPerCon: modules.ExamPerCon,
                         });
                     });
 
@@ -451,7 +451,7 @@ function Modules(props) {
                 buttons={
                     <>
                         <button type="button" className="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#bulk_modal">Bulk Upload
+                                data-bs-target="#bulk_modal"><i className="fa fa-upload me-2"></i>Bulk Upload
                         </button>
                         <button type="button" className="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#kt_modal_general"
@@ -465,7 +465,7 @@ function Modules(props) {
                                     CAPerCon: "",
                                     ExamPerCon: "",
                                     InsertedBy: props.LoginDetails[0].StaffID,
-                                })}>Add a Module
+                                })}><i className="fa fa-plus me-2"></i>Add a Module
                         </button>
                         <button type="button" className="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#kt_modal_general_module_code" onClick={() => {

@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
+import SearchSelect from "../../common/select/SearchSelect";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
 
@@ -109,21 +110,15 @@ const ActiveStudentListByModeOfEntry = (props) => {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Mode of Entry
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select Mode Of Entry"
+                      <SearchSelect
                         id="type"
-                        onChange={handleChange}
-                        value={entry.type}
+                        label="Select Mode of Entry"
+                        value={mode.map(m => ({ value: m.ModeOfEntry, label: m.ModeOfEntry })).find(s => s.value === entry.type) || null}
+                        options={mode.map(m => ({ value: m.ModeOfEntry, label: m.ModeOfEntry }))}
+                        onChange={(selected) => handleChange({ target: { id: 'type', value: selected?.value || '' }, preventDefault: () => { } })}
+                        placeholder="Select Mode Of Entry"
                         required
-                      >
-                        <option value="">Select option</option>
-                        {mode.map((m, i) => (
-                          <option key={i} value={m.ModeOfEntry}>
-                            {m.ModeOfEntry}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   </div>
                 </form>

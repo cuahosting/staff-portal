@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 
 const StudentListAll = (props) => {
   const token = props.login[0].token;

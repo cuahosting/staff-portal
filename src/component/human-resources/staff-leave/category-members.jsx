@@ -8,7 +8,7 @@ import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
-import ReportTable from "../../common/table/report_table";
+import ReportTable from "../../common/table/ReportTable";
 
 
 const StaffLeaveCategoryMembers = (props) => {

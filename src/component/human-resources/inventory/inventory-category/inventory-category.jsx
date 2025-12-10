@@ -7,7 +7,7 @@ import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import {connect} from "react-redux";
-import ReportTable from "../../../common/table/report_table";
+import ReportTable from "../../../common/table/ReportTable";
 import InventoryCategoryForm from "./inventory-category-form";
 import InventorySubCategoryForm from "./inventory-sub-category-form";
 
@@ -23,8 +23,8 @@ function InventoryCategory(props) {
     const [formData2, setFormData2] = useState(initialSubCategoryValue);
 
     const [categoryList, setCategoryList] = useState([]);
-    const columns = ["S/N", "Category Name", "Description", "Inserted By", "Action"];
-    const columns2 = ["S/N", "Category Name", "Sub Category Name", "Description", "Inserted By", "Action"];
+    const columns = ["S/N", "Action", "Category Name", "Description", "Inserted By"];
+    const columns2 = ["S/N", "Action", "Category Name", "Sub Category Name", "Description", "Inserted By"];
     const [tableData,setTableData] = useState([]);
     const [tableData2,setTableData2] = useState([]);
 
@@ -37,7 +37,7 @@ function InventoryCategory(props) {
 
                     if (res.data.Category.length > 0) {
                         res.data.Category.map((r, i) => {
-                            categories.push([i+1, r.category_name, r.description, r.InsertedBy,
+                            categories.push([i+1,
                                 (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -57,7 +57,8 @@ function InventoryCategory(props) {
                                     >
                                         <i className="fa fa-pen" />
                                     </button>
-                                )
+                                ),
+                                r.category_name, r.description, r.InsertedBy
                             ])
                         })
                         setTableData(categories)
@@ -65,7 +66,7 @@ function InventoryCategory(props) {
 
                     if (res.data.SubCategory.length > 0) {
                         res.data.SubCategory.map((r, i) => {
-                            sub_categories.push([i+1, r.category_name, r.sub_category_name, r.description, r.InsertedBy,
+                            sub_categories.push([i+1,
                                 (
                                     <button
                                         className="btn btn-sm btn-primary"
@@ -88,7 +89,8 @@ function InventoryCategory(props) {
                                     >
                                         <i className="fa fa-pen" />
                                     </button>
-                                )
+                                ),
+                                r.category_name, r.sub_category_name, r.description, r.InsertedBy
                             ])
                         })
                         setTableData2(sub_categories)
@@ -333,6 +335,7 @@ function InventoryCategory(props) {
                                             setFormData(initialCategoryValue)
                                         }
                                     >
+                                        <i className="fa fa-plus me-2"></i>
                                         Add Category
                                     </button>
                                 </div>
@@ -348,6 +351,7 @@ function InventoryCategory(props) {
                                         onClick={() => setFormData2(initialSubCategoryValue)
                                         }
                                     >
+                                        <i className="fa fa-plus me-2"></i>
                                         Add Sub Category
                                     </button>
                                 </div>
