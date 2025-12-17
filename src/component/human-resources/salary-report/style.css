@@ -1,14 +1,15 @@
 /* Hide elements not meant for printing */
-@media screen {
+/* @media screen {
 .no-print {
         display: none;
     }
-}
+} */
 
 /* Print-specific styles */
 @media print {
+
     /* Set page margins and ensure elements fit within print area */
-@page {
+    @page {
         margin: 1cm;
     }
 

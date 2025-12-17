@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../common/pageheader/pageheader";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -9,7 +8,6 @@ import { connect } from "react-redux";
 import SearchSelect from "../../common/select/SearchSelect";
 
 function AddStaffQualifications(props) {
-  const token = props.loginData[0].token;
 
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
@@ -42,50 +40,32 @@ function AddStaffQualifications(props) {
   const deleteItem = async (id, image) => {
     if (id) {
       toast.info(`Deleting... Please wait!`);
-      await axios
-        .delete(`${serverLink}application/pg/document/delete/${id}/${image}`, token)
-        .then((res) => {
-          if (res.data.message === "success") {
-            // props.update_app_data();
-            toast.success(`Deleted`);
-          } else {
-            toast.error(
-              `Something went wrong. Please check your connection and try again!`
-            );
-          }
-        })
-        .catch((error) => {
-          console.log("NETWORK ERROR", error);
-        });
+      const { success, data } = await api.delete(`application/pg/document/delete/${id}/${image}`);
+      if (success && data.message === "success") {
+        toast.success(`Deleted`);
+      } else {
+        toast.error(`Something went wrong. Please check your connection and try again!`);
+      }
     }
   };
 
   const getStaff = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((response) => {
-        let rows = [];
-        response.data.length > 0 &&
-          response.data.map((row) => {
-            rows.push({ label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + "" + row.Surname, value: row.StaffID });
-          });
-        setStaffList(rows);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
+    const { success, data } = await api.get("staff/hr/staff-management/staff/list");
+    if (success && data.length > 0) {
+      let rows = [];
+      data.map((row) => {
+        rows.push({ label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + "" + row.Surname, value: row.StaffID });
       });
+      setStaffList(rows);
+    }
+    setIsLoading(false);
   };
 
   const getQualification = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/qualifications/`, token)
-      .then((response) => {
-        setQualifications(response.data);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+    const { success, data } = await api.get("staff/hr/staff-management/qualifications/");
+    if (success) {
+      setQualifications(data);
+    }
   };
 
   const onSubmit = async (e) => {
@@ -106,24 +86,17 @@ function AddStaffQualifications(props) {
     // console.log("Staff Documents", addStaffQualifications);
     // return false;
     toast.info(`Submitting... Please wait!`);
-    await axios
-      .post(
-        `${serverLink}staff/hr/staff-management/staff/qualifications`,
-        addStaffQualifications, token
-      )
-      .then((res) => {
-        if (res.data.message === "success") {
-          console.log("Response Type", res.data);
-          toast.success("Qualification Added Successfully");
-          setAddDocument(false);
-        } else {
-          console.log("error", res);
-          toast.error(`Something went wrong. Please try again!`);
-        }
-      })
-      .catch((error) => {
-        console.log("NETWORK ERROR", error);
-      });
+    const { success, data } = await api.post("staff/hr/staff-management/staff/qualifications", addStaffQualifications);
+    if (success) {
+      if (data.message === "success") {
+        console.log("Response Type", data);
+        toast.success("Qualification Added Successfully");
+        setAddDocument(false);
+      } else {
+        console.log("error", data);
+        toast.error(`Something went wrong. Please try again!`);
+      }
+    }
   };
 
   const onEdit = (e) => {

@@ -2,35 +2,20 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
 function HRBank(props) {
-  const token = props.loginData[0].token;
-
   const [isLoading, setIsLoading] = useState(true);
   const [datatable, setDatatable] = useState({
     columns: [
-      {
-        label: "S/N",
-        field: "sn",
-      },
-      {
-        label: "Action",
-        field: "action",
-      },
-      {
-        label: "Bank Name",
-        field: "name",
-      },
-      {
-        label: "Sort Code",
-        field: "sort_code",
-      },
+      { label: "S/N", field: "sn" },
+      { label: "Action", field: "action" },
+      { label: "Bank Name", field: "name" },
+      { label: "Sort Code", field: "sort_code" },
     ],
     rows: [],
   });
@@ -41,54 +26,55 @@ function HRBank(props) {
     entry_id: "",
   });
 
-  const getBanks = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/bank/list`, token)
-      .then((result) => {
-        if (result.data.length > 0) {
-          let rows = [];
-          result.data.map((bank, index) => {
-            rows.push({
-              sn: index + 1,
-              name: bank.BankName,
+  // Helper function to build table rows from bank data
+  const buildBankRows = (banks) => {
+    return banks.map((bank, index) => ({
+      sn: index + 1,
+      name: bank.BankName,
+      sort_code: bank.SortCode || "",
+      action: (
+        <button
+          className="btn btn-sm btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#kt_modal_general"
+          onClick={() =>
+            setCreateBank({
+              bank_name: bank.BankName,
               sort_code: bank.SortCode || "",
-              action: (
-                <button
-                  className="btn btn-sm btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateBank({
-                      bank_name: bank.BankName,
-                      sort_code: bank.SortCode || "",
-                      entry_id: bank.EntryID,
-                    })
-                  }
-                >
-                  <i className="fa fa-pen" />
-                </button>
-              ),
-            });
-          });
+              entry_id: bank.EntryID,
+            })
+          }
+        >
+          <i className="fa fa-pen" />
+        </button>
+      ),
+    }));
+  };
 
-          setDatatable({
-            ...datatable,
-            columns: datatable.columns,
-            rows: rows,
-          });
-        }
+  const getBanks = async () => {
+    const { success, data } = await api.get("staff/hr/bank/list");
 
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+    if (success && data?.length > 0) {
+      setDatatable((prev) => ({
+        ...prev,
+        rows: buildBankRows(data),
+      }));
+    }
+    setIsLoading(false);
   };
 
   const onEdit = (e) => {
     setCreateBank({
       ...createBank,
       [e.target.id]: e.target.value,
+    });
+  };
+
+  const resetForm = () => {
+    setCreateBank({
+      bank_name: "",
+      sort_code: "",
+      entry_id: "",
     });
   };
 
@@ -99,110 +85,38 @@ function HRBank(props) {
     }
 
     if (createBank.entry_id === "") {
-      await axios
-        .post(`${serverLink}staff/hr/bank/add`, createBank, token)
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Bank Added Successfully");
-            document.getElementById("closeModal").click()
-            getBanks();
-            setCreateBank({
-              ...createBank,
-              bank_name: "",
-              sort_code: "",
-              entry_id: "",
-            });
-          } else if (result.data.message === "exist") {
-            showAlert("BANK EXIST", "Bank already exist!", "error");
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
-          showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
-            "error"
-          );
-        });
+      // Add new bank
+      const { success, data } = await api.post("staff/hr/bank/add", createBank);
+
+      if (success) {
+        if (data?.message === "success") {
+          toast.success("Bank Added Successfully");
+          document.getElementById("closeModal").click();
+          getBanks();
+          resetForm();
+        } else if (data?.message === "exist") {
+          showAlert("BANK EXIST", "Bank already exist!", "error");
+        } else {
+          showAlert("ERROR", "Something went wrong. Please try again!", "error");
+        }
+      }
     } else {
-      await axios
-        .patch(`${serverLink}staff/hr/bank/update`, createBank, token)
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Bank Updated Successfully");
-            document.getElementById("closeModal").click()
-            getBanks();
-            setCreateBank({
-              ...createBank,
-              bank_name: "",
-              sort_code: "",
-              entry_id: "",
-            });
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
-          showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
-            "error"
-          );
-        });
+      // Update existing bank
+      const { success, data } = await api.patch("staff/hr/bank/update", createBank);
+
+      if (success && data?.message === "success") {
+        toast.success("Bank Updated Successfully");
+        document.getElementById("closeModal").click();
+        getBanks();
+        resetForm();
+      } else if (success) {
+        showAlert("ERROR", "Something went wrong. Please try again!", "error");
+      }
     }
   };
 
   useEffect(() => {
-     axios
-        .get(`${serverLink}staff/hr/bank/list`, token)
-        .then((result) => {
-          if (result.data.length > 0) {
-            let rows = [];
-            result.data.map((bank, index) => {
-              rows.push({
-                sn: index + 1,
-                name: bank.BankName,
-                sort_code: bank.SortCode || "",
-                action: (
-                    <button
-                        className="btn btn-sm btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_general"
-                        onClick={() =>
-                            setCreateBank({
-                              bank_name: bank.BankName,
-                              sort_code: bank.SortCode || "",
-                              entry_id: bank.EntryID,
-                            })
-                        }
-                    >
-                      <i className="fa fa-pen" />
-                    </button>
-                ),
-              });
-            });
-
-            setDatatable({
-              ...datatable,
-              columns: datatable.columns,
-              rows: rows,
-            });
-          }
-
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.log("NETWORK ERROR");
-        });
+    getBanks();
   }, []);
 
   return isLoading ? (
@@ -218,14 +132,7 @@ function HRBank(props) {
             className="btn btn-primary"
             data-bs-toggle="modal"
             data-bs-target="#kt_modal_general"
-            onClick={() =>
-              setCreateBank({
-                ...createBank,
-                bank_name: "",
-                sort_code: "",
-                entry_id: "",
-              })
-            }
+            onClick={resetForm}
           >
             <i className="fa fa-plus me-2"></i>
             Add Bank
@@ -279,6 +186,5 @@ const mapStateToProps = (state) => {
     loginData: state.LoginDetails,
   };
 };
-
 
 export default connect(mapStateToProps, null)(HRBank);

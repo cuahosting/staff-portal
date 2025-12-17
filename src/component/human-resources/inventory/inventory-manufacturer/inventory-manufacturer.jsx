@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -13,69 +12,68 @@ import swal from "sweetalert";
 import ReportTable from "../../../common/table/ReportTable";
 import InventoryManufacturerForm from "./inventory-manufacturer-form";
 function InventoryManufacturer(props) {
-    let token = props.loginData[0].token
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState(false);
     const initialValue = {
         manufacturer_id: '', manufacturer_name: '', description: '', address: '',
-        phone_number: '', email_address: '', submitted_by: '', updated_by: ''}
+        phone_number: '', email_address: '', submitted_by: '', updated_by: ''
+    }
     const [formData, setFormData] = useState(initialValue);
 
     const [manufacturerList, setManufacturerList] = useState([]);
 
     const columns = ["S/N", "Action", "Manufacturer Name", "Email Address", "Phone", "Address", "Description", "Updated By"];
-    const [tableData,setTableData] = useState([]);
+    const [tableData, setTableData] = useState([]);
 
     const fetchData = async () => {
-        await axios.get(`${serverLink}staff/inventory/manufacturer/list`, token)
-            .then(res => {
-                if (res.data.message === 'success') {
-                    const row = [];
-                    if (res.data.response.length > 0) {
-                        res.data.response.map((r, i) => {
-                            row.push([i+1,
-                                (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        onClick={() => {
-                                            onOpenModal();
-                                            setFormData({
-                                                ...formData,
-                                                manufacturer_name: r.manufacturer_name,
-                                                description: r.description,
-                                                address: r.address,
-                                                phone_number: r.phone_number,
-                                                email_address: r.email_address,
-                                                submitted_by: r.submitted_by,
-                                                updated_by: r.updated_by,
-                                                manufacturer_id: r.manufacturer_id,
-                                            })
-                                        }
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                                r.manufacturer_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by
-                            ])
-                        })
-                        setTableData(row)
-                    }
-                    setManufacturerList(res.data.response)
-                } else {
-                    toast.info("Something went wrong. Please try again!")
+        try {
+            const { success, data } = await api.get("staff/inventory/manufacturer/list");
+            if (success && data.message === 'success') {
+                const row = [];
+                if (data.response.length > 0) {
+                    data.response.map((r, i) => {
+                        row.push([i + 1,
+                        (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() => {
+                                    onOpenModal();
+                                    setFormData({
+                                        ...formData,
+                                        manufacturer_name: r.manufacturer_name,
+                                        description: r.description,
+                                        address: r.address,
+                                        phone_number: r.phone_number,
+                                        email_address: r.email_address,
+                                        submitted_by: r.submitted_by,
+                                        updated_by: r.updated_by,
+                                        manufacturer_id: r.manufacturer_id,
+                                    })
+                                }
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                        r.manufacturer_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by
+                        ])
+                    })
+                    setTableData(row)
                 }
-                setIsLoading(false)
-            })
-            .catch(e => {
-                toast.error(`${e.response.statusText}: ${e.response.data}`)
-            })
+                setManufacturerList(data.response)
+            } else {
+                toast.info("Something went wrong. Please try again!")
+            }
+            setIsLoading(false)
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     }
     useEffect(() => {
         fetchData()
-    },[formData])
+    }, [formData])
 
     const onOpenModal = () => {
         setFormData(initialValue)
@@ -83,7 +81,7 @@ function InventoryManufacturer(props) {
     const handleFormValueChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.id] : e.target.value
+            [e.target.id]: e.target.value
         })
     }
 
@@ -110,16 +108,16 @@ function InventoryManufacturer(props) {
         }
         setIsFormLoading(true)
         if (formData.manufacturer_id === '') {
-            await axios
-                .post(`${serverLink}staff/inventory/manufacturer/add`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.post("staff/inventory/manufacturer/add", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Manufacturer Added Successfully");
                         fetchData();
                         setFormData({ ...formData, ...initialValue })
                         setIsFormLoading(false)
                         document.getElementById("closeModal").click();
-                    } else if (result.data.message === "exist") {
+                    } else if (data.message === "exist") {
                         setIsFormLoading(false)
                         showAlert("MANUFACTURER EXIST", "Manufacturer already exist!", "error");
                     } else {
@@ -130,22 +128,20 @@ function InventoryManufacturer(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         } else {
-
-            await axios
-                .patch(`${serverLink}staff/inventory/manufacturer/update`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.patch("staff/inventory/manufacturer/update", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Manufacturer Updated Successfully");
                         fetchData();
                         setFormData({ ...formData, ...initialValue })
@@ -159,15 +155,15 @@ function InventoryManufacturer(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     }
 
@@ -204,7 +200,7 @@ function InventoryManufacturer(props) {
                     </div>
                 </div>
                 <Modal title={"Manage Manufacturer"}>
-                    <InventoryManufacturerForm value = {formData} isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
+                    <InventoryManufacturerForm value={formData} isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
                 </Modal>
             </div>
         </div>

@@ -2,19 +2,17 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import {useLocation, useParams} from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 function InventoryReport(props) {
     const { slug } = useParams();
     if (slug === "") window.location.href = '/';
     let urlLocation = useLocation();
 
-    const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState("off");
     const [datatable, setDatatable] = useState({
@@ -73,16 +71,16 @@ function InventoryReport(props) {
     });
 
     const getData = async () => {
-        await axios
-            .get(`${serverLink}staff/inventory/allocation/view/${atob(slug)}`, token)
-            .then((result) => {
+        try {
+            const { success, data: result } = await api.get(`staff/inventory/allocation/view/${atob(slug)}`);
+            if (success) {
                 let rows = []
                 let rowData = []
                 let deptRow = []
                 let inventoryRow = []
-                let itemData = result.data.Item;
-                let inventoryData = result.data.Inventory;
-                let allocatedData = result.data.Allocation
+                let itemData = result.Item;
+                let inventoryData = result.Inventory;
+                let allocatedData = result.Allocation
 
                 if (itemData.length > 0) {
                     //Set Item Data
@@ -135,14 +133,11 @@ function InventoryReport(props) {
                     rows: rowSet,
                 });
 
-                // setDatatable2({
-                //     ...datatable2,
-                //     columns: datatable2.columns,
-                //     rows: dataSet,
-                // });
-
                 setIsLoading(false)
-            });
+            }
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     };
 
     // const onEdit = (e) => {

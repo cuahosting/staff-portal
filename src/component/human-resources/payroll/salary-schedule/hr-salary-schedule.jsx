@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { connect } from "react-redux";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import { toast } from "react-toastify";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Loader from "../../../common/loader/loader";
 import AGReportTable from "../../../common/table/AGReportTable";
-import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
+import { currencyConverter } from "../../../../resources/constants";
 import * as XLSX from "xlsx";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function HrSalarySchedule(props) {
-    const token = props.loginData[0].token;
-
     const [isLoading, setIsLoading] = useState(true);
     const [salaryMonths, setSalaryMonths] = useState([]);
     const [scheduleData, setScheduleData] = useState([]);
@@ -41,15 +39,11 @@ function HrSalarySchedule(props) {
 
     // Fetch available salary months
     const fetchSalaryMonths = async () => {
-        try {
-            const response = await axios.get(`${serverLink}staff/hr/salary-schedule/months`, token);
-            setSalaryMonths(response.data);
-            setIsLoading(false);
-        } catch (error) {
-            console.error("Error fetching salary months:", error);
-            toast.error("Failed to load salary months");
-            setIsLoading(false);
+        const { success, data } = await api.get("staff/hr/salary-schedule/months");
+        if (success) {
+            setSalaryMonths(data);
         }
+        setIsLoading(false);
     };
 
     // Fetch schedule data for selected month
@@ -57,17 +51,17 @@ function HrSalarySchedule(props) {
         if (!salaryDate) return;
 
         setIsLoading(true);
-        try {
-            const [dataResponse, summaryResponse] = await Promise.all([
-                axios.get(`${serverLink}staff/hr/salary-schedule/data/${salaryDate}`, token),
-                axios.get(`${serverLink}staff/hr/salary-schedule/summary/${salaryDate}`, token)
-            ]);
 
-            setScheduleData(dataResponse.data);
-            setSummary(summaryResponse.data);
+        const [dataRes, summaryRes] = await Promise.all([
+            api.get(`staff/hr/salary-schedule/data/${salaryDate}`),
+            api.get(`staff/hr/salary-schedule/summary/${salaryDate}`)
+        ]);
+
+        if (dataRes.success) {
+            setScheduleData(dataRes.data);
 
             // Format data for table display
-            const formattedData = dataResponse.data.map((item, index) => {
+            const formattedData = dataRes.data.map((item, index) => {
                 const transactionRef = `SAL-${salaryDate.replace("-", "")}-${String(index + 1).padStart(4, "0")}`;
                 return [
                     index + 1,
@@ -83,14 +77,14 @@ function HrSalarySchedule(props) {
                     item.DesignationName || ""
                 ];
             });
-
             setTableData(formattedData);
-            setIsLoading(false);
-        } catch (error) {
-            console.error("Error fetching schedule data:", error);
-            toast.error("Failed to load schedule data");
-            setIsLoading(false);
         }
+
+        if (summaryRes.success) {
+            setSummary(summaryRes.data);
+        }
+
+        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -128,12 +122,17 @@ function HrSalarySchedule(props) {
         return `${monthNames[parseInt(month) - 1]} ${year}`;
     };
 
+    // Options for SearchSelect
+    const monthOptions = useMemo(() => {
+        return salaryMonths.map(item => ({
+            value: item.SalaryDate,
+            label: formatMonthYear(item.SalaryDate)
+        }));
+    }, [salaryMonths]);
+
     const onEdit = (e) => {
         const { id, value } = e.target;
-        setFormData({
-            ...formData,
-            [id]: value
-        });
+        setFormData({ ...formData, [id]: value });
 
         if (id === "salaryMonth" && value) {
             fetchScheduleData(value);
@@ -181,16 +180,16 @@ function HrSalarySchedule(props) {
         // Prepare data rows
         const dataRows = scheduleData.map((item, index) => {
             return [
-                index + 1,                                              // Transaction Reference Number
-                (item.FullName?.trim() || "").toUpperCase(),            // Beneficiary Name (ALL CAPS)
-                item.StaffID,                                           // Staff ID
-                parseFloat(item.NetPay || 0).toFixed(2),                // Payment Amount (2 decimal places)
-                formattedDueDate,                                       // Payment Due Date (DD/MM/YYYY)
-                `STAFF${index + 1}`,                                    // Beneficiary Code
-                item.AccountNumber || "",                               // Beneficiary Account Number
-                item.SortCode || "",                                    // Beneficiary Bank Sort Code
-                formData.debitAccountNumber,                            // Debit Account Number
-                item.DesignationName || ""                              // Comment (Designation)
+                index + 1,
+                (item.FullName?.trim() || "").toUpperCase(),
+                item.StaffID,
+                parseFloat(item.NetPay || 0).toFixed(2),
+                formattedDueDate,
+                `STAFF${index + 1}`,
+                item.AccountNumber || "",
+                item.SortCode || "",
+                formData.debitAccountNumber,
+                item.DesignationName || ""
             ];
         });
 
@@ -200,16 +199,16 @@ function HrSalarySchedule(props) {
 
         // Set column widths
         worksheet["!cols"] = [
-            { wch: 35 },  // Transaction Ref
-            { wch: 40 },  // Beneficiary Name
-            { wch: 12 },  // Staff ID
-            { wch: 18 },  // Payment Amount
-            { wch: 18 },  // Payment Due Date
-            { wch: 20 },  // Beneficiary Code
-            { wch: 18 },  // Account Number
-            { wch: 20 },  // Sort Code
-            { wch: 18 },  // Debit Account
-            { wch: 30 }   // Comment
+            { wch: 35 },
+            { wch: 40 },
+            { wch: 12 },
+            { wch: 18 },
+            { wch: 18 },
+            { wch: 20 },
+            { wch: 18 },
+            { wch: 20 },
+            { wch: 18 },
+            { wch: 30 }
         ];
 
         // Create workbook and add worksheet
@@ -328,19 +327,14 @@ function HrSalarySchedule(props) {
                                                 <i className="fa fa-calendar me-2 text-primary"></i>
                                                 Select Salary Month
                                             </label>
-                                            <select
+                                            <SearchSelect
                                                 id="salaryMonth"
-                                                className="form-select form-select-solid"
-                                                value={formData.salaryMonth}
-                                                onChange={onEdit}
-                                            >
-                                                <option value="">-- Select Month --</option>
-                                                {salaryMonths.map((item, index) => (
-                                                    <option key={index} value={item.SalaryDate}>
-                                                        {formatMonthYear(item.SalaryDate)}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                value={monthOptions.find(opt => opt.value === formData.salaryMonth) || null}
+                                                options={monthOptions}
+                                                onChange={(selected) => onEdit({ target: { id: 'salaryMonth', value: selected?.value || '' } })}
+                                                placeholder="-- Select Month --"
+                                                isClearable={false}
+                                            />
                                         </div>
                                     </div>
                                     <div className="col-lg-3">

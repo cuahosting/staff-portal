@@ -2,20 +2,18 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../../common/modal/modal";
 import PageHeader from "../../../../common/pageheader/pageheader";
 import AGTable from "../../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../../resources/url";
+import { api } from "../../../../../resources/api";
 import Loader from "../../../../common/loader/loader";
 import { showAlert } from "../../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import ItemAllocationForm from "./item-allocation-form";
-import {useLocation, useParams} from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 function ItemAllocation(props) {
     const { slug } = useParams();
     if (slug === "") window.location.href = '/';
     let urlLocation = useLocation();
 
-    const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState("off");
     const [datatable, setDatatable] = useState({
@@ -145,39 +143,39 @@ function ItemAllocation(props) {
     })
 
     const getData = async () => {
-        await axios
-            .get(`${serverLink}staff/inventory/allocation/view/${atob(slug)}`, token)
-            .then((result) => {
+        try {
+            const { success, data: result } = await api.get(`staff/inventory/allocation/view/${atob(slug)}`);
+            if (success) {
                 let rows = []
                 let rowData = []
                 let deptRow = []
                 let inventoryRow = []
-                let itemData = result.data.Item;
-                let inventoryData = result.data.Inventory;
-                let allocatedData = result.data.Allocation
+                let itemData = result.Item;
+                let inventoryData = result.Inventory;
+                let allocatedData = result.Allocation
 
                 //Set Inventory List
                 setInventoryList(inventoryData)
 
                 //Set Staff Dropdown Items
-                if (result.data.Staff.length > 0) {
-                    result.data.Staff.map((row) => {
+                if (result.Staff.length > 0) {
+                    result.Staff.map((row) => {
                         rows.push({ value: row.StaffID, label: row.StaffName })
                     });
                     setStaff(rows)
                 }
 
                 //Set Location Dropdown Items
-                if (result.data.Location.length > 0) {
-                    result.data.Location.map((row) => {
+                if (result.Location.length > 0) {
+                    result.Location.map((row) => {
                         rowData.push({ value: row.EntryID, label: row.LocationName })
                     });
                     setLocation(rowData)
                 }
 
                 //Set Department Dropdown Items
-                if (result.data.Department.length > 0) {
-                    result.data.Department.map((row) => {
+                if (result.Department.length > 0) {
+                    result.Department.map((row) => {
                         deptRow.push({ value: row.DepartmentCode, label: row.DepartmentName })
                     });
                     setDepartment(deptRow)
@@ -186,7 +184,7 @@ function ItemAllocation(props) {
                 //Set inventory Dropdown Items
                 if (inventoryData.length > 0) {
                     inventoryData.map((row) => {
-                        inventoryRow.push({ value: row.EntryID, label: row.ItemName +" ("+(row.Quantity - row.QuantityTaken)+") ", inventoryID: row.EntryID })
+                        inventoryRow.push({ value: row.EntryID, label: row.ItemName + " (" + (row.Quantity - row.QuantityTaken) + ") ", inventoryID: row.EntryID })
                     });
                     setInventory(inventoryRow)
                 }
@@ -249,7 +247,10 @@ function ItemAllocation(props) {
 
 
                 setIsLoading(false)
-            });
+            }
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     };
 
     const onEdit = (e) => {
@@ -287,8 +288,8 @@ function ItemAllocation(props) {
     }
 
     const onItemChange = (e) => {
-        let inventory =  inventoryList.filter(element => element.EntryID.toString() === e.value.toString());
-        if (inventory.length > 0){
+        let inventory = inventoryList.filter(element => element.EntryID.toString() === e.value.toString());
+        if (inventory.length > 0) {
             setFormData({
                 ...formData,
                 ItemID: inventory[0].ItemID,
@@ -338,10 +339,10 @@ function ItemAllocation(props) {
         }
 
         setIsFormLoading("on");
-        await axios
-            .post(`${serverLink}staff/inventory/item/allocation`, formData, token)
-            .then((result) => {
-                if (result.data.message === "success") {
+        try {
+            const { success, data } = await api.post("staff/inventory/item/allocation", formData);
+            if (success) {
+                if (data.message === "success") {
                     toast.success("Item Received Successful");
                     setIsFormLoading("off");
                     getData();
@@ -384,15 +385,14 @@ function ItemAllocation(props) {
                         "error"
                     );
                 }
-            })
-            .catch((error) => {
-                showAlert(
-                    "NETWORK ERROR",
-                    "Please check your connection and try again!",
-                    "error"
-                );
-            });
-
+            }
+        } catch (error) {
+            showAlert(
+                "NETWORK ERROR",
+                "Please check your connection and try again!",
+                "error"
+            );
+        }
     };
 
     useEffect(() => {
@@ -405,81 +405,81 @@ function ItemAllocation(props) {
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader title={"Inventory Dashboard"} items={["Inventory", "Dashboard"]} />
             <div className="flex-column-fluid">
-                    <div className="col-md-12">
-                        <div className="row">
-                            <div className="col-md-9 mb-5">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <h2> {itemData?.ItemName} ({itemData?.QuantityAvailable})</h2>
-                                    </div>
+                <div className="col-md-12">
+                    <div className="row">
+                        <div className="col-md-9 mb-5">
+                            <div className="card">
+                                <div className="card-body">
+                                    <h2> {itemData?.ItemName} ({itemData?.QuantityAvailable})</h2>
                                 </div>
                             </div>
-                            <div className="col-md-3  mb-5 btn pt-0" >
-                                <div className="card shadow" style={{backgroundColor: '#425b5e'}}>
-                                    <div className="card-body"
-                                         data-bs-toggle="modal"
-                                         data-bs-target="#kt_modal_general"
-                                         onClick={()=> {
-                                             setFormData({
-                                                 ...formData,
-                                                 InventoryID: "",
-                                                 ItemID: "",
-                                                 ManufacturerID: "",
-                                                 VendorID: "",
-                                                 VendorID2: "",
-                                                 CategoryID: "",
-                                                 SubCategoryID: "",
-                                                 LocationID: "",
-                                                 LocationID2: "",
-                                                 UserID: "",
-                                                 UserID2: "",
-                                                 UserName: "",
-                                                 DepartmentCode: "",
-                                                 DepartmentCode2: "",
-                                                 DepartmentName: "",
-                                                 Quantity: 0,
-                                                 EntryID: "",
-                                                 ItemName: "",
-                                                 ManufacturerName: "",
-                                                 VendorName: "",
-                                                 VendorName2: "",
-                                                 CategoryName: "",
-                                                 SubCategoryName: "",
-                                                 LocationName: "",
-                                                 Photo: "",
-                                                 QuantityRemaining: 0,
-                                                 QuantityAvailable: 0,
-                                                 show: 0,
-                                             });
-                                         }}
-                                    >
-                                        <h3 className="text-white"> Allocate Item</h3>
-                                    </div>
+                        </div>
+                        <div className="col-md-3  mb-5 btn pt-0" >
+                            <div className="card shadow" style={{ backgroundColor: '#425b5e' }}>
+                                <div className="card-body"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#kt_modal_general"
+                                    onClick={() => {
+                                        setFormData({
+                                            ...formData,
+                                            InventoryID: "",
+                                            ItemID: "",
+                                            ManufacturerID: "",
+                                            VendorID: "",
+                                            VendorID2: "",
+                                            CategoryID: "",
+                                            SubCategoryID: "",
+                                            LocationID: "",
+                                            LocationID2: "",
+                                            UserID: "",
+                                            UserID2: "",
+                                            UserName: "",
+                                            DepartmentCode: "",
+                                            DepartmentCode2: "",
+                                            DepartmentName: "",
+                                            Quantity: 0,
+                                            EntryID: "",
+                                            ItemName: "",
+                                            ManufacturerName: "",
+                                            VendorName: "",
+                                            VendorName2: "",
+                                            CategoryName: "",
+                                            SubCategoryName: "",
+                                            LocationName: "",
+                                            Photo: "",
+                                            QuantityRemaining: 0,
+                                            QuantityAvailable: 0,
+                                            show: 0,
+                                        });
+                                    }}
+                                >
+                                    <h3 className="text-white"> Allocate Item</h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-12">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <h3>Inventory Item List</h3>
-                                <div className="card">
-                                    <div className="card-body pt-1 mt-2">
-                                        <AGTable data={datatable} />
-                                    </div>
+                </div>
+                <div className="col-md-12">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <h3>Inventory Item List</h3>
+                            <div className="card">
+                                <div className="card-body pt-1 mt-2">
+                                    <AGTable data={datatable} />
                                 </div>
                             </div>
-                            <div className="col-md-6">
-                                <h3>Item Allocations</h3>
-                                <div className="card">
-                                    <div className="card-body pt-1 mt-2">
-                                        <AGTable data={datatable2} />
-                                    </div>
+                        </div>
+                        <div className="col-md-6">
+                            <h3>Item Allocations</h3>
+                            <div className="card">
+                                <div className="card-body pt-1 mt-2">
+                                    <AGTable data={datatable2} />
                                 </div>
                             </div>
+                        </div>
 
-                        </div>
                     </div>
+                </div>
                 <Modal large title={"Item Receive Form"}>
                     <ItemAllocationForm
                         data={formData}

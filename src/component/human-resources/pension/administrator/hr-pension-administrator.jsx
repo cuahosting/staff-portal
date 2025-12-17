@@ -2,15 +2,13 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
 function HRPensionAdministrator(props) {
-  const token = props.loginData[0].token;
 
   const [isLoading, setIsLoading] = useState(true);
   const [datatable, setDatatable] = useState({
@@ -47,49 +45,41 @@ function HRPensionAdministrator(props) {
   });
 
   const getRecord = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/pension/administrator/list`, token)
-      .then((result) => {
-        if (result.data.length > 0) {
-          let rows = [];
-          result.data.map((item, index) => {
-            rows.push({
-              sn: index + 1,
-              name: item.AdminName,
-              phone: item.ContactNo,
-              email: item.ContactEmail,
-              action: (
-                <button
-                  className="btn btn-sm btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateItem({
-                      admin_name: item.AdminName,
-                      contact_no: item.ContactNo,
-                      contact_email: item.ContactEmail,
-                      entry_id: item.EntryID,
-                    })
-                  }
-                >
-                  <i className="fa fa-pen" />
-                </button>
-              ),
-            });
-          });
-
-          setDatatable({
-            ...datatable,
-            columns: datatable.columns,
-            rows: rows,
-          });
-        }
-
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
+    const { success, data } = await api.get("staff/hr/pension/administrator/list");
+    if (success && data.length > 0) {
+      let rows = [];
+      data.map((item, index) => {
+        rows.push({
+          sn: index + 1,
+          name: item.AdminName,
+          phone: item.ContactNo,
+          email: item.ContactEmail,
+          action: (
+            <button
+              className="btn btn-sm btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#kt_modal_general"
+              onClick={() =>
+                setCreateItem({
+                  admin_name: item.AdminName,
+                  contact_no: item.ContactNo,
+                  contact_email: item.ContactEmail,
+                  entry_id: item.EntryID,
+                })
+              }
+            >
+              <i className="fa fa-pen" />
+            </button>
+          ),
+        });
       });
+      setDatatable({
+        ...datatable,
+        columns: datatable.columns,
+        rows: rows,
+      });
+    }
+    setIsLoading(false);
   };
 
   const onEdit = (e) => {
@@ -114,114 +104,52 @@ function HRPensionAdministrator(props) {
     }
 
     if (createItem.entry_id === "") {
-      await axios
-        .post(`${serverLink}staff/hr/pension/administrator/add`, createItem, token)
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Administrator Added Successfully");
-            document.getElementById("closeModal").click()
-            getRecord();
-            setCreateItem({
-              ...createItem,
-              admin_name: "",
-              contact_no: "",
-              contact_email: "",
-              entry_id: "",
-            });
-          } else if (result.data.message === "exist") {
-            showAlert("ADMINISTRATOR EXIST", "Administrator already exist!", "error");
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
-          showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
-            "error"
-          );
-        });
+      const { success, data } = await api.post("staff/hr/pension/administrator/add", createItem);
+      if (success) {
+        if (data.message === "success") {
+          toast.success("Administrator Added Successfully");
+          document.getElementById("closeModal").click()
+          getRecord();
+          setCreateItem({
+            ...createItem,
+            admin_name: "",
+            contact_no: "",
+            contact_email: "",
+            entry_id: "",
+          });
+        } else if (data.message === "exist") {
+          showAlert("ADMINISTRATOR EXIST", "Administrator already exist!", "error");
+        } else {
+          showAlert("ERROR", "Something went wrong. Please try again!", "error");
+        }
+      } else {
+        showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+      }
     } else {
-      await axios
-        .patch(`${serverLink}staff/hr/pension/administrator/update`, createItem, token)
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Administrator Updated Successfully");
-            document.getElementById("closeModal").click()
-            getRecord();
-            setCreateItem({
-              ...createItem,
-              admin_name: "",
-              contact_email: "",
-              contact_no: "",
-              entry_id: "",
-            });
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
-          showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
-            "error"
-          );
-        });
+      const { success, data } = await api.patch("staff/hr/pension/administrator/update", createItem);
+      if (success) {
+        if (data.message === "success") {
+          toast.success("Administrator Updated Successfully");
+          document.getElementById("closeModal").click()
+          getRecord();
+          setCreateItem({
+            ...createItem,
+            admin_name: "",
+            contact_email: "",
+            contact_no: "",
+            entry_id: "",
+          });
+        } else {
+          showAlert("ERROR", "Something went wrong. Please try again!", "error");
+        }
+      } else {
+        showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+      }
     }
   };
 
   useEffect(() => {
-     axios
-        .get(`${serverLink}staff/hr/pension/administrator/list`, token)
-        .then((result) => {
-          if (result.data.length > 0) {
-            let rows = [];
-            result.data.map((item, index) => {
-              rows.push({
-                sn: index + 1,
-                name: item.AdminName,
-                phone: item.ContactNo,
-                email: item.ContactEmail,
-                action: (
-                    <button
-                        className="btn btn-sm btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_general"
-                        onClick={() =>
-                            setCreateItem({
-                              admin_name: item.AdminName,
-                              contact_no: item.ContactNo,
-                              contact_email: item.ContactEmail,
-                              entry_id: item.EntryID,
-                            })
-                        }
-                    >
-                      <i className="fa fa-pen" />
-                    </button>
-                ),
-              });
-            });
-
-            setDatatable({
-              ...datatable,
-              columns: datatable.columns,
-              rows: rows,
-            });
-          }
-
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.log("NETWORK ERROR");
-        });
+    getRecord();
   }, []);
 
   return isLoading ? (

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -10,67 +9,66 @@ import { connect } from "react-redux";
 import ReportTable from "../../../common/table/ReportTable";
 import InventoryVendorForm from "./inventory-vendor-form";
 function InventoryVendor(props) {
-    let token = props.loginData[0].token
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState(false);
     const initialValue = {
         vendor_id: '', vendor_name: '', description: '', address: '',
-        phone_number: '', email_address: '', submitted_by: '', updated_by: ''}
+        phone_number: '', email_address: '', submitted_by: '', updated_by: ''
+    }
     const [formData, setFormData] = useState(initialValue);
 
     const columns = ["S/N", "Action", "Vendor Name", "Email Address", "Phone Number", "Address", "Description", "Updated By"];
-    const [tableData,setTableData] = useState([]);
+    const [tableData, setTableData] = useState([]);
 
     const fetchData = async () => {
-        await axios.get(`${serverLink}staff/inventory/vendor/list`, token)
-            .then(res => {
-                if (res.data.message === 'success') {
-                    const row = [];
-                    if (res.data.response.length > 0) {
-                        res.data.response.map((r, i) => {
-                            row.push([i+1,
-                                (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        onClick={() => {
-                                            onOpenModal();
-                                            setFormData({
-                                                ...formData,
-                                                vendor_name: r.vendor_name,
-                                                description: r.description,
-                                                address: r.address,
-                                                phone_number: r.phone_number,
-                                                email_address: r.email_address,
-                                                submitted_by: r.submitted_by,
-                                                updated_by: r.updated_by,
-                                                vendor_id: r.vendor_id,
-                                            })
-                                        }
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                                r.vendor_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by
-                            ])
-                        })
-                        setTableData(row)
-                    }
-                } else {
-                    toast.info("Something went wrong. Please try again!")
+        try {
+            const { success, data } = await api.get("staff/inventory/vendor/list");
+            if (success && data.message === 'success') {
+                const row = [];
+                if (data.response.length > 0) {
+                    data.response.map((r, i) => {
+                        row.push([i + 1,
+                        (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() => {
+                                    onOpenModal();
+                                    setFormData({
+                                        ...formData,
+                                        vendor_name: r.vendor_name,
+                                        description: r.description,
+                                        address: r.address,
+                                        phone_number: r.phone_number,
+                                        email_address: r.email_address,
+                                        submitted_by: r.submitted_by,
+                                        updated_by: r.updated_by,
+                                        vendor_id: r.vendor_id,
+                                    })
+                                }
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                        r.vendor_name, r.email_address, r.phone_number, r.address, r.description, r.updated_by
+                        ])
+                    })
+                    setTableData(row)
                 }
-                setIsLoading(false)
-            })
-            .catch(e => {
-                toast.error(`${e.response.statusText}: ${e.response.data}`)
-            })
+            } else {
+                toast.info("Something went wrong. Please try again!")
+            }
+            setIsLoading(false)
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     }
 
     useEffect(() => {
         fetchData()
-    },[formData])
+    }, [formData])
 
     const onOpenModal = () => {
         setFormData(initialValue)
@@ -78,7 +76,7 @@ function InventoryVendor(props) {
     const handleFormValueChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.id] : e.target.value
+            [e.target.id]: e.target.value
         })
     }
 
@@ -105,16 +103,16 @@ function InventoryVendor(props) {
         }
         setIsFormLoading(true)
         if (formData.vendor_id === '') {
-            await axios
-                .post(`${serverLink}staff/inventory/vendor/add`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.post("staff/inventory/vendor/add", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Vendor Added Successfully");
                         fetchData();
                         setFormData({ ...formData, ...initialValue })
                         setIsFormLoading(false)
                         document.getElementById("closeModal").click();
-                    } else if (result.data.message === "exist") {
+                    } else if (data.message === "exist") {
                         setIsFormLoading(false)
                         showAlert("VENDOR EXIST", "vendor already exist!", "error");
                     } else {
@@ -125,22 +123,20 @@ function InventoryVendor(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         } else {
-
-            await axios
-                .patch(`${serverLink}staff/inventory/vendor/update`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.patch("staff/inventory/vendor/update", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Vendor Updated Successfully");
                         fetchData();
                         setFormData({ ...formData, ...initialValue })
@@ -154,15 +150,15 @@ function InventoryVendor(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     }
 
@@ -199,7 +195,7 @@ function InventoryVendor(props) {
                     </div>
                 </div>
                 <Modal title={"Manage Vendor"}>
-                    <InventoryVendorForm value = {formData} isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
+                    <InventoryVendorForm value={formData} isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
                 </Modal>
             </div>
         </div>

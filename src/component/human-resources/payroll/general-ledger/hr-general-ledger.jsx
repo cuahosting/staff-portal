@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import AGReportTable from "../../../common/table/AGReportTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { formatDateAndTime } from "../../../../resources/constants";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function HRGeneralLedger(props) {
-    const token = props.loginData[0].token;
-
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "Action", "Account Number", "Description", "Account Type", "Balance/Income", "Updated By", "Date"];
     const [data, setData] = useState([]);
@@ -37,52 +35,41 @@ function HRGeneralLedger(props) {
     };
 
     const getRecord = async () => {
-        await axios
-            .get(`${serverLink}staff/hr/payroll/ledger/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    let rows = [];
-                    result.data.map((item, index) => {
-                        rows.push([
-                            index + 1,
-                            <button
-                                className="btn btn-sm btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#kt_modal_general"
-                                onClick={() =>
-                                    setCreateItem({
-                                        account_number: item.AccountNumber,
-                                        description: item.Description,
-                                        account_type: item.AccountType,
-                                        balance_or_income: item.BalanceOrIncome,
-                                        entry_id: item.EntryID,
-                                    })
-                                }
-                            >
-                                <i className="fa fa-pen" />
-                            </button>,
-                            item.AccountNumber,
-                            item.Description,
-                            item.AccountType,
-                            item.BalanceOrIncome,
-                            item.StaffName,
-                            formatDateAndTime(item.InsertedDate, 'date')
-                        ]);
-                    });
-                    setData(rows);
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+        const { success, data: resultData } = await api.get("staff/hr/payroll/ledger/list");
+
+        if (success && resultData?.length > 0) {
+            const rows = resultData.map((item, index) => [
+                index + 1,
+                <button
+                    className="btn btn-sm btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_general"
+                    onClick={() =>
+                        setCreateItem({
+                            account_number: item.AccountNumber,
+                            description: item.Description,
+                            account_type: item.AccountType,
+                            balance_or_income: item.BalanceOrIncome,
+                            entry_id: item.EntryID,
+                        })
+                    }
+                >
+                    <i className="fa fa-pen" />
+                </button>,
+                item.AccountNumber,
+                item.Description,
+                item.AccountType,
+                item.BalanceOrIncome,
+                item.StaffName,
+                formatDateAndTime(item.InsertedDate, 'date')
+            ]);
+            setData(rows);
+        }
+        setIsLoading(false);
     };
 
     const onEdit = (e) => {
-        setCreateItem({
-            ...createItem,
-            [e.target.id]: e.target.value,
-        });
+        setCreateItem({ ...createItem, [e.target.id]: e.target.value });
     };
 
     const onSubmit = async () => {
@@ -104,45 +91,35 @@ function HRGeneralLedger(props) {
         }
 
         if (createItem.entry_id === "") {
-            await axios
-                .post(`${serverLink}staff/hr/payroll/ledger/add`, createItem, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Ledger Added Successfully");
-                        document.getElementById("closeModal").click();
-                        getRecord();
-                        resetForm();
-                    } else if (result.data.message === "exist") {
-                        showAlert("LEDGER EXIST", "Ledger already exist!", "error");
-                    } else {
-                        showAlert("ERROR", "Something went wrong. Please try again!", "error");
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                    showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
-                });
+            const { success, data } = await api.post("staff/hr/payroll/ledger/add", createItem);
+
+            if (success && data?.message === "success") {
+                toast.success("Ledger Added Successfully");
+                document.getElementById("closeModal").click();
+                getRecord();
+                resetForm();
+            } else if (success && data?.message === "exist") {
+                showAlert("LEDGER EXIST", "Ledger already exist!", "error");
+            } else if (success) {
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
         } else {
-            await axios
-                .patch(`${serverLink}staff/hr/payroll/ledger/update`, createItem, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Ledger Updated Successfully");
-                        document.getElementById("closeModal").click();
-                        getRecord();
-                        resetForm();
-                    } else {
-                        showAlert("ERROR", "Something went wrong. Please try again!", "error");
-                    }
-                })
-                .catch((error) => {
-                    showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
-                });
+            const { success, data } = await api.patch("staff/hr/payroll/ledger/update", createItem);
+
+            if (success && data?.message === "success") {
+                toast.success("Ledger Updated Successfully");
+                document.getElementById("closeModal").click();
+                getRecord();
+                resetForm();
+            } else if (success) {
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
         }
     };
 
     useEffect(() => {
         getRecord();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (
@@ -183,39 +160,45 @@ function HRGeneralLedger(props) {
                     <label htmlFor="account_number">Account Number</label>
                     <input
                         type="number"
-                        id={"account_number"}
+                        id="account_number"
                         onChange={onEdit}
                         value={createItem.account_number}
-                        className={"form-control"}
-                        placeholder={"Enter the Account Number"}
+                        className="form-control"
+                        placeholder="Enter the Account Number"
                     />
                 </div>
                 <div className="form-group pt-2">
                     <label htmlFor="description">Ledger Description</label>
                     <input
                         type="text"
-                        id={"description"}
+                        id="description"
                         onChange={onEdit}
                         value={createItem.description}
-                        className={"form-control"}
-                        placeholder={"Enter the Ledger Description"}
+                        className="form-control"
+                        placeholder="Enter the Ledger Description"
                     />
                 </div>
                 <div className="form-group pt-2">
                     <label htmlFor="account_type">Account Type</label>
-                    <select id="account_type" className="form-select" onChange={onEdit} value={createItem.account_type}>
-                        <option value="">Select Account Type</option>
-                        <option value="Heading">Heading</option>
-                        <option value="Posting">Posting</option>
-                    </select>
+                    <SearchSelect
+                        id="account_type"
+                        value={[{ value: 'Heading', label: 'Heading' }, { value: 'Posting', label: 'Posting' }].find(opt => opt.value === createItem.account_type) || null}
+                        options={[{ value: 'Heading', label: 'Heading' }, { value: 'Posting', label: 'Posting' }]}
+                        onChange={(selected) => onEdit({ target: { id: 'account_type', value: selected?.value || '' } })}
+                        placeholder="Select Account Type"
+                        isClearable={false}
+                    />
                 </div>
                 <div className="form-group pt-2">
                     <label htmlFor="balance_or_income">Balance/Income</label>
-                    <select id="balance_or_income" className="form-select" onChange={onEdit} value={createItem.balance_or_income}>
-                        <option value="">Select Account Type</option>
-                        <option value="Balance Sheet">Balance Sheet</option>
-                        <option value="Income Statement">Income Statement</option>
-                    </select>
+                    <SearchSelect
+                        id="balance_or_income"
+                        value={[{ value: 'Balance Sheet', label: 'Balance Sheet' }, { value: 'Income Statement', label: 'Income Statement' }].find(opt => opt.value === createItem.balance_or_income) || null}
+                        options={[{ value: 'Balance Sheet', label: 'Balance Sheet' }, { value: 'Income Statement', label: 'Income Statement' }]}
+                        onChange={(selected) => onEdit({ target: { id: 'balance_or_income', value: selected?.value || '' } })}
+                        placeholder="Select Account Type"
+                        isClearable={false}
+                    />
                 </div>
                 <div className="form-group pt-2">
                     <button onClick={onSubmit} className="btn btn-primary w-100">

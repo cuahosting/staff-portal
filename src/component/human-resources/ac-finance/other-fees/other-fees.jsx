@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
@@ -86,7 +86,18 @@ function OtherFees(props) {
         "Replacement",
         "Late Registration",
         "Other",
-    ];
+    ].map(cat => ({ value: cat, label: cat }));
+
+    const feeTypeSelectOptions = useMemo(() => {
+        return feeTypeList
+            .filter((f) => f.IsActive === 1)
+            .map(fee => ({
+                value: fee.OtherFeeID,
+                label: `${fee.Name} (${currencyConverter(fee.DefaultAmount)})`,
+                defaultAmount: fee.DefaultAmount,
+                name: fee.Name
+            }));
+    }, [feeTypeList]);
 
     // Reset Forms
     const resetFeeTypeForm = () => {
@@ -538,19 +549,14 @@ function OtherFees(props) {
                                     <label htmlFor="Category" className="form-label">
                                         Category
                                     </label>
-                                    <select
+                                    <SearchSelect
                                         id="Category"
-                                        onChange={onFeeTypeEdit}
-                                        value={feeTypeForm.Category}
-                                        className="form-select form-select-solid"
-                                    >
-                                        <option value="">Select Category</option>
-                                        {categoryOptions.map((cat, index) => (
-                                            <option key={index} value={cat}>
-                                                {cat}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        value={categoryOptions.find(opt => opt.value === feeTypeForm.Category) || null}
+                                        options={categoryOptions}
+                                        onChange={(selected) => onFeeTypeEdit({ target: { id: 'Category', value: selected?.value || '' } })}
+                                        placeholder="Select Category"
+                                        isClearable={true}
+                                    />
                                 </div>
                             </div>
                             <div className="modal-footer">
@@ -631,30 +637,21 @@ function OtherFees(props) {
                                 {/* Add Item Row */}
                                 <div className="row mb-3">
                                     <div className="col-md-4">
-                                        <select
-                                            className="form-select form-select-solid"
-                                            value={newItem.FeeID}
-                                            onChange={(e) => {
-                                                const fee = feeTypeList.find(
-                                                    (f) => f.OtherFeeID === parseInt(e.target.value)
-                                                );
+                                        <SearchSelect
+                                            id="FeeID"
+                                            value={feeTypeSelectOptions.find(opt => opt.value === parseInt(newItem.FeeID)) || null}
+                                            options={feeTypeSelectOptions}
+                                            onChange={(selected) => {
                                                 setNewItem({
                                                     ...newItem,
-                                                    FeeID: e.target.value,
-                                                    Amount: fee?.DefaultAmount || "",
-                                                    Description: fee?.Name || "",
+                                                    FeeID: selected?.value || '',
+                                                    Amount: selected?.defaultAmount || '',
+                                                    Description: selected?.name || '',
                                                 });
                                             }}
-                                        >
-                                            <option value="">Select Fee Type</option>
-                                            {feeTypeList
-                                                .filter((f) => f.IsActive === 1)
-                                                .map((fee) => (
-                                                    <option key={fee.OtherFeeID} value={fee.OtherFeeID}>
-                                                        {fee.Name} ({currencyConverter(fee.DefaultAmount)})
-                                                    </option>
-                                                ))}
-                                        </select>
+                                            placeholder="Select Fee Type"
+                                            isClearable={false}
+                                        />
                                     </div>
                                     <div className="col-md-3">
                                         <input

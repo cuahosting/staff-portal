@@ -2,18 +2,16 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
-import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
+import { currencyConverter } from "../../../../resources/constants";
 import SearchSelect from "../../../common/select/SearchSelect";
 import { ProgressBar } from "react-bootstrap";
 
 function HrSalaryManagement(props) {
-    const token = props.loginData[0].token;
     const staffID = props.loginData[0].StaffID;
     const [isLoading, setIsLoading] = useState(true);
 
@@ -27,42 +25,15 @@ function HrSalaryManagement(props) {
     // Table data
     const [datatable, setDatatable] = useState({
         columns: [
-            {
-                label: "S/N",
-                field: "sn",
-            },
-            {
-                label: "Action",
-                field: "action",
-            },
-            {
-                label: "Staff ID",
-                field: "StaffID",
-            },
-            {
-                label: "Staff Name",
-                field: "StaffName",
-            },
-            {
-                label: "Department",
-                field: "Department",
-            },
-            {
-                label: "Designation",
-                field: "Designation",
-            },
-            {
-                label: "Payment Amount",
-                field: "PaymentAmount",
-            },
-            {
-                label: "Bank Details",
-                field: "BankDetails",
-            },
-            {
-                label: "Due Date",
-                field: "DueDate",
-            },
+            { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
+            { label: "Staff ID", field: "StaffID" },
+            { label: "Staff Name", field: "StaffName" },
+            { label: "Department", field: "Department" },
+            { label: "Designation", field: "Designation" },
+            { label: "Payment Amount", field: "PaymentAmount" },
+            { label: "Bank Details", field: "BankDetails" },
+            { label: "Due Date", field: "DueDate" },
         ],
         rows: [],
     });
@@ -111,89 +82,52 @@ function HrSalaryManagement(props) {
 
     // Fetch all salary records
     const getSalaryRecords = async () => {
-        try {
-            await axios.get(`${serverLink}staff/hr/salaries/all`, token)
-                .then((result) => {
-                    const records = result.data;
-                    setSalaryRecords(records);
-                    formatTableData(records);
-                })
-                .catch((err) => {
-                    console.log("NETWORK ERROR");
-                    toast.error("Failed to fetch salary records");
-                });
-        } catch (e) {
-            console.log(e);
+        const { success, data } = await api.get("staff/hr/salaries/all");
+        if (success && data) {
+            setSalaryRecords(data);
+            formatTableData(data);
+        } else if (!success) {
+            toast.error("Failed to fetch salary records");
         }
     };
 
     // Fetch all active staff
     const getStaffList = async () => {
-        try {
-            await axios.get(`${serverLink}staff/report/staff/list/status/1`, token)
-                .then((result) => {
-                    const staff = result.data;
-                    setStaffList(staff);
-
-                    // Format for react-select
-                    let options = [];
-                    staff.map((s) => {
-                        options.push({
-                            value: s.StaffID,
-                            label: `${s.StaffID} -- ${s.StaffName}`
-                        });
-                    });
-                    setStaffSelect(options);
-                })
-                .catch((err) => {
-                    console.log("NETWORK ERROR");
-                });
-        } catch (e) {
-            console.log(e);
+        const { success, data } = await api.get("staff/report/staff/list/status/1");
+        if (success && data) {
+            setStaffList(data);
+            const options = data.map(s => ({
+                value: s.StaffID,
+                label: `${s.StaffID} -- ${s.StaffName}`
+            }));
+            setStaffSelect(options);
         }
     };
 
     // Fetch banks list
     const getBanks = async () => {
-        try {
-            await axios.get(`${serverLink}staff/hr/staff/data`, token)
-                .then((result) => {
-                    setBanksList(result.data.banks);
-                })
-                .catch((err) => {
-                    console.log("NETWORK ERROR");
-                });
-        } catch (e) {
-            console.log(e);
+        const { success, data } = await api.get("staff/hr/staff/data");
+        if (success && data?.banks) {
+            setBanksList(data.banks);
         }
     };
 
     // Fetch salary settings
     const getSalarySettings = async () => {
-        try {
-            await axios.get(`${serverLink}staff/hr/payroll/salary/settings/record`, token)
-                .then((result) => {
-                    if (result.data.length > 0) {
-                        setSalarySettings(result.data[0]);
-                    }
-                })
-                .catch((err) => {
-                    console.log("NETWORK ERROR");
-                });
-        } catch (e) {
-            console.log(e);
+        const { success, data } = await api.get("staff/hr/payroll/salary/settings/record");
+        if (success && data?.length > 0) {
+            setSalarySettings(data[0]);
         }
     };
 
     // Format table data
     const formatTableData = (records) => {
-        let rows = [];
-        records.forEach((item, index) => {
-            const bankDetails = item.BeneficiaryAccountNumber ?
-                `${item.BeneficiaryAccountNumber} (${item.BankSortCode || 'N/A'})` :
-                "No bank details";
+        const rows = records.map((item, index) => {
+            const bankDetails = item.BeneficiaryAccountNumber
+                ? `${item.BeneficiaryAccountNumber} (${item.BankSortCode || 'N/A'})`
+                : "No bank details";
 
-            rows.push({
+            return {
                 sn: index + 1,
                 StaffID: item.StaffID,
                 StaffName: item.StaffName || "N/A",
@@ -240,12 +174,9 @@ function HrSalaryManagement(props) {
                         </button>
                     </>
                 )
-            });
+            };
         });
-        setDatatable({
-            ...datatable,
-            rows: rows,
-        });
+        setDatatable({ ...datatable, rows });
     };
 
     // Get bank name by ID
@@ -256,10 +187,7 @@ function HrSalaryManagement(props) {
 
     // Handle form input change
     const onEdit = (e) => {
-        setCreateItem({
-            ...createItem,
-            [e.target.id]: e.target.value
-        });
+        setCreateItem({ ...createItem, [e.target.id]: e.target.value });
     };
 
     // Handle staff selection
@@ -277,39 +205,27 @@ function HrSalaryManagement(props) {
             return;
         }
 
-        setCreateItem({
-            ...createItem,
-            staff: selectedOption,
-            StaffID: selectedOption.value
-        });
+        setCreateItem({ ...createItem, staff: selectedOption, StaffID: selectedOption.value });
 
-        // Fetch staff details including bank info
-        try {
-            await axios.get(`${serverLink}staff/hr/staff/${selectedOption.value}`, token)
-                .then((result) => {
-                    const staffData = result.data.staff[0];
-                    const bankData = result.data.staff_bank;
+        const { success, data } = await api.get(`staff/hr/staff/${selectedOption.value}`);
+        if (success && data) {
+            const staffData = data.staff[0];
+            const bankData = data.staff_bank;
 
-                    let updateData = {
-                        ...createItem,
-                        staff: selectedOption,
-                        StaffID: selectedOption.value,
-                        BeneficiaryName: `${staffData.FirstName} ${staffData.MiddleName || ''} ${staffData.Surname}`.trim(),
-                        BeneficiaryCode: selectedOption.value
-                    };
+            let updateData = {
+                ...createItem,
+                staff: selectedOption,
+                StaffID: selectedOption.value,
+                BeneficiaryName: `${staffData.FirstName} ${staffData.MiddleName || ''} ${staffData.Surname}`.trim(),
+                BeneficiaryCode: selectedOption.value
+            };
 
-                    if (bankData.length > 0) {
-                        updateData.BeneficiaryAccountNumber = bankData[0].AccountNumber;
-                        updateData.BankSortCode = getBankName(bankData[0].BankID);
-                    }
+            if (bankData?.length > 0) {
+                updateData.BeneficiaryAccountNumber = bankData[0].AccountNumber;
+                updateData.BankSortCode = getBankName(bankData[0].BankID);
+            }
 
-                    setCreateItem(updateData);
-                })
-                .catch((err) => {
-                    console.log("Error fetching staff details");
-                });
-        } catch (e) {
-            console.log(e);
+            setCreateItem(updateData);
         }
     };
 
@@ -358,28 +274,23 @@ function HrSalaryManagement(props) {
             showAlert("EMPTY FIELD", "Please select a staff member", "error");
             return false;
         }
-
         if (createItem.BeneficiaryName === "") {
             showAlert("EMPTY FIELD", "Please enter beneficiary name", "error");
             return false;
         }
-
         if (createItem.PaymentAmount === "" || parseFloat(createItem.PaymentAmount) <= 0) {
             showAlert("INVALID AMOUNT", "Please enter a valid payment amount", "error");
             return false;
         }
-
         if (createItem.DueDate === "") {
             showAlert("EMPTY FIELD", "Please select a due date", "error");
             return false;
         }
-
         if (createItem.EmployeeType === "") {
             showAlert("EMPTY FIELD", "Please select employee type", "error");
             return false;
         }
 
-        // Prepare data
         const submitData = {
             BeneficiaryName: createItem.BeneficiaryName,
             StaffID: createItem.StaffID,
@@ -392,50 +303,31 @@ function HrSalaryManagement(props) {
             EmployeeType: createItem.EmployeeType
         };
 
-        try {
-            if (createItem.entry_id === "") {
-                // Create new record
-                await axios.post(`${serverLink}staff/hr/salaries/create`, submitData, token)
-                    .then((result) => {
-                        if (result.data.message === "success") {
-                            toast.success("Salary record added successfully");
-                            document.getElementById("closeModal").click();
-                            getSalaryRecords();
-                            onOpenAddModal();
-                        } else if (result.data.message === "exist") {
-                            toast.error("Salary record already exists for this staff");
-                        } else if (result.data.message === "Staff not found") {
-                            toast.error("Staff not found in the system");
-                        } else {
-                            toast.error("Failed to add salary record");
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        toast.error("Network error occurred");
-                    });
-            } else {
-                // Update existing record
-                submitData.EntryID = createItem.entry_id;
-                await axios.patch(`${serverLink}staff/hr/salaries/update`, submitData, token)
-                    .then((result) => {
-                        if (result.data.message === "success") {
-                            toast.success("Salary record updated successfully");
-                            document.getElementById("closeModal").click();
-                            getSalaryRecords();
-                            onOpenAddModal();
-                        } else {
-                            toast.error("Failed to update salary record");
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        toast.error("Network error occurred");
-                    });
+        if (createItem.entry_id === "") {
+            const { success, data } = await api.post("staff/hr/salaries/create", submitData);
+            if (success && data?.message === "success") {
+                toast.success("Salary record added successfully");
+                document.getElementById("closeModal").click();
+                getSalaryRecords();
+                onOpenAddModal();
+            } else if (success && data?.message === "exist") {
+                toast.error("Salary record already exists for this staff");
+            } else if (success && data?.message === "Staff not found") {
+                toast.error("Staff not found in the system");
+            } else if (success) {
+                toast.error("Failed to add salary record");
             }
-        } catch (e) {
-            console.log(e);
-            toast.error("An error occurred");
+        } else {
+            submitData.EntryID = createItem.entry_id;
+            const { success, data } = await api.patch("staff/hr/salaries/update", submitData);
+            if (success && data?.message === "success") {
+                toast.success("Salary record updated successfully");
+                document.getElementById("closeModal").click();
+                getSalaryRecords();
+                onOpenAddModal();
+            } else if (success) {
+                toast.error("Failed to update salary record");
+            }
         }
     };
 
@@ -446,20 +338,14 @@ function HrSalaryManagement(props) {
             "Are you sure you want to delete this salary record? This action cannot be undone.",
             "warning",
             true,
-            () => {
-                axios.delete(`${serverLink}staff/hr/salaries/delete/${entryId}`, token)
-                    .then((result) => {
-                        if (result.data.message === "success") {
-                            toast.success("Salary record deleted successfully");
-                            getSalaryRecords();
-                        } else {
-                            toast.error("Failed to delete salary record");
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                        toast.error("Network error occurred");
-                    });
+            async () => {
+                const { success, data } = await api.delete(`staff/hr/salaries/delete/${entryId}`);
+                if (success && data?.message === "success") {
+                    toast.success("Salary record deleted successfully");
+                    getSalaryRecords();
+                } else if (success) {
+                    toast.error("Failed to delete salary record");
+                }
             }
         );
     };
@@ -471,40 +357,29 @@ function HrSalaryManagement(props) {
 
     // Handle bulk data input
     const onBulkEdit = (e) => {
-        setBulkData({
-            ...bulkData,
-            [e.target.id]: e.target.value
-        });
+        setBulkData({ ...bulkData, [e.target.id]: e.target.value });
     };
 
     // Open bulk add modal
     const onOpenBulkModal = () => {
         setSelectedStaff([]);
-        setBulkData({
-            PaymentAmount: "",
-            DueDate: "",
-            EmployeeType: ""
-        });
+        setBulkData({ PaymentAmount: "", DueDate: "", EmployeeType: "" });
     };
 
     // Submit bulk staff addition
     const onSubmitBulk = async () => {
-        // Validation
         if (selectedStaff.length === 0) {
             showAlert("NO STAFF SELECTED", "Please select at least one staff member", "error");
             return false;
         }
-
         if (bulkData.PaymentAmount === "" || parseFloat(bulkData.PaymentAmount) <= 0) {
             showAlert("INVALID AMOUNT", "Please enter a valid payment amount", "error");
             return false;
         }
-
         if (bulkData.DueDate === "") {
             showAlert("EMPTY FIELD", "Please select a due date", "error");
             return false;
         }
-
         if (bulkData.EmployeeType === "") {
             showAlert("EMPTY FIELD", "Please select employee type", "error");
             return false;
@@ -515,13 +390,11 @@ function HrSalaryManagement(props) {
         let successCount = 0;
         let errorCount = 0;
 
-        // Process each selected staff
         for (let i = 0; i < selectedStaff.length; i++) {
             const staffId = selectedStaff[i].value;
 
-            try {
-                // Fetch staff details
-                const staffResponse = await axios.get(`${serverLink}staff/hr/staff/${staffId}`, token);
+            const staffResponse = await api.get(`staff/hr/staff/${staffId}`);
+            if (staffResponse.success && staffResponse.data) {
                 const staffData = staffResponse.data.staff[0];
                 const bankData = staffResponse.data.staff_bank;
 
@@ -531,21 +404,19 @@ function HrSalaryManagement(props) {
                     PaymentAmount: parseFloat(bulkData.PaymentAmount),
                     DueDate: bulkData.DueDate,
                     BeneficiaryCode: staffId,
-                    BeneficiaryAccountNumber: bankData.length > 0 ? bankData[0].AccountNumber : "",
-                    BankSortCode: bankData.length > 0 ? getBankName(bankData[0].BankID) : "",
+                    BeneficiaryAccountNumber: bankData?.length > 0 ? bankData[0].AccountNumber : "",
+                    BankSortCode: bankData?.length > 0 ? getBankName(bankData[0].BankID) : "",
                     DebitAcconutNumber: "",
                     EmployeeType: bulkData.EmployeeType
                 };
 
-                const result = await axios.post(`${serverLink}staff/hr/salaries/create`, submitData, token);
-
-                if (result.data.message === "success") {
+                const { success, data } = await api.post("staff/hr/salaries/create", submitData);
+                if (success && data?.message === "success") {
                     successCount++;
                 } else {
                     errorCount++;
                 }
-            } catch (err) {
-                console.log(err);
+            } else {
                 errorCount++;
             }
         }
@@ -553,7 +424,6 @@ function HrSalaryManagement(props) {
         if (successCount > 0) {
             toast.success(`Successfully added ${successCount} staff to salary records`);
         }
-
         if (errorCount > 0) {
             toast.warning(`${errorCount} staff could not be added (may already exist or errors occurred)`);
         }
@@ -571,21 +441,13 @@ function HrSalaryManagement(props) {
         const currentDate = new Date();
         const salaryDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
 
-        try {
-            await axios.get(`${serverLink}staff/hr/salaries/${staffId}/${salaryDate}`, token)
-                .then((result) => {
-                    if (result.data.message) {
-                        toast.error(result.data.message);
-                    } else {
-                        setBreakdownData(result.data);
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                    toast.error("Failed to fetch salary breakdown");
-                });
-        } catch (e) {
-            console.log(e);
+        const { success, data } = await api.get(`staff/hr/salaries/${staffId}/${salaryDate}`);
+        if (success) {
+            if (data?.message) {
+                toast.error(data.message);
+            } else {
+                setBreakdownData(data);
+            }
         }
     };
 
@@ -593,30 +455,19 @@ function HrSalaryManagement(props) {
     const viewHistory = async (staffId) => {
         setHistoryData(null);
 
-        try {
-            await axios.get(`${serverLink}staff/hr/salaries/history/${staffId}`, token)
-                .then((result) => {
-                    if (result.data.message) {
-                        toast.error(result.data.message);
-                    } else {
-                        setHistoryData(result.data);
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                    toast.error("Failed to fetch salary history");
-                });
-        } catch (e) {
-            console.log(e);
+        const { success, data } = await api.get(`staff/hr/salaries/history/${staffId}`);
+        if (success) {
+            if (data?.message) {
+                toast.error(data.message);
+            } else {
+                setHistoryData(data);
+            }
         }
     };
 
     // Handle salary push input
     const onPushEdit = (e) => {
-        setPushData({
-            ...pushData,
-            [e.target.id]: e.target.value
-        });
+        setPushData({ ...pushData, [e.target.id]: e.target.value });
     };
 
     // Submit salary push
@@ -635,36 +486,26 @@ function HrSalaryManagement(props) {
                 setIsPushing(true);
                 setProgress({ percentage: 0, variant: 'danger' });
 
-                try {
-                    await axios.post(`${serverLink}staff/hr/salaries/push`, pushData, token)
-                        .then((result) => {
-                            if (result.data.message === "success") {
-                                setProgress({ percentage: 100, variant: 'success' });
-                                toast.success("Salary push completed successfully");
+                const { success, data } = await api.post("staff/hr/salaries/push", pushData);
 
-                                setTimeout(() => {
-                                    document.getElementById("closePushModal").click();
-                                    getSalaryRecords();
-                                    setIsPushing(false);
-                                    setPushData({ salary_date: "", inserted_by: staffID });
-                                    setProgress({ percentage: 0, variant: 'danger' });
-                                }, 2000);
-                            } else if (result.data.message === "exist") {
-                                toast.error(result.data.info || "Salary already processed for this month");
-                                setIsPushing(false);
-                            } else {
-                                toast.error(result.data.message || "Failed to push salaries");
-                                setIsPushing(false);
-                            }
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            toast.error("Network error occurred");
-                            setIsPushing(false);
-                        });
-                } catch (e) {
-                    console.log(e);
-                    toast.error("An error occurred");
+                if (success && data?.message === "success") {
+                    setProgress({ percentage: 100, variant: 'success' });
+                    toast.success("Salary push completed successfully");
+
+                    setTimeout(() => {
+                        document.getElementById("closePushModal").click();
+                        getSalaryRecords();
+                        setIsPushing(false);
+                        setPushData({ salary_date: "", inserted_by: staffID });
+                        setProgress({ percentage: 0, variant: 'danger' });
+                    }, 2000);
+                } else if (success && data?.message === "exist") {
+                    toast.error(data.info || "Salary already processed for this month");
+                    setIsPushing(false);
+                } else if (success) {
+                    toast.error(data?.message || "Failed to push salaries");
+                    setIsPushing(false);
+                } else {
                     setIsPushing(false);
                 }
             }
@@ -674,14 +515,17 @@ function HrSalaryManagement(props) {
     // Initialize component
     useEffect(() => {
         const fetchData = async () => {
-            await getSalaryRecords();
-            await getStaffList();
-            await getBanks();
-            await getSalarySettings();
+            await Promise.all([
+                getSalaryRecords(),
+                getStaffList(),
+                getBanks(),
+                getSalarySettings()
+            ]);
             setIsLoading(false);
         };
 
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return isLoading ? (

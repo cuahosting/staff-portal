@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
 import api from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { currencyConverter, formatDateAndTime } from "../../../resources/constants";
 import { connect } from "react-redux";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function ScholarshipReport(props) {
     const token = props.loginData[0]?.token;
@@ -159,6 +160,20 @@ function ScholarshipReport(props) {
         });
     };
 
+    const semesterOptions = useMemo(() => {
+        return semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: (s.SemesterName || s.SemesterCode) + (s.IsCurrent === 1 ? ' (Current)' : '')
+        }));
+    }, [semesterList]);
+
+    const scholarshipOptions = useMemo(() => {
+        return [{ value: '', label: 'All Scholarships' }, ...scholarshipList.map(s => ({
+            value: s.ScholarshipID,
+            label: s.Name
+        }))];
+    }, [scholarshipList]);
+
     const applyFilters = () => {
         setIsLoading(true);
         getReportData();
@@ -232,36 +247,25 @@ function ScholarshipReport(props) {
                         <div className="row g-3 align-items-end">
                             <div className="col-md-4">
                                 <label className="form-label required">Select Semester</label>
-                                <select
+                                <SearchSelect
                                     id="SemesterCode"
-                                    className="form-select form-select-solid"
-                                    value={filters.SemesterCode}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">Select Semester</option>
-                                    {semesterList.map((s) => (
-                                        <option key={s.SemesterCode} value={s.SemesterCode}>
-                                            {s.SemesterName || s.SemesterCode}
-                                            {s.IsCurrent === 1 && " (Current)"}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={semesterOptions.find(opt => opt.value === filters.SemesterCode) || null}
+                                    options={semesterOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                    placeholder="Select Semester"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-4">
                                 <label className="form-label">Scholarship</label>
-                                <select
+                                <SearchSelect
                                     id="ScholarshipID"
-                                    className="form-select form-select-solid"
-                                    value={filters.ScholarshipID}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">All Scholarships</option>
-                                    {scholarshipList.map((s) => (
-                                        <option key={s.ScholarshipID} value={s.ScholarshipID}>
-                                            {s.Name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={scholarshipOptions.find(opt => opt.value === filters.ScholarshipID) || scholarshipOptions[0]}
+                                    options={scholarshipOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'ScholarshipID', value: selected?.value || '' } })}
+                                    placeholder="All Scholarships"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-4 text-end">
                                 <button

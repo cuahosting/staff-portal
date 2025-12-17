@@ -179,6 +179,10 @@ import AllPaymentReport from "../human-resources/finance-report/all-payment-repo
 import CustomPaymentReport from "../human-resources/finance-report/custom-payment-report";
 import PaymentReportByTrimester from "../human-resources/finance-report/payment-report-by-trimester";
 import TuitionFeePaymentReport from "../human-resources/finance-report/tuition-fee-payment-report";
+import FeedingPaymentReport from "../human-resources/finance-report/feeding-payment-report";
+import HostelPaymentReport from "../human-resources/finance-report/hostel-payment-report";
+import StudentPaymentAnalysis from "../human-resources/finance-report/student-payment-analysis";
+import ExamAttendanceSheet from "../assessments/reports/exam-attendance-sheet";
 import GraduatingList from "../user/student-report/graduating-list";
 import StudentsConstactByModule from "../user/student-report/students-contact-by-module";
 import StudentsContactByLecturerModule from "../user/student-report/students-contact-by-lecturer-module";
@@ -452,6 +456,18 @@ export default function PageRoutes() {
                   path="/human-resources/finance-report/tuition-fee-payment-report"
                   element={<TuitionFeePaymentReport />}
                 />
+                <Route
+                  path="/human-resources/finance-report/feeding-payment-report"
+                  element={<FeedingPaymentReport />}
+                />
+                <Route
+                  path="/human-resources/finance-report/hostel-payment-report"
+                  element={<HostelPaymentReport />}
+                />
+                <Route
+                  path="/human-resources/finance-report/student-payment-analysis"
+                  element={<StudentPaymentAnalysis />}
+                />
                 {/* jobs routes */}
                 <Route
                   path="/human-resources/jobs/openings"
@@ -568,6 +584,11 @@ export default function PageRoutes() {
                 <Route
                   path="/assessment/examinations/reports"
                   element={<ExaminationReports />}
+                />
+
+                <Route
+                  path="/assessment/exam-attendance-sheet"
+                  element={<ExamAttendanceSheet />}
                 />
 
                 <Route

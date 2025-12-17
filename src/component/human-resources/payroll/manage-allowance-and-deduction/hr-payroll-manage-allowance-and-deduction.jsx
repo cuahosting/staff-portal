@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import AGReportTable from "../../../common/table/AGReportTable";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
@@ -10,18 +9,27 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import SearchSelect from "../../../common/select/SearchSelect";
 
-
-
 function HRPayrollManageAllowanceAndDeduction(props) {
-    const token = props.loginData[0].token;
-
     const [isLoading, setIsLoading] = useState(true);
     const [ledgerList, setLedgerList] = useState([]);
-    const [ledgerSelect, setLedgerSelect] = useState([]);
     const [staffList, setStaffList] = useState([]);
     const [staffSelect, setStaffSelect] = useState([]);
-    const columns = ["SN", "Action", "Staff ID", "Staff Name", "Post Type", "Ledger Account", "Start Date", "End Date", "Frequency", "Amount", "Status", "Added By"]
+    const columns = ["SN", "Action", "Staff ID", "Staff Name", "Post Type", "Ledger Account", "Start Date", "End Date", "Frequency", "Amount", "Status", "Added By"];
     const [data, setData] = useState([]);
+
+    // Bulk Allowance State
+    const [showBulkModal, setShowBulkModal] = useState(false);
+    const [bulkPreview, setBulkPreview] = useState(null);
+    const [bulkLoading, setBulkLoading] = useState(false);
+    const [bulkForm, setBulkForm] = useState({
+        percentage: "",
+        post_type: "Allowance",
+        ledger_account: "",
+        start_date: "",
+        end_date: "",
+        frequency: "Monthly"
+    });
+
     const [createItem, setCreateItem] = useState({
         staff_id: "",
         post_type: "",
@@ -33,7 +41,7 @@ function HRPayrollManageAllowanceAndDeduction(props) {
         inserted_by: props.loginData[0].StaffID,
         status: "active",
         entry_id: "",
-    })
+    });
 
     const onClear = () => {
         setCreateItem({
@@ -49,114 +57,135 @@ function HRPayrollManageAllowanceAndDeduction(props) {
             status: "active",
             inserted_by: props.loginData[0].StaffID,
             entry_id: "",
-        })
+        });
     };
 
     const getRecord = async () => {
-        await axios
-            .get(`${serverLink}staff/hr/payroll/ledger/list`, token)
-            .then((result) => {
-                const data = result.data;
-                setLedgerList(data)
-                if (data.length > 0) {
-                    let ledger_list = [];
-                    data.map(item => {
-                        ledger_list.push({ value: item.EntryID, label: item.Description, id: 'ledger_account' })
-                    })
-                    setLedgerSelect(ledger_list);
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+        const [ledgerRes, entryRes, staffRes] = await Promise.all([
+            api.get("staff/hr/payroll/ledger/list"),
+            api.get("staff/hr/payroll/entry/list"),
+            api.get("staff/report/staff/list/status/1")
+        ]);
 
-        await axios
-            .get(`${serverLink}staff/hr/payroll/entry/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    let rows = [];
-                    result.data.map((item, index) => {
-                        rows.push([
-                            index + 1,
-                            <button
-                                className={"btn btn-sm btn-primary"}
-                                data-bs-toggle="modal"
-                                data-bs-target="#kt_modal_general"
-                                onClick={async () => {
+        if (ledgerRes.success && ledgerRes.data?.length > 0) {
+            setLedgerList(ledgerRes.data);
+        }
 
-                                    setCreateItem({
-                                        staff_id: item.StaffID,
-                                        staff: { value: item.StaffID, label: item.StaffID + "--" + item.StaffName },
-                                        post_type: item.PostType,
-                                        ledger_account: item.LedgerAccount,
-                                        start_date: item.StartDate,
-                                        end_date: item.EndDate,
-                                        frequency: item.Frequency,
-                                        amount: item.Amount,
-                                        status: item.Status,
-                                        inserted_by: props.loginData[0].StaffID,
-                                        entry_id: item.EntryID,
-                                    })
-                                }
-
-                                }
-                            ><i className="fa fa-pen" /></button>,
-                            item.StaffID, item.StaffName, item.PostType, item.Description,
-                            formatDateAndTime(item.StartDate, "month_and_year"),
-                            formatDateAndTime(item.EndDate, "month_and_year"),
-                            item.Frequency, currencyConverter(item.Amount),
-                            item.Status, item.InsertedBy]
-                        )
-                    });
-                    setData(rows)
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
-
-        await axios
-            .get(`${serverLink}staff/report/staff/list/status/1`, token)
-            .then((result) => {
-                const data = result.data;
-                setStaffList(data)
-                if (data.length > 0) {
-                    // let _list = [];
-                    // data.map(item => {
-                    //     _list.push({ value: item.StaffID, label: item.StaffName, id: 'staff_id' })
-                    // })
-
-                    let rows = [];
-                    data.length > 0 &&
-                        data.map((row) => {
-                            rows.push({ value: row.StaffID, label: row.StaffID + "--" + row.StaffName });
+        if (entryRes.success && entryRes.data?.length > 0) {
+            const rows = entryRes.data.map((item, index) => [
+                index + 1,
+                <button
+                    className="btn btn-sm btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#kt_modal_general"
+                    onClick={() => {
+                        setCreateItem({
+                            staff_id: item.StaffID,
+                            staff: { value: item.StaffID, label: item.StaffID + "--" + item.StaffName },
+                            post_type: item.PostType,
+                            ledger_account: item.LedgerAccount,
+                            start_date: item.StartDate,
+                            end_date: item.EndDate,
+                            frequency: item.Frequency,
+                            amount: item.Amount,
+                            status: item.Status,
+                            inserted_by: props.loginData[0].StaffID,
+                            entry_id: item.EntryID,
                         });
-                    setStaffSelect(rows);
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+                    }}
+                >
+                    <i className="fa fa-pen" />
+                </button>,
+                item.StaffID,
+                item.StaffName,
+                item.PostType,
+                item.Description,
+                formatDateAndTime(item.StartDate, "month_and_year"),
+                formatDateAndTime(item.EndDate, "month_and_year"),
+                item.Frequency,
+                currencyConverter(item.Amount),
+                item.Status,
+                item.InsertedBy
+            ]);
+            setData(rows);
+        }
+
+        if (staffRes.success && staffRes.data?.length > 0) {
+            setStaffList(staffRes.data);
+            const staffRows = staffRes.data.map(row => ({
+                value: row.StaffID,
+                label: row.StaffID + "--" + row.StaffName
+            }));
+            setStaffSelect(staffRows);
+        }
+
+        setIsLoading(false);
     };
 
     useEffect(() => {
         getRecord();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onEdit = (e) => {
-        setCreateItem({
-            ...createItem,
-            [e.target.id]: e.target.value,
-        });
+        setCreateItem({ ...createItem, [e.target.id]: e.target.value });
     };
+
     const handleStaffEdit = (e) => {
         setCreateItem({
             ...createItem,
             staff_id: e?.value || "",
             staff: e
-        })
-    }
+        });
+    };
+
+    // Bulk Allowance Functions
+    const handleBulkPreview = async () => {
+        if (!bulkForm.percentage) {
+            toast.warning("Please enter a percentage");
+            return;
+        }
+        setBulkLoading(true);
+        try {
+            const { success, data } = await api.post("staff/hr/salaries/bulk-allowance-preview", {
+                percentage: bulkForm.percentage,
+                post_type: bulkForm.post_type
+            });
+            if (success && data.preview) {
+                setBulkPreview(data);
+            }
+        } catch (err) {
+            toast.error("Failed to generate preview");
+        }
+        setBulkLoading(false);
+    };
+
+    const handleBulkSubmit = async () => {
+        if (!bulkForm.percentage || !bulkForm.ledger_account || !bulkForm.start_date || !bulkForm.end_date) {
+            toast.warning("Please fill all required fields");
+            return;
+        }
+
+        setBulkLoading(true);
+        try {
+            const { success, data } = await api.post("staff/hr/salaries/bulk-allowance-by-percentage", {
+                ...bulkForm,
+                inserted_by: props.loginData[0].StaffID
+            });
+            if (success && data.message === "success") {
+                toast.success(`Successfully allocated to ${data.summary.staffProcessed} staff members`);
+                setShowBulkModal(false);
+                setBulkPreview(null);
+                setBulkForm({ percentage: "", post_type: "Allowance", ledger_account: "", start_date: "", end_date: "", frequency: "Monthly" });
+                getRecord();
+            } else {
+                toast.error(data.message || "Failed to process bulk allocation");
+            }
+        } catch (err) {
+            toast.error("Failed to process bulk allocation");
+        }
+        setBulkLoading(false);
+    };
 
     const onSubmit = async () => {
         if (createItem.staff_id === "") {
@@ -207,76 +236,29 @@ function HRPayrollManageAllowanceAndDeduction(props) {
         }
 
         if (createItem.entry_id === "") {
-            toast.warning("adding, please wait...")
-            await axios.post(`${serverLink}staff/hr/payroll/entry/add`, createItem, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Record Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecord();
-                        setCreateItem({
-                            ...createItem,
-                            staff_id: "",
-                            post_type: "",
-                            ledger_account: "",
-                            start_date: "",
-                            end_date: "",
-                            frequency: "",
-                            amount: "",
-                            inserted_by: props.loginData[0].StaffID,
-                            entry_id: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-        }
-        else {
-            toast.warning("updating, please wait...")
-            await axios.patch(`${serverLink}staff/hr/payroll/entry/update`, createItem, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Record Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecord();
-                        setCreateItem({
-                            ...createItem,
-                            staff_id: "",
-                            post_type: "",
-                            ledger_account: "",
-                            start_date: "",
-                            end_date: "",
-                            frequency: "",
-                            amount: "",
-                            inserted_by: props.loginData[0].StaffID,
-                            entry_id: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            toast.warning("Adding, please wait...");
+            const { success, data } = await api.post("staff/hr/payroll/entry/add", createItem);
+
+            if (success && data?.message === "success") {
+                toast.success("Record Added Successfully");
+                document.getElementById("closeModal").click();
+                getRecord();
+                onClear();
+            } else if (success) {
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
+        } else {
+            toast.warning("Updating, please wait...");
+            const { success, data } = await api.patch("staff/hr/payroll/entry/update", createItem);
+
+            if (success && data?.message === "success") {
+                toast.success("Record Updated Successfully");
+                document.getElementById("closeModal").click();
+                getRecord();
+                onClear();
+            } else if (success) {
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
         }
     };
 
@@ -296,15 +278,24 @@ function HRPayrollManageAllowanceAndDeduction(props) {
                         </ol>
                     </nav>
                 </div>
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#kt_modal_general"
-                    onClick={onClear}
-                >
-                    <i className="fa fa-plus me-2"></i>Add New
-                </button>
+                <div className="d-flex gap-2">
+                    <button
+                        type="button"
+                        className="btn btn-success"
+                        onClick={() => setShowBulkModal(true)}
+                    >
+                        <i className="fa fa-users me-2"></i>Bulk Allocation by %
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={onClear}
+                    >
+                        <i className="fa fa-plus me-2"></i>Add New
+                    </button>
+                </div>
             </div>
 
             <div className="card shadow-sm" style={{ width: '100%' }}>
@@ -313,25 +304,126 @@ function HRPayrollManageAllowanceAndDeduction(props) {
                 </div>
             </div>
 
-            <Modal title={"Manage Allowance and Deduction Form"} large={true}>
+            {/* Bulk Allocation Modal */}
+            {showBulkModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-xl">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Bulk Allocation by Percentage of Gross Pay</h5>
+                                <button type="button" className="btn-close" onClick={() => { setShowBulkModal(false); setBulkPreview(null); }}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="row mb-4">
+                                    <div className="col-md-3">
+                                        <label className="form-label required">Percentage (%)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="form-control"
+                                            value={bulkForm.percentage}
+                                            onChange={(e) => setBulkForm({ ...bulkForm, percentage: e.target.value })}
+                                            placeholder="e.g., 5"
+                                        />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="form-label required">Post Type</label>
+                                        <select
+                                            className="form-select"
+                                            value={bulkForm.post_type}
+                                            onChange={(e) => setBulkForm({ ...bulkForm, post_type: e.target.value })}
+                                        >
+                                            <option value="Allowance">Allowance</option>
+                                            <option value="Deduction">Deduction</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label required">Ledger Account</label>
+                                        <SearchSelect
+                                            options={ledgerList.map(item => ({ label: `${item.Description} (${item.AccountNumber})`, value: item.EntryID }))}
+                                            value={ledgerList.map(item => ({ label: `${item.Description} (${item.AccountNumber})`, value: item.EntryID })).find(op => op.value === bulkForm.ledger_account) || null}
+                                            onChange={(selected) => setBulkForm({ ...bulkForm, ledger_account: selected?.value || '' })}
+                                            placeholder="Select Ledger"
+                                        />
+                                    </div>
+                                    <div className="col-md-2 d-flex align-items-end">
+                                        <button className="btn btn-info w-100" onClick={handleBulkPreview} disabled={bulkLoading}>
+                                            <i className="fa fa-eye me-1"></i>Preview
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="row mb-4">
+                                    <div className="col-md-3">
+                                        <label className="form-label required">Start Date</label>
+                                        <input type="month" className="form-control" value={bulkForm.start_date} onChange={(e) => setBulkForm({ ...bulkForm, start_date: e.target.value })} />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="form-label required">End Date</label>
+                                        <input type="month" className="form-control" value={bulkForm.end_date} min={bulkForm.start_date} onChange={(e) => setBulkForm({ ...bulkForm, end_date: e.target.value })} />
+                                    </div>
+                                    <div className="col-md-3">
+                                        <label className="form-label">Frequency</label>
+                                        <select className="form-select" value={bulkForm.frequency} onChange={(e) => setBulkForm({ ...bulkForm, frequency: e.target.value })}>
+                                            <option value="Once">Once</option>
+                                            <option value="Monthly">Monthly</option>
+                                            <option value="Quarterly">Quarterly</option>
+                                            <option value="Annually">Annually</option>
+                                        </select>
+                                    </div>
+                                </div>
 
+                                {bulkPreview && (
+                                    <div className="mt-4">
+                                        <div className="alert alert-info">
+                                            <strong>Preview Summary:</strong> {bulkPreview.staffCount} staff members |
+                                            <strong> Total Amount:</strong> {currencyConverter(bulkPreview.totalAmount)} |
+                                            <strong> Type:</strong> {bulkForm.post_type}
+                                        </div>
+                                        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                            <table className="table table-sm table-bordered">
+                                                <thead className="table-light">
+                                                    <tr><th>Staff ID</th><th>Staff Name</th><th>Gross Pay</th><th>Calculated Amount ({bulkForm.percentage}%)</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    {bulkPreview.preview.slice(0, 50).map((item, idx) => (
+                                                        <tr key={idx}>
+                                                            <td>{item.staffId}</td>
+                                                            <td>{item.staffName}</td>
+                                                            <td>{currencyConverter(item.grossPay)}</td>
+                                                            <td className="text-success fw-bold">{currencyConverter(item.calculatedAmount)}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                            {bulkPreview.preview.length > 50 && <p className="text-muted">...and {bulkPreview.preview.length - 50} more</p>}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => { setShowBulkModal(false); setBulkPreview(null); }}>Cancel</button>
+                                <button type="button" className="btn btn-primary" onClick={handleBulkSubmit} disabled={bulkLoading || !bulkPreview}>
+                                    {bulkLoading ? 'Processing...' : 'Apply to All Staff'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <Modal title={"Manage Allowance and Deduction Form"} large={true}>
                 <div className="row mb-5">
                     <div className="col-md-6">
                         <div className="form-group">
                             <label htmlFor="staff_id">Select Staff</label>
                             <SearchSelect
-                                isDisabled={createItem.staff !== "" ? true : false}
+                                isDisabled={createItem.staff !== ""}
                                 id="staff"
                                 value={createItem.staff}
                                 onChange={handleStaffEdit}
                                 options={staffSelect}
                                 placeholder="select staff"
                             />
-                            {/*<Select*/}
-                            {/*    id={"staff_id"}*/}
-                            {/*    options={staffSelect}*/}
-                            {/*    onChange={handleSelectChange}*/}
-                            {/*/>*/}
                         </div>
                     </div>
 
@@ -360,12 +452,6 @@ function HRPayrollManageAllowanceAndDeduction(props) {
                                 options={ledgerList ? ledgerList.map(item => ({ label: `${item.Description} (${item.AccountNumber})`, value: item.EntryID })) : []}
                                 placeholder="Select Option"
                             />
-                            {/*<Select*/}
-                            {/*    id={"ledger_account"}*/}
-                            {/*    defaultValue={createItem.ledger_account}*/}
-                            {/*    options={ledgerSelect}*/}
-                            {/*    onChange={handleSelectChange}*/}
-                            {/*/>*/}
                         </div>
                     </div>
                     <div className="col-md-6">
@@ -385,11 +471,11 @@ function HRPayrollManageAllowanceAndDeduction(props) {
                 <div className="row mb-5">
                     <div className="col-md-6">
                         <label htmlFor="start_date">Start Date</label>
-                        <input type="month" id={"start_date"} disabled={createItem.frequency === ''} onChange={onEdit} value={createItem.start_date} className="form-control" />
+                        <input type="month" id="start_date" disabled={createItem.frequency === ''} onChange={onEdit} value={createItem.start_date} className="form-control" />
                     </div>
                     <div className="col-md-6">
                         <label htmlFor="end_date">End Date</label>
-                        <input type="month" id={"end_date"} disabled={createItem.frequency === '' || createItem.start_date === ''} min={createItem.start_date} max={createItem.frequency === 'Once' ? createItem.start_date : ''} onChange={onEdit} value={createItem.end_date} className="form-control" />
+                        <input type="month" id="end_date" disabled={createItem.frequency === '' || createItem.start_date === ''} min={createItem.start_date} max={createItem.frequency === 'Once' ? createItem.start_date : ''} onChange={onEdit} value={createItem.end_date} className="form-control" />
                     </div>
                 </div>
 
@@ -407,7 +493,7 @@ function HRPayrollManageAllowanceAndDeduction(props) {
 
                     <div className="col-md-6">
                         <label htmlFor="Amount">Amount</label>
-                        <input type="number" step={0.01} id={"amount"} onChange={onEdit} value={createItem.amount} className="form-control" />
+                        <input type="number" step={0.01} id="amount" onChange={onEdit} value={createItem.amount} className="form-control" />
                     </div>
                 </div>
 

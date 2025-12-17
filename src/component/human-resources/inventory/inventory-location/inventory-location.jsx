@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -10,69 +9,67 @@ import { connect } from "react-redux";
 import ReportTable from "../../../common/table/ReportTable";
 import InventoryLocationForm from "./inventory-location-form";
 function InventoryLocation(props) {
-    let token = props.loginData[0].token
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState(false);
     const initialValue = {
-        location_id: '', location_name: '', description: '',  submitted_by: '', updated_by: ''}
+        location_id: '', location_name: '', description: '', submitted_by: '', updated_by: ''
+    }
     const [formData, setFormData] = useState(initialValue);
 
     const columns = ["S/N", "Action", "Location Name", "Description", "Updated By"];
-    const [tableData,setTableData] = useState([]);
+    const [tableData, setTableData] = useState([]);
 
     const fetchData = async () => {
-        await axios.get(`${serverLink}staff/inventory/location/data/list`, token)
-            .then(res => {
-                if (res.data.message === 'success') {
-
-                    const row = [];
-                    if (res.data.Location.length > 0) {
-                        res.data.Location.map((r, i) => {
-                            row.push([i+1,
-                                (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        onClick={() => {
-                                            setFormData({
-                                                ...formData,
-                                                location_name: r.location_name,
-                                                description: r.description,
-                                                address: r.address,
-                                                location_id: r.location_id,
-                                            })
-                                        }
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                                r.location_name, r.description, r.updated_by
-                            ])
-                        })
-                        setTableData(row)
-                    }else{
-                        setTableData([])
-                    }
+        try {
+            const { success, data } = await api.get("staff/inventory/location/data/list");
+            if (success && data.message === 'success') {
+                const row = [];
+                if (data.Location.length > 0) {
+                    data.Location.map((r, i) => {
+                        row.push([i + 1,
+                        (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() => {
+                                    setFormData({
+                                        ...formData,
+                                        location_name: r.location_name,
+                                        description: r.description,
+                                        address: r.address,
+                                        location_id: r.location_id,
+                                    })
+                                }
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                        r.location_name, r.description, r.updated_by
+                        ])
+                    })
+                    setTableData(row)
                 } else {
-                    toast.info("Something went wrong. Please try again!")
+                    setTableData([])
                 }
-                setIsLoading(false)
-            })
-            .catch(e => {
-                toast.error(`${e.response?.statusText}: ${e.response?.data}`)
-            })
+            } else {
+                toast.info("Something went wrong. Please try again!")
+            }
+            setIsLoading(false)
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     }
 
     useEffect(() => {
         fetchData()
-    },[""])
+    }, [""])
 
     const handleFormValueChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.id] : e.target.value
+            [e.target.id]: e.target.value
         })
     }
 
@@ -91,16 +88,16 @@ function InventoryLocation(props) {
 
         setIsFormLoading(true)
         if (formData.location_id === '') {
-            await axios
-                .post(`${serverLink}staff/inventory/location/add`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.post("staff/inventory/location/add", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Location Added Successfully");
                         fetchData();
                         setFormData({ ...formData, ...initialValue })
                         setIsFormLoading(false)
                         document.getElementById("closeModal").click();
-                    } else if (result.data.message === "exist") {
+                    } else if (data.message === "exist") {
                         setIsFormLoading(false)
                         showAlert("LOCATION EXIST", "Location already exist!", "error");
                     } else {
@@ -111,26 +108,25 @@ function InventoryLocation(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         } else {
-
-            await axios
-                .patch(`${serverLink}staff/inventory/location/update`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.patch("staff/inventory/location/update", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Location Updated Successfully");
                         fetchData();
-                        setFormData({ ...formData,
-                            location_id: '',location_name: '', description: '',  submitted_by: '', updated_by: '',
+                        setFormData({
+                            ...formData,
+                            location_id: '', location_name: '', description: '', submitted_by: '', updated_by: '',
                         })
                         setIsFormLoading(false)
                         document.getElementById("closeModal").click();
@@ -142,15 +138,15 @@ function InventoryLocation(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     }
 
@@ -188,7 +184,7 @@ function InventoryLocation(props) {
                     </div>
                 </div>
                 <Modal title={"Manage Location"}>
-                    <InventoryLocationForm value = {formData} isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
+                    <InventoryLocationForm value={formData} isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
                 </Modal>
             </div>
         </div>

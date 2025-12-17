@@ -1,159 +1,47 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import axios from "axios";
+import { api } from "../../../../resources/api";
 import { toast } from "react-toastify";
 import Loader from "../../../common/loader/loader";
 import PageHeader from "../../../common/pageheader/pageheader";
-import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
 import ReportTable from "../../../common/table/ReportTable";
-import { formatDateAndTime } from "../../../../resources/constants";
-import { CommentsDisabledOutlined } from "@mui/icons-material";
-
-import { useForm } from "react-hook-form";
 
 function FinanceClearance(props) {
-  const token = props.loginData.token;
-
   const [isLoading, setIsLoading] = useState(false);
   const [clearanceData, setClearanceData] = useState(false);
-  const columns = [
-    "S/N",
-    "Student ID",
-    "Student Name",
-    "Course",
-    "Level",
-    "Semester",
-    "Status",
-    "Action By",
-    "Action",
-  ];
+  const columns = ["S/N", "Student ID", "Student Name", "Course", "Level", "Semester", "Status", "Action By", "Action"];
+
   async function TakeDecision(decision, id) {
-    const dataTo={
-      decision,
-      id,
-      Cleared: 'FinanceCleared',
-      ClearedBy: 'FinanceClearedBy' ,
-      insertedBy:props.loginData.StaffID,
-      ClearedDate:'FinanceClearedDate',
-    }
-    await axios
-        .patch(`${serverLink}staff/users/graduation-clearance`, dataTo, token)
-        .then((res) => {
-          if (res.data.message === "success") {
-            toast.success(decision+" Successfully");
-            getClearance();
-          } else {
-            toast.error("An error has occurred. Please try again!");
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error("NETWORK ERROR. Please try again!");
-        });
+    const dataTo = { decision, id, Cleared: 'FinanceCleared', ClearedBy: 'FinanceClearedBy', insertedBy: props.loginData.StaffID, ClearedDate: 'FinanceClearedDate' };
+    const { success } = await api.patch("staff/users/graduation-clearance", dataTo);
+    if (success) { toast.success(decision + " Successfully"); getClearance(); }
+    else { toast.error("An error has occurred. Please try again!"); }
   }
+
   const getClearance = async () => {
-    await axios
-      .get(`${serverLink}staff/users/graduation-clearance/finance`, token)
-      .then((res) => {
-        const data = res.data;
-        let rows = [];
-        if (data.message === "success") {
-          data.data.length > 0 &&
-            data.data.map((item, index) => {
-
-
-              rows.push([
-                index + 1,
-                item.StudentID,
-                item.Name,
-                item.CourseCode,
-                item.StudentLevel,
-                item.StudentSemester,
-                item.FinanceCleared ,
-                item.FinanceClearedBy,
-                <>
-                  <button
-                    type="button"
-                    id="ApproveBtn"
-                    data-toggle="tooltip"
-                    data-placement="right"
-                    title="Cleared"
-                    onClick={() => {
-                      if (item.FinanceCleared !== "Cleared") {
-                        TakeDecision("Cleared", item.StudentID);
-                      }
-                    }}
-                    className="btn btn-sm btn-success "
-                  >
-                    <i className={"fa fa-check"} />
-                  </button>
-                  <button
-                    style={{ marginLeft: "2px" }}
-                    type="button"
-                    id="RejectBtn"
-                    data-toggle="tooltip"
-                    onClick={() => {
-                      if (item.FinanceCleared !== "Rejected") {
-                        TakeDecision("Rejected", item.StudentID);
-                      }
-                    }}
-                    data-placement="right"
-                    title="Reject"
-                    className="btn btn-sm btn-danger "
-                  >
-                    <i className={"fa fa-times"} />
-                  </button>
-                </>,
-              ]);
-            });
-        }
-        setClearanceData(rows);
-      })
-      .catch((err) => {
-        console.log(err);
-        toast.error("NETWORK ERROR. Please try again!");
+    const { success, data } = await api.get("staff/users/graduation-clearance/finance");
+    let rows = [];
+    if (success && data?.data?.length > 0) {
+      data.data.forEach((item, index) => {
+        rows.push([
+          index + 1, item.StudentID, item.Name, item.CourseCode, item.StudentLevel, item.StudentSemester, item.FinanceCleared, item.FinanceClearedBy,
+          <><button type="button" id="ApproveBtn" data-toggle="tooltip" data-placement="right" title="Cleared" onClick={() => { if (item.FinanceCleared !== "Cleared") { TakeDecision("Cleared", item.StudentID); } }} className="btn btn-sm btn-success "><i className={"fa fa-check"} /></button><button style={{ marginLeft: "2px" }} type="button" id="RejectBtn" data-toggle="tooltip" onClick={() => { if (item.FinanceCleared !== "Rejected") { TakeDecision("Rejected", item.StudentID); } }} data-placement="right" title="Reject" className="btn btn-sm btn-danger "><i className={"fa fa-times"} /></button></>
+        ]);
       });
+    }
+    setClearanceData(rows);
   };
 
-  useEffect(() => {
-    getClearance().then();
-  }, []);
-  return isLoading ? (
-    <Loader />
-  ) : (
-    <div className="d-flex flex-column flex-row-fluid">
-      <PageHeader
-        title={"Finance Clearance"}
-        items={["Users", "Graduation Clearance", "Finance Clearacne"]}
-      />
-      <div className="flex-column-fluid">
-        <div className="card">
-        <div className="card-body p-0">
-            {clearanceData.length > 0 ? (
-              <ReportTable columns={columns} data={clearanceData} />
-            ) : (
-              <></>
-            )}
-          </div>
-        </div>
+  useEffect(() => { getClearance(); }, []);
 
-        <Modal title={"Progression Settings Form"}>
-          <form>
-            <div className="form-group pt-2">
-              <button className="btn btn-primary w-100">Save</button>
-            </div>
-          </form>
-        </Modal>
-      </div>
+  return isLoading ? (<Loader />) : (
+    <div className="d-flex flex-column flex-row-fluid">
+      <PageHeader title={"Finance Clearance"} items={["Users", "Graduation Clearance", "Finance Clearacne"]} />
+      <div className="flex-column-fluid"><div className="card"><div className="card-body p-0">{clearanceData.length > 0 ? (<ReportTable columns={columns} data={clearanceData} />) : (<></>)}</div></div><Modal title={"Progression Settings Form"}><form><div className="form-group pt-2"><button className="btn btn-primary w-100">Save</button></div></form></Modal></div>
     </div>
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    loginData: state.LoginDetails[0],
-  };
-};
-
+const mapStateToProps = (state) => { return { loginData: state.LoginDetails[0] }; };
 export default connect(mapStateToProps, null)(FinanceClearance);

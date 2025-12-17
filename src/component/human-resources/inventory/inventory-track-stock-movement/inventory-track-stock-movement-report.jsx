@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import axios from "axios";
+import { api } from "../../../../resources/api";
 import { toast } from "react-toastify";
-import { serverLink } from "../../../../resources/url";
 import ReportTable from "../../../common/table/ReportTable";
 import { currencyConverter } from "../../../../resources/constants";
 
-function InventoryTrackStockMovementReport(props)
-{
-    let token = props.loginData[0].token;
+function InventoryTrackStockMovementReport(props) {
     let slug = props.value?.slug;
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "Item", "Quantity", "Unit Price", "Total Price", "Storage Location", "Received By"];
@@ -17,46 +14,36 @@ function InventoryTrackStockMovementReport(props)
     const [tableData2, setTableData2] = useState([]);
 
 
-    const fetchData = async () =>
-    {
-        await axios.get(`${serverLink}staff/inventory/allocation/view/${slug}`, token)
-            .then(res =>
-            {
-                if (res.data.message === 'success')
-                {
-                    let inventoryData = res.data.Inventory.filter(e => e.action === "received");
-                    let allocatedData = res.data.Inventory.filter(e => e.action === "allocated");
+    const fetchData = async () => {
+        try {
+            const { success, data: res } = await api.get(`staff/inventory/allocation/view/${slug}`);
+            if (success && res.message === 'success') {
+                let inventoryData = res.Inventory.filter(e => e.action === "received");
+                let allocatedData = res.Inventory.filter(e => e.action === "allocated");
 
-                    let rowSet = [];
-                    inventoryData.map((item, index) =>
-                    {
-                        rowSet.push([index + 1, item.item_name, item.quantity, currencyConverter(item.unit_price), currencyConverter(item.unit_price * item.quantity), item.location, item.allocated_by]);
-                    });
-                    setTableData(rowSet)
+                let rowSet = [];
+                inventoryData.map((item, index) => {
+                    rowSet.push([index + 1, item.item_name, item.quantity, currencyConverter(item.unit_price), currencyConverter(item.unit_price * item.quantity), item.location, item.allocated_by]);
+                });
+                setTableData(rowSet)
 
-                    let dataSet = [];
-                    allocatedData.map((r, index) =>
-                    {
-                        dataSet.push([index + 1, r.allocated_to_id, r.allocated_to, r.allocated_department, r.location, r.quantity, r.allocated_by]);
-                    });
-                    setTableData2(dataSet)
+                let dataSet = [];
+                allocatedData.map((r, index) => {
+                    dataSet.push([index + 1, r.allocated_to_id, r.allocated_to, r.allocated_department, r.location, r.quantity, r.allocated_by]);
+                });
+                setTableData2(dataSet)
 
-                } else
-                {
-                    toast.info("Something went wrong. Please try again!")
-                }
-                setIsLoading(false)
-            })
-            .catch(e =>
-            {
-                toast.error(`${e.response.statusText}: ${e.response.data}`)
-            })
+            } else {
+                toast.info("Something went wrong. Please try again!")
+            }
+            setIsLoading(false)
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     }
 
-    useEffect(() =>
-    {
-        if (slug)
-        {
+    useEffect(() => {
+        if (slug) {
             fetchData()
         }
     }, [slug])
@@ -100,8 +87,7 @@ function InventoryTrackStockMovementReport(props)
 
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails,
     };

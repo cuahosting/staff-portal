@@ -2,16 +2,14 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import {connect} from "react-redux";
-import {formatDate, formatDateAndTime} from "../../../../resources/constants";
+import { connect } from "react-redux";
+import { formatDate, formatDateAndTime } from "../../../../resources/constants";
 
 function HRPensionSettings(props) {
-  const token = props.loginData[0].token;
 
   const [isLoading, setIsLoading] = useState(true);
   const [datatable, setDatatable] = useState({
@@ -49,34 +47,26 @@ function HRPensionSettings(props) {
   });
 
   const getRecords = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/pension/settings/list`, token)
-      .then((result) => {
-        if (result.data.length > 0) {
-          let rows = [];
-          result.data.map((data, index) => {
-            rows.push({
-              sn: index + 1,
-              employee_contribution: data.EmployeeContribution,
-              employer_contribution: data.EmployerContribution,
-              inserted_by: data.InsertedBy,
-              inserted_date: formatDateAndTime(data.InsertedDate.split('T')[0], 'date'),
-              entry_id: data.EntryID,
-            });
-          });
-
-          setDatatable({
-            ...datatable,
-            columns: datatable.columns,
-            rows: rows,
-          });
-        }
-
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
+    const { success, data } = await api.get("staff/hr/pension/settings/list");
+    if (success && data.length > 0) {
+      let rows = [];
+      data.map((item, index) => {
+        rows.push({
+          sn: index + 1,
+          employee_contribution: item.EmployeeContribution,
+          employer_contribution: item.EmployerContribution,
+          inserted_by: item.InsertedBy,
+          inserted_date: formatDateAndTime(item.InsertedDate.split('T')[0], 'date'),
+          entry_id: item.EntryID,
+        });
       });
+      setDatatable({
+        ...datatable,
+        columns: datatable.columns,
+        rows: rows,
+      });
+    }
+    setIsLoading(false);
   };
 
   const onEdit = (e) => {
@@ -97,67 +87,30 @@ function HRPensionSettings(props) {
       return false;
     }
 
-    await axios
-        .post(`${serverLink}staff/hr/pension/settings/add`, createSettings, token)
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Pension Settings Added Successfully");
-            document.getElementById("closeModal").click()
-            getRecords();
-            setCreateSettings({
-              ...createSettings,
-              employee_contribution: "",
-              employer_contribution: "",
-              inserted_by: props.loginData.StaffID,
-              inserted_date: "",
-              entry_id: "",
-            });
-          } else {
-            showAlert(
-                "ERROR",
-                "Something went wrong. Please try again!",
-                "error"
-            );
-          }
-        })
-        .catch((error) => {
-          showAlert(
-              "NETWORK ERROR",
-              "Please check your connection and try again!",
-              "error"
-          );
+    const { success, data } = await api.post("staff/hr/pension/settings/add", createSettings);
+    if (success) {
+      if (data.message === "success") {
+        toast.success("Pension Settings Added Successfully");
+        document.getElementById("closeModal").click()
+        getRecords();
+        setCreateSettings({
+          ...createSettings,
+          employee_contribution: "",
+          employer_contribution: "",
+          inserted_by: props.loginData.StaffID,
+          inserted_date: "",
+          entry_id: "",
         });
+      } else {
+        showAlert("ERROR", "Something went wrong. Please try again!", "error");
+      }
+    } else {
+      showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+    }
   };
 
   useEffect(() => {
-     axios
-        .get(`${serverLink}staff/hr/pension/settings/list`, token)
-        .then((result) => {
-          if (result.data.length > 0) {
-            let rows = [];
-            result.data.map((data, index) => {
-              rows.push({
-                sn: index + 1,
-                employee_contribution: data.EmployeeContribution,
-                employer_contribution: data.EmployerContribution,
-                inserted_by: data.InsertedBy,
-                inserted_date: formatDateAndTime(data.InsertedDate.split('T')[0], 'date'),
-                entry_id: data.EntryID,
-              });
-            });
-
-            setDatatable({
-              ...datatable,
-              columns: datatable.columns,
-              rows: rows,
-            });
-          }
-
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.log("NETWORK ERROR");
-        });
+    getRecords();
   }, []);
 
   return isLoading ? (

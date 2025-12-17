@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
 import api from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { currencyConverter } from "../../../../resources/constants";
 import { connect } from "react-redux";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function BalanceReport(props) {
     const token = props.loginData[0]?.token;
@@ -39,6 +40,21 @@ function BalanceReport(props) {
         ],
         rows: [],
     });
+
+    // Options for SearchSelect
+    const semesterOptions = useMemo(() => {
+        return semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: (s.SemesterName || s.SemesterCode) + (s.IsCurrent === 1 ? ' (Current)' : '')
+        }));
+    }, [semesterList]);
+
+    const balanceTypeOptions = [
+        { value: 'all', label: 'All Students' },
+        { value: 'outstanding', label: 'Outstanding Only' },
+        { value: 'cleared', label: 'Cleared Only' },
+        { value: 'overpaid', label: 'Overpaid Only' }
+    ];
 
     const getReportData = async () => {
         if (!filters.SemesterCode) {
@@ -90,9 +106,8 @@ function BalanceReport(props) {
                 ),
                 Balance: (
                     <span
-                        className={`fw-bold text-${
-                            balance > 0 ? "danger" : balance < 0 ? "info" : "success"
-                        }`}
+                        className={`fw-bold text-${balance > 0 ? "danger" : balance < 0 ? "info" : "success"
+                            }`}
                     >
                         {currencyConverter(Math.abs(balance))}
                         {balance < 0 && " (CR)"}
@@ -229,34 +244,25 @@ function BalanceReport(props) {
                         <div className="row g-3 align-items-end">
                             <div className="col-md-4">
                                 <label className="form-label required">Select Semester</label>
-                                <select
+                                <SearchSelect
                                     id="SemesterCode"
-                                    className="form-select form-select-solid"
-                                    value={filters.SemesterCode}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">Select Semester</option>
-                                    {semesterList.map((s) => (
-                                        <option key={s.SemesterCode} value={s.SemesterCode}>
-                                            {s.SemesterName || s.SemesterCode}
-                                            {s.IsCurrent === 1 && " (Current)"}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={semesterOptions.find(opt => opt.value === filters.SemesterCode) || null}
+                                    options={semesterOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                    placeholder="Select Semester"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-3">
                                 <label className="form-label">Balance Type</label>
-                                <select
+                                <SearchSelect
                                     id="BalanceType"
-                                    className="form-select form-select-solid"
-                                    value={filters.BalanceType}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="all">All Students</option>
-                                    <option value="outstanding">Outstanding Only</option>
-                                    <option value="cleared">Cleared Only</option>
-                                    <option value="overpaid">Overpaid Only</option>
-                                </select>
+                                    value={balanceTypeOptions.find(opt => opt.value === filters.BalanceType) || null}
+                                    options={balanceTypeOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'BalanceType', value: selected?.value || '' } })}
+                                    placeholder="Select Type"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-5 text-end">
                                 <button
@@ -310,13 +316,12 @@ function BalanceReport(props) {
                             </div>
                             <div className="col-md-2-4" style={{ flex: "0 0 20%", maxWidth: "20%" }}>
                                 <div
-                                    className={`card bg-light-${
-                                        summaryStats.totalBalance > 0
+                                    className={`card bg-light-${summaryStats.totalBalance > 0
                                             ? "warning"
                                             : summaryStats.totalBalance < 0
-                                            ? "info"
-                                            : "success"
-                                    }`}
+                                                ? "info"
+                                                : "success"
+                                        }`}
                                 >
                                     <div className="card-body py-4 text-center">
                                         <div className="fs-4 fw-bold">
@@ -346,11 +351,10 @@ function BalanceReport(props) {
                                                     <div
                                                         className="progress-bar bg-success"
                                                         style={{
-                                                            width: `${
-                                                                (summaryStats.clearedStudents /
+                                                            width: `${(summaryStats.clearedStudents /
                                                                     summaryStats.totalStudents) *
                                                                 100
-                                                            }%`,
+                                                                }%`,
                                                         }}
                                                         title={`Cleared: ${summaryStats.clearedStudents}`}
                                                     >
@@ -368,11 +372,10 @@ function BalanceReport(props) {
                                                     <div
                                                         className="progress-bar bg-danger"
                                                         style={{
-                                                            width: `${
-                                                                (summaryStats.outstandingStudents /
+                                                            width: `${(summaryStats.outstandingStudents /
                                                                     summaryStats.totalStudents) *
                                                                 100
-                                                            }%`,
+                                                                }%`,
                                                         }}
                                                         title={`Outstanding: ${summaryStats.outstandingStudents}`}
                                                     >
@@ -390,11 +393,10 @@ function BalanceReport(props) {
                                                     <div
                                                         className="progress-bar bg-info"
                                                         style={{
-                                                            width: `${
-                                                                (summaryStats.overpaidStudents /
+                                                            width: `${(summaryStats.overpaidStudents /
                                                                     summaryStats.totalStudents) *
                                                                 100
-                                                            }%`,
+                                                                }%`,
                                                         }}
                                                         title={`Overpaid: ${summaryStats.overpaidStudents}`}
                                                     >

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux/es/exports";
-import { serverLink } from "../../../resources/url";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import {
@@ -13,7 +12,6 @@ import { toast } from "react-toastify";
 import AGTable from "../../common/table/AGTable";
 
 function ITFReport(props) {
-    const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [reportData, setReportData] = useState([]);
@@ -39,7 +37,7 @@ function ITFReport(props) {
     const getTotal = () => {
         let total_amount = 0;
         reportData.filter(e => e.NetPay > 0).forEach((item) => {
-            total_amount += (1/100) * item.NetPay;
+            total_amount += (1 / 100) * item.NetPay;
         });
         return total_amount;
     }
@@ -51,7 +49,7 @@ function ITFReport(props) {
 
         data.filter(e => e.NetPay > 0).forEach((item, index) => {
             total += item.NetPay;
-            itf += (1/100) * item.NetPay;
+            itf += (1 / 100) * item.NetPay;
             rows.push({
                 sn: index + 1,
                 staffId: item.StaffID ?? "N/A",
@@ -59,7 +57,7 @@ function ITFReport(props) {
                 dateOfBirth: formatDateAndTime(item.DateOfBirth, 'date'),
                 gender: item.Gender ?? "N/A",
                 monthlyEarnings: moneyFormat(item.NetPay),
-                itfAmount: moneyFormat((1/100) * item.NetPay),
+                itfAmount: moneyFormat((1 / 100) * item.NetPay),
                 remarks: "",
             });
         });
@@ -89,20 +87,15 @@ function ITFReport(props) {
             setDatatable(prev => ({ ...prev, rows: [] }));
         } else {
             setIsLoading(true)
-            await axios.get(`${serverLink}staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`, token)
-                .then((res) => {
-                    if (res.data.length > 0) {
-                        setReportData(res.data)
-                        buildTableData(res.data);
-                    } else {
-                        setReportData([]);
-                        setDatatable(prev => ({ ...prev, rows: [] }));
-                    }
-                    setIsLoading(false)
-                }).catch((e) => {
-                    setIsLoading(false)
-                    toast.error("error getting allowances")
-                })
+            const { success, data } = await api.get(`staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`);
+            if (success && data.length > 0) {
+                setReportData(data)
+                buildTableData(data);
+            } else {
+                setReportData([]);
+                setDatatable(prev => ({ ...prev, rows: [] }));
+            }
+            setIsLoading(false)
         }
     }
 
@@ -117,7 +110,7 @@ function ITFReport(props) {
     }
 
     useEffect(() => {
-        setTimeout(()=>{
+        setTimeout(() => {
             setIsLoading(false)
         }, 2000);
     }, []);
@@ -135,11 +128,11 @@ function ITFReport(props) {
                     <div className="form-group">
                         <label htmlFor="month_id">Select Salary Month</label>
                         <input type="month" id="month_id"
-                               className="form-control"
-                               value={formData.month_id}
-                               onChange={onChange}
-                               max={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}`}
-                               required/>
+                            className="form-control"
+                            value={formData.month_id}
+                            onChange={onChange}
+                            max={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}`}
+                            required />
                     </div>
                 </div>
             </div>

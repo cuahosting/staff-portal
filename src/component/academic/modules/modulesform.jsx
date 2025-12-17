@@ -109,27 +109,33 @@ export const ModulesForm = (props) => {
                             Module Type
                         </label>
                         <div className="enhanced-input-wrapper">
-                            <select
+                            <SearchSelect
                                 id="ModuleType"
-                                onChange={props.onEdit}
-                                required
-                                value={props.createModule.ModuleType}
-                                className="form-control form-control-lg form-control-solid enhanced-input"
-                                data-kt-select2="true"
-                                data-placeholder="Select option"
-                                data-dropdown-parent="#kt_menu_624456606a84b"
-                                data-allow-clear="true"
-                            >
-                                <option value="">-select type-</option>
-                                <option value="Core">Core</option>
-                                <option value="Elective">Elective</option>
-                                <option value="Lecture">Lecture</option>
-                                <option value="Interactive">Interactive</option>
-                                <option value="Class">Class</option>
-                                <option value="Workshop">Workshop</option>
-                                <option value="Online">Online</option>
-                                <option value="Seminar">Seminar</option>
-                            </select>
+                                value={[
+                                    { value: "Core", label: "Core" },
+                                    { value: "Elective", label: "Elective" },
+                                    { value: "Lecture", label: "Lecture" },
+                                    { value: "Interactive", label: "Interactive" },
+                                    { value: "Class", label: "Class" },
+                                    { value: "Workshop", label: "Workshop" },
+                                    { value: "Online", label: "Online" },
+                                    { value: "Seminar", label: "Seminar" }
+                                ].find(opt => opt.value === props.createModule.ModuleType) || null}
+                                options={[
+                                    { value: "Core", label: "Core" },
+                                    { value: "Elective", label: "Elective" },
+                                    { value: "Lecture", label: "Lecture" },
+                                    { value: "Interactive", label: "Interactive" },
+                                    { value: "Class", label: "Class" },
+                                    { value: "Workshop", label: "Workshop" },
+                                    { value: "Online", label: "Online" },
+                                    { value: "Seminar", label: "Seminar" }
+                                ]}
+                                onChange={(selected) => props.onEdit({ target: { id: 'ModuleType', value: selected?.value || '' } })}
+                                placeholder="-select type-"
+                                isClearable={false}
+                                styles={customSelectStyles}
+                            />
                         </div>
                     </div>
                 </div>

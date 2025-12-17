@@ -10,6 +10,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import thunkMiddleware from "redux-thunk";
 import { logger } from "redux-logger";
 import "./resources/enhanced-forms.css";
+import { initializeApi } from "./resources/api";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 let store;
@@ -25,6 +26,9 @@ if (process.env.NODE_ENV === 'development') {
     composeEnhancers(applyMiddleware(thunkMiddleware))
   );
 }
+
+// Initialize API client with store for automatic token injection
+initializeApi(store);
 
 const persist = persistStore(store);
 

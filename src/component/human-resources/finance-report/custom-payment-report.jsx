@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Loader from "../../common/loader/loader";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import ReportTable from "../../common/table/ReportTable";
 import { connect } from "react-redux";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function CustomPaymentReport(props) {
-  const token = props.login[0].token;
 
   const [isLoading, setIsLoading] = useState(false);
   const [canSeeReport, setCanSeeReport] = useState(false);
@@ -22,32 +21,47 @@ function CustomPaymentReport(props) {
   const [tableHeight, setTableHeight] = useState("600px");
   const columns = ["S/N", "PaymentID", "StudentID", "Name", "Course", "Amount"];
 
+  // Options for SearchSelect
+  const paymentTypeOptions = useMemo(() => {
+    return paymentType.map(t => ({
+      value: t.Description,
+      label: t.Description
+    }));
+  }, [paymentType]);
+
+  const semesterOptions = useMemo(() => {
+    return allSemester.map(s => ({
+      value: s.SemesterCode,
+      label: s.SemesterName
+    }));
+  }, [allSemester]);
+
   useEffect(() => {
     const getPaymentType = async () => {
-      axios
-        .get(`${serverLink}staff/human-resources/finance-report/custom-list`, token)
-        .then((response) => {
-          setPaymentType(response.data);
-          setIsLoading(false);
-        })
-        .catch((ex) => {
-          console.error(ex);
-        });
+      try {
+        const { success, data } = await api.get("staff/human-resources/finance-report/custom-list");
+        if (success) {
+          setPaymentType(data);
+        }
+        setIsLoading(false);
+      } catch (ex) {
+        console.error(ex);
+      }
     };
     getPaymentType();
   }, []);
 
   useEffect(() => {
     const getSchoolSemester = async () => {
-      axios
-        .get(`${serverLink}staff/timetable/timetable/semester`, token)
-        .then((response) => {
-          setAllSemester(response.data);
-          setIsLoading(false);
-        })
-        .catch((ex) => {
-          console.error(ex);
-        });
+      try {
+        const { success, data } = await api.get("staff/timetable/timetable/semester");
+        if (success) {
+          setAllSemester(data);
+        }
+        setIsLoading(false);
+      } catch (ex) {
+        console.error(ex);
+      }
     };
     getSchoolSemester();
   }, []);
@@ -61,19 +75,12 @@ function CustomPaymentReport(props) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios
-      .get(
-        `${serverLink}staff/human-resources/finance-report/custom-payment/`, token,
-        {
-          params: {
-            semester: values.semesterCode,
-            type: values.type,
-          },
-        }
-      )
-      .then((res) => {
+    try {
+      const { success, data: result } = await api.get(
+        `staff/human-resources/finance-report/custom-payment/?semester=${values.semesterCode}&type=${values.type}`
+      );
+      if (success) {
         setIsLoading(true);
-        const result = res.data;
         if (result.length > 0) {
           let rows = [];
           result.map((item, index) => {
@@ -94,10 +101,10 @@ function CustomPaymentReport(props) {
           setCanSeeReport(false);
         }
         setIsLoading(false);
-      })
-      .catch((err) => {
-        toast.error("NETWORK ERROR");
-      });
+      }
+    } catch (err) {
+      toast.error("NETWORK ERROR");
+    }
   };
 
   return isLoading ? (
@@ -119,42 +126,28 @@ function CustomPaymentReport(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select Payment Type
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select payment type"
+                      <SearchSelect
                         id="type"
-                        onChange={handleChange}
-                        required
-                        value={values.type}
-                      >
-                        <option value="">Select option</option>
-                        {paymentType.map((t, i) => (
-                          <option key={i} value={t.Description}>
-                            {t.Description}
-                          </option>
-                        ))}
-                      </select>
+                        value={paymentTypeOptions.find(opt => opt.value === values.type) || null}
+                        options={paymentTypeOptions}
+                        onChange={(selected) => handleChange({ target: { id: 'type', value: selected?.value || '' } })}
+                        placeholder="Select option"
+                        isClearable={false}
+                      />
                     </div>
 
                     <div className="col-md-4 fv-row">
                       <label className="required fs-6 fw-bold mb-2">
                         Select School Semester
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select school semester"
+                      <SearchSelect
                         id="semesterCode"
-                        required
-                        onChange={handleChange}
-                        value={values.semesterCode}
-                      >
-                        <option value="">Select option</option>
-                        {allSemester.map((semester, index) => (
-                          <option key={index} value={semester.SemesterCode}>
-                            {semester.SemesterName}
-                          </option>
-                        ))}
-                      </select>
+                        value={semesterOptions.find(opt => opt.value === values.semesterCode) || null}
+                        options={semesterOptions}
+                        onChange={(selected) => handleChange({ target: { id: 'semesterCode', value: selected?.value || '' } })}
+                        placeholder="Select option"
+                        isClearable={false}
+                      />
                     </div>
                     <div className="col-md-4">
                       <div className="row ">

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -12,7 +11,6 @@ import { connect } from "react-redux";
 import SearchSelect from "../../../common/select/SearchSelect";
 
 function FinanceSettings(props) {
-    const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [courseList, setCourseList] = useState([]);
@@ -208,168 +206,177 @@ function FinanceSettings(props) {
 
 
     const getRecords = async () => {
-        await axios.get(`${serverLink}staff/finance/tuition/list`, token)
-            .then((result) => {
-                const data = result.data;
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            CourseCode: item.CourseCode,
-                            TuitionAmount: currencyConverter(item.TuitionAmount),
-                            TuitionAmountIntl: item.TuitionAmountIntl,
-                            Level: item.Level,
-                            Semester: item.Semester,
-                            InsertedBy: item.InsertedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() => {
-                                        Reset();
-                                        setTuitionFormData({
-                                            CourseCode: item.CourseCode,
-                                            TuitionAmount: item.TuitionAmount,
-                                            TuitionAmountIntl: item.TuitionAmountIntl,
-                                            Level: item.Level,
-                                            Semester: item.Semester,
-                                            InsertedBy: item.InsertedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/finance/tuition/list");
+            if (success && data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        CourseCode: item.CourseCode,
+                        TuitionAmount: currencyConverter(item.TuitionAmount),
+                        TuitionAmountIntl: item.TuitionAmountIntl,
+                        Level: item.Level,
+                        Semester: item.Semester,
+                        InsertedBy: item.InsertedBy,
+                        EntryID: item.EntryID,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() => {
+                                    Reset();
+                                    setTuitionFormData({
+                                        CourseCode: item.CourseCode,
+                                        TuitionAmount: item.TuitionAmount,
+                                        TuitionAmountIntl: item.TuitionAmountIntl,
+                                        Level: item.Level,
+                                        Semester: item.Semester,
+                                        InsertedBy: item.InsertedBy,
+                                        EntryID: item.EntryID,
+                                    })
+                                }}
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setTuitionDatatable({
-                        ...tuitionDatatable,
-                        columns: tuitionDatatable.columns,
-                        rows: rows,
-                    });
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+                });
+                setTuitionDatatable({
+                    ...tuitionDatatable,
+                    columns: tuitionDatatable.columns,
+                    rows: rows,
+                });
+            }
+            setIsLoading(false);
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
 
-        await axios.get(`${serverLink}staff/finance/other-fee/list`, token)
-            .then((result) => {
-                const data = result.data;
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            Title: item.Title,
-                            Amount: currencyConverter(item.Amount),
-                            PaidBy: item.PaidBy,
-                            IsRequired: item.IsRequired.toString() === '1' ? 'Yes' : 'No',
-                            InsertedBy: item.InsertedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#other_fee"
-                                    onClick={() =>
-                                        setOtherFeeFormData({
-                                            Title: item.Title,
-                                            Amount: item.Amount,
-                                            PaidBy: item.PaidBy,
-                                            IsRequired: item.IsRequired,
-                                            InsertedBy: item.InsertedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/finance/other-fee/list");
+            if (success && data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        Title: item.Title,
+                        Amount: currencyConverter(item.Amount),
+                        PaidBy: item.PaidBy,
+                        IsRequired: item.IsRequired.toString() === '1' ? 'Yes' : 'No',
+                        InsertedBy: item.InsertedBy,
+                        EntryID: item.EntryID,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#other_fee"
+                                onClick={() =>
+                                    setOtherFeeFormData({
+                                        Title: item.Title,
+                                        Amount: item.Amount,
+                                        PaidBy: item.PaidBy,
+                                        IsRequired: item.IsRequired,
+                                        InsertedBy: item.InsertedBy,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setOtherFeeDatatable({
-                        ...otherFeeDatatable,
-                        columns: otherFeeDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setOtherFeeDatatable({
+                    ...otherFeeDatatable,
+                    columns: otherFeeDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
 
-        await axios.get(`${serverLink}staff/finance/scholarship/list`, token)
-            .then((result) => {
-                const data = result.data;
-                if (data.length > 0) {
-                    setScholarshipList(data)
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            ScholarshipName: item.ScholarshipName,
-                            TuitionPercentage: item.TuitionPercentage,
-                            HostelPercentage: item.HostelPercentage,
-                            FeedingPercentage: item.FeedingPercentage,
-                            InsertedBy: item.InsertedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#scholarship"
-                                    onClick={() =>
-                                        setScholarshipFormData({
-                                            ScholarshipName: item.ScholarshipName,
-                                            TuitionPercentage: item.TuitionPercentage,
-                                            HostelPercentage: item.HostelPercentage,
-                                            FeedingPercentage: item.FeedingPercentage,
-                                            InsertedBy: item.InsertedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/finance/scholarship/list");
+            if (success && data.length > 0) {
+                setScholarshipList(data)
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        ScholarshipName: item.ScholarshipName,
+                        TuitionPercentage: item.TuitionPercentage,
+                        HostelPercentage: item.HostelPercentage,
+                        FeedingPercentage: item.FeedingPercentage,
+                        InsertedBy: item.InsertedBy,
+                        EntryID: item.EntryID,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#scholarship"
+                                onClick={() =>
+                                    setScholarshipFormData({
+                                        ScholarshipName: item.ScholarshipName,
+                                        TuitionPercentage: item.TuitionPercentage,
+                                        HostelPercentage: item.HostelPercentage,
+                                        FeedingPercentage: item.FeedingPercentage,
+                                        InsertedBy: item.InsertedBy,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setScholarshipDatatable({
-                        ...scholarshipDatatable,
-                        columns: scholarshipDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setScholarshipDatatable({
+                    ...scholarshipDatatable,
+                    columns: scholarshipDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
 
-        await axios.get(`${serverLink}staff/finance/scholarship-enrolment/list`, token)
-            .then((result) => {
-                const data = result.data;
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            StudentID: item.StudentID,
-                            StudentName: item.StudentName,
-                            Scholarship: item.Scholarship,
-                            Status: item.Status,
-                            InsertedBy: item.InsertedBy,
-                            InsertedDate: formatDateAndTime(item.InsertedDate, 'date'),
-                            EntryID: item.EntryID,
-                            action: item.Status !== 'Active' ? (
+        try {
+            const { success, data } = await api.get("staff/finance/scholarship-enrolment/list");
+            if (success && data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        StudentID: item.StudentID,
+                        StudentName: item.StudentName,
+                        Scholarship: item.Scholarship,
+                        Status: item.Status,
+                        InsertedBy: item.InsertedBy,
+                        InsertedDate: formatDateAndTime(item.InsertedDate, 'date'),
+                        EntryID: item.EntryID,
+                        action: item.Status !== 'Active' ? (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                onClick={() => {
+                                    setEnrolmentFormData({
+                                        ...enrolmentFormData,
+                                        StudentID: item.StudentID,
+                                        ScholarshipID: item.ScholarshipID,
+                                        Status: item.Status,
+                                        EntryID: item.EntryID,
+                                    })
+                                    onActivate(item);
+                                }}
+                            >
+                                <i className="fa fa-check-circle" />
+                            </button>
+                        ) :
+                            (
                                 <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-sm btn-danger"
                                     onClick={() => {
                                         setEnrolmentFormData({
                                             ...enrolmentFormData,
@@ -379,75 +386,54 @@ function FinanceSettings(props) {
                                             EntryID: item.EntryID,
                                         })
                                         onActivate(item);
-                                    }
-                                    }
+                                    }}
                                 >
-                                    <i className="fa fa-check-circle" />
+                                    <i className="fa fa-trash" />
                                 </button>
-                            ) :
-                                (
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => {
-                                            setEnrolmentFormData({
-                                                ...enrolmentFormData,
-                                                StudentID: item.StudentID,
-                                                ScholarshipID: item.ScholarshipID,
-                                                Status: item.Status,
-                                                EntryID: item.EntryID,
-                                            })
-                                            onActivate(item);
-                                        }
-
-                                        }
-                                    >
-                                        <i className="fa fa-trash" />
-                                    </button>
-                                ),
-                        });
+                            ),
                     });
-                    setEnrolmentDatatable({
-                        ...enrolmentDatatable,
-                        columns: enrolmentDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setEnrolmentDatatable({
+                    ...enrolmentDatatable,
+                    columns: enrolmentDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
 
-        await axios.get(`${serverLink}staff/academics/course/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    setCourseList(result.data)
-                }
-            }).catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+        try {
+            const { success, data } = await api.get("staff/academics/course/list");
+            if (success && data.length > 0) {
+                setCourseList(data)
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
 
-        await axios.get(`${serverLink}staff/student-manager/student/active`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    // Sort students alphabetically by full name
-                    const sortedStudents = result.data.sort((a, b) => {
-                        const nameA = `${a.FirstName} ${a.MiddleName} ${a.Surname}`.toUpperCase();
-                        const nameB = `${b.FirstName} ${b.MiddleName} ${b.Surname}`.toUpperCase();
-                        return nameA.localeCompare(nameB);
-                    });
+        try {
+            const { success, data } = await api.get("staff/student-manager/student/active");
+            if (success && data.length > 0) {
+                // Sort students alphabetically by full name
+                const sortedStudents = data.sort((a, b) => {
+                    const nameA = `${a.FirstName} ${a.MiddleName} ${a.Surname}`.toUpperCase();
+                    const nameB = `${b.FirstName} ${b.MiddleName} ${b.Surname}`.toUpperCase();
+                    return nameA.localeCompare(nameB);
+                });
 
-                    // Create options for react-select
-                    const options = sortedStudents.map((student, index) => ({
-                        value: student.StudentID,
-                        label: `${index + 1}. ${student.FirstName} ${student.MiddleName} ${student.Surname} (${student.StudentID})`
-                    }));
+                // Create options for react-select
+                const options = sortedStudents.map((student, index) => ({
+                    value: student.StudentID,
+                    label: `${index + 1}. ${student.FirstName} ${student.MiddleName} ${student.Surname} (${student.StudentID})`
+                }));
 
-                    setStudentList(sortedStudents);
-                    setStudentOptions(options);
-                }
-            }).catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+                setStudentList(sortedStudents);
+                setStudentOptions(options);
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
     };
 
     const onTuitionEdit = (e) => {
@@ -504,72 +490,52 @@ function FinanceSettings(props) {
         }
 
         if (tuitionFormData.EntryID === "") {
-            await axios
-                .post(`${serverLink}staff/finance/tuition/add`, tuitionFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Tuition Fee Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setTuitionFormData({
-                            ...tuitionFormData,
-                            CourseCode: "",
-                            TuitionAmount: "",
-                            TuitionAmountIntl: "",
-                            Level: "",
-                            Semester: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist") {
-                        showAlert("TUITION EXIST", "Tuition Fee already exist!", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.post("staff/finance/tuition/add", tuitionFormData);
+                if (success && data.message === "success") {
+                    toast.success("Tuition Fee Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setTuitionFormData({
+                        ...tuitionFormData,
+                        CourseCode: "",
+                        TuitionAmount: "",
+                        TuitionAmountIntl: "",
+                        Level: "",
+                        Semester: "",
+                        EntryID: "",
+                    });
+                } else if (data.message === "exist") {
+                    showAlert("TUITION EXIST", "Tuition Fee already exist!", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/finance/tuition/update`, tuitionFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Tuition Fee Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setTuitionFormData({
-                            ...tuitionFormData,
-                            CourseCode: "",
-                            TuitionAmount: "",
-                            TuitionAmountIntl: "",
-                            Level: "",
-                            Semester: "",
-                            EntryID: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.patch("staff/finance/tuition/update", tuitionFormData);
+                if (success && data.message === "success") {
+                    toast.success("Tuition Fee Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setTuitionFormData({
+                        ...tuitionFormData,
+                        CourseCode: "",
+                        TuitionAmount: "",
+                        TuitionAmountIntl: "",
+                        Level: "",
+                        Semester: "",
+                        EntryID: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
@@ -592,70 +558,50 @@ function FinanceSettings(props) {
         }
 
         if (otherFeeFormData.EntryID === "") {
-            await axios
-                .post(`${serverLink}staff/finance/other-fee/add`, otherFeeFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Other Fee Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setOtherFeeFormData({
-                            ...otherFeeFormData,
-                            Title: "",
-                            Amount: "",
-                            PaidBy: "",
-                            IsRequired: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist") {
-                        showAlert("OTHER FEE EXIST", "Other Fee already exist!", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.post("staff/finance/other-fee/add", otherFeeFormData);
+                if (success && data.message === "success") {
+                    toast.success("Other Fee Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setOtherFeeFormData({
+                        ...otherFeeFormData,
+                        Title: "",
+                        Amount: "",
+                        PaidBy: "",
+                        IsRequired: "",
+                        EntryID: "",
+                    });
+                } else if (data.message === "exist") {
+                    showAlert("OTHER FEE EXIST", "Other Fee already exist!", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/finance/other-fee/update`, otherFeeFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Other Fee Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setOtherFeeFormData({
-                            ...otherFeeFormData,
-                            Title: "",
-                            Amount: "",
-                            PaidBy: "",
-                            IsRequired: "",
-                            EntryID: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.patch("staff/finance/other-fee/update", otherFeeFormData);
+                if (success && data.message === "success") {
+                    toast.success("Other Fee Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setOtherFeeFormData({
+                        ...otherFeeFormData,
+                        Title: "",
+                        Amount: "",
+                        PaidBy: "",
+                        IsRequired: "",
+                        EntryID: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
@@ -678,70 +624,50 @@ function FinanceSettings(props) {
         }
 
         if (scholarshipFormData.EntryID === "") {
-            await axios
-                .post(`${serverLink}staff/finance/scholarship/add`, scholarshipFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Scholarship Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setScholarshipFormData({
-                            ...scholarshipFormData,
-                            ScholarshipName: "",
-                            TuitionPercentage: "",
-                            HostelPercentage: "",
-                            FeedingPercentage: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist") {
-                        showAlert("SCHOLARSHIP EXIST", "Scholarship already exist!", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.post("staff/finance/scholarship/add", scholarshipFormData);
+                if (success && data.message === "success") {
+                    toast.success("Scholarship Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setScholarshipFormData({
+                        ...scholarshipFormData,
+                        ScholarshipName: "",
+                        TuitionPercentage: "",
+                        HostelPercentage: "",
+                        FeedingPercentage: "",
+                        EntryID: "",
+                    });
+                } else if (data.message === "exist") {
+                    showAlert("SCHOLARSHIP EXIST", "Scholarship already exist!", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/finance/scholarship/update`, scholarshipFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Scholarship Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setScholarshipFormData({
-                            ...scholarshipFormData,
-                            ScholarshipName: "",
-                            TuitionPercentage: "",
-                            HostelPercentage: "",
-                            FeedingPercentage: "",
-                            EntryID: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.patch("staff/finance/scholarship/update", scholarshipFormData);
+                if (success && data.message === "success") {
+                    toast.success("Scholarship Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setScholarshipFormData({
+                        ...scholarshipFormData,
+                        ScholarshipName: "",
+                        TuitionPercentage: "",
+                        HostelPercentage: "",
+                        FeedingPercentage: "",
+                        EntryID: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
@@ -756,68 +682,48 @@ function FinanceSettings(props) {
         }
 
         if (enrolmentFormData.EntryID === "") {
-            await axios
-                .post(`${serverLink}staff/finance/scholarship-enrolment/add`, enrolmentFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Student Enroled Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setEnrolmentFormData({
-                            ...enrolmentFormData,
-                            StudentID: "",
-                            ScholarshipID: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist") {
-                        showAlert("ENROLMENT EXIST", "This student has been enroled for scholarship !", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.post("staff/finance/scholarship-enrolment/add", enrolmentFormData);
+                if (success && data.message === "success") {
+                    toast.success("Student Enroled Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setEnrolmentFormData({
+                        ...enrolmentFormData,
+                        StudentID: "",
+                        ScholarshipID: "",
+                        EntryID: "",
+                    });
+                } else if (data.message === "exist") {
+                    showAlert("ENROLMENT EXIST", "This student has been enroled for scholarship !", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/finance/scholarship-enrolment/update`, enrolmentFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Scholarship Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setEnrolmentFormData({
-                            ...enrolmentFormData,
-                            ScholarshipName: "",
-                            TuitionPercentage: "",
-                            HostelPercentage: "",
-                            FeedingPercentage: "",
-                            EntryID: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.patch("staff/finance/scholarship-enrolment/update", enrolmentFormData);
+                if (success && data.message === "success") {
+                    toast.success("Scholarship Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setEnrolmentFormData({
+                        ...enrolmentFormData,
+                        ScholarshipName: "",
+                        TuitionPercentage: "",
+                        HostelPercentage: "",
+                        FeedingPercentage: "",
+                        EntryID: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
@@ -831,62 +737,42 @@ function FinanceSettings(props) {
             StudentName: item.StudentName
         }
         if (sendData.Status === "Active") {
-            await axios
-                .patch(`${serverLink}staff/finance/scholarship-enrolment/deactivate`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Scholarship Removed Successfully");
-                        getRecords();
-                        setEnrolmentFormData({
-                            ...sendData,
-                            StudentID: "",
-                            ScholarshipID: "",
-                            EntryID: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.patch("staff/finance/scholarship-enrolment/deactivate", sendData);
+                if (success && data.message === "success") {
+                    toast.success("Scholarship Removed Successfully");
+                    getRecords();
+                    setEnrolmentFormData({
+                        ...sendData,
+                        StudentID: "",
+                        ScholarshipID: "",
+                        EntryID: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/finance/scholarship-enrolment/activate`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Scholarship Removed Successfully");
-                        getRecords();
-                        setEnrolmentFormData({
-                            ...sendData,
-                            StudentID: "",
-                            ScholarshipID: "",
-                            EntryID: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            try {
+                const { success, data } = await api.patch("staff/finance/scholarship-enrolment/activate", sendData);
+                if (success && data.message === "success") {
+                    toast.success("Scholarship Removed Successfully");
+                    getRecords();
+                    setEnrolmentFormData({
+                        ...sendData,
+                        StudentID: "",
+                        ScholarshipID: "",
+                        EntryID: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } catch (error) {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
@@ -1007,20 +893,14 @@ function FinanceSettings(props) {
                                     </div>
                                     <div className="form-group col-md-5 mb-4">
                                         <label htmlFor="ScholarshipID">Scholarship</label>
-                                        <select
-                                            id={"ScholarshipID"}
-                                            onChange={onEnrolmentEdit}
-                                            value={enrolmentFormData.ScholarshipID}
-                                            className={"form-control"}
-                                        >
-                                            <option>Select Scholarship</option>
-                                            {
-                                                scholarshipList.length > 0 && scholarshipList.map((item, index) => {
-                                                    return <option key={index} value={item.EntryID}>{item.ScholarshipName}</option>
-                                                })
-                                            }
-
-                                        </select>
+                                        <SearchSelect
+                                            id="ScholarshipID"
+                                            value={scholarshipList.map(item => ({ value: item.EntryID.toString(), label: item.ScholarshipName })).find(opt => opt.value === enrolmentFormData.ScholarshipID?.toString()) || null}
+                                            options={scholarshipList.map(item => ({ value: item.EntryID.toString(), label: item.ScholarshipName }))}
+                                            onChange={(selected) => onEnrolmentEdit({ target: { id: 'ScholarshipID', value: selected?.value || '' } })}
+                                            placeholder="Select Scholarship"
+                                            isClearable={false}
+                                        />
                                     </div>
                                     <div className="form-group  col-md-2 pt-6 ">
                                         <button onClick={onSubmitEnrolment} className="btn btn-primary w-100">
@@ -1038,57 +918,37 @@ function FinanceSettings(props) {
                     <div className={"row"}>
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="CourseCode">Course</label>
-                            <select
-                                id={"CourseCode"}
-                                onChange={onTuitionEdit}
-                                value={tuitionFormData.CourseCode}
-                                className={"form-control"}
-                            >
-                                <option>Select Course</option>
-                                {
-                                    courseList.length > 0 && courseList.map((course, index) => {
-                                        return <option key={index} value={course.CourseCode}>{course.CourseName}</option>
-                                    })
-                                }
-
-                            </select>
+                            <SearchSelect
+                                id="CourseCode"
+                                value={courseList.map(course => ({ value: course.CourseCode, label: course.CourseName })).find(opt => opt.value === tuitionFormData.CourseCode) || null}
+                                options={courseList.map(course => ({ value: course.CourseCode, label: course.CourseName }))}
+                                onChange={(selected) => onTuitionEdit({ target: { id: 'CourseCode', value: selected?.value || '' } })}
+                                placeholder="Select Course"
+                                isClearable={false}
+                            />
                         </div>
 
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="Level">Level</label>
-                            <select
-                                id={"Level"}
-                                onChange={onTuitionEdit}
-                                value={tuitionFormData.Level}
-                                className={"form-control"}
-                            >
-                                <option>Select Level</option>
-                                <option value="100">100</option>
-                                <option value="200">200</option>
-                                <option value="300">300</option>
-                                <option value="400">400</option>
-                                <option value="500">500</option>
-                                <option value="600">600</option>
-                                <option value="700">700</option>
-                                <option value="800">800</option>
-                                <option value="900">900</option>
-                            </select>
+                            <SearchSelect
+                                id="Level"
+                                value={[{ value: '100', label: '100' }, { value: '200', label: '200' }, { value: '300', label: '300' }, { value: '400', label: '400' }, { value: '500', label: '500' }, { value: '600', label: '600' }, { value: '700', label: '700' }, { value: '800', label: '800' }, { value: '900', label: '900' }].find(opt => opt.value === tuitionFormData.Level?.toString()) || null}
+                                options={[{ value: '100', label: '100' }, { value: '200', label: '200' }, { value: '300', label: '300' }, { value: '400', label: '400' }, { value: '500', label: '500' }, { value: '600', label: '600' }, { value: '700', label: '700' }, { value: '800', label: '800' }, { value: '900', label: '900' }]}
+                                onChange={(selected) => onTuitionEdit({ target: { id: 'Level', value: selected?.value || '' } })}
+                                placeholder="Select Level"
+                                isClearable={false}
+                            />
                         </div>
                         <div className="form-group col-md-12 mb-4">
                             <label htmlFor="Semester">Semester</label>
-                            <select
-                                id={"Semester"}
-                                onChange={onTuitionEdit}
-                                value={tuitionFormData.Semester}
-                                className={"form-control"}
-                            >
-                                <option value="">Select Semester</option>
-                                <option value="All">All</option>
-                                <option value="First">First</option>
-                                <option value="Second">Second</option>
-                                <option value="Third">Third</option>
-                                <option value="Forth">Forth</option>
-                            </select>
+                            <SearchSelect
+                                id="Semester"
+                                value={[{ value: 'All', label: 'All' }, { value: 'First', label: 'First' }, { value: 'Second', label: 'Second' }, { value: 'Third', label: 'Third' }, { value: 'Forth', label: 'Forth' }].find(opt => opt.value === tuitionFormData.Semester) || null}
+                                options={[{ value: 'All', label: 'All' }, { value: 'First', label: 'First' }, { value: 'Second', label: 'Second' }, { value: 'Third', label: 'Third' }, { value: 'Forth', label: 'Forth' }]}
+                                onChange={(selected) => onTuitionEdit({ target: { id: 'Semester', value: selected?.value || '' } })}
+                                placeholder="Select Semester"
+                                isClearable={false}
+                            />
                         </div>
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="TuitionAmount">Tuition Fee(Local)</label>
@@ -1146,30 +1006,25 @@ function FinanceSettings(props) {
                         </div>
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="PaidBy">Paid By</label>
-                            <select
-                                id={"PaidBy"}
-                                onChange={onOtherFeeEdit}
-                                value={otherFeeFormData.PaidBy}
-                                className={"form-control"}
-                            >
-                                <option>Select an option</option>
-                                <option value="Both">Both</option>
-                                <option value="Returning Student">Returning Student</option>
-                                <option value="New Student">New Student</option>
-                            </select>
+                            <SearchSelect
+                                id="PaidBy"
+                                value={[{ value: 'Both', label: 'Both' }, { value: 'Returning Student', label: 'Returning Student' }, { value: 'New Student', label: 'New Student' }].find(opt => opt.value === otherFeeFormData.PaidBy) || null}
+                                options={[{ value: 'Both', label: 'Both' }, { value: 'Returning Student', label: 'Returning Student' }, { value: 'New Student', label: 'New Student' }]}
+                                onChange={(selected) => onOtherFeeEdit({ target: { id: 'PaidBy', value: selected?.value || '' } })}
+                                placeholder="Select an option"
+                                isClearable={false}
+                            />
                         </div>
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="IsRequired">Is Required</label>
-                            <select
-                                id={"IsRequired"}
-                                onChange={onOtherFeeEdit}
-                                value={otherFeeFormData.IsRequired}
-                                className={"form-control"}
-                            >
-                                <option value="">Select an option</option>
-                                <option value="1">Yes</option>
-                                <option value="0">No</option>
-                            </select>
+                            <SearchSelect
+                                id="IsRequired"
+                                value={[{ value: '1', label: 'Yes' }, { value: '0', label: 'No' }].find(opt => opt.value === otherFeeFormData.IsRequired?.toString()) || null}
+                                options={[{ value: '1', label: 'Yes' }, { value: '0', label: 'No' }]}
+                                onChange={(selected) => onOtherFeeEdit({ target: { id: 'IsRequired', value: selected?.value || '' } })}
+                                placeholder="Select an option"
+                                isClearable={false}
+                            />
                         </div>
                     </div>
 

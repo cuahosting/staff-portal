@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { connect } from "react-redux";
-import { serverLink } from "../../../resources/url";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import { currencyConverter, formatDateAndTime } from "../../../resources/constants";
 import { toast } from "react-toastify";
 import AGTable from "../../common/table/AGTable";
 import "./style.css";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function SalaryBreakdownReport(props) {
-    const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [isDataLoading, setIsDataLoading] = useState(false);
@@ -46,11 +45,10 @@ function SalaryBreakdownReport(props) {
     // Fetch available months on load
     const getAvailableMonths = async () => {
         try {
-            const result = await axios.get(
-                `${serverLink}staff/human-resources/finance-report/report/salary-months`,
-                token
-            );
-            setAvailableMonths(result.data || []);
+            const { success, data } = await api.get("staff/human-resources/finance-report/report/salary-months");
+            if (success) {
+                setAvailableMonths(data || []);
+            }
             setIsLoading(false);
         } catch (err) {
             console.error("Error fetching available months:", err);
@@ -69,15 +67,15 @@ function SalaryBreakdownReport(props) {
 
         setIsDataLoading(true);
         try {
-            const result = await axios.get(
-                `${serverLink}staff/human-resources/finance-report/report/salary-breakdown/${salaryDate}`,
-                token
-            );
+            const { success, data } = await api.get(`staff/human-resources/finance-report/report/salary-breakdown/${salaryDate}`);
+            if (!success) {
+                throw new Error("Failed to fetch salary breakdown");
+            }
 
-            const data = result.data || [];
+            const result = data || [];
 
             // Format the data for display
-            const formattedData = data.map((item, index) => ({
+            const formattedData = result.map((item, index) => ({
                 sn: index + 1,
                 StaffID: item.StaffID,
                 FullName: item.FullName?.trim() || '',
@@ -157,18 +155,15 @@ function SalaryBreakdownReport(props) {
         setSendingEmails(prev => ({ ...prev, [staffId]: true }));
 
         try {
-            const response = await axios.post(
-                `${serverLink}staff/hr/payslip/send/${staffId}/${salaryMonth}`,
-                {
-                    sent_by: props.LoginDetails[0].StaffID
-                },
-                token
+            const { success, data } = await api.post(
+                `staff/hr/payslip/send/${staffId}/${salaryMonth}`,
+                { sent_by: props.LoginDetails[0].StaffID }
             );
 
-            if (response.data.message === 'success') {
+            if (success && data.message === 'success') {
                 toast.success(`Payslip sent successfully to ${staffName}`);
             } else {
-                toast.error(response.data.message || 'Failed to send payslip');
+                toast.error(data.message || 'Failed to send payslip');
             }
         } catch (error) {
             console.error('Error sending payslip:', error);
@@ -203,6 +198,14 @@ function SalaryBreakdownReport(props) {
             return dateStr;
         }
     };
+
+    // Options for SearchSelect
+    const monthOptions = useMemo(() => {
+        return availableMonths.map(item => ({
+            value: item.SalaryDate,
+            label: formatMonth(item.SalaryDate)
+        }));
+    }, [availableMonths]);
 
     // Calculate totals
     const totals = {
@@ -247,18 +250,14 @@ function SalaryBreakdownReport(props) {
                                     <i className="fa fa-calendar me-2 text-primary"></i>
                                     Select Salary Month
                                 </label>
-                                <select
-                                    className="form-select form-select-solid"
-                                    value={selectedMonth}
-                                    onChange={onMonthChange}
-                                >
-                                    <option value="">-- Select Month --</option>
-                                    {availableMonths.map((item, index) => (
-                                        <option key={index} value={item.SalaryDate}>
-                                            {formatMonth(item.SalaryDate)}
-                                        </option>
-                                    ))}
-                                </select>
+                                <SearchSelect
+                                    id="selectedMonth"
+                                    value={monthOptions.find(opt => opt.value === selectedMonth) || null}
+                                    options={monthOptions}
+                                    onChange={(selected) => onMonthChange({ target: { value: selected?.value || '' } })}
+                                    placeholder="-- Select Month --"
+                                    isClearable={false}
+                                />
                             </div>
                             {selectedMonth && (
                                 <div className="col-lg-8 d-flex align-items-end">

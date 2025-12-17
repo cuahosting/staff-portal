@@ -2,16 +2,14 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import {currencyConverter, formatDateAndTime} from "../../../resources/constants";
-import {connect} from "react-redux";
+import { currencyConverter, formatDateAndTime } from "../../../resources/constants";
+import { connect } from "react-redux";
 
 function Inventory(props) {
-    const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [courseList, setCourseList] = useState([]);
@@ -109,82 +107,76 @@ function Inventory(props) {
 
 
     const getRecords = async () => {
-        await axios.get(`${serverLink}staff/hr/inventory/list`, token)
-            .then((result) => {
-                const data = result.data;
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            ItemName: item.ItemName,
-                            Quantity: item.Quantity,
-                            QuantityUsed: item.QuantityUsed,
-                            AvailableQuantity: parseInt(item.Quantity) - parseInt(item.QuantityUsed),
-                            Amount: currencyConverter(item.Amount),
-                            ReceiptNo: item.ReceiptNo,
-                            InsertedBy: item.InsertedBy,
-                            action: (
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#inventory_usage_modal"
-                                    onClick={() =>
-                                        setInventoryUsageFormData({
-                                            ...inventoryUsageFormData,
-                                            ItemName: item.ItemName,
-                                            MainQuantity: parseInt(item.Quantity) - parseInt(item.QuantityUsed),
-                                            MainQuantityUsed: item.QuantityUsed,
-                                            Quantity: "",
-                                            InventoryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-check-square" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/hr/inventory/list");
+            if (success && data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        ItemName: item.ItemName,
+                        Quantity: item.Quantity,
+                        QuantityUsed: item.QuantityUsed,
+                        AvailableQuantity: parseInt(item.Quantity) - parseInt(item.QuantityUsed),
+                        Amount: currencyConverter(item.Amount),
+                        ReceiptNo: item.ReceiptNo,
+                        InsertedBy: item.InsertedBy,
+                        action: (
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#inventory_usage_modal"
+                                onClick={() =>
+                                    setInventoryUsageFormData({
+                                        ...inventoryUsageFormData,
+                                        ItemName: item.ItemName,
+                                        MainQuantity: parseInt(item.Quantity) - parseInt(item.QuantityUsed),
+                                        MainQuantityUsed: item.QuantityUsed,
+                                        Quantity: "",
+                                        InventoryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-check-square" />
+                            </button>
+                        ),
                     });
-                    setInventoryDatatable({
-                        ...inventoryDatatable,
-                        columns: inventoryDatatable.columns,
-                        rows: rows,
-                    });
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+                });
+                setInventoryDatatable({
+                    ...inventoryDatatable,
+                    columns: inventoryDatatable.columns,
+                    rows: rows,
+                });
+            }
+            setIsLoading(false);
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
 
-        await axios.get(`${serverLink}staff/hr/inventory/usage/list`, token)
-            .then((result) => {
-                const data = result.data;
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            ItemName: item.ItemName,
-                            Quantity: item.Quantity,
-                            Reason: item.Reason,
-                            InsertedBy: item.InsertedBy,
-                            EntryID: item.EntryID,
-                        });
+        try {
+            const { success, data } = await api.get("staff/hr/inventory/usage/list");
+            if (success && data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        ItemName: item.ItemName,
+                        Quantity: item.Quantity,
+                        Reason: item.Reason,
+                        InsertedBy: item.InsertedBy,
+                        EntryID: item.EntryID,
                     });
-                    setInventoryUsageDatatable({
-                        ...inventoryUsageDatatable,
-                        columns: inventoryUsageDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR STATE");
-            });
-
-
+                });
+                setInventoryUsageDatatable({
+                    ...inventoryUsageDatatable,
+                    columns: inventoryUsageDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
     };
 
     const onInventoryEdit = (e) => {
@@ -211,12 +203,11 @@ function Inventory(props) {
             return false;
         }
 
-
         if (inventoryFormData.EntryID === "") {
-            await axios
-                .post(`${serverLink}staff/hr/inventory/add`, inventoryFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.post("staff/hr/inventory/add", inventoryFormData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Item Added Successfully");
                         document.getElementById("closeModal").click()
                         getRecords();
@@ -230,7 +221,7 @@ function Inventory(props) {
                             InsertedBy: props.loginData[0].StaffID,
                             EntryID: "",
                         });
-                    } else if (result.data.message === "exist") {
+                    } else if (data.message === "exist") {
                         showAlert("ITEM EXIST", "Item already exist!", "error");
                     } else {
                         showAlert(
@@ -239,16 +230,15 @@ function Inventory(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
-
     };
 
     const onSubmitInventoryUsed = async () => {
@@ -262,46 +252,44 @@ function Inventory(props) {
             return false;
         }
 
-        if (inventoryUsageFormData.Quantity >  inventoryUsageFormData.MainQuantity) {
+        if (inventoryUsageFormData.Quantity > inventoryUsageFormData.MainQuantity) {
             showAlert("QUANTITY ERROR", "Quantity cannot be more than the selected item quantity", "error");
             return false;
         }
 
-            await axios
-                .post(`${serverLink}staff/hr/inventory/usage/add`, inventoryUsageFormData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Inventory Usage Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setInventoryUsageFormData({
-                            ...inventoryUsageFormData,
-                            ItemName: "",
-                            InventoryID: "",
-                            MainQuantity: 0,
-                            MainQuantityUsed: 0,
-                            Quantity: 0,
-                            Reason: "",
-                            InsertedBy: props.loginData[0].StaffID,
-                            EntryID: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
+        try {
+            const { success, data } = await api.post("staff/hr/inventory/usage/add", inventoryUsageFormData);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Inventory Usage Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setInventoryUsageFormData({
+                        ...inventoryUsageFormData,
+                        ItemName: "",
+                        InventoryID: "",
+                        MainQuantity: 0,
+                        MainQuantityUsed: 0,
+                        Quantity: 0,
+                        Reason: "",
+                        InsertedBy: props.loginData[0].StaffID,
+                        EntryID: "",
+                    });
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
-
-
+                }
+            }
+        } catch (error) {
+            showAlert(
+                "NETWORK ERROR",
+                "Please check your connection and try again!",
+                "error"
+            );
+        }
     };
 
 
@@ -314,7 +302,7 @@ function Inventory(props) {
         <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Inventory"} items={["Human Resource", "Others", "Inventory"]}/>
+            <PageHeader title={"Inventory"} items={["Human Resource", "Others", "Inventory"]} />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-body p-0">
@@ -440,7 +428,7 @@ function Inventory(props) {
                                 className={"form-control"}
                                 rows={3}
                                 cols={3}
-                                >
+                            >
 
                             </textarea>
                         </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
 import { connect } from "react-redux";
 import InvoiceDetails from "./invoice-details";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function InvoiceManagement(props) {
     const token = props.loginData[0]?.token;
@@ -41,6 +42,20 @@ function InvoiceManagement(props) {
         ],
         rows: [],
     });
+
+    const semesterOptions = useMemo(() => {
+        return [{ value: '', label: 'All Semesters' }, ...semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: s.SemesterName || s.SemesterCode
+        }))];
+    }, [semesterList]);
+
+    const statusOptions = [
+        { value: '', label: 'All Status' },
+        { value: 'paid', label: 'Paid' },
+        { value: 'partial', label: 'Partial' },
+        { value: 'unpaid', label: 'Unpaid' }
+    ];
 
     const getInvoices = async () => {
         let endpoint = "staff/ac-finance/invoices/list";
@@ -99,9 +114,8 @@ function InvoiceManagement(props) {
                 ),
                 Status: (
                     <span
-                        className={`badge badge-light-${
-                            status === "Paid" ? "success" : status === "Partial" ? "warning" : "danger"
-                        }`}
+                        className={`badge badge-light-${status === "Paid" ? "success" : status === "Partial" ? "warning" : "danger"
+                            }`}
                     >
                         {status}
                     </span>
@@ -326,35 +340,27 @@ function InvoiceManagement(props) {
                                 <label htmlFor="SemesterCode" className="form-label">
                                     Semester
                                 </label>
-                                <select
+                                <SearchSelect
                                     id="SemesterCode"
-                                    className="form-select form-select-solid"
-                                    value={filters.SemesterCode}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">All Semesters</option>
-                                    {semesterList.map((s) => (
-                                        <option key={s.SemesterCode} value={s.SemesterCode}>
-                                            {s.SemesterName || s.SemesterCode}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={semesterOptions.find(opt => opt.value === filters.SemesterCode) || semesterOptions[0]}
+                                    options={semesterOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                    placeholder="All Semesters"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-3">
                                 <label htmlFor="Status" className="form-label">
                                     Status
                                 </label>
-                                <select
+                                <SearchSelect
                                     id="Status"
-                                    className="form-select form-select-solid"
-                                    value={filters.Status}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">All Status</option>
-                                    <option value="paid">Paid</option>
-                                    <option value="partial">Partial</option>
-                                    <option value="unpaid">Unpaid</option>
-                                </select>
+                                    value={statusOptions.find(opt => opt.value === filters.Status) || statusOptions[0]}
+                                    options={statusOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'Status', value: selected?.value || '' } })}
+                                    placeholder="All Status"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-3">
                                 <button className="btn btn-light me-2" onClick={clearFilters}>

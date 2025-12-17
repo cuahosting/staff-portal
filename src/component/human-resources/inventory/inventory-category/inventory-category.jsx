@@ -1,115 +1,112 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 import ReportTable from "../../../common/table/ReportTable";
 import InventoryCategoryForm from "./inventory-category-form";
 import InventorySubCategoryForm from "./inventory-sub-category-form";
 
 function InventoryCategory(props) {
-    const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [openModal2, setOpenModal2] = useState(false);
-    const initialCategoryValue = {  category_id: '', category_name: '', description: '', submitted_by: '', updated_by: ''}
-    const initialSubCategoryValue = {  sub_category_id: '', category_id: '', category_name: '', sub_category_name: '', description: '', submitted_by: '', updated_by: ''}
+    const initialCategoryValue = { category_id: '', category_name: '', description: '', submitted_by: '', updated_by: '' }
+    const initialSubCategoryValue = { sub_category_id: '', category_id: '', category_name: '', sub_category_name: '', description: '', submitted_by: '', updated_by: '' }
     const [formData, setFormData] = useState(initialCategoryValue);
     const [formData2, setFormData2] = useState(initialSubCategoryValue);
 
     const [categoryList, setCategoryList] = useState([]);
     const columns = ["S/N", "Action", "Category Name", "Description", "Inserted By"];
     const columns2 = ["S/N", "Action", "Category Name", "Sub Category Name", "Description", "Inserted By"];
-    const [tableData,setTableData] = useState([]);
-    const [tableData2,setTableData2] = useState([]);
+    const [tableData, setTableData] = useState([]);
+    const [tableData2, setTableData2] = useState([]);
 
     const fetchCategoryData = async () => {
-        await axios.get(`${serverLink}staff/inventory/category/data/list`, props.loginData[0].token)
-            .then(res => {
-                if (res.data.message === 'success') {
-                    const categories = [];
-                    const sub_categories = [];
+        try {
+            const { success, data } = await api.get("staff/inventory/category/data/list");
+            if (success && data.message === 'success') {
+                const categories = [];
+                const sub_categories = [];
 
-                    if (res.data.Category.length > 0) {
-                        res.data.Category.map((r, i) => {
-                            categories.push([i+1,
-                                (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        onClick={() => {
-                                            setFormData({
-                                                ...formData,
-                                                category_name: r.category_name,
-                                                description: r.description,
-                                                submitted_date: r.submitted_date,
-                                                submitted_by: r.submitted_by,
-                                                category_id: r.category_id,
-                                            })
-                                        }
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                                r.category_name, r.description, r.InsertedBy
-                            ])
-                        })
-                        setTableData(categories)
-                    }
-
-                    if (res.data.SubCategory.length > 0) {
-                        res.data.SubCategory.map((r, i) => {
-                            sub_categories.push([i+1,
-                                (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#sub_cat"
-                                        onClick={() => {
-                                            onOpenModal2();
-                                            setFormData2({
-                                                ...formData2,
-                                                category_id: r.category_id,
-                                                category_name: r.category_name,
-                                                sub_category_name: r.sub_category_name,
-                                                description: r.description,
-                                                submitted_date: r.submitted_date,
-                                                submitted_by: r.submitted_by,
-                                                sub_category_id: r.sub_category_id,
-                                            })
-                                        }
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                                r.category_name, r.sub_category_name, r.description, r.InsertedBy
-                            ])
-                        })
-                        setTableData2(sub_categories)
-                    }
-
-                    setCategoryList(res.data.Category)
-                } else {
-                    toast.info("Something went wrong. Please try again!")
+                if (data.Category.length > 0) {
+                    data.Category.map((r, i) => {
+                        categories.push([i + 1,
+                        (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() => {
+                                    setFormData({
+                                        ...formData,
+                                        category_name: r.category_name,
+                                        description: r.description,
+                                        submitted_date: r.submitted_date,
+                                        submitted_by: r.submitted_by,
+                                        category_id: r.category_id,
+                                    })
+                                }
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                        r.category_name, r.description, r.InsertedBy
+                        ])
+                    })
+                    setTableData(categories)
                 }
-                setIsLoading(false)
-            })
-            .catch(e => {
-                toast.error(`${e.response.statusText}: ${e.response.data}`)
-            })
+
+                if (data.SubCategory.length > 0) {
+                    data.SubCategory.map((r, i) => {
+                        sub_categories.push([i + 1,
+                        (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#sub_cat"
+                                onClick={() => {
+                                    onOpenModal2();
+                                    setFormData2({
+                                        ...formData2,
+                                        category_id: r.category_id,
+                                        category_name: r.category_name,
+                                        sub_category_name: r.sub_category_name,
+                                        description: r.description,
+                                        submitted_date: r.submitted_date,
+                                        submitted_by: r.submitted_by,
+                                        sub_category_id: r.sub_category_id,
+                                    })
+                                }
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                        r.category_name, r.sub_category_name, r.description, r.InsertedBy
+                        ])
+                    })
+                    setTableData2(sub_categories)
+                }
+
+                setCategoryList(data.Category)
+            } else {
+                toast.info("Something went wrong. Please try again!")
+            }
+            setIsLoading(false)
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     }
 
     useEffect(() => {
         fetchCategoryData()
-    },[formData])
+    }, [formData])
 
     const onOpenModal = () => {
         setFormData(initialCategoryValue)
@@ -121,13 +118,13 @@ function InventoryCategory(props) {
     const handleFormValueChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.id] : e.target.value
+            [e.target.id]: e.target.value
         })
     }
     const handleFormValueChange2 = (e) => {
         setFormData2({
             ...formData2,
-            [e.target.id] : e.target.value
+            [e.target.id]: e.target.value
         })
     }
 
@@ -144,10 +141,10 @@ function InventoryCategory(props) {
                 submitted_by: props.loginData[0].StaffID
             }
 
-            await axios
-                .post(`${serverLink}staff/inventory/category/add`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.post("staff/inventory/category/add", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Category Data Added Successfully");
                         fetchCategoryData();
                         setFormData({
@@ -156,7 +153,7 @@ function InventoryCategory(props) {
                         })
                         setIsFormLoading(false)
                         document.getElementById("closeModal").click();
-                    } else if (result.data.message === "exist") {
+                    } else if (data.message === "exist") {
                         setIsFormLoading(false)
                         showAlert("CATEGORY EXIST", "Category already exist!", "error");
                     } else {
@@ -167,25 +164,24 @@ function InventoryCategory(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         } else {
             let sendData = {
                 ...formData,
                 updated_by: props.loginData[0].StaffID
             }
-            await axios
-                .patch(`${serverLink}staff/inventory/category/update`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.patch("staff/inventory/category/update", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Category Data Updated Successfully");
                         fetchCategoryData();
                         setFormData({
@@ -202,15 +198,15 @@ function InventoryCategory(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
 
     }
@@ -233,10 +229,10 @@ function InventoryCategory(props) {
                 submitted_by: props.loginData[0].StaffID
             }
 
-            await axios
-                .post(`${serverLink}staff/inventory/sub_category/add`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.post("staff/inventory/sub_category/add", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Sub Category Added Successfully");
                         fetchCategoryData();
                         setFormData2({
@@ -245,7 +241,7 @@ function InventoryCategory(props) {
                         })
                         setIsFormLoading(false)
                         document.getElementById("closeModal").click();
-                    } else if (result.data.message === "exist") {
+                    } else if (data.message === "exist") {
                         setIsFormLoading(false)
                         showAlert("SUB CATEGORY EXIST", "Sub Category already exist!", "error");
                     } else {
@@ -256,25 +252,24 @@ function InventoryCategory(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         } else {
             let sendData = {
                 ...formData2,
                 updated_by: props.loginData[0].StaffID
             }
-            await axios
-                .patch(`${serverLink}staff/inventory/sub_category/update`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.patch("staff/inventory/sub_category/update", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Category Data Updated Successfully");
                         fetchCategoryData();
                         setFormData2({
@@ -291,15 +286,15 @@ function InventoryCategory(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
 
     }
@@ -308,7 +303,7 @@ function InventoryCategory(props) {
         <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Inventory Categories"} items={["Human Resources", "Inventory", "Inventory Categories"]}/>
+            <PageHeader title={"Inventory Categories"} items={["Human Resources", "Inventory", "Inventory Categories"]} />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-body p-0">
@@ -362,10 +357,10 @@ function InventoryCategory(props) {
                 </div>
 
                 <Modal title={"Add Category"}>
-                    <InventoryCategoryForm value = {formData}  isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
+                    <InventoryCategoryForm value={formData} isFormLoading={isFormLoading} onChange={handleFormValueChange} onSubmit={onFormSubmit} />
                 </Modal>
                 <Modal title={"Sub Category Form"} id="sub_cat">
-                    <InventorySubCategoryForm value = {formData2} categoryList={categoryList}  isFormLoading={isFormLoading} onChange={handleFormValueChange2} onSubmit={onFormSubmit2} />
+                    <InventorySubCategoryForm value={formData2} categoryList={categoryList} isFormLoading={isFormLoading} onChange={handleFormValueChange2} onSubmit={onFormSubmit2} />
                 </Modal>
             </div>
         </div>

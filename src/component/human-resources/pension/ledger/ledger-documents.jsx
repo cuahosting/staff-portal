@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "../../../../resources/api";
 import { toast } from "react-toastify";
-import { serverLink } from "../../../../resources/url";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import Loader from "../../../common/loader/loader";
 import Modal from "../../../common/modal/modal";
@@ -10,7 +9,6 @@ import AGReportTable from "../../../common/table/AGReportTable";
 import { formatDateAndTime } from "../../../../resources/constants";
 
 function LedgerDocuments(props) {
-    const token = props.LoginDetails[0].token
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState("off");
     const columns = ["SN", "Action", "Document Type", "Inserted By", "Inserted Date"]
@@ -23,35 +21,33 @@ function LedgerDocuments(props) {
     });
 
     const getDocumentTypes = async () => {
-        await axios.get(`${serverLink}ledger/document-types/list`, token).then((res) => {
-            if (res.data.length > 0) {
-                let rows = []
-                res.data.map((x, i) => {
-                    rows.push([
-                        i + 1,
-                        <button
-                            className="btn btn-sm btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#kt_modal_general"
-                            onClick={() => {
-                                setCreateDocumentType({
-                                    ...documentTypes,
-                                    EntryID: x.EntryID,
-                                    DocumentType: x.DocumentType
-                                })
-                            }} >
-                            <i className="fa fa-pen-alt" /> Edit
-                        </button>,
-                        x.DocumentType,
-                        x.InsertedBy,
-                        formatDateAndTime(x.InsertedDate, "date")
-                    ])
-                })
-                setData(rows)
-            }
-            setIsLoading(false)
-        }).catch((e) => { console.log(e) })
-
+        const { success, data } = await api.get("ledger/document-types/list");
+        if (success && data && data.length > 0) {
+            let rows = []
+            data.map((x, i) => {
+                rows.push([
+                    i + 1,
+                    <button
+                        className="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() => {
+                            setCreateDocumentType({
+                                ...documentTypes,
+                                EntryID: x.EntryID,
+                                DocumentType: x.DocumentType
+                            })
+                        }} >
+                        <i className="fa fa-pen-alt" /> Edit
+                    </button>,
+                    x.DocumentType,
+                    x.InsertedBy,
+                    formatDateAndTime(x.InsertedDate, "date")
+                ])
+            })
+            setData(rows)
+        }
+        setIsLoading(false)
     };
 
     useEffect(() => {
@@ -82,49 +78,38 @@ function LedgerDocuments(props) {
 
         if (documentTypes.EntryID === "") {
             setisFormLoading("on");
-            await axios.post(`${serverLink}ledger/document-types/add`, documentTypes, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Document Type Added Successfully");
-                        getDocumentTypes();
-                        Reset();
-                        document.getElementById("closeModal").click();
-                    } else if (result.data.message === "exists") {
-                        toast.error("Document Type already exists");
-                    } else {
-                        toast.error("error adding document type");
-                    }
-                    setisFormLoading("off");
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.post("ledger/document-types/add", documentTypes);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Document Type Added Successfully");
+                    getDocumentTypes();
+                    Reset();
+                    document.getElementById("closeModal").click();
+                } else if (data.message === "exists") {
+                    toast.error("Document Type already exists");
+                } else {
+                    toast.error("error adding document type");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
+            setisFormLoading("off");
         } else {
             setisFormLoading("on");
-            await axios
-                .patch(`${serverLink}ledger/document-types/update`, documentTypes, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Document Type Updated Successfully");
-                        getDocumentTypes();
-                        Reset();
-                        document.getElementById("closeModal").click();
-                    } else {
-                        toast.error("Something went wrong. Please try again!");
-                    }
-                    setisFormLoading("off");
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.patch("ledger/document-types/update", documentTypes);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Document Type Updated Successfully");
+                    getDocumentTypes();
+                    Reset();
+                    document.getElementById("closeModal").click();
+                } else {
+                    toast.error("Something went wrong. Please try again!");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
+            setisFormLoading("off");
         }
     };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../common/pageheader/pageheader";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import { projectName, serverLink, simpleFileUploadAPIKey } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
@@ -10,7 +10,6 @@ import { connect } from "react-redux";
 import SearchSelect from "../../common/select/SearchSelect";
 
 function UploadStaffDocument(props) {
-  const token = props.loginData[0].token;
 
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
@@ -42,50 +41,37 @@ function UploadStaffDocument(props) {
   const deleteItem = async (id, image) => {
     if (id) {
       toast.info(`Deleting... Please wait!`);
-      await axios
-        .delete(`${serverLink}application/pg/document/delete/${id}/${image}`, token)
-        .then((res) => {
-          if (res.data.message === "success") {
-            // props.update_app_data();
-            toast.success(`Deleted`);
-          } else {
-            toast.error(
-              `Something went wrong. Please check your connection and try again!`
-            );
-          }
-        })
-        .catch((error) => {
-          console.log("NETWORK ERROR", error);
-        });
+      const { success, data } = await api.delete(`application/pg/document/delete/${id}/${image}`);
+      if (success) {
+        if (data.message === "success") {
+          toast.success(`Deleted`);
+        } else {
+          toast.error(`Something went wrong. Please check your connection and try again!`);
+        }
+      } else {
+        console.log("NETWORK ERROR");
+      }
     }
   };
 
   const getStaff = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((response) => {
-        let rows = [];
-        response.data.length > 0 &&
-          response.data.map((row) => {
-            rows.push({ value: row.StaffID, label: row.StaffID + " -- " + row.FirstName + " " + row.MiddleName + " " + row.Surname });
-          });
-        setStaffList(rows);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+    const { success, data } = await api.get("staff/hr/staff-management/staff/list");
+    if (success && data) {
+      let rows = [];
+      data.length > 0 &&
+        data.map((row) => {
+          rows.push({ value: row.StaffID, label: row.StaffID + " -- " + row.FirstName + " " + row.MiddleName + " " + row.Surname });
+        });
+      setStaffList(rows);
+    }
+    setIsLoading(false);
   };
 
   const getStaffDocument = async (staffId) => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/document/`, staffId, token)
-      .then((response) => {
-        setStaffDocuments(response.data);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+    const { success, data } = await api.get(`staff/hr/staff-management/staff/document/`, { staffId });
+    if (success && data) {
+      setStaffDocuments(data);
+    }
   };
 
 
@@ -110,20 +96,17 @@ function UploadStaffDocument(props) {
 
     console.log(sendData)
 
-    // return false;
-    await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/document`, sendData, token)
-      .then((res) => {
-        if (res.data.message === "success") {
-          toast.success(`Document Uploaded`);
-          setAddDocument(false);
-
-        } else {
-          toast.error(`Something went wrong submitting your document!`);
-        }
-      })
-      .catch((error) => {
-        console.log("Error", error);
-      });
+    const { success, data } = await api.post("staff/hr/staff-management/upload/staff/document", sendData);
+    if (success) {
+      if (data.message === "success") {
+        toast.success(`Document Uploaded`);
+        setAddDocument(false);
+      } else {
+        toast.error(`Something went wrong submitting your document!`);
+      }
+    } else {
+      console.log("Error uploading document");
+    }
   }
 
   const onSubmit = async (e) => {
@@ -151,43 +134,25 @@ function UploadStaffDocument(props) {
     let formData = new FormData();
     formData.append("file", addStaffDocument.file);
 
-    await axios
-      .post(`${serverLink}staff/hr/staff-management/uploadDocument`, formData, token)
-      .then((res) => {
-        if (res.data.type === "success") {
-          const sendData = {
-            StaffID: addStaffDocument.StaffID,
-            DocumentType: addStaffDocument.DocumentType,
-            Document: res.data.file.filename,
-            InsertedBy: addStaffDocument.InsertedBy,
-            InsertedDate: addStaffDocument.InsertedDate,
-          };
-          axios
-            .post(
-              `${serverLink}staff/hr/staff-management/upload/staff/document`,
-              sendData, token
-            )
-            .then((res) => {
-              if (res.data.message === "success") {
-                // props.update_app_data();
-                toast.success(`Document Uploaded`);
-                setAddDocument(false);
-              } else {
-                toast.error(`Something went wrong submitting your document!`);
-              }
-            })
-            .catch((error) => {
-              console.log("Error", error);
-            });
-        } else {
-          toast.error(
-            `Something went wrong uploading your document. Please try again!`
-          );
-        }
-      })
-      .catch((error) => {
-        console.log("NETWORK ERROR", error);
-      });
+    const { success, data } = await api.post("staff/hr/staff-management/uploadDocument", formData, { headers: { "Content-Type": "multipart/form-data" } });
+    if (success && data.type === "success") {
+      const sendData = {
+        StaffID: addStaffDocument.StaffID,
+        DocumentType: addStaffDocument.DocumentType,
+        Document: data.file.filename,
+        InsertedBy: addStaffDocument.InsertedBy,
+        InsertedDate: addStaffDocument.InsertedDate,
+      };
+      const postRes = await api.post("staff/hr/staff-management/upload/staff/document", sendData);
+      if (postRes.success && postRes.data.message === "success") {
+        toast.success(`Document Uploaded`);
+        setAddDocument(false);
+      } else {
+        toast.error(`Something went wrong submitting your document!`);
+      }
+    } else {
+      toast.error(`Something went wrong uploading your document. Please try again!`);
+    }
   };
 
   const onEdit = (e) => {

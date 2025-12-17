@@ -6,12 +6,12 @@ import { serverLink } from "../../../../resources/url";
 import { Link } from "react-router-dom";
 import * as DOMPurify from 'dompurify';
 import { projectURL, shortCode } from "../../../../resources/constants";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 
-const BasicApplicantDetails = (props) =>
-{
+const BasicApplicantDetails = (props) => {
     const editorRef = React.createRef();
     const [numPages, setnumPages] = useState(null);
     const [pageNumber, setpageNumber] = useState(1);
@@ -33,8 +33,7 @@ const BasicApplicantDetails = (props) =>
     const mname = applicant.MiddleName !== "" ? applicant.MiddleName : ""
     const sname = applicant.Surname !== "" ? applicant.Surname : ""
 
-    const onDocumentLoadSuccess = ({ numPages }) =>
-    {
+    const onDocumentLoadSuccess = ({ numPages }) => {
         setnumPages(numPages)
     };
 
@@ -113,17 +112,22 @@ const BasicApplicantDetails = (props) =>
                                         </a>
 
                                         <Modal title={"Manage Applicant"} large={true} style={{ width: '400px' }} id={"applicant"} close={"applicant"} >
-                                            <select id="Status" onChange={props.onEdit}
-                                                className="form-select form-select-solid"
-                                                data-kt-select2="true"
-                                                data-placeholder="Select option"
-                                                data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                                                <option value={""}>-select Status-</option>
-                                                <option value={"1"} >Invite for Interview</option>
-                                                <option value={"2"} className="text-danger">Reject Applicant</option>
-                                                <option value={"3"} className="text-success">Accept Applicant</option>
-
-                                            </select>
+                                            <SearchSelect
+                                                id="Status"
+                                                value={[
+                                                    { value: '1', label: 'Invite for Interview' },
+                                                    { value: '2', label: 'Reject Applicant' },
+                                                    { value: '3', label: 'Accept Applicant' }
+                                                ].find(opt => opt.value === props.applicant?.Status) || null}
+                                                options={[
+                                                    { value: '1', label: 'Invite for Interview' },
+                                                    { value: '2', label: 'Reject Applicant' },
+                                                    { value: '3', label: 'Accept Applicant' }
+                                                ]}
+                                                onChange={(selected) => props.onEdit({ target: { id: 'Status', value: selected?.value || '' } })}
+                                                placeholder="-select Status-"
+                                                isClearable={false}
+                                            />
                                             <br />
                                             <div className="form-group">
                                                 <label htmlFor="CoverLetter">Email Template</label>

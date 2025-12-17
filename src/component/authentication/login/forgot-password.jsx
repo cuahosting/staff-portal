@@ -1,58 +1,44 @@
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import { setLoginDetails } from "../../../actions/setactiondetails";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { EmailTemplates, encryptData, projectLogo, sendEmail } from "../../../resources/constants";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import "./auth-animations.css";
 
-function ForgotPassword(props)
-{
+function ForgotPassword(props) {
   const [reset, setReset] = useState({
     EmailAddress: "",
   });
 
-  const onEdit = (e) =>
-  {
+  const onEdit = (e) => {
     setReset({
       ...reset,
       [e.target.name]: e.target.value,
     });
   };
 
-
-  const onSubmit = async (e) =>
-  {
+  const onSubmit = async (e) => {
     e.preventDefault();
     const token = "pa" + Math.floor(Math.random() * 999999999);
     const email = EmailTemplates('5', encryptData(token));
-    toast.info('loading, please wait...')
-    await axios.patch(`${serverLink}login/forget_password/add_token/${reset.EmailAddress}`, { token: encryptData(token) })
-      .then((result) =>
-      {
-        if (result.data.message === "success")
-        {
-          toast.success('An email have been sent to your mailbox, please check and proceed.')
-          sendEmail(
-            reset.EmailAddress, email.subject, email.title, reset.EmailAddress, email.body, '', ''
-          )
-        }
-        else if (result.data.message === "no email")
-        {
-          toast.error('Sorry!, your email address is not registered')
-        }
-        else
-        {
-          // toast.error('Please try again.')
-        }
-      }).catch((e) =>
-      {
-        console.log('NETWORK ERROR')
-      })
+    toast.info('loading, please wait...');
 
-  }
+    const { success, data } = await api.patch(
+      `login/forget_password/add_token/${reset.EmailAddress}`,
+      { token: encryptData(token) }
+    );
+
+    if (success && data?.message === "success") {
+      toast.success('An email have been sent to your mailbox, please check and proceed.');
+      sendEmail(
+        reset.EmailAddress, email.subject, email.title, reset.EmailAddress, email.body, '', ''
+      );
+    } else if (success && data?.message === "no email") {
+      toast.error('Sorry!, your email address is not registered');
+    }
+  };
 
   return (
     <>
@@ -119,18 +105,15 @@ function ForgotPassword(props)
   );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails,
   };
 };
 
-const mapDispatchToProps = (dispatch) =>
-{
+const mapDispatchToProps = (dispatch) => {
   return {
-    setOnLoginDetails: (p) =>
-    {
+    setOnLoginDetails: (p) => {
       dispatch(setLoginDetails(p));
     },
   };

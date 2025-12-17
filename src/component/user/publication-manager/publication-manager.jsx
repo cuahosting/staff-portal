@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import {decryptData, encryptData} from "../../../resources/constants";
-import {connect} from "react-redux";
+import { decryptData, encryptData } from "../../../resources/constants";
+import { connect } from "react-redux";
 import BlogForm from "./blog-form";
 import BookForm from "./book-form";
 import BookChapterForm from "./book-chapter-form";
@@ -19,7 +18,7 @@ import PatentForm from "./patent-form";
 import { useLocation } from "react-router";
 
 function PublicationManager(props) {
-    const {search} = useLocation();
+    const { search } = useLocation();
     const param = search.split("=")[1] !== undefined ? search.split("=")[1] : "";
 
     const token = props.loginData[0].token;
@@ -190,7 +189,7 @@ function PublicationManager(props) {
             {
                 label: "Journal Issue Number",
                 field: "JournalIssueNumber",
-            },{
+            }, {
                 label: "Volume No.",
                 field: "VolumeNumber",
             },
@@ -346,361 +345,356 @@ function PublicationManager(props) {
 
 
     const getRecords = async () => {
-        await axios.get(`${serverLink}staff/publication-manager/list/${formData.InsertedBy}`, token)
-            .then((result) => {
-                const data = result.data;
-                if (data.length > 0 ){
-                    const book = data.filter(e => e.PublicationTypeID.toString() === '1');
-                    const book_chapter = data.filter(e => e.PublicationTypeID.toString() === '2');
-                    const conference = data.filter(e => e.PublicationTypeID.toString() === '3');
-                    const newspaper = data.filter(e => e.PublicationTypeID.toString() === '4');
-                    const blog = data.filter(e => e.PublicationTypeID.toString() === '5');
-                    const patent = data.filter(e => e.PublicationTypeID.toString() === '6');
-                    const journal = data.filter(e => e.PublicationTypeID.toString() === '7');
+        const { success, data } = await api.get(`staff/publication-manager/list/${formData.InsertedBy}`);
+        if (success && data?.length > 0) {
+            const book = data.filter(e => e.PublicationTypeID.toString() === '1');
+            const book_chapter = data.filter(e => e.PublicationTypeID.toString() === '2');
+            const conference = data.filter(e => e.PublicationTypeID.toString() === '3');
+            const newspaper = data.filter(e => e.PublicationTypeID.toString() === '4');
+            const blog = data.filter(e => e.PublicationTypeID.toString() === '5');
+            const patent = data.filter(e => e.PublicationTypeID.toString() === '6');
+            const journal = data.filter(e => e.PublicationTypeID.toString() === '7');
 
-                    if (blog.length > 0) {
-                        let rows = [];
-                        blog.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                WorkTitle: item.WorkTitle,
-                                Authors: item.Authors,
-                                PublishedYear: item.PublishedYear,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
-                                action: (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        onClick={() =>
-                                            setFormData({
-                                                ...formData,
-                                                PublicationTypeID: item.PublicationTypeID,
-                                                WorkTitle: item.WorkTitle,
-                                                Authors: item.Authors,
-                                                PublishedYear: item.PublishedYear,
-                                                OnlineURL: decryptData(item.OnlineURL),
-                                                DOI: item.DOI,
-                                                UploadFile: item.UploadFile,
-                                                InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
-                                                EntryID: item.EntryID,
-                                            })
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                            });
-                        });
-                        setBlogDatatable({
-                            ...blogDatatable,
-                            columns: blogDatatable.columns,
-                            rows: rows,
-                        });
-                    }
+            if (blog.length > 0) {
+                let rows = [];
+                blog.forEach((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        WorkTitle: item.WorkTitle,
+                        Authors: item.Authors,
+                        PublishedYear: item.PublishedYear,
+                        OnlineURL: (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                        UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        PublicationTypeID: item.PublicationTypeID,
+                                        WorkTitle: item.WorkTitle,
+                                        Authors: item.Authors,
+                                        PublishedYear: item.PublishedYear,
+                                        OnlineURL: decryptData(item.OnlineURL),
+                                        DOI: item.DOI,
+                                        UploadFile: item.UploadFile,
+                                        InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                    });
+                });
+                setBlogDatatable({
+                    ...blogDatatable,
+                    columns: blogDatatable.columns,
+                    rows: rows,
+                });
+            }
 
-                    if (book.length > 0) {
-                        let rows = [];
-                        book.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                WorkTitle: item.WorkTitle,
-                                Authors: item.Authors,
-                                PublishedYear: item.PublishedYear,
-                                Publisher: item.Publisher,
-                                PlaceOfPublication: item.PlaceOfPublication,
-                                Edition: item.Edition,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
-                                action: (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#book_form"
-                                        onClick={() =>
-                                            setFormData({
-                                                ...formData,
-                                                PublicationTypeID: item.PublicationTypeID,
-                                                WorkTitle: item.WorkTitle,
-                                                Authors: item.Authors,
-                                                PublishedYear: item.PublishedYear,
-                                                Publisher: item.Publisher,
-                                                PlaceOfPublication: item.PlaceOfPublication,
-                                                Edition: item.Edition,
-                                                OnlineURL: decryptData(item.OnlineURL),
-                                                UploadFile: item.UploadFile,
-                                                InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
-                                                EntryID: item.EntryID,
-                                            })
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                            });
-                        });
-                        setBookDatatable({
-                            ...bookDatatable,
-                            columns: bookDatatable.columns,
-                            rows: rows,
-                        });
-                    }
+            if (book.length > 0) {
+                let rows = [];
+                book.forEach((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        WorkTitle: item.WorkTitle,
+                        Authors: item.Authors,
+                        PublishedYear: item.PublishedYear,
+                        Publisher: item.Publisher,
+                        PlaceOfPublication: item.PlaceOfPublication,
+                        Edition: item.Edition,
+                        OnlineURL: (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                        UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#book_form"
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        PublicationTypeID: item.PublicationTypeID,
+                                        WorkTitle: item.WorkTitle,
+                                        Authors: item.Authors,
+                                        PublishedYear: item.PublishedYear,
+                                        Publisher: item.Publisher,
+                                        PlaceOfPublication: item.PlaceOfPublication,
+                                        Edition: item.Edition,
+                                        OnlineURL: decryptData(item.OnlineURL),
+                                        UploadFile: item.UploadFile,
+                                        InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                    });
+                });
+                setBookDatatable({
+                    ...bookDatatable,
+                    columns: bookDatatable.columns,
+                    rows: rows,
+                });
+            }
 
-                    if (book_chapter.length > 0) {
-                        let rows = [];
-                        book_chapter.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                WorkTitle: item.WorkTitle,
-                                Authors: item.Authors,
-                                PublishedYear: item.PublishedYear,
-                                Publisher: item.Publisher,
-                                PlaceOfPublication: item.PlaceOfPublication,
-                                ChapterTitle: item.ChapterTitle,
-                                ChapterNumber: item.ChapterNumber,
-                                EditorName: item.EditorName,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
-                                action: (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#book_chapter_form"
-                                        onClick={() =>
-                                            setFormData({
-                                                ...formData,
-                                                PublicationTypeID: item.PublicationTypeID,
-                                                WorkTitle: item.WorkTitle,
-                                                Authors: item.Authors,
-                                                PublishedYear: item.PublishedYear,
-                                                Publisher: item.Publisher,
-                                                PlaceOfPublication: item.PlaceOfPublication,
-                                                ChapterTitle: item.ChapterTitle,
-                                                ChapterNumber: item.ChapterNumber,
-                                                EditorName: item.EditorName,
-                                                OnlineURL: decryptData(item.OnlineURL),
-                                                InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
-                                                EntryID: item.EntryID,
-                                            })
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                            });
-                        });
-                        setBookChapterDatatable({
-                            ...bookChapterDatatable,
-                            columns: bookChapterDatatable.columns,
-                            rows: rows,
-                        });
-                    }
+            if (book_chapter.length > 0) {
+                let rows = [];
+                book_chapter.forEach((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        WorkTitle: item.WorkTitle,
+                        Authors: item.Authors,
+                        PublishedYear: item.PublishedYear,
+                        Publisher: item.Publisher,
+                        PlaceOfPublication: item.PlaceOfPublication,
+                        ChapterTitle: item.ChapterTitle,
+                        ChapterNumber: item.ChapterNumber,
+                        EditorName: item.EditorName,
+                        OnlineURL: (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#book_chapter_form"
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        PublicationTypeID: item.PublicationTypeID,
+                                        WorkTitle: item.WorkTitle,
+                                        Authors: item.Authors,
+                                        PublishedYear: item.PublishedYear,
+                                        Publisher: item.Publisher,
+                                        PlaceOfPublication: item.PlaceOfPublication,
+                                        ChapterTitle: item.ChapterTitle,
+                                        ChapterNumber: item.ChapterNumber,
+                                        EditorName: item.EditorName,
+                                        OnlineURL: decryptData(item.OnlineURL),
+                                        InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                    });
+                });
+                setBookChapterDatatable({
+                    ...bookChapterDatatable,
+                    columns: bookChapterDatatable.columns,
+                    rows: rows,
+                });
+            }
 
-                    if (conference.length > 0) {
-                        let rows = [];
-                        conference.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                WorkTitle: item.WorkTitle,
-                                PaperTitle: item.PaperTitle,
-                                Authors: item.Authors,
-                                PublishedYear: item.PublishedYear,
-                                Location: item.Location,
-                                Publisher: item.Publisher,
-                                PlaceOfPublication: item.PlaceOfPublication,
-                                Organiser: item.Organiser,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
-                                action: (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#conference_form"
-                                        onClick={() =>
-                                            setFormData({
-                                                ...formData,
-                                                PublicationTypeID: item.PublicationTypeID,
-                                                WorkTitle: item.WorkTitle,
-                                                PaperTitle: item.PaperTitle,
-                                                Authors: item.Authors,
-                                                PublishedYear: item.PublishedYear,
-                                                Location: item.Location,
-                                                Publisher: item.Publisher,
-                                                PlaceOfPublication: item.PlaceOfPublication,
-                                                Organiser: item.Organiser,
-                                                OnlineURL: decryptData(item.OnlineURL),
-                                                InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
-                                                EntryID: item.EntryID,
-                                            })
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                            });
-                        });
-                        setConferenceDatatable({
-                            ...conferenceDatatable,
-                            columns: conferenceDatatable.columns,
-                            rows: rows,
-                        });
-                    }
+            if (conference.length > 0) {
+                let rows = [];
+                conference.forEach((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        WorkTitle: item.WorkTitle,
+                        PaperTitle: item.PaperTitle,
+                        Authors: item.Authors,
+                        PublishedYear: item.PublishedYear,
+                        Location: item.Location,
+                        Publisher: item.Publisher,
+                        PlaceOfPublication: item.PlaceOfPublication,
+                        Organiser: item.Organiser,
+                        OnlineURL: (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                        UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#conference_form"
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        PublicationTypeID: item.PublicationTypeID,
+                                        WorkTitle: item.WorkTitle,
+                                        PaperTitle: item.PaperTitle,
+                                        Authors: item.Authors,
+                                        PublishedYear: item.PublishedYear,
+                                        Location: item.Location,
+                                        Publisher: item.Publisher,
+                                        PlaceOfPublication: item.PlaceOfPublication,
+                                        Organiser: item.Organiser,
+                                        OnlineURL: decryptData(item.OnlineURL),
+                                        InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                    });
+                });
+                setConferenceDatatable({
+                    ...conferenceDatatable,
+                    columns: conferenceDatatable.columns,
+                    rows: rows,
+                });
+            }
 
-                    if (journal.length > 0) {
-                        let rows = [];
-                        journal.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                WorkTitle: item.WorkTitle,
-                                ArticleTitle: item.ArticleTitle,
-                                Authors: item.Authors,
-                                PublishedYear: item.PublishedYear,
-                                JournalIssueNumber: item.JournalIssueNumber,
-                                VolumeNumber: item.VolumeNumber,
-                                PageRange: item.PageRange,
-                                DOI: item.DOI,
-                                DatabaseName: item.DatabaseName,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
-                                action: (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#journal_form"
-                                        onClick={() =>
-                                            setFormData({
-                                                ...formData,
-                                                PublicationTypeID: item.PublicationTypeID,
-                                                ArticleTitle: item.ArticleTitle,
-                                                Authors: item.Authors,
-                                                PublishedYear: item.PublishedYear,
-                                                JournalIssueNumber: item.JournalIssueNumber,
-                                                VolumeNumber: item.VolumeNumber,
-                                                PageRange: item.PageRange,
-                                                DOI: item.DOI,
-                                                DatabaseName: item.DatabaseName,
-                                                OnlineURL: decryptData(item.OnlineURL),
-                                                InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
-                                                EntryID: item.EntryID,
-                                            })
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                            });
-                        });
-                        setJournalDatatable({
-                            ...journalDatatable,
-                            columns: journalDatatable.columns,
-                            rows: rows,
-                        });
-                    }
+            if (journal.length > 0) {
+                let rows = [];
+                journal.forEach((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        WorkTitle: item.WorkTitle,
+                        ArticleTitle: item.ArticleTitle,
+                        Authors: item.Authors,
+                        PublishedYear: item.PublishedYear,
+                        JournalIssueNumber: item.JournalIssueNumber,
+                        VolumeNumber: item.VolumeNumber,
+                        PageRange: item.PageRange,
+                        DOI: item.DOI,
+                        DatabaseName: item.DatabaseName,
+                        OnlineURL: (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                        UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#journal_form"
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        PublicationTypeID: item.PublicationTypeID,
+                                        ArticleTitle: item.ArticleTitle,
+                                        Authors: item.Authors,
+                                        PublishedYear: item.PublishedYear,
+                                        JournalIssueNumber: item.JournalIssueNumber,
+                                        VolumeNumber: item.VolumeNumber,
+                                        PageRange: item.PageRange,
+                                        DOI: item.DOI,
+                                        DatabaseName: item.DatabaseName,
+                                        OnlineURL: decryptData(item.OnlineURL),
+                                        InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                    });
+                });
+                setJournalDatatable({
+                    ...journalDatatable,
+                    columns: journalDatatable.columns,
+                    rows: rows,
+                });
+            }
 
-                    if (newspaper.length > 0) {
-                        let rows = [];
-                        newspaper.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                WorkTitle: item.WorkTitle,
-                                PaperTitle: item.PaperTitle,
-                                Authors: item.Authors,
-                                PublishedYear: item.PublishedYear,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
-                                action: (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#newspaper_form"
-                                        onClick={() =>
-                                            setFormData({
-                                                ...formData,
-                                                PublicationTypeID: item.PublicationTypeID,
-                                                WorkTitle: item.WorkTitle,
-                                                PaperTitle: item.PaperTitle,
-                                                Authors: item.Authors,
-                                                PublishedYear: item.PublishedYear,
-                                                OnlineURL: decryptData(item.OnlineURL),
-                                                InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
-                                                EntryID: item.EntryID,
-                                            })
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                            });
-                        });
-                        setNewspaperDatatable({
-                            ...newspaperDatatable,
-                            columns: newspaperDatatable.columns,
-                            rows: rows,
-                        });
-                    }
+            if (newspaper.length > 0) {
+                let rows = [];
+                newspaper.forEach((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        WorkTitle: item.WorkTitle,
+                        PaperTitle: item.PaperTitle,
+                        Authors: item.Authors,
+                        PublishedYear: item.PublishedYear,
+                        OnlineURL: (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                        UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#newspaper_form"
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        PublicationTypeID: item.PublicationTypeID,
+                                        WorkTitle: item.WorkTitle,
+                                        PaperTitle: item.PaperTitle,
+                                        Authors: item.Authors,
+                                        PublishedYear: item.PublishedYear,
+                                        OnlineURL: decryptData(item.OnlineURL),
+                                        InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                    });
+                });
+                setNewspaperDatatable({
+                    ...newspaperDatatable,
+                    columns: newspaperDatatable.columns,
+                    rows: rows,
+                });
+            }
 
-                    if (patent.length > 0) {
-                        let rows = [];
-                        patent.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                WorkTitle: item.WorkTitle,
-                                Authors: item.Authors,
-                                PublishedYear: item.PublishedYear,
-                                PlaceOfPublication: item.PlaceOfPublication,
-                                Assignee: item.Assignee,
-                                PatentNumber: item.PatentNumber,
-                                DatabaseName: item.DatabaseName,
-                                OnlineURL:  (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
-                                UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
-                                action: (
-                                    <button
-                                        className="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#patent_form"
-                                        onClick={() =>
-                                            setFormData({
-                                                ...formData,
-                                                PublicationTypeID: item.PublicationTypeID,
-                                                Authors: item.Authors,
-                                                PublishedYear: item.PublishedYear,
-                                                PlaceOfPublication: item.PlaceOfPublication,
-                                                Assignee: item.Assignee,
-                                                PatentNumber: item.PatentNumber,
-                                                DatabaseName: item.DatabaseName,
-                                                OnlineURL: decryptData(item.OnlineURL),
-                                                InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
-                                                EntryID: item.EntryID,
-                                            })
-                                        }
-                                    >
-                                        <i className="fa fa-pen" />
-                                    </button>
-                                ),
-                            });
-                        });
-                        setPatentDatatable({
-                            ...patentDatatable,
-                            columns: patentDatatable.columns,
-                            rows: rows,
-                        });
-                    }
-                }
+            if (patent.length > 0) {
+                let rows = [];
+                patent.forEach((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        WorkTitle: item.WorkTitle,
+                        Authors: item.Authors,
+                        PublishedYear: item.PublishedYear,
+                        PlaceOfPublication: item.PlaceOfPublication,
+                        Assignee: item.Assignee,
+                        PatentNumber: item.PatentNumber,
+                        DatabaseName: item.DatabaseName,
+                        OnlineURL: (!item.OnlineURL ? '--' : <a href={decryptData(item.OnlineURL)} target="_blank" rel="noreferrer">Link</a>),
+                        UploadFile: (!item.UploadFile ? '--' : <button className="btn btn-link p-0">File</button>),
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#patent_form"
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        PublicationTypeID: item.PublicationTypeID,
+                                        Authors: item.Authors,
+                                        PublishedYear: item.PublishedYear,
+                                        PlaceOfPublication: item.PlaceOfPublication,
+                                        Assignee: item.Assignee,
+                                        PatentNumber: item.PatentNumber,
+                                        DatabaseName: item.DatabaseName,
+                                        OnlineURL: decryptData(item.OnlineURL),
+                                        InsertedBy: param !== "" ? decryptData(param) : props.loginData[0].StaffID,
+                                        EntryID: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
+                    });
+                });
+                setPatentDatatable({
+                    ...patentDatatable,
+                    columns: patentDatatable.columns,
+                    rows: rows,
+                });
+            }
+        }
 
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+        setIsLoading(false);
     };
+
 
     const onEdit = (e) => {
         const id = e.target.id;
         let value;
-        if (id === "UploadFile"){
+        if (id === "UploadFile") {
             value = e.target.files[0];
-        }else{
-           value = e.target.value;
+        } else {
+            value = e.target.value;
         }
 
         setFormData({
@@ -712,7 +706,7 @@ function PublicationManager(props) {
 
     const onSubmit = async (pubID) => {
         const pubTypeID = pubID;
-        if (pubTypeID.toString() === "1"){
+        if (pubTypeID.toString() === "1") {
             if (formData.WorkTitle.trim() === "") {
                 showAlert("EMPTY FIELD", "Please enter the work title", "error");
                 return false;
@@ -725,9 +719,9 @@ function PublicationManager(props) {
                 showAlert("EMPTY FIELD", "Please enter the date published", "error");
                 return false;
             }
-        }else if (pubTypeID.toString() === "1"){
+        } else if (pubTypeID.toString() === "1") {
 
-        }else {
+        } else {
 
         }
 
@@ -735,106 +729,41 @@ function PublicationManager(props) {
 
         if (formData.EntryID === "") {
             setIsFormLoading("on")
-            let sendData = {...formData, PublicationTypeID: pubTypeID, OnlineURL: encryptData(formData.OnlineURL)};
-            await axios
-                .post(`${serverLink}staff/publication-manager/add`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        setIsFormLoading("off")
-                        toast.success("Publication Added Successfully");
-                         document.querySelector("closeModal").click()
-
-                        getRecords();
-                        setFormData({
-                            ...formData,
-                            PublicationTypeID: "",
-                            WorkTitle: "",
-                            Authors: "",
-                            ChapterTitle: "",
-                            ChapterNumber: "",
-                            PaperTitle: "",
-                            ArticleTitle: "",
-                            JournalIssueNumber: "",
-                            Assignee: "",
-                            PatentNumber: "",
-                            PageRange: "",
-                            EditorName: "",
-                            OrganiserName: "",
-                            Location: "",
-                            Publisher: "",
-                            PlaceOfPublication: "",
-                            PublishedYear: "",
-                            OnlineURL: "",
-                            Edition: "",
-                            WorkStatus: "",
-                            VolumeNumber: "",
-                            DatabaseName: "",
-                            DOI: "",
-                            BlogName: "",
-                            UploadFile: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist") {
-                        setIsFormLoading("off")
-                        showAlert("PUBLICATION EXIST", "Publication already exist!", "error");
-                    } else {
-                        setIsFormLoading("off")
-                        showAlert( "ERROR", "Something went wrong. Please try again!",  "error" );
-                    }
-                })
-                .catch((error) => {
-                    setIsFormLoading("off")
-                    showAlert( "NETWORK ERROR",  "Please check your connection and try again!", "error"   );
+            let sendData = { ...formData, PublicationTypeID: pubTypeID, OnlineURL: encryptData(formData.OnlineURL) };
+            const { success, message } = await api.post("staff/publication-manager/add", sendData);
+            if (success) {
+                setIsFormLoading("off")
+                toast.success("Publication Added Successfully");
+                document.querySelector("closeModal").click()
+                getRecords();
+                setFormData({
+                    ...formData,
+                    PublicationTypeID: "", WorkTitle: "", Authors: "", ChapterTitle: "", ChapterNumber: "", PaperTitle: "", ArticleTitle: "", JournalIssueNumber: "", Assignee: "", PatentNumber: "", PageRange: "", EditorName: "", OrganiserName: "", Location: "", Publisher: "", PlaceOfPublication: "", PublishedYear: "", OnlineURL: "", Edition: "", WorkStatus: "", VolumeNumber: "", DatabaseName: "", DOI: "", BlogName: "", UploadFile: "", EntryID: "",
                 });
+            } else if (message === "exist") {
+                setIsFormLoading("off")
+                showAlert("PUBLICATION EXIST", "Publication already exist!", "error");
+            } else {
+                setIsFormLoading("off")
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
         } else {
             setIsFormLoading("on")
-            let sendData = {...formData, PublicationTypeID: pubTypeID, OnlineURL: encryptData(formData.OnlineURL)};
-            await axios
-                .patch(`${serverLink}staff/publication-manager/update`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        setIsFormLoading("off")
-                        toast.success("Publication Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setFormData({
-                            ...formData,
-                            PublicationTypeID: "",
-                            WorkTitle: "",
-                            Authors: "",
-                            ChapterTitle: "",
-                            ChapterNumber: "",
-                            PaperTitle: "",
-                            ArticleTitle: "",
-                            JournalIssueNumber: "",
-                            Assignee: "",
-                            PatentNumber: "",
-                            PageRange: "",
-                            EditorName: "",
-                            OrganiserName: "",
-                            Location: "",
-                            Publisher: "",
-                            PlaceOfPublication: "",
-                            PublishedYear: "",
-                            OnlineURL: "",
-                            Edition: "",
-                            WorkStatus: "",
-                            VolumeNumber: "",
-                            DatabaseName: "",
-                            DOI: "",
-                            BlogName: "",
-                            UploadFile: "",
-                            EntryID: "",
-                        });
-                    } else {
-                        setIsFormLoading("off")
-                        showAlert( "ERROR", "Something went wrong. Please try again!",  "error" );
-                    }
-                })
-                .catch((error) => {
-                    setIsFormLoading("off")
-                    showAlert( "NETWORK ERROR",  "Please check your connection and try again!", "error"   );
+            let sendData = { ...formData, PublicationTypeID: pubTypeID, OnlineURL: encryptData(formData.OnlineURL) };
+            const { success: updateSuccess } = await api.patch("staff/publication-manager/update", sendData);
+            if (updateSuccess) {
+                setIsFormLoading("off")
+                toast.success("Publication Updated Successfully");
+                document.getElementById("closeModal").click()
+                getRecords();
+                setFormData({
+                    ...formData,
+                    PublicationTypeID: "", WorkTitle: "", Authors: "", ChapterTitle: "", ChapterNumber: "", PaperTitle: "", ArticleTitle: "", JournalIssueNumber: "", Assignee: "", PatentNumber: "", PageRange: "", EditorName: "", OrganiserName: "", Location: "", Publisher: "", PlaceOfPublication: "", PublishedYear: "", OnlineURL: "", Edition: "", WorkStatus: "", VolumeNumber: "", DatabaseName: "", DOI: "", BlogName: "", UploadFile: "", EntryID: "",
                 });
+            } else {
+                setIsFormLoading("off")
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
         }
     };
 
@@ -843,7 +772,7 @@ function PublicationManager(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(()=>{
+    useEffect(() => {
         setFormData({
             ...formData,
             PublicationTypeID: "",
@@ -880,7 +809,7 @@ function PublicationManager(props) {
         <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
-            <PageHeader title={"Publication Manager"} items={["Users", "Publication", "Publication Manager"]}/>
+            <PageHeader title={"Publication Manager"} items={["Users", "Publication", "Publication Manager"]} />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-body p-0">
@@ -923,7 +852,7 @@ function PublicationManager(props) {
                                         className="btn btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#kt_modal_general"
-                                        onClick={() => resetForm }
+                                        onClick={() => resetForm}
                                     >
                                         Add Publication
                                     </button>
@@ -937,7 +866,7 @@ function PublicationManager(props) {
                                         className="btn btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#book_form"
-                                        onClick={() => resetForm }
+                                        onClick={() => resetForm}
                                     >
                                         Add Publication
                                     </button>
@@ -951,7 +880,7 @@ function PublicationManager(props) {
                                         className="btn btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#book_chapter_form"
-                                        onClick={() => resetForm }
+                                        onClick={() => resetForm}
                                     >
                                         Add Publication
                                     </button>
@@ -965,7 +894,7 @@ function PublicationManager(props) {
                                         className="btn btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#conference_form"
-                                        onClick={() => resetForm }
+                                        onClick={() => resetForm}
                                     >
                                         Add Publication
                                     </button>
@@ -979,7 +908,7 @@ function PublicationManager(props) {
                                         className="btn btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#journal_form"
-                                        onClick={() => resetForm }
+                                        onClick={() => resetForm}
                                     >
                                         Add Publication
                                     </button>
@@ -993,7 +922,7 @@ function PublicationManager(props) {
                                         className="btn btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#newspaper_form"
-                                        onClick={() => resetForm }
+                                        onClick={() => resetForm}
                                     >
                                         Add Publication
                                     </button>
@@ -1007,7 +936,7 @@ function PublicationManager(props) {
                                         className="btn btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#patent_form"
-                                        onClick={() => resetForm }
+                                        onClick={() => resetForm}
                                     >
                                         Add Publication
                                     </button>
@@ -1019,31 +948,31 @@ function PublicationManager(props) {
                 </div>
 
                 <Modal title={"Blog Form"}>
-                   <BlogForm data={formData} onSubmit={()=>onSubmit(5)} onEdit={onEdit} isFormLoading={isFormLoading}/>
+                    <BlogForm data={formData} onSubmit={() => onSubmit(5)} onEdit={onEdit} isFormLoading={isFormLoading} />
                 </Modal>
 
-                <Modal title={"Book Form"} id="book_form">
-                    <BookForm data={formData} onSubmit={()=>onSubmit(1)} onEdit={onEdit} isFormLoading={isFormLoading}/>
+                <Modal title={"Book Form"} id="book_form" large>
+                    <BookForm data={formData} onSubmit={() => onSubmit(1)} onEdit={onEdit} isFormLoading={isFormLoading} />
                 </Modal>
 
-                <Modal title={"Book Chapter Form"} id="book_chapter_form">
-                    <BookChapterForm data={formData} onSubmit={()=>onSubmit(2)} onEdit={onEdit} isFormLoading={isFormLoading}/>
+                <Modal title={"Book Chapter Form"} id="book_chapter_form" large>
+                    <BookChapterForm data={formData} onSubmit={() => onSubmit(2)} onEdit={onEdit} isFormLoading={isFormLoading} />
                 </Modal>
 
-                <Modal title={"Conference Form"} id="conference_form">
-                    <ConferenceForm data={formData} onSubmit={()=>onSubmit(3)} onEdit={onEdit} isFormLoading={isFormLoading}/>
+                <Modal title={"Conference Form"} id="conference_form" large>
+                    <ConferenceForm data={formData} onSubmit={() => onSubmit(3)} onEdit={onEdit} isFormLoading={isFormLoading} />
                 </Modal>
 
-                <Modal title={"Journal Form"} id="journal_form">
-                    <JournalForm data={formData} onSubmit={()=>onSubmit(7)} onEdit={onEdit} isFormLoading={isFormLoading}/>
+                <Modal title={"Journal Form"} id="journal_form" large>
+                    <JournalForm data={formData} onSubmit={() => onSubmit(7)} onEdit={onEdit} isFormLoading={isFormLoading} />
                 </Modal>
 
                 <Modal title={"Newspaper/Magazine Form"} id="newspaper_form">
-                    <NewspaperForm data={formData} onSubmit={()=>onSubmit(4)} onEdit={onEdit} isFormLoading={isFormLoading}/>
+                    <NewspaperForm data={formData} onSubmit={() => onSubmit(4)} onEdit={onEdit} isFormLoading={isFormLoading} />
                 </Modal>
 
                 <Modal title={"Patent/Creative Work/Invention Form"} id="patent_form">
-                    <PatentForm data={formData} onSubmit={()=>onSubmit(6)} onEdit={onEdit} isFormLoading={isFormLoading}/>
+                    <PatentForm data={formData} onSubmit={() => onSubmit(6)} onEdit={onEdit} isFormLoading={isFormLoading} />
                 </Modal>
             </div>
         </div>

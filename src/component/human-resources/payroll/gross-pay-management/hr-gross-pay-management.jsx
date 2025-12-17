@@ -2,17 +2,14 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api, apiClient } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
-import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { formatDateAndTime, currencyConverter } from "../../../../resources/constants";
 import SearchSelect from "../../../common/select/SearchSelect";
 
 function HrGrossPayManagement(props) {
-  const token = props.loginData[0].token;
   const staffID = props.loginData[0].StaffID;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +19,12 @@ function HrGrossPayManagement(props) {
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadResult, setUploadResult] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Bulk Increase State
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkPercentage, setBulkPercentage] = useState("");
+  const [bulkPreview, setBulkPreview] = useState(null);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const [datatable, setDatatable] = useState({
     columns: [
@@ -48,10 +51,9 @@ function HrGrossPayManagement(props) {
   // Fetch staff list
   const getStaffList = async () => {
     setIsLoading(true);
-    try {
-      const response = await axios.get(`${serverLink}staff/hr/gross-pay/list`, token);
-      const data = response.data;
+    const { success, data } = await api.get("staff/hr/gross-pay/list");
 
+    if (success && data) {
       // Format data for table
       const rows = data.map((item, index) => ({
         sn: index + 1,
@@ -88,10 +90,7 @@ function HrGrossPayManagement(props) {
         ),
       }));
 
-      setDatatable({
-        ...datatable,
-        rows: rows,
-      });
+      setDatatable({ ...datatable, rows });
 
       // Create options for dropdown
       const options = data.map((item) => ({
@@ -100,12 +99,8 @@ function HrGrossPayManagement(props) {
         grossPay: item.GrossPay || 0,
       }));
       setStaffOptions(options);
-    } catch (error) {
-      console.error("Error fetching staff list:", error);
-      toast.error("Failed to fetch staff list");
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   // Open update modal
@@ -121,30 +116,20 @@ function HrGrossPayManagement(props) {
   // Handle staff selection in update modal
   const handleStaffSelect = (selected) => {
     if (selected) {
-      // Find the original option to ensure we get the grossPay property
-      // In case SearchSelect or data transformation strips extra properties
       const originalOption = staffOptions.find(opt => opt.value === selected.value);
-
       setUpdateForm({
         ...updateForm,
         StaffID: selected.value,
         CurrentGrossPay: originalOption ? originalOption.grossPay : 0,
       });
     } else {
-      setUpdateForm({
-        ...updateForm,
-        StaffID: "",
-        CurrentGrossPay: 0,
-      });
+      setUpdateForm({ ...updateForm, StaffID: "", CurrentGrossPay: 0 });
     }
   };
 
   // Handle update form change
   const handleUpdateChange = (e) => {
-    setUpdateForm({
-      ...updateForm,
-      [e.target.name]: e.target.value,
-    });
+    setUpdateForm({ ...updateForm, [e.target.name]: e.target.value });
   };
 
   // Submit update
@@ -159,49 +144,30 @@ function HrGrossPayManagement(props) {
       return;
     }
 
-    try {
-      const response = await axios.patch(
-        `${serverLink}staff/hr/gross-pay/update`,
-        {
-          StaffID: updateForm.StaffID,
-          GrossPay: parseFloat(updateForm.NewGrossPay),
-          Remarks: updateForm.Remarks,
-          UpdatedBy: staffID,
-        },
-        token
-      );
+    const { success, data } = await api.patch("staff/hr/gross-pay/update", {
+      StaffID: updateForm.StaffID,
+      GrossPay: parseFloat(updateForm.NewGrossPay),
+      Remarks: updateForm.Remarks,
+      UpdatedBy: staffID,
+    });
 
-      if (response.data.message === "success") {
-        toast.success("Gross pay updated successfully");
-        document.getElementById("closeModal").click();
-        getStaffList();
-        setUpdateForm({
-          StaffID: "",
-          CurrentGrossPay: 0,
-          NewGrossPay: "",
-          Remarks: "",
-        });
-      } else {
-        toast.error("Failed to update gross pay");
-      }
-    } catch (error) {
-      console.error("Error updating gross pay:", error);
-      toast.error("An error occurred while updating");
+    if (success && data?.message === "success") {
+      toast.success("Gross pay updated successfully");
+      document.getElementById("closeModal").click();
+      getStaffList();
+      setUpdateForm({ StaffID: "", CurrentGrossPay: 0, NewGrossPay: "", Remarks: "" });
+    } else if (success) {
+      toast.error("Failed to update gross pay");
     }
   };
 
   // View history
   const viewHistory = async (staff) => {
     setSelectedStaffForHistory(staff);
-    try {
-      const response = await axios.get(
-        `${serverLink}staff/hr/gross-pay/history/${staff.StaffID}`,
-        token
-      );
-      setHistoryData(response.data);
-    } catch (error) {
-      console.error("Error fetching history:", error);
-      toast.error("Failed to fetch history");
+    const { success, data } = await api.get(`staff/hr/gross-pay/history/${staff.StaffID}`);
+
+    if (success) {
+      setHistoryData(data || []);
     }
   };
 
@@ -214,7 +180,7 @@ function HrGrossPayManagement(props) {
     }
   };
 
-  // Handle bulk upload
+  // Handle bulk upload - uses apiClient directly for FormData
   const handleBulkUpload = async () => {
     if (!uploadFile) {
       toast.error("Please select a file to upload");
@@ -229,16 +195,9 @@ function HrGrossPayManagement(props) {
       formData.append("file", uploadFile);
       formData.append("UpdatedBy", staffID);
 
-      const response = await axios.post(
-        `${serverLink}staff/hr/gross-pay/bulk-upload`,
-        formData,
-        {
-          headers: {
-            ...token.headers,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await apiClient.post("staff/hr/gross-pay/bulk-upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.data.message === "success") {
         setUploadResult(response.data.summary);
@@ -260,13 +219,9 @@ function HrGrossPayManagement(props) {
   // Download template
   const downloadTemplate = async () => {
     try {
-      const response = await axios.get(
-        `${serverLink}staff/hr/gross-pay/download-template`,
-        {
-          ...token,
-          responseType: "blob",
-        }
-      );
+      const response = await apiClient.get("staff/hr/gross-pay/download-template", {
+        responseType: "blob",
+      });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -289,16 +244,58 @@ function HrGrossPayManagement(props) {
 
   // Reset update modal
   const resetUpdateModal = () => {
-    setUpdateForm({
-      StaffID: "",
-      CurrentGrossPay: 0,
-      NewGrossPay: "",
-      Remarks: "",
-    });
+    setUpdateForm({ StaffID: "", CurrentGrossPay: 0, NewGrossPay: "", Remarks: "" });
+  };
+
+  // Bulk Increase Functions
+  const handleBulkIncreasePreview = async () => {
+    if (!bulkPercentage || parseFloat(bulkPercentage) <= 0) {
+      toast.warning("Please enter a valid percentage");
+      return;
+    }
+    setBulkLoading(true);
+    try {
+      const { success, data } = await api.post("staff/hr/salaries/bulk-gross-pay-preview", {
+        percentage: bulkPercentage
+      });
+      if (success && data.preview) {
+        setBulkPreview(data);
+      }
+    } catch (err) {
+      toast.error("Failed to generate preview");
+    }
+    setBulkLoading(false);
+  };
+
+  const handleBulkIncreaseSubmit = async () => {
+    if (!bulkPercentage || !bulkPreview) {
+      toast.warning("Please preview before applying");
+      return;
+    }
+    setBulkLoading(true);
+    try {
+      const { success, data } = await api.post("staff/hr/salaries/bulk-gross-pay-increase", {
+        percentage: bulkPercentage,
+        inserted_by: staffID
+      });
+      if (success && data.message === "success") {
+        toast.success(`Successfully increased gross pay for ${data.summary.staffProcessed} staff members`);
+        setShowBulkModal(false);
+        setBulkPreview(null);
+        setBulkPercentage("");
+        getStaffList();
+      } else {
+        toast.error(data.message || "Failed to process bulk increase");
+      }
+    } catch (err) {
+      toast.error("Failed to process bulk increase");
+    }
+    setBulkLoading(false);
   };
 
   useEffect(() => {
     getStaffList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (
@@ -325,6 +322,13 @@ function HrGrossPayManagement(props) {
               onClick={downloadTemplate}
             >
               <i className="fa fa-download me-2"></i>Download Template
+            </button>
+            <button
+              type="button"
+              className="btn btn-warning me-2"
+              onClick={() => setShowBulkModal(true)}
+            >
+              <i className="fa fa-percent me-2"></i>Bulk Increase by %
             </button>
             <button
               type="button"
@@ -454,10 +458,7 @@ function HrGrossPayManagement(props) {
                 {uploadResult.failed.length > 0 && (
                   <div className="alert alert-warning">
                     <strong>Failed Records:</strong>
-                    <ul
-                      className="mb-0 mt-2"
-                      style={{ maxHeight: "150px", overflowY: "auto" }}
-                    >
+                    <ul className="mb-0 mt-2" style={{ maxHeight: "150px", overflowY: "auto" }}>
                       {uploadResult.failed.map((item, idx) => (
                         <li key={idx}>
                           Row {item.row}: {item.StaffID} - {item.reason}
@@ -519,10 +520,7 @@ function HrGrossPayManagement(props) {
                       <td>{currencyConverter(item.PreviousGrossPay || 0)}</td>
                       <td>{currencyConverter(item.NewGrossPay)}</td>
                       <td>
-                        <span
-                          className={`badge ${item.UpdateMethod === "MANUAL" ? "bg-primary" : "bg-info"
-                            }`}
-                        >
+                        <span className={`badge ${item.UpdateMethod === "MANUAL" ? "bg-primary" : "bg-info"}`}>
                           {item.UpdateMethod}
                         </span>
                       </td>
@@ -541,6 +539,75 @@ function HrGrossPayManagement(props) {
             </table>
           </div>
         </Modal>
+
+        {/* Bulk Increase Modal */}
+        {showBulkModal && (
+          <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-xl">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Bulk Gross Pay Increase by Percentage</h5>
+                  <button type="button" className="btn-close" onClick={() => { setShowBulkModal(false); setBulkPreview(null); }}></button>
+                </div>
+                <div className="modal-body">
+                  <div className="row mb-4">
+                    <div className="col-md-4">
+                      <label className="form-label">Increase Percentage (%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="form-control"
+                        value={bulkPercentage}
+                        onChange={(e) => setBulkPercentage(e.target.value)}
+                        placeholder="e.g., 10 for 10% increase"
+                      />
+                    </div>
+                    <div className="col-md-4 d-flex align-items-end">
+                      <button className="btn btn-info w-100" onClick={handleBulkIncreasePreview} disabled={bulkLoading}>
+                        <i className="fa fa-eye me-2"></i>Preview Changes
+                      </button>
+                    </div>
+                  </div>
+
+                  {bulkPreview && (
+                    <div className="mt-4">
+                      <div className="alert alert-warning">
+                        <strong>⚠️ Warning:</strong> This will permanently update gross pay for <strong>{bulkPreview.staffCount}</strong> staff members.
+                        <br />
+                        Total increase: <strong>{currencyConverter(bulkPreview.totalIncrease)}</strong>
+                      </div>
+                      <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                        <table className="table table-sm table-bordered">
+                          <thead className="table-light">
+                            <tr><th>Staff ID</th><th>Staff Name</th><th>Current Gross Pay</th><th>New Gross Pay</th><th>Increase</th></tr>
+                          </thead>
+                          <tbody>
+                            {bulkPreview.preview.slice(0, 50).map((item, idx) => (
+                              <tr key={idx}>
+                                <td>{item.staffId}</td>
+                                <td>{item.staffName}</td>
+                                <td>{currencyConverter(item.currentGrossPay)}</td>
+                                <td className="text-success fw-bold">{currencyConverter(item.newGrossPay)}</td>
+                                <td className="text-primary">+{currencyConverter(item.increase)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {bulkPreview.preview.length > 50 && <p className="text-muted">...and {bulkPreview.preview.length - 50} more staff members</p>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => { setShowBulkModal(false); setBulkPreview(null); }}>Cancel</button>
+                  <button type="button" className="btn btn-danger" onClick={handleBulkIncreaseSubmit} disabled={bulkLoading || !bulkPreview}>
+                    {bulkLoading ? 'Processing...' : 'Apply Increase to All Staff'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

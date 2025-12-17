@@ -2,17 +2,15 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
 import { connect } from "react-redux";
+import SearchSelect from "../../../common/select/SearchSelect";
 
-function InventorySettings(props)
-{
-    const token = props.loginData[0].token;
+function InventorySettings(props) {
 
     const [isLoading, setIsLoading] = useState(true);
     const [categoryList, setCategoryList] = useState([]);
@@ -31,39 +29,39 @@ function InventorySettings(props)
             },
             {
                 label: "Manufacturer Name",
-                field: "ManufacturerName",
+                field: "manufacturer_name",
             },
             {
                 label: "Address",
-                field: "Address",
+                field: "address",
             },
             {
                 label: "Phone Number",
-                field: "PhoneNumber",
+                field: "phone_number",
             },
             {
                 label: "Email Address",
-                field: "EmailAddress",
+                field: "email_address",
             },
             {
                 label: "Description",
-                field: "Description",
+                field: "description",
             },
             {
                 label: "Added By",
-                field: "SubmittedBy",
+                field: "updated_by",
             },
         ],
         rows: [],
     });
     const [manufacturerFormData, setManufacturerFormData] = useState({
-        ManufacturerName: "",
-        Description: "",
-        Address: "",
-        PhoneNumber: "",
-        EmailAddress: "",
-        SubmittedBy: props.loginData[0].StaffID,
-        EntryID: "",
+        manufacturer_name: "",
+        description: "",
+        address: "",
+        phone_number: "",
+        email_address: "",
+        submitted_by: props.loginData[0].StaffID,
+        manufacturer_id: "",
     });
 
     const [vendorDatatable, setVendorDatatable] = useState({
@@ -78,39 +76,39 @@ function InventorySettings(props)
             },
             {
                 label: "Vendor Name",
-                field: "VendorName",
+                field: "vendor_name",
             },
             {
                 label: "Email Address",
-                field: "EmailAddress",
+                field: "email_address",
             },
             {
                 label: "Phone Number",
-                field: "PhoneNumber",
+                field: "phone_number",
             },
             {
                 label: "Address",
-                field: "Address",
+                field: "address",
             },
             {
                 label: "Description",
-                field: "Description",
+                field: "description",
             },
             {
                 label: "Added By",
-                field: "SubmittedBy",
+                field: "updated_by",
             },
         ],
         rows: [],
     });
     const [vendorFormData, setVendorFormData] = useState({
-        CategoryName: "",
-        EmailAddress: "",
-        PhoneNumber: "",
-        Address: "",
-        Description: "",
-        SubmittedBy: props.loginData[0].StaffID,
-        EntryID: "",
+        vendor_name: "",
+        email_address: "",
+        phone_number: "",
+        address: "",
+        description: "",
+        submitted_by: props.loginData[0].StaffID,
+        vendor_id: "",
     });
 
     const [categoryDatatable, setCategoryDatatable] = useState({
@@ -125,24 +123,24 @@ function InventorySettings(props)
             },
             {
                 label: "Category Name",
-                field: "CategoryName",
+                field: "category_name",
             },
             {
                 label: "Description",
-                field: "Description",
+                field: "description",
             },
             {
                 label: "Added By",
-                field: "SubmittedBy",
+                field: "submitted_by",
             },
         ],
         rows: [],
     });
     const [categoryFormData, setCategoryFormData] = useState({
-        CategoryName: "",
-        Description: "",
-        SubmittedBy: props.loginData[0].StaffID,
-        EntryID: "",
+        category_name: "",
+        description: "",
+        submitted_by: props.loginData[0].StaffID,
+        category_id: "",
     });
 
     const [subCategoryDatatable, setSubCategoryDatatable] = useState({
@@ -157,29 +155,29 @@ function InventorySettings(props)
             },
             {
                 label: "Category Name",
-                field: "CategoryID",
+                field: "category_name",
             },
             {
                 label: "SubCategory Name",
-                field: "SubCategoryName",
+                field: "sub_category_name",
             },
             {
                 label: "Description",
-                field: "Description",
+                field: "description",
             },
             {
                 label: "Added By",
-                field: "SubmittedBy",
+                field: "inserted_by",
             },
         ],
         rows: [],
     });
     const [subCategoryFormData, setSubCategoryFormData] = useState({
-        CategoryID: "",
-        SubCategoryName: "",
-        Description: "",
-        SubmittedBy: props.loginData[0].StaffID,
-        EntryID: "",
+        category_id: "",
+        sub_category_name: "",
+        description: "",
+        submitted_by: props.loginData[0].StaffID,
+        sub_category_id: "",
     });
 
     const [locationDatatable, setLocationDatatable] = useState({
@@ -194,24 +192,24 @@ function InventorySettings(props)
             },
             {
                 label: "Location Name",
-                field: "LocationName",
+                field: "location_name",
             },
             {
                 label: "Description",
-                field: "Description",
+                field: "description",
             },
             {
                 label: "Inserted By",
-                field: "SubmittedBy",
+                field: "updated_by",
             },
         ],
         rows: [],
     });
     const [locationFormData, setLocationFormData] = useState({
-        LocationName: "",
-        Description: "",
-        EntryID: "",
-        SubmittedBy: `${props.loginData[0].StaffID}`,
+        location_name: "",
+        description: "",
+        location_id: "",
+        submitted_by: `${props.loginData[0].StaffID}`,
     });
 
     const [itemDatatable, setItemDatatable] = useState({
@@ -226,998 +224,847 @@ function InventorySettings(props)
             },
             {
                 label: "Item Name",
-                field: "ItemName",
+                field: "item_name",
             },
             {
                 label: "Manufacturer Name",
-                field: "ManufacturerName",
+                field: "manufacturer_name",
             },
             {
-                label: "VendorName",
-                field: "VendorName",
+                label: "Vendor Name",
+                field: "vendor_name",
             },
             {
                 label: "Category Name",
-                field: "CategoryName",
+                field: "category_name",
             },
             {
                 label: "SubCategory Name",
-                field: "SubCategoryName",
+                field: "sub_category_name",
             },
             {
                 label: "Quantity Available",
-                field: "QuantityAvailable",
+                field: "quantity_available",
             },
         ],
         rows: [],
     });
     const [itemFormData, setItemFormData] = useState({
-        ItemName: "",
-        ManufacturerName: "",
-        VendorName: "",
-        CategoryName: "",
-        SubCategoryName: "",
-        QuantityAvailable: "",
-        EntryID: "",
-        SubmittedBy: `${props.loginData[0].StaffID}`,
+        item_name: "",
+        manufacturer_id: "",
+        vendor_id: "",
+        category_id: "",
+        sub_category_id: "",
+        quantity_available: "",
+        item_id: "",
+        submitted_by: `${props.loginData[0].StaffID}`,
     });
 
 
-    const getRecords = async () =>
-    {
-        await axios.get(`${serverLink}staff/inventory/manufacturer/list`, token)
-            .then((result) =>
-            {
-                const data = result.data;
-                if (data.length > 0)
-                {
-                    setManufacturerList(result.data)
-                    let rows = [];
-                    data.map((item, index) =>
-                    {
-                        rows.push({
-                            sn: index + 1,
-                            ManufacturerName: item.ManufacturerName,
-                            Description: item.Description,
-                            Address: item.Address,
-                            PhoneNumber: item.PhoneNumber,
-                            EmailAddress: item.EmailAddress,
-                            SubmittedBy: item.SubmittedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setManufacturerFormData({
-                                            ManufacturerName: item.ManufacturerName,
-                                            Description: item.Description,
-                                            Address: item.Address,
-                                            PhoneNumber: item.PhoneNumber,
-                                            EmailAddress: item.EmailAddress,
-                                            SubmittedBy: item.SubmittedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+    const getRecords = async () => {
+        try {
+            const { success, data } = await api.get("staff/inventory/manufacturer/list");
+            if (success && data.length > 0) {
+                setManufacturerList(data)
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        ...item,
+                        sn: index + 1,
+                        manufacturer_name: item.manufacturer_name,
+                        description: item.description,
+                        address: item.address,
+                        phone_number: item.phone_number,
+                        email_address: item.email_address,
+                        submitted_by: item.submitted_by,
+                        manufacturer_id: item.manufacturer_id,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() =>
+                                    setManufacturerFormData({
+                                        manufacturer_name: item.manufacturer_name,
+                                        description: item.description,
+                                        address: item.address,
+                                        phone_number: item.phone_number,
+                                        email_address: item.email_address,
+                                        submitted_by: item.submitted_by,
+                                        manufacturer_id: item.manufacturer_id,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setManufacturerDatatable({
-                        ...manufacturerDatatable,
-                        columns: manufacturerDatatable.columns,
-                        rows: rows,
-                    });
-                }
-                setIsLoading(false);
-            })
-            .catch((err) =>
-            {
-                console.log("NETWORK ERROR");
-            });
+                });
+                setManufacturerDatatable({
+                    ...manufacturerDatatable,
+                    columns: manufacturerDatatable.columns,
+                    rows: rows,
+                });
+            }
+            setIsLoading(false);
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
 
-        await axios.get(`${serverLink}staff/inventory/vendor/list`, token)
-            .then((result) =>
-            {
-                const data = result.data;
-                if (data.length > 0)
-                {
-                    setVendorList(result.data)
-                    let rows = [];
-                    data.map((item, index) =>
-                    {
-                        rows.push({
-                            sn: index + 1,
-                            VendorName: item.VendorName,
-                            EmailAddress: item.EmailAddress,
-                            PhoneNumber: item.PhoneNumber,
-                            Address: item.Address,
-                            Description: item.Description,
-                            SubmittedBy: item.SubmittedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#vendor"
-                                    onClick={() =>
-                                        setVendorFormData({
-                                            VendorName: item.VendorName,
-                                            EmailAddress: item.EmailAddress,
-                                            PhoneNumber: item.PhoneNumber,
-                                            Address: item.Address,
-                                            Description: item.Description,
-                                            SubmittedBy: item.SubmittedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/inventory/vendor/list");
+            if (success && data.length > 0) {
+                setVendorList(data)
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        ...item,
+                        sn: index + 1,
+                        vendor_name: item.vendor_name,
+                        email_address: item.email_address,
+                        phone_number: item.phone_number,
+                        address: item.address,
+                        description: item.description,
+                        submitted_by: item.submitted_by,
+                        vendor_id: item.vendor_id,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#vendor"
+                                onClick={() =>
+                                    setVendorFormData({
+                                        vendor_name: item.vendor_name,
+                                        email_address: item.email_address,
+                                        phone_number: item.phone_number,
+                                        address: item.address,
+                                        description: item.description,
+                                        submitted_by: item.submitted_by,
+                                        vendor_id: item.vendor_id,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setVendorDatatable({
-                        ...vendorDatatable,
-                        columns: vendorDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) =>
-            {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setVendorDatatable({
+                    ...vendorDatatable,
+                    columns: vendorDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
 
-        await axios.get(`${serverLink}staff/inventory/category/list`, token)
-            .then((result) =>
-            {
-                const data = result.data;
-                if (data.length > 0)
-                {
-                    setCategoryList(result.data)
-                    let rows = [];
-                    data.map((item, index) =>
-                    {
-                        rows.push({
-                            sn: index + 1,
-                            CategoryName: item.CategoryName,
-                            Description: item.Description,
-                            SubmittedBy: item.SubmittedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#category"
-                                    onClick={() =>
-                                        setCategoryFormData({
-                                            CategoryName: item.CategoryName,
-                                            Description: item.Description,
-                                            SubmittedBy: item.SubmittedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/inventory/category/list");
+            if (success && data.length > 0) {
+                setCategoryList(data)
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        ...item,
+                        sn: index + 1,
+                        category_name: item.category_name,
+                        description: item.description,
+                        submitted_by: item.submitted_by,
+                        category_id: item.category_id,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#category"
+                                onClick={() =>
+                                    setCategoryFormData({
+                                        category_name: item.category_name,
+                                        description: item.description,
+                                        submitted_by: item.submitted_by,
+                                        category_id: item.category_id,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setCategoryDatatable({
-                        ...categoryDatatable,
-                        columns: categoryDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) =>
-            {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setCategoryDatatable({
+                    ...categoryDatatable,
+                    columns: categoryDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
 
-        await axios.get(`${serverLink}staff/inventory/sub_category/list`, token)
-            .then((result) =>
-            {
-                const data = result.data;
-                if (data.length > 0)
-                {
-                    setSubCategoryList(result.data)
-                    let rows = [];
-                    data.map((item, index) =>
-                    {
-                        rows.push({
-                            sn: index + 1,
-                            CategoryID: item.CategoryID,
-                            SubCategoryName: item.SubCategoryName,
-                            Description: item.Description,
-                            SubmittedBy: item.SubmittedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#sub_category"
-                                    onClick={() =>
-                                        setSubCategoryFormData({
-                                            CategoryID: item.CategoryID,
-                                            SubCategoryName: item.SubCategoryName,
-                                            Description: item.Description,
-                                            SubmittedBy: item.SubmittedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/inventory/sub_category/list");
+            if (success && data.length > 0) {
+                setSubCategoryList(data)
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        ...item,
+                        sn: index + 1,
+                        category_id: item.category_id,
+                        category_name: item.category_name,
+                        sub_category_name: item.sub_category_name,
+                        description: item.description,
+                        submitted_by: item.submitted_by,
+                        sub_category_id: item.sub_category_id,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#sub_category"
+                                onClick={() =>
+                                    setSubCategoryFormData({
+                                        category_id: item.category_id,
+                                        sub_category_name: item.sub_category_name,
+                                        description: item.description,
+                                        submitted_by: item.submitted_by,
+                                        sub_category_id: item.sub_category_id,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setSubCategoryDatatable({
-                        ...subCategoryDatatable,
-                        columns: subCategoryDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) =>
-            {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setSubCategoryDatatable({
+                    ...subCategoryDatatable,
+                    columns: subCategoryDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
 
-        await axios.get(`${serverLink}staff/inventory/location/list`, token)
-            .then((result) =>
-            {
-                const data = result.data;
-                if (data.length > 0)
-                {
-                    let rows = [];
-                    data.map((item, index) =>
-                    {
-                        rows.push({
-                            sn: index + 1,
-                            LocationName: item.LocationName,
-                            Description: item.Description,
-                            SubmittedBy: item.SubmittedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#location"
-                                    onClick={() =>
-                                        setLocationFormData({
-                                            LocationName: item.LocationName,
-                                            Description: item.Description,
-                                            SubmittedBy: item.SubmittedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/inventory/location/list");
+            if (success && data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        ...item,
+                        sn: index + 1,
+                        location_name: item.location_name,
+                        description: item.description,
+                        submitted_by: item.submitted_by,
+                        location_id: item.location_id,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#location"
+                                onClick={() =>
+                                    setLocationFormData({
+                                        location_name: item.location_name,
+                                        description: item.description,
+                                        submitted_by: item.submitted_by,
+                                        location_id: item.location_id,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setLocationDatatable({
-                        ...locationDatatable,
-                        columns: locationDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) =>
-            {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setLocationDatatable({
+                    ...locationDatatable,
+                    columns: locationDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
 
-        await axios.get(`${serverLink}staff/inventory/item/list`, token)
-            .then((result) =>
-            {
-                const data = result.data;
-                if (data.length > 0)
-                {
-                    let rows = [];
-                    data.map((item, index) =>
-                    {
-                        rows.push({
-                            sn: index + 1,
-                            ItemName: item.ItemName,
-                            ManufacturerName: item.ManufacturerName,
-                            VendorName: item.VendorName,
-                            CategoryName: item.CategoryName,
-                            SubCategoryName: item.SubCategoryName,
-                            QuantityAvailable: item.QuantityAvailable,
-                            SubmittedBy: item.SubmittedBy,
-                            EntryID: item.EntryID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#item"
-                                    onClick={() =>
-                                        setItemFormData({
-                                            ItemName: item.ItemName,
-                                            ManufacturerName: item.ManufacturerName,
-                                            VendorName: item.VendorName,
-                                            CategoryName: item.CategoryName,
-                                            SubCategoryName: item.SubCategoryName,
-                                            QuantityAvailable: item.QuantityAvailable,
-                                            SubmittedBy: item.SubmittedBy,
-                                            EntryID: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        try {
+            const { success, data } = await api.get("staff/inventory/item/list");
+            if (success && data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        ...item,
+                        sn: index + 1,
+                        item_name: item.item_name,
+                        manufacturer_name: item.manufacturer_name,
+                        vendor_name: item.vendor_name,
+                        category_name: item.category_name,
+                        sub_category_name: item.sub_category_name,
+                        quantity_available: item.quantity_available,
+                        submitted_by: item.submitted_by,
+                        item_id: item.item_id,
+                        manufacturer_id: item.manufacturer_id,
+                        vendor_id: item.vendor_id,
+                        category_id: item.category_id,
+                        sub_category_id: item.sub_category_id,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#item"
+                                onClick={() =>
+                                    setItemFormData({
+                                        item_name: item.item_name,
+                                        manufacturer_id: item.manufacturer_id,
+                                        vendor_id: item.vendor_id,
+                                        category_id: item.category_id,
+                                        sub_category_id: item.sub_category_id,
+                                        quantity_available: item.quantity_available,
+                                        submitted_by: item.submitted_by,
+                                        item_id: item.item_id,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setItemDatatable({
-                        ...itemDatatable,
-                        columns: itemDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) =>
-            {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setItemDatatable({
+                    ...itemDatatable,
+                    columns: itemDatatable.columns,
+                    rows: rows,
+                });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR STATE");
+        }
     };
 
-    const onManufacturerEdit = (e) =>
-    {
+    const onManufacturerEdit = (e) => {
         setManufacturerFormData({
             ...manufacturerFormData,
             [e.target.id]: e.target.value,
         });
     };
 
-    const onVendorEdit = (e) =>
-    {
+    const onVendorEdit = (e) => {
         setVendorFormData({
             ...vendorFormData,
             [e.target.id]: e.target.value,
         });
     };
 
-    const onCategoryEdit = (e) =>
-    {
+    const onCategoryEdit = (e) => {
         setCategoryFormData({
             ...categoryFormData,
             [e.target.id]: e.target.value,
         });
     };
 
-    const onSubCategoryEdit = (e) =>
-    {
+    const onSubCategoryEdit = (e) => {
         setSubCategoryFormData({
             ...subCategoryFormData,
             [e.target.id]: e.target.value,
         });
     };
 
-    const onLocationEdit = (e) =>
-    {
+    const onLocationEdit = (e) => {
         setLocationFormData({
             ...locationFormData,
             [e.target.id]: e.target.value,
         });
     };
 
-    const onItemEdit = (e) =>
-    {
+    const onItemEdit = (e) => {
         setItemFormData({
             ...itemFormData,
             [e.target.id]: e.target.value,
         });
     };
 
-    const onSubmitManufacturer = async () =>
-    {
-        if (manufacturerFormData.ManufacturerName.trim() === "")
-        {
-            showAlert("EMPTY FIELD", "Please enter ManufacturerName", "error");
+    const onSubmitManufacturer = async () => {
+        if (manufacturerFormData.manufacturer_name.trim() === "") {
+            showAlert("EMPTY FIELD", "Please enter Manufacturer Name", "error");
             return false;
         }
-        if (manufacturerFormData.Address.trim() === "")
-        {
+        if (manufacturerFormData.address.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter the Address", "error");
             return false;
         }
-        if (manufacturerFormData.PhoneNumber.trim() === "")
-        {
+        if (manufacturerFormData.phone_number.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Phone Number", "error");
             return false;
         }
-        if (manufacturerFormData.EmailAddress.trim() === "")
-        {
+        if (manufacturerFormData.email_address.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Email Address", "error");
             return false;
         }
-        if (manufacturerFormData.Description.trim() === "")
-        {
+        if (manufacturerFormData.description.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Description", "error");
             return false;
         }
 
-        if (manufacturerFormData.EntryID === "")
-        {
-            await axios
-                .post(`${serverLink}staff/inventory/manufacturer/add`, manufacturerFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Manufacturer Data Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setManufacturerFormData({
-                            ...manufacturerFormData,
-                            ManufacturerName: "",
-                            Description: "",
-                            Address: "",
-                            PhoneNumber: "",
-                            EmailAddress: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist")
-                    {
-                        showAlert("MANUFACTURER EXIST", "Manufacturer already exist!", "error");
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        if (manufacturerFormData.manufacturer_id === "") {
+            try {
+                const { success, data } = await api.post("staff/inventory/manufacturer/add", manufacturerFormData);
+                if (success && data.message === "success") {
+                    toast.success("Manufacturer Data Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setManufacturerFormData({
+                        ...manufacturerFormData,
+                        manufacturer_name: "",
+                        description: "",
+                        address: "",
+                        phone_number: "",
+                        email_address: "",
+                        manufacturer_id: "",
+                    });
+                } else if (success && data.message === "exist") {
+                    showAlert("MANUFACTURER EXIST", "Manufacturer already exist!", "error");
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
-        else
-        {
-            await axios
-                .patch(`${serverLink}staff/inventory/manufacturer/update`, manufacturerFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Manufacturer Data Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setManufacturerFormData({
-                            ...manufacturerFormData,
-                            ManufacturerName: "",
-                            Description: "",
-                            Address: "",
-                            PhoneNumber: "",
-                            EmailAddress: "",
-                            EntryID: "",
-                        });
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        else {
+            try {
+                const { success, data } = await api.patch("staff/inventory/manufacturer/update", manufacturerFormData);
+                if (success && data.message === "success") {
+                    toast.success("Manufacturer Data Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setManufacturerFormData({
+                        ...manufacturerFormData,
+                        manufacturer_name: "",
+                        description: "",
+                        address: "",
+                        phone_number: "",
+                        email_address: "",
+                        manufacturer_id: "",
+                    });
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     };
 
-    const onSubmitVendor = async () =>
-    {
-        if (vendorFormData.VendorName.trim() === "")
-        {
+    const onSubmitVendor = async () => {
+        if (vendorFormData.vendor_name.trim() === "") {
             showAlert("EMPTY FIELD", "enter Vendor Name", "error");
             return false;
         }
-        if (vendorFormData.EmailAddress.trim() === "")
-        {
+        if (vendorFormData.email_address.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Email Address", "error");
             return false;
         }
-        if (vendorFormData.PhoneNumber.trim() === "")
-        {
+        if (vendorFormData.phone_number.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Phone Number", "error");
             return false;
         }
-        if (vendorFormData.Address.trim() === "")
-        {
+        if (vendorFormData.address.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Address", "error");
             return false;
         }
-        if (vendorFormData.Description.trim() === "")
-        {
+        if (vendorFormData.description.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Description", "error");
             return false;
         }
 
-        if (vendorFormData.EntryID === "")
-        {
-            await axios
-                .post(`${serverLink}staff/inventory/vendor/add`, vendorFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Vendor Data Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setVendorFormData({
-                            ...vendorFormData,
-                            VendorName: "",
-                            EmailAddress: "",
-                            PhoneNumber: "",
-                            Address: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist")
-                    {
-                        showAlert("VENDOR EXIST", "Vendor already exist!", "error");
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        if (vendorFormData.vendor_id === "") {
+            try {
+                const { success, data } = await api.post("staff/inventory/vendor/add", vendorFormData);
+                if (success && data.message === "success") {
+                    toast.success("Vendor Data Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setVendorFormData({
+                        ...vendorFormData,
+                        vendor_name: "",
+                        email_address: "",
+                        phone_number: "",
+                        address: "",
+                        description: "",
+                        vendor_id: "",
+                    });
+                } else if (success && data.message === "exist") {
+                    showAlert("VENDOR EXIST", "Vendor already exist!", "error");
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
-        else
-        {
-            await axios
-                .patch(`${serverLink}staff/inventory/vendor/update`, vendorFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Vendor Data Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setVendorFormData({
-                            ...vendorFormData,
-                            VendorName: "",
-                            EmailAddress: "",
-                            PhoneNumber: "",
-                            Address: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        else {
+            try {
+                const { success, data } = await api.patch("staff/inventory/vendor/update", vendorFormData);
+                if (success && data.message === "success") {
+                    toast.success("Vendor Data Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setVendorFormData({
+                        ...vendorFormData,
+                        vendor_name: "",
+                        email_address: "",
+                        phone_number: "",
+                        address: "",
+                        description: "",
+                        vendor_id: "",
+                    });
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     };
 
-    const onSubmitCategory = async () =>
-    {
-        if (categoryFormData.CategoryName.trim() === "")
-        {
+    const onSubmitCategory = async () => {
+        if (categoryFormData.CategoryName.trim() === "") {
             showAlert("EMPTY FIELD", "enter Vendor Name", "error");
             return false;
         }
-        if (categoryFormData.Description.trim() === "")
-        {
+        if (categoryFormData.Description.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Email Address", "error");
             return false;
         }
-        if (categoryFormData.EntryID === "")
-        {
-            await axios
-                .post(`${serverLink}staff/inventory/category/add`, categoryFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Category Data Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setCategoryFormData({
-                            ...categoryFormData,
-                            CategoryName: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist")
-                    {
-                        showAlert("CATEGORY EXIST", "Category already exist!", "error");
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        if (categoryFormData.EntryID === "") {
+            try {
+                const { success, data } = await api.post("staff/inventory/category/add", categoryFormData);
+                if (success && data.message === "success") {
+                    toast.success("Category Data Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setCategoryFormData({
+                        ...categoryFormData,
+                        CategoryName: "",
+                        Description: "",
+                        EntryID: "",
+                    });
+                } else if (success && data.message === "exist") {
+                    showAlert("CATEGORY EXIST", "Category already exist!", "error");
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
-        else
-        {
-            await axios
-                .patch(`${serverLink}staff/inventory/category/update`, categoryFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Category Data Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setCategoryFormData({
-                            ...categoryFormData,
-                            CategoryName: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        else {
+            try {
+                const { success, data } = await api.patch("staff/inventory/category/update", categoryFormData);
+                if (success && data.message === "success") {
+                    toast.success("Category Data Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setCategoryFormData({
+                        ...categoryFormData,
+                        CategoryName: "",
+                        Description: "",
+                        EntryID: "",
+                    });
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     };
 
-    const onSubmitSubCategory = async () =>
-    {
-        if (subCategoryFormData.CategoryID.toString().trim() === "")
-        {
+    const onSubmitSubCategory = async () => {
+        if (subCategoryFormData.CategoryID.toString().trim() === "") {
             showAlert("EMPTY FIELD", "enter Category Name", "error");
             return false;
         }
-        if (subCategoryFormData.SubCategoryName.trim() === "")
-        {
+        if (subCategoryFormData.SubCategoryName.trim() === "") {
             showAlert("EMPTY FIELD", "enter Sub Category Name", "error");
             return false;
         }
-        if (subCategoryFormData.Description.trim() === "")
-        {
+        if (subCategoryFormData.Description.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Description", "error");
             return false;
         }
-        if (subCategoryFormData.EntryID === "")
-        {
-            await axios
-                .post(`${serverLink}staff/inventory/sub_category/add`, subCategoryFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Sub Category Data Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setSubCategoryFormData({
-                            ...subCategoryFormData,
-                            CategoryID: "",
-                            SubCategoryName: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist")
-                    {
-                        showAlert("SUB CATEGORY EXIST", "Sub Category already exist!", "error");
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        if (subCategoryFormData.EntryID === "") {
+            try {
+                const { success, data } = await api.post("staff/inventory/sub_category/add", subCategoryFormData);
+                if (success && data.message === "success") {
+                    toast.success("Sub Category Data Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setSubCategoryFormData({
+                        ...subCategoryFormData,
+                        CategoryID: "",
+                        SubCategoryName: "",
+                        Description: "",
+                        EntryID: "",
+                    });
+                } else if (success && data.message === "exist") {
+                    showAlert("SUB CATEGORY EXIST", "Sub Category already exist!", "error");
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
-        else
-        {
-            await axios
-                .patch(`${serverLink}staff/inventory/sub_category/update`, subCategoryFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Sub Category Data Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setSubCategoryFormData({
-                            ...subCategoryFormData,
-                            CategoryID: "",
-                            SubCategoryName: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        else {
+            try {
+                const { success, data } = await api.patch("staff/inventory/sub_category/update", subCategoryFormData);
+                if (success && data.message === "success") {
+                    toast.success("Sub Category Data Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setSubCategoryFormData({
+                        ...subCategoryFormData,
+                        CategoryID: "",
+                        SubCategoryName: "",
+                        Description: "",
+                        EntryID: "",
+                    });
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     };
 
-    const onSubmitLocation = async () =>
-    {
-        if (locationFormData.LocationName.trim() === "")
-        {
+    const onSubmitLocation = async () => {
+        if (locationFormData.LocationName.trim() === "") {
             showAlert("EMPTY FIELD", "enter Location Name", "error");
             return false;
         }
-        if (locationFormData.Description.trim() === "")
-        {
+        if (locationFormData.Description.trim() === "") {
             showAlert("EMPTY FIELD", "Please enter Description", "error");
             return false;
         }
-        if (locationFormData.EntryID === "")
-        {
-            await axios
-                .post(`${serverLink}staff/inventory/location/add`, locationFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Location Data Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setLocationFormData({
-                            ...locationFormData,
-                            LocationName: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist")
-                    {
-                        showAlert("THIS LOCATION EXIST", "Location already exist!", "error");
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        if (locationFormData.EntryID === "") {
+            try {
+                const { success, data } = await api.post("staff/inventory/location/add", locationFormData);
+                if (success && data.message === "success") {
+                    toast.success("Location Data Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setLocationFormData({
+                        ...locationFormData,
+                        LocationName: "",
+                        Description: "",
+                        EntryID: "",
+                    });
+                } else if (success && data.message === "exist") {
+                    showAlert("THIS LOCATION EXIST", "Location already exist!", "error");
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
-        else
-        {
-            await axios
-                .patch(`${serverLink}staff/inventory/location/update`, locationFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Location Data Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setLocationFormData({
-                            ...locationFormData,
-                            LocationName: "",
-                            Description: "",
-                            EntryID: "",
-                        });
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        else {
+            try {
+                const { success, data } = await api.patch("staff/inventory/location/update", locationFormData);
+                if (success && data.message === "success") {
+                    toast.success("Location Data Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setLocationFormData({
+                        ...locationFormData,
+                        LocationName: "",
+                        Description: "",
+                        EntryID: "",
+                    });
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     };
 
-    const onSubmitItem = async () =>
-    {
-        if (itemFormData.ItemName.trim() === "")
-        {
+    const onSubmitItem = async () => {
+        if (itemFormData.ItemName.trim() === "") {
             showAlert("EMPTY FIELD", "enter Item Name", "error");
             return false;
         }
-        if (itemFormData.ManufacturerID.toString().trim() === "")
-        {
+        if (itemFormData.ManufacturerID.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Please select Manufacturer", "error");
             return false;
         }
-        if (itemFormData.VendorID.toString().trim() === "")
-        {
+        if (itemFormData.VendorID.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Please select VendorID", "error");
             return false;
         }
-        if (itemFormData.CategoryID.toString().trim() === "")
-        {
+        if (itemFormData.CategoryID.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Please select Category", "error");
             return false;
         }
-        if (itemFormData.SubCategoryID.toString().trim() === "")
-        {
+        if (itemFormData.SubCategoryID.toString().trim() === "") {
             showAlert("EMPTY FIELD", "Please select SubCategory", "error");
             return false;
         }
-        if (itemFormData.EntryID === "")
-        {
-            await axios
-                .post(`${serverLink}staff/inventory/item/add`, itemFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Item Data Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setItemFormData({
-                            ...itemFormData,
-                            ItemName: "",
-                            ManufacturerID: "",
-                            VendorID: "",
-                            CategoryID: "",
-                            SubCategoryID: "",
-                            QuantityAvailable: "",
-                            EntryID: "",
-                        });
-                    } else if (result.data.message === "exist")
-                    {
-                        showAlert("ITEM EXIST", "item already exist!", "error");
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        if (itemFormData.EntryID === "") {
+            try {
+                const { success, data } = await api.post("staff/inventory/item/add", itemFormData);
+                if (success && data.message === "success") {
+                    toast.success("Item Data Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setItemFormData({
+                        ...itemFormData,
+                        ItemName: "",
+                        ManufacturerID: "",
+                        VendorID: "",
+                        CategoryID: "",
+                        SubCategoryID: "",
+                        QuantityAvailable: "",
+                        EntryID: "",
+                    });
+                } else if (success && data.message === "exist") {
+                    showAlert("ITEM EXIST", "item already exist!", "error");
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
-        else
-        {
-            await axios
-                .patch(`${serverLink}staff/inventory/item/update`, itemFormData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Item Data Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setItemFormData({
-                            ...itemFormData,
-                            ItemName: "",
-                            ManufacturerID: "",
-                            VendorID: "",
-                            CategoryID: "",
-                            SubCategoryID: "",
-                            QuantityAvailable: "",
-                            EntryID: "",
-                        });
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        else {
+            try {
+                const { success, data } = await api.patch("staff/inventory/item/update", itemFormData);
+                if (success && data.message === "success") {
+                    toast.success("Item Data Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setItemFormData({
+                        ...itemFormData,
+                        ItemName: "",
+                        ManufacturerID: "",
+                        VendorID: "",
+                        CategoryID: "",
+                        SubCategoryID: "",
+                        QuantityAvailable: "",
+                        EntryID: "",
+                    });
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     };
 
 
 
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         getRecords();
     }, []);
 
@@ -1269,12 +1116,12 @@ function InventorySettings(props)
                                         onClick={() =>
                                             setManufacturerFormData({
                                                 ...manufacturerFormData,
-                                                ManufacturerName: "",
-                                                Description: "",
-                                                Address: "",
-                                                PhoneNumber: "",
-                                                EmailAddress: "",
-                                                EntryID: "",
+                                                manufacturer_name: "",
+                                                description: "",
+                                                address: "",
+                                                phone_number: "",
+                                                email_address: "",
+                                                manufacturer_id: "",
                                             })
                                         }
                                     >
@@ -1293,12 +1140,12 @@ function InventorySettings(props)
                                         onClick={() =>
                                             setVendorFormData({
                                                 ...vendorFormData,
-                                                VendorName: "",
-                                                EmailAddress: "",
-                                                PhoneNumber: "",
-                                                Address: "",
-                                                Description: "",
-                                                EntryID: "",
+                                                vendor_name: "",
+                                                email_address: "",
+                                                phone_number: "",
+                                                address: "",
+                                                description: "",
+                                                vendor_id: "",
                                             })
                                         }
                                     >
@@ -1317,9 +1164,9 @@ function InventorySettings(props)
                                         onClick={() =>
                                             setCategoryFormData({
                                                 ...categoryFormData,
-                                                CategoryName: "",
-                                                Description: "",
-                                                EntryID: "",
+                                                category_name: "",
+                                                description: "",
+                                                category_id: "",
                                             })
                                         }
                                     >
@@ -1338,10 +1185,10 @@ function InventorySettings(props)
                                         onClick={() =>
                                             setSubCategoryFormData({
                                                 ...subCategoryFormData,
-                                                CategoryID: "",
-                                                SubCategoryName: "",
-                                                Description: "",
-                                                EntryID: "",
+                                                category_id: "",
+                                                sub_category_name: "",
+                                                description: "",
+                                                sub_category_id: "",
                                             })
                                         }
                                     >
@@ -1360,9 +1207,9 @@ function InventorySettings(props)
                                         onClick={() =>
                                             setLocationFormData({
                                                 ...locationFormData,
-                                                LocationName: "",
-                                                Description: "",
-                                                EntryID: "",
+                                                location_name: "",
+                                                description: "",
+                                                location_id: "",
                                             })
                                         }
                                     >
@@ -1381,13 +1228,13 @@ function InventorySettings(props)
                                         onClick={() =>
                                             setItemFormData({
                                                 ...itemFormData,
-                                                ItemName: "",
-                                                ManufacturerID: "",
-                                                VendorID: "",
-                                                CategoryID: "",
-                                                SubCategoryID: "",
-                                                QuantityAvailable: "",
-                                                EntryID: "",
+                                                item_name: "",
+                                                manufacturer_id: "",
+                                                vendor_id: "",
+                                                category_id: "",
+                                                sub_category_id: "",
+                                                quantity_available: "",
+                                                item_id: "",
                                             })
                                         }
                                     >
@@ -1407,9 +1254,9 @@ function InventorySettings(props)
                             <label htmlFor="CourseCode">Manufacturer Name</label>
                             <input
                                 type="text"
-                                id={"ManufacturerName"}
+                                id={"manufacturer_name"}
                                 onChange={onManufacturerEdit}
-                                value={manufacturerFormData.ManufacturerName}
+                                value={manufacturerFormData.manufacturer_name}
                                 className={"form-control"}
                                 placeholder={"enter Manufacturer Name"}
                             />
@@ -1418,9 +1265,9 @@ function InventorySettings(props)
                             <label htmlFor="EmailAddress">Email Address</label>
                             <input
                                 type="text"
-                                id={"EmailAddress"}
+                                id={"email_address"}
                                 onChange={onManufacturerEdit}
-                                value={manufacturerFormData.EmailAddress}
+                                value={manufacturerFormData.email_address}
                                 className={"form-control"}
                                 placeholder={"Please enter the EmailAddress"}
                             />
@@ -1429,9 +1276,9 @@ function InventorySettings(props)
                             <label htmlFor="PhoneNumber">Phone Number</label>
                             <input
                                 type="number"
-                                id={"PhoneNumber"}
+                                id={"phone_number"}
                                 onChange={onManufacturerEdit}
-                                value={manufacturerFormData.PhoneNumber}
+                                value={manufacturerFormData.phone_number}
                                 className={"form-control"}
                                 placeholder={"Please enter Phone Number"}
                             />
@@ -1440,9 +1287,9 @@ function InventorySettings(props)
                             <label htmlFor="Address">Address</label>
                             <input
                                 type="text"
-                                id={"Address"}
+                                id={"address"}
                                 onChange={onManufacturerEdit}
-                                value={manufacturerFormData.Address}
+                                value={manufacturerFormData.address}
                                 className={"form-control"}
                                 placeholder={"Please enter the Address"}
                             />
@@ -1452,9 +1299,9 @@ function InventorySettings(props)
                             <label htmlFor="Semester">Description</label>
                             <input
                                 type="text"
-                                id={"Description"}
+                                id={"description"}
                                 onChange={onManufacturerEdit}
-                                value={manufacturerFormData.Description}
+                                value={manufacturerFormData.description}
                                 className={"form-control"}
                                 placeholder={"Please enter Description"}
                             />
@@ -1473,9 +1320,9 @@ function InventorySettings(props)
                             <label htmlFor="VendorName">Vendor Name</label>
                             <input
                                 type="text"
-                                id={"VendorName"}
+                                id={"vendor_name"}
                                 onChange={onVendorEdit}
-                                value={vendorFormData.VendorName}
+                                value={vendorFormData.vendor_name}
                                 className={"form-control"}
                                 placeholder={"Please enter Vendor Name"}
                             />
@@ -1484,9 +1331,9 @@ function InventorySettings(props)
                             <label htmlFor="Amount">PhoneNumber</label>
                             <input
                                 type="number"
-                                id={"PhoneNumber"}
+                                id={"phone_number"}
                                 onChange={onVendorEdit}
-                                value={vendorFormData.PhoneNumber}
+                                value={vendorFormData.phone_number}
                                 className={"form-control"}
                                 placeholder={"Please enter PhoneNumber"}
                             />
@@ -1495,9 +1342,9 @@ function InventorySettings(props)
                             <label htmlFor="Amount">EmailAddress</label>
                             <input
                                 type="text"
-                                id={"EmailAddress"}
+                                id={"email_address"}
                                 onChange={onVendorEdit}
-                                value={vendorFormData.EmailAddress}
+                                value={vendorFormData.email_address}
                                 className={"form-control"}
                                 placeholder={"Please enter EmailAddress"}
                             />
@@ -1506,9 +1353,9 @@ function InventorySettings(props)
                             <label htmlFor="Address">Address</label>
                             <input
                                 type="text"
-                                id={"Address"}
+                                id={"address"}
                                 onChange={onVendorEdit}
-                                value={vendorFormData.Address}
+                                value={vendorFormData.address}
                                 className={"form-control"}
                                 placeholder={"Please enter Address"}
                             />
@@ -1517,9 +1364,9 @@ function InventorySettings(props)
                             <label htmlFor="Description">Description</label>
                             <input
                                 type="text"
-                                id={"Description"}
+                                id={"description"}
                                 onChange={onVendorEdit}
-                                value={vendorFormData.Description}
+                                value={vendorFormData.description}
                                 className={"form-control"}
                                 placeholder={"Please enter Description"}
                             />
@@ -1538,9 +1385,9 @@ function InventorySettings(props)
                             <label htmlFor="CategoryName">Category Name</label>
                             <input
                                 type="text"
-                                id={"CategoryName"}
+                                id={"category_name"}
                                 onChange={onCategoryEdit}
-                                value={categoryFormData.CategoryName}
+                                value={categoryFormData.category_name}
                                 className={"form-control"}
                                 placeholder={"Please enter Category Name"}
                             />
@@ -1549,9 +1396,9 @@ function InventorySettings(props)
                             <label htmlFor="Description">Description</label>
                             <input
                                 type="text"
-                                id={"Description"}
+                                id={"description"}
                                 onChange={onCategoryEdit}
-                                value={categoryFormData.Description}
+                                value={categoryFormData.description}
                                 className={"form-control"}
                                 placeholder={"Please enter Description"}
                             />
@@ -1568,29 +1415,32 @@ function InventorySettings(props)
                     <div className={"row"}>
                         <div className="form-group col-md-12 mb-4">
                             <label htmlFor="CategoryName">Category Name</label>
-                            <select
-                                id={"CategoryID"}
-                                onChange={onSubCategoryEdit}
-                                value={subCategoryFormData.CategoryID}
-                                className={"form-control"}
-                            >
-                                <option>Select Category Name</option>
-                                {
-                                    categoryList.length > 0 && categoryList.map((category, index) =>
-                                    {
-                                        return <option key={index} value={category.EntryID}>{category.CategoryName}</option>
-                                    })
+                            <SearchSelect
+                                id="category_id"
+                                onChange={(selected) => onSubCategoryEdit({ target: { id: "category_id", value: selected?.value || "" } })}
+                                value={
+                                    categoryList.length > 0
+                                        ? categoryList
+                                            .map((r) => ({ label: r.category_name, value: r.category_id }))
+                                            .find((r) => r.value === subCategoryFormData.category_id)
+                                        : null
                                 }
-
-                            </select>
+                                options={
+                                    categoryList.length > 0
+                                        ? categoryList.map((r) => ({ label: r.category_name, value: r.category_id }))
+                                        : []
+                                }
+                                className={"form-control"}
+                                placeholder={"Select Category Name"}
+                            />
                         </div>
                         <div className="form-group col-md-12 mb-4">
                             <label htmlFor="SubCategoryName">Sub Category Name</label>
                             <input
                                 type="text"
-                                id={"SubCategoryName"}
+                                id={"sub_category_name"}
                                 onChange={onSubCategoryEdit}
-                                value={subCategoryFormData.SubCategoryName}
+                                value={subCategoryFormData.sub_category_name}
                                 className={"form-control"}
                                 placeholder={"Please enter Sub Category Name"}
                             />
@@ -1599,9 +1449,9 @@ function InventorySettings(props)
                             <label htmlFor="Description">Description</label>
                             <input
                                 type="text"
-                                id={"Description"}
+                                id={"description"}
                                 onChange={onSubCategoryEdit}
-                                value={subCategoryFormData.Description}
+                                value={subCategoryFormData.description}
                                 className={"form-control"}
                                 placeholder={"Please enter Description"}
                             />
@@ -1620,9 +1470,9 @@ function InventorySettings(props)
                             <label htmlFor="LocationName">Location Name</label>
                             <input
                                 type="text"
-                                id={"LocationName"}
+                                id={"location_name"}
                                 onChange={onLocationEdit}
-                                value={locationFormData.LocationName}
+                                value={locationFormData.location_name}
                                 className={"form-control"}
                                 placeholder={"Please enter Location Name"}
                             />
@@ -1631,9 +1481,9 @@ function InventorySettings(props)
                             <label htmlFor="Description">Description</label>
                             <input
                                 type="text"
-                                id={"Description"}
+                                id={"description"}
                                 onChange={onLocationEdit}
-                                value={locationFormData.Description}
+                                value={locationFormData.description}
                                 className={"form-control"}
                                 placeholder={"Please enter Description"}
                             />
@@ -1652,84 +1502,99 @@ function InventorySettings(props)
                             <label htmlFor="ItemName">Item Name</label>
                             <input
                                 type="text"
-                                id={"ItemName"}
+                                id={"item_name"}
                                 onChange={onItemEdit}
-                                value={itemFormData.ItemName}
+                                value={itemFormData.item_name}
                                 className={"form-control"}
                                 placeholder={"Please enter Item Name"}
                             />
                         </div>
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="ManufacturerName">Manufacturer Name</label>
-                            <select
-                                id={"ManufacturerName"}
-                                onChange={onItemEdit}
-                                value={itemFormData.ManufacturerName}
-                                className={"form-control"}
-                            >
-                                <option>Select Category Name</option>
-                                {
-                                    manufacturerList.length > 0 && manufacturerList.map((manufacturer, index) =>
-                                    {
-                                        return <option key={index} value={manufacturer.EntryID}>{manufacturer.ManufacturerName}</option>
-                                    })
+                            <SearchSelect
+                                id="manufacturer_id"
+                                onChange={(selected) => onItemEdit({ target: { id: "manufacturer_id", value: selected?.value || "" } })}
+                                value={
+                                    manufacturerList.length > 0
+                                        ? manufacturerList
+                                            .map((r) => ({ label: r.manufacturer_name, value: r.manufacturer_id }))
+                                            .find((r) => r.value === itemFormData.manufacturer_id)
+                                        : null
                                 }
-
-                            </select>
+                                options={
+                                    manufacturerList.length > 0
+                                        ? manufacturerList.map((r) => ({ label: r.manufacturer_name, value: r.manufacturer_id }))
+                                        : []
+                                }
+                                className={"form-control"}
+                                placeholder={"Select Manufacturer"}
+                            />
                         </div>
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="VendorName">Vendor Name</label>
-                            <select
-                                id={"VendorName"}
-                                onChange={onItemEdit}
-                                value={itemFormData.VendorName}
-                                className={"form-control"}
-                            >
-                                <option>Select Vendor Name</option>
-                                {
-                                    vendorList.length > 0 && vendorList.map((vendor, index) =>
-                                    {
-                                        return <option key={index} value={vendor.EntryID}>{vendor.VendorName}</option>
-                                    })
+                            <SearchSelect
+                                id="vendor_id"
+                                onChange={(selected) => onItemEdit({ target: { id: "vendor_id", value: selected?.value || "" } })}
+                                value={
+                                    vendorList.length > 0
+                                        ? vendorList
+                                            .map((r) => ({ label: r.vendor_name, value: r.vendor_id }))
+                                            .find((r) => r.value === itemFormData.vendor_id)
+                                        : null
                                 }
-
-                            </select>
+                                options={
+                                    vendorList.length > 0
+                                        ? vendorList.map((r) => ({ label: r.vendor_name, value: r.vendor_id }))
+                                        : []
+                                }
+                                className={"form-control"}
+                                placeholder={"Select Vendor"}
+                            />
                         </div>
                         <div className="form-group col-md-6 mb-4">
                             <label htmlFor="CategoryName">Category Name</label>
-                            <select
-                                id={"CategoryName"}
-                                onChange={onItemEdit}
-                                value={itemFormData.CategoryName}
-                                className={"form-control"}
-                            >
-                                <option>Select Category Name</option>
-                                {
-                                    categoryList.length > 0 && categoryList.map((category, index) =>
-                                    {
-                                        return <option key={index} value={category.EntryID}>{category.CategoryName}</option>
-                                    })
+                            <SearchSelect
+                                id="category_id"
+                                onChange={(selected) => onItemEdit({ target: { id: "category_id", value: selected?.value || "" } })}
+                                value={
+                                    categoryList.length > 0
+                                        ? categoryList
+                                            .map((r) => ({ label: r.category_name, value: r.category_id }))
+                                            .find((r) => r.value === itemFormData.category_id)
+                                        : null
                                 }
-
-                            </select>
+                                options={
+                                    categoryList.length > 0
+                                        ? categoryList.map((r) => ({ label: r.category_name, value: r.category_id }))
+                                        : []
+                                }
+                                className={"form-control"}
+                                placeholder={"Select Category"}
+                            />
                         </div>
                         <div className="form-group col-md-12 mb-4">
                             <label htmlFor="SubCategoryID">SubCategory Name</label>
-                            <select
-                                id={"SubCategoryName"}
-                                onChange={onItemEdit}
-                                value={itemFormData.SubCategoryName}
-                                className={"form-control"}
-                            >
-                                <option>Select SubCategory Name</option>
-                                {
-                                    subCategoryList.length > 0 && subCategoryList.map((subCategory, index) =>
-                                    {
-                                        return <option key={index} value={subCategory.EntryID}>{subCategory.SubCategoryName}</option>
-                                    })
+                            <SearchSelect
+                                id="sub_category_id"
+                                onChange={(selected) => onItemEdit({ target: { id: "sub_category_id", value: selected?.value || "" } })}
+                                value={
+                                    subCategoryList.length > 0
+                                        ? subCategoryList
+                                            .filter(sc => sc.category_id === itemFormData.category_id) // Filter by selected category if desired, but for now just map all
+                                            .map((r) => ({ label: r.sub_category_name, value: r.sub_category_id }))
+                                            .find((r) => r.value === itemFormData.sub_category_id)
+                                        : null
                                 }
-
-                            </select>
+                                options={
+                                    subCategoryList.length > 0
+                                        ? subCategoryList
+                                            .filter(sc => itemFormData.category_id ? sc.category_id == itemFormData.category_id : true)
+                                            .map((r) => ({ label: r.sub_category_name, value: r.sub_category_id }))
+                                        : []
+                                }
+                                className={"form-control"}
+                                placeholder={"Select SubCategory"}
+                            />
                         </div>
                     </div>
 
@@ -1745,8 +1610,7 @@ function InventorySettings(props)
         </div>
     );
 }
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails,
     };

@@ -1,19 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
-import {formatDateAndTime} from "../../../../resources/constants";
-import {connect} from "react-redux";
+import { formatDateAndTime } from "../../../../resources/constants";
+import { connect } from "react-redux";
 import ReportTable from "../../../common/table/ReportTable";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function PermissionPermission(props) {
-    const token = props.loginData[0].token;
-
     const [isLoading, setIsLoading] = useState(true);
     const column = ["S/N", "Sub Sub Menu", "Menu/Sub Menu", "Visibility", "Menu Link", "Updated By/Updated Date", "Edit", "Delete"];
     const [data, setData] = useState([]);
@@ -24,25 +22,29 @@ function PermissionPermission(props) {
     });
     const [permissionList, setPermissionList] = useState([]);
     const [groupList, setGroupList] = useState([]);
-    const [groupPermission, setGroupPermission] = useState([]);
+
+    const groupOptions = useMemo(() => {
+        return groupList.map(group => ({
+            value: group.EntryID,
+            label: group.GroupName
+        }));
+    }, [groupList]);
 
     const getRecords = async (group_id = '') => {
-        await axios.get(`${serverLink}staff/settings/group/list`, token)
-            .then((result) => {
-                setGroupList(result.data)
-            })
-            .catch((err) => {
-                console.log("NETWORK NATIONALITY ERROR");
-            });
+        const [groupRes, menuRes] = await Promise.all([
+            api.get("staff/settings/group/list"),
+            api.get("staff/settings/menu/view/list")
+        ]);
 
-        await axios.get(`${serverLink}staff/settings/menu/view/list`, token)
-            .then((result) => {
-                setPermissionList(result.data);
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK NATIONALITY ERROR");
-            });
+        if (groupRes.success && groupRes.data) {
+            setGroupList(groupRes.data);
+        }
+
+        if (menuRes.success && menuRes.data) {
+            setPermissionList(menuRes.data);
+        }
+
+        setIsLoading(false);
 
         if (group_id !== '') {
             await populatePermission(group_id);
@@ -51,73 +53,70 @@ function PermissionPermission(props) {
 
     const handleGroupChange = async (e) => {
         const value = e.target.value;
-        setCreateItem({
-            ...createItem,
-            group_id: value
-        });
-
-        await populatePermission(value)
-    }
+        setCreateItem({ ...createItem, group_id: value });
+        await populatePermission(value);
+    };
 
     const populatePermission = async (group_id) => {
         let rows = [];
         if (group_id !== '') {
-            await axios.get(`${serverLink}staff/settings/group/permission/${group_id}`, token)
-                .then((result) => {
-                    const group_permission = result.data;
-                    permissionList.length > 0 &&
-                    permissionList.map((item, index) => {
-                        let inserted_by = '';
-                        let inserted_date = '';
-                        let editBtn = (<button className="btn btn-sm btn-success" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'add', '')} ><i className="fa fa-check" /></button>);
-                        let deleteBtn = null;
+            const { success, data: group_permission } = await api.get(`staff/settings/group/permission/${group_id}`);
 
-                        const check = group_permission.filter(i => i.SubSubMenuID === item.SubSubMenuID);
+            if (success && group_permission) {
+                permissionList.forEach((item, index) => {
+                    let inserted_by = '';
+                    let inserted_date = '';
+                    let editBtn = (
+                        <button className="btn btn-sm btn-success" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'add', '')}>
+                            <i className="fa fa-check" />
+                        </button>
+                    );
+                    let deleteBtn = null;
 
-                        if (check.length > 0) {
-                            inserted_by = check[0].InsertedBy;
-                            inserted_date = formatDateAndTime(check[0].InsertedDate, 'date');
-                            editBtn = null;
-                            deleteBtn = (<button className="btn btn-sm btn-danger" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'remove', check[0].EntryID)} ><i className="fa fa-trash" /></button>);
-                        }
+                    const check = group_permission.filter(i => i.SubSubMenuID === item.SubSubMenuID);
 
-                        const menuSubMenu = (
-                            <div>
-                                <div>{item.MenuName}</div>
-                                <div className="text-muted small">{item.SubMenuName}</div>
-                            </div>
+                    if (check.length > 0) {
+                        inserted_by = check[0].InsertedBy;
+                        inserted_date = formatDateAndTime(check[0].InsertedDate, 'date');
+                        editBtn = null;
+                        deleteBtn = (
+                            <button className="btn btn-sm btn-danger" onClick={() => onHandleMemberBtn(item.SubSubMenuID, group_id, 'remove', check[0].EntryID)}>
+                                <i className="fa fa-trash" />
+                            </button>
                         );
+                    }
 
-                        const updatedByDate = (
-                            <div>
-                                <div>{inserted_by}</div>
-                                <div className="text-muted small">{inserted_date}</div>
-                            </div>
-                        );
+                    const menuSubMenu = (
+                        <div>
+                            <div>{item.MenuName}</div>
+                            <div className="text-muted small">{item.SubMenuName}</div>
+                        </div>
+                    );
 
-                        const visibility = item.Visibility === 1 ? "show" : "hide";
+                    const updatedByDate = (
+                        <div>
+                            <div>{inserted_by}</div>
+                            <div className="text-muted small">{inserted_date}</div>
+                        </div>
+                    );
 
-                        rows.push([
-                            (index+1),
-                            item.SubSubMenuName,
-                            menuSubMenu,
-                            visibility,
-                            item.SubSubMenuLink || '-',
-                            updatedByDate,
-                            editBtn,
-                            deleteBtn
-                        ])
-                    })
+                    const visibility = item.Visibility === 1 ? "show" : "hide";
 
-                    setData(rows);
-                })
-                .catch((err) => {
-                    console.log("NETWORK NATIONALITY ERROR");
+                    rows.push([
+                        (index + 1),
+                        item.SubSubMenuName,
+                        menuSubMenu,
+                        visibility,
+                        item.SubSubMenuLink || '-',
+                        updatedByDate,
+                        editBtn,
+                        deleteBtn
+                    ]);
                 });
-        } else {
-            setData(rows);
+            }
         }
-    }
+        setData(rows);
+    };
 
     const onHandleMemberBtn = async (sub_sub_menu_id, group_id, type, perm_id) => {
         createItem.group_id = group_id;
@@ -125,48 +124,33 @@ function PermissionPermission(props) {
             group_id: group_id,
             sub_sub_menu_id: sub_sub_menu_id,
             inserted_by: createItem.inserted_by
-        }
+        };
 
         if (type === 'add') {
-            await axios.post(`${serverLink}staff/settings/group/permission/add`, sendData, token)
-                .then(result => {
-                    const message = result.data.message;
-                    if (message === 'success') {
-                        toast.success("Permission Added Successfully")
-                        getRecords(group_id);
-                    } else if (message === 'exist') {
-                        toast.info("Permission Already Exist")
-                    } else {
-                        toast.error("Something went wrong. Please try again!")
-                    }
-                })
-                .catch(error => {
-                    toast.success("Network error. Please check your connection and try again!")
-                })
+            const { success, data } = await api.post("staff/settings/group/permission/add", sendData);
+            if (success && data?.message === 'success') {
+                toast.success("Permission Added Successfully");
+                getRecords(group_id);
+            } else if (success && data?.message === 'exist') {
+                toast.info("Permission Already Exist");
+            } else if (success) {
+                toast.error("Something went wrong. Please try again!");
+            }
         } else {
-            await axios.delete(`${serverLink}staff/settings/group/permission/delete/${perm_id}`, token)
-                .then(result => {
-                    const message = result.data.message;
-                    if (message === 'success') {
-                        toast.success("Permission Removed Successfully")
-                        getRecords(group_id);
-                    } else {
-                        toast.error("Something went wrong. Please try again!")
-                    }
-                })
-                .catch(error => {
-                    toast.success("Network error. Please check your connection and try again!")
-                })
+            const { success, data } = await api.delete(`staff/settings/group/permission/delete/${perm_id}`);
+            if (success && data?.message === 'success') {
+                toast.success("Permission Removed Successfully");
+                getRecords(group_id);
+            } else if (success) {
+                toast.error("Something went wrong. Please try again!");
+            }
         }
-    }
+    };
 
     useEffect(() => {
         getRecords();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    // useEffect(() => {
-    //     populateGroupMembers(createGroupMember.group_id);
-    // }, [groupMemberList])
 
     return isLoading ? (
         <Loader />
@@ -176,25 +160,23 @@ function PermissionPermission(props) {
                 <div className="card card-no-border">
                     <div className="card-body p-0 w-100">
                         <div className="d-flex pb-5" data-kt-customer-table-toolbar="base">
-                            <select id="select_group_name" onChange={handleGroupChange} value={createItem.group_id} className="form-select w-100">
-                                <option value="">Select Group</option>
-                                {
-                                    groupList.length > 0 &&
-                                    groupList.map((group, index) => {
-                                        return <option key={index} value={group.EntryID}>{group.GroupName}</option>
-                                    })
-                                }
-                            </select>
+                            <SearchSelect
+                                id="select_group_name"
+                                value={groupOptions.find(opt => opt.value === createItem.group_id) || null}
+                                options={groupOptions}
+                                onChange={(selected) => handleGroupChange({ target: { value: selected?.value || '' } })}
+                                placeholder="Select Group"
+                                isClearable={false}
+                            />
                         </div>
-
-                        <ReportTable title={`Permission Page`} columns={column} data={data} height={"800px"}/>
+                        <ReportTable title={`Permission Page`} columns={column} data={data} height={"800px"} />
                     </div>
                 </div>
-
             </div>
         </div>
     );
 }
+
 const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails,

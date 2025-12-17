@@ -5,15 +5,12 @@ import Non_Academic_Staff_Dashboard from "./non-academic-dashboard"
 import { useState } from "react";
 import Loader from "../common/loader/loader";
 import { useEffect } from "react";
-import axios from "axios";
-import { serverLink } from "../../resources/url";
+import { api } from "../../resources/api";
 import { setDashboardData } from "../../actions/setactiondetails";
 import { decryptData } from "../../resources/constants";
 
 
-function Dashboard(props)
-{
-  const header = props.loginData[0].token;
+function Dashboard(props) {
   const current_user = props.loginData[0];
   const dash_ = props.DashBoardData;
   const dashboard = props.DashBoardData[0]
@@ -41,102 +38,56 @@ function Dashboard(props)
     { id: 6, dayName: 'Saturday' },
   ]
 
-  const getData = async () =>
-  {
-    try
-    {
+  const getData = async () => {
+    try {
+      const [modulesRes, studentsRes, timetableRes, activitiesRes, activitiesCountRes] = await Promise.all([
+        api.get(`staff/settings/dashboard/modules/list/${current_user.StaffID}`),
+        api.post(`staff/settings/dashboard/students/list/${current_user.StaffID}`, { SemesterCode: semester }),
+        api.get(`staff/settings/dashboard/timetable/list/${current_user.StaffID}/`),
+        api.get(`staff/settings/dashboard/activities/list/${current_user.StaffID}`),
+        api.get(`staff/settings/dashboard/activities/count/${current_user.StaffID}`)
+      ]);
+
       let modules_ = [];
-      await axios.get(`${serverLink}staff/settings/dashboard/modules/list/${current_user.StaffID}`, header)
-        .then((result) =>
-        {
-          if (result.data.length > 0)
-          {
-            setModules(result.data[0])
-            modules_ = result.data
-          }
-        }).catch((e) =>
-        {
-          console.log(e)
-        })
+      if (modulesRes.success && modulesRes.data?.length > 0) {
+        modules_ = modulesRes.data;
+        setModules(modulesRes.data[0]);
+      }
 
-      let students_ = []
-      await axios.post(`${serverLink}staff/settings/dashboard/students/list/${current_user.StaffID}`, { SemesterCode: semester }, header)
-        .then((result) =>
-        {
-          if (result.data.length > 0)
-          {
-            students_ = result.data;
-            setStudents(result.data[0])
+      let students_ = [];
+      if (studentsRes.success && studentsRes.data?.length > 0) {
+        students_ = studentsRes.data;
+        setStudents(studentsRes.data[0]);
+      }
 
-          }
-        }).catch((e) =>
-        {
-          console.log(e)
-        })
-
-      let timetable_ = []
-      await axios.get(`${serverLink}staff/settings/dashboard/timetable/list/${current_user.StaffID}/`, header)
-        .then((result) =>
-        {
-          if (result.data.length > 0)
-          {
-            timetable_ = result.data
-            setTimetable(result.data)
-          }
-        }).catch((e) =>
-        {
-          console.log(e)
-        })
-
-      let login_ = []
-      // await axios.get(`${serverLink}staff/settings/dashboard/staff/login/list/${current_user.StaffID}`)
-      //   .then((result) => {
-      //     if (result.data.length > 0) {
-      //       login_ = result.data;
-      //       setStaffLogin(result.data)
-      //     }
-      //   }).catch((e)=>{
-      //     console.log(e)
-      //   })
+      let timetable_ = [];
+      if (timetableRes.success && timetableRes.data?.length > 0) {
+        timetable_ = timetableRes.data;
+        setTimetable(timetableRes.data);
+      }
 
       let activities_ = [];
-      await axios.get(`${serverLink}staff/settings/dashboard/activities/list/${current_user.StaffID}`, header)
-        .then((result) =>
-        {
-          if (result.data.length > 0)
-          {
-            activities_ = result.data;
-            setActivities(result.data)
-          }
-        }).catch((e) =>
-        {
-          console.log(e)
-        })
+      if (activitiesRes.success && activitiesRes.data?.length > 0) {
+        activities_ = activitiesRes.data;
+        setActivities(activitiesRes.data);
+      }
 
       let activties_count = [];
-      await axios.get(`${serverLink}staff/settings/dashboard/activities/count/${current_user.StaffID}`, header)
-        .then((result) =>
-        {
-          if (result.data.length > 0)
-          {
-            activties_count = result.data;
-            setActivitiesCount(result.data)
-          }
-        }).catch((e) =>
-        {
-          console.log(e)
-        })
+      if (activitiesCountRes.success && activitiesCountRes.data?.length > 0) {
+        activties_count = activitiesCountRes.data;
+        setActivitiesCount(activitiesCountRes.data);
+      }
 
       props.setOnDashboardData([
         {
           modules_: modules_,
           students_: students_,
           timetable_: timetable_,
-          login_: login_,
+          login_: [],
           activities_: activities_,
           activties_count: activties_count,
         }
-      ])
+      ]);
 
       const month = parseInt(new Date().getMonth());
       const year = parseInt(new Date().getFullYear());
@@ -148,43 +99,35 @@ function Dashboard(props)
 
       const allDaysinaMonth = getAllDaysInMonth(month + 1, year);
       const daysOfAMonth = allDaysinaMonth.map(x => x.toLocaleDateString([], { day: "numeric", weekday: "short" }));
-      setMonthDays(daysOfAMonth)
+      setMonthDays(daysOfAMonth);
 
       const t_id = parseInt(new Date().getDay());
-      if (t_id === 6)
-      {
-        setToday(days.filter(x => x.id === 6)[0].dayName)
-        setTomorrow(days.filter(x => x.id === 0)[0].dayName)
-      }
-      else
-      {
+      if (t_id === 6) {
+        setToday(days.filter(x => x.id === 6)[0].dayName);
+        setTomorrow(days.filter(x => x.id === 0)[0].dayName);
+      } else {
         const to_day = days.filter(x => x.id === t_id)[0].dayName;
         setToday(to_day);
-        setTomorrow(days.filter(x => x.id === t_id + 1)[0].dayName)
+        setTomorrow(days.filter(x => x.id === t_id + 1)[0].dayName);
       }
-      setisLoading(false)
+      setisLoading(false);
 
-    } catch (e)
-    {
-      console.log(e)
-      console.log('NETWORK ERROR ')
+    } catch (e) {
+      console.log(e);
+      console.log('NETWORK ERROR ');
     }
   }
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     getData();
-  }, [])
-
-  //
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return props.DashBoardData.length === 0 ? (
     <Loader />
   ) : (
     <>
       {
-
-        // current_user.IsAcademicStaff.toString() === '1' ?
         <Academic_Staff_Dashboard
           modules={modules}
           students={students}
@@ -201,30 +144,12 @@ function Dashboard(props)
           activities={activities}
           activitiesCount={activitiesCount}
         />
-        //:
-        // <>
-        //   <Non_Academic_Staff_Dashboard
-        //     modules={modules}
-        //     students={students}
-        //     semester={semester}
-        //     facultyList={facultyList}
-        //     departmentList={departmentList}
-        //     current_user={current_user}
-        //     designations={designation}
-        //     tomorrow={tomorrow}
-        //     today={today}
-        //     timetable={timetable}
-        //     staffLogin={staffLogin}
-        //     activities={activities}
-        //     activitiesCount={activitiesCount}
-        //   />
-        // </>
       }
     </>
   )
 }
-const mapStateToProps = (state) =>
-{
+
+const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails,
     semester: state.currentSemester,
@@ -234,15 +159,12 @@ const mapStateToProps = (state) =>
   };
 };
 
-const mapDispatchToProps = (dispatch) =>
-{
+const mapDispatchToProps = (dispatch) => {
   return {
-    setOnDashboardData: (p) =>
-    {
+    setOnDashboardData: (p) => {
       dispatch(setDashboardData(p));
     }
   };
 };
-
 
 export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

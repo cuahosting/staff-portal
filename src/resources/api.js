@@ -2,7 +2,29 @@ import axios from "axios";
 import { serverLink } from "./url";
 import { toast } from "react-toastify";
 
-// Create axios instance with base config
+/**
+ * Centralized HTTP Client for the Staff Portal
+ * 
+ * Features:
+ * - Auto-injects authentication token from Redux store
+ * - Standardized { success, data, message, error } response format
+ * - Built-in error handling with optional toast notifications
+ * - No need to pass token or serverLink in components
+ * 
+ * Usage:
+ *   import { api } from '../resources/api';
+ *   
+ *   // Simple GET request - token is auto-injected
+ *   const { success, data } = await api.get('staff/hr/bank/list');
+ *   
+ *   // POST request with payload
+ *   const { success, data } = await api.post('staff/hr/bank/add', { bank_name: 'Test' });
+ *   
+ *   // Disable auto error toast
+ *   const { success, data } = await api.get('staff/hr/bank/list', { showError: false });
+ */
+
+// Create axios instance with base configuration
 const apiClient = axios.create({
     baseURL: serverLink,
     timeout: 30000,
@@ -11,45 +33,107 @@ const apiClient = axios.create({
     },
 });
 
+// Store reference for auto token injection
+let storeRef = null;
+
 /**
- * HTTP Request Wrapper
- * @param {string} method - HTTP method (GET, POST, PATCH, PUT, DELETE)
- * @param {string} endpoint - API endpoint (without base URL)
- * @param {object} data - Request body (for POST, PATCH, PUT) or query params (for GET)
- * @param {object} token - Auth token object from Redux { headers: { Authorization: ... } }
- * @param {object} customHeaders - Additional headers to merge
- * @param {boolean} showError - Whether to show toast on error (default: true)
+ * Initialize the API client with the Redux store reference
+ * Call this once in your app's index.js after store creation
+ * 
+ * @param {object} store - Redux store instance
+ */
+export const initializeApi = (store) => {
+    storeRef = store;
+};
+
+/**
+ * Get the current auth token from Redux store
+ * @returns {object|null} Token headers object or null
+ */
+const getAuthToken = () => {
+    if (!storeRef) {
+        console.warn("API: Store not initialized. Call initializeApi(store) in index.js");
+        return null;
+    }
+
+    const state = storeRef.getState();
+    const loginDetails = state.LoginDetails;
+
+    if (loginDetails && loginDetails.length > 0 && loginDetails[0].token) {
+        return loginDetails[0].token;
+    }
+
+    return null;
+};
+
+// Request interceptor - auto-attach token
+apiClient.interceptors.request.use(
+    (config) => {
+        const token = getAuthToken();
+        if (token?.headers) {
+            config.headers = { ...config.headers, ...token.headers };
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// Response interceptor - handle common errors
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        // Handle specific HTTP status codes with toast notifications
+        if (error.response) {
+            switch (error.response.status) {
+                case 401:
+                    toast.error("Session expired. Please login again.");
+                    break;
+                case 403:
+                    toast.error("Access denied. Insufficient permissions.");
+                    break;
+                case 500:
+                    toast.error("Server error. Please try again later.");
+                    break;
+                default:
+                    break;
+            }
+        } else if (error.request) {
+            // Network error - no response received
+            toast.error("Network error. Please check your connection.");
+        }
+        return Promise.reject(error);
+    }
+);
+
+
+/**
+ * Make an HTTP request with standardized response format
+ * 
+ * @param {string} method - HTTP method
+ * @param {string} endpoint - API endpoint (relative to serverLink)
+ * @param {object} data - Request body or query params
+ * @param {object} options - Additional options { showError: boolean, headers: object }
  * @returns {Promise<{success: boolean, data: any, message: string, error?: any}>}
  */
-export const apiRequest = async (
-    method,
-    endpoint,
-    data = null,
-    token = null,
-    customHeaders = {},
-    showError = true
-) => {
+const request = async (method, endpoint, data = null, options = {}) => {
+    const { showError = true, headers = {} } = options;
+
     try {
         const config = {
             method: method.toUpperCase(),
             url: endpoint,
-            headers: {
-                ...token?.headers,
-                ...customHeaders,
-            },
+            headers: { ...headers },
         };
 
-        // Add data for methods that support request body
+        // Add data based on method type
         if (["POST", "PATCH", "PUT"].includes(method.toUpperCase()) && data) {
             config.data = data;
         }
 
-        // Add query params for GET requests with data
         if (method.toUpperCase() === "GET" && data) {
             config.params = data;
         }
 
-        // Add data for DELETE if provided (some APIs need body in DELETE)
         if (method.toUpperCase() === "DELETE" && data) {
             config.data = data;
         }
@@ -68,7 +152,7 @@ export const apiRequest = async (
             toast.error(errorMessage);
         }
 
-        console.error(`API Error [${method} ${endpoint}]:`, error);
+        console.error(`API Error [${method.toUpperCase()} ${endpoint}]:`, error.message);
 
         return {
             success: false,
@@ -80,63 +164,55 @@ export const apiRequest = async (
 };
 
 /**
- * Convenience methods for common HTTP operations
+ * HTTP API wrapper with convenience methods
+ * Token is automatically injected - no need to pass it
  */
 export const api = {
     /**
      * GET request
      * @param {string} endpoint - API endpoint
-     * @param {object} token - Auth token object
      * @param {object} params - Query parameters (optional)
-     * @param {object} customHeaders - Custom headers (optional)
-     * @param {boolean} showError - Show error toast (default: true)
+     * @param {object} options - { showError: boolean, headers: object }
      */
-    get: (endpoint, token, params = null, customHeaders = {}, showError = true) =>
-        apiRequest("GET", endpoint, params, token, customHeaders, showError),
+    get: (endpoint, params = null, options = {}) =>
+        request("GET", endpoint, params, options),
 
     /**
      * POST request
      * @param {string} endpoint - API endpoint
      * @param {object} data - Request body
-     * @param {object} token - Auth token object
-     * @param {object} customHeaders - Custom headers (optional)
-     * @param {boolean} showError - Show error toast (default: true)
+     * @param {object} options - { showError: boolean, headers: object }
      */
-    post: (endpoint, data, token, customHeaders = {}, showError = true) =>
-        apiRequest("POST", endpoint, data, token, customHeaders, showError),
+    post: (endpoint, data = {}, options = {}) =>
+        request("POST", endpoint, data, options),
 
     /**
      * PATCH request
      * @param {string} endpoint - API endpoint
      * @param {object} data - Request body
-     * @param {object} token - Auth token object
-     * @param {object} customHeaders - Custom headers (optional)
-     * @param {boolean} showError - Show error toast (default: true)
+     * @param {object} options - { showError: boolean, headers: object }
      */
-    patch: (endpoint, data, token, customHeaders = {}, showError = true) =>
-        apiRequest("PATCH", endpoint, data, token, customHeaders, showError),
+    patch: (endpoint, data = {}, options = {}) =>
+        request("PATCH", endpoint, data, options),
 
     /**
      * PUT request
      * @param {string} endpoint - API endpoint
      * @param {object} data - Request body
-     * @param {object} token - Auth token object
-     * @param {object} customHeaders - Custom headers (optional)
-     * @param {boolean} showError - Show error toast (default: true)
+     * @param {object} options - { showError: boolean, headers: object }
      */
-    put: (endpoint, data, token, customHeaders = {}, showError = true) =>
-        apiRequest("PUT", endpoint, data, token, customHeaders, showError),
+    put: (endpoint, data = {}, options = {}) =>
+        request("PUT", endpoint, data, options),
 
     /**
      * DELETE request
      * @param {string} endpoint - API endpoint
-     * @param {object} token - Auth token object
-     * @param {object} data - Request body (optional, some APIs need it)
-     * @param {object} customHeaders - Custom headers (optional)
-     * @param {boolean} showError - Show error toast (default: true)
+     * @param {object} data - Request body (optional)
+     * @param {object} options - { showError: boolean, headers: object }
      */
-    delete: (endpoint, token, data = null, customHeaders = {}, showError = true) =>
-        apiRequest("DELETE", endpoint, data, token, customHeaders, showError),
+    delete: (endpoint, data = null, options = {}) =>
+        request("DELETE", endpoint, data, options),
 };
 
 export default api;
+export { apiClient };

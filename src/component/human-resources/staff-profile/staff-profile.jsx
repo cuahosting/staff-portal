@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
@@ -10,10 +10,9 @@ import { toast } from "react-toastify";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { encryptData, formatDate, formatDateAndTime, shortCode } from "../../../resources/constants";
 import { connect } from "react-redux";
+import "./staff-profile.css";
 
-function StaffProfile(props)
-{
-  const token = props.loginData[0].token;
+function StaffProfile(props) {
   const isAdmin = String(props.loginData?.[0]?.IsAdmin || "0") === "1";
   const canEditSocial = isAdmin || props.loginData[0]?.StaffID === staffId;
 
@@ -104,8 +103,7 @@ function StaffProfile(props)
     InsertedDate: "",
   });
   const [toggleBank, setToggleBank] = useState(false);
-  const staffBankForm = () =>
-  {
+  const staffBankForm = () => {
     setEditStaffBank({
       EntryID: staffInformation.staff_bank[0]?.EntryID,
       StaffID: staffInformation.staff_bank[0]?.StaffID,
@@ -134,32 +132,28 @@ function StaffProfile(props)
     InsertDate: "",
   });
   const [toggleNOK, setToggleNOK] = useState(false);
-  const staffNOKForm = async (id) =>
-  {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/get/staff/nok/${id}`, token)
-      .then((response) =>
-      {
-        // setSelectedStaffData(response.data[0]);
+  const staffNOKForm = async (id) => {
+    try {
+      const { success, data } = await api.get(`staff/hr/staff-management/get/staff/nok/${id}`);
+      if (success) {
         setEditStaffNOK({
-          EntryID: response.data[0]?.EntryID,
-          StaffID: response.data[0]?.StaffID,
-          FirstName: response.data[0]?.FirstName,
-          Surname: response.data[0]?.Surname,
-          MiddleName: response.data[0]?.MiddleName,
-          Relationship: response.data[0]?.Relationship,
-          PhoneNumber: response.data[0]?.PhoneNumber,
-          Address: response.data[0]?.Address,
-          EmailAddress: response.data[0]?.EmailAddress,
+          EntryID: data[0]?.EntryID,
+          StaffID: data[0]?.StaffID,
+          FirstName: data[0]?.FirstName,
+          Surname: data[0]?.Surname,
+          MiddleName: data[0]?.MiddleName,
+          Relationship: data[0]?.Relationship,
+          PhoneNumber: data[0]?.PhoneNumber,
+          Address: data[0]?.Address,
+          EmailAddress: data[0]?.EmailAddress,
           InsertBy: props.loginData[0]?.StaffID,
           InsertDate: "",
         });
         setToggleNOK(true);
-      })
-      .catch((error) =>
-      {
-        console.log("NETWORK ERROR", error);
-      });
+      }
+    } catch (error) {
+      console.log("NETWORK ERROR", error);
+    }
   };
 
   // STAFF QUALIFICATION
@@ -174,12 +168,10 @@ function StaffProfile(props)
   const [toggleQualification, setToggleQualification] = useState(false);
   const [isNewQualification, setIsNewQualification] = useState(false);
 
-  const staffQualificationForm = async (id) =>
-  {
+  const staffQualificationForm = async (id) => {
 
     const match = staffInformation.qualifications.find((q) => q.EntryID === id);
-    if (match)
-    {
+    if (match) {
       setIsNewQualification(false);
       setEditStaffQualification({
         EntryID: match.EntryID,
@@ -193,8 +185,7 @@ function StaffProfile(props)
     }
   };
 
-  const startNewQualification = () =>
-  {
+  const startNewQualification = () => {
     setIsNewQualification(true);
     setEditStaffQualification({
       EntryID: "",
@@ -266,8 +257,7 @@ function StaffProfile(props)
     Orcid: "",
   });
   const [toggleInformation, setToggleInformation] = useState(false);
-  const staffInformationForm = () =>
-  {
+  const staffInformationForm = () => {
 
     setStateList(
       data.state.filter((item) => item.NationalityID === staffInformation.staff[0].NationalityID)
@@ -279,8 +269,7 @@ function StaffProfile(props)
     setToggleInformation(true);
   };
 
-  const setStaff = (stf) =>
-  {
+  const setStaff = (stf) => {
     setEditStaffInformation({
       EntryID: stf[0].EntryID,
       FirstName: stf[0].FirstName,
@@ -341,86 +330,76 @@ function StaffProfile(props)
     });
   }
 
-  const getStaff = async () =>
-  {
-    if (staffInformation !== undefined)
-    {
-      await axios
-        .get(`${serverLink}staff/hr/staff-management/staff/${staffInformation.staff[0]?.StaffID}`, token)
-        .then((result) =>
-        {
-          if (result.data.length > 0)
-          {
-            let rows = [];
+  const getStaff = async () => {
+    if (staffInformation !== undefined) {
+      try {
+        const { success, data } = await api.get(`staff/hr/staff-management/staff/${staffInformation.staff[0]?.StaffID}`);
+        if (success && data.length > 0) {
+          let rows = [];
 
-            action: <button
-              onClick={() =>
-              {
-                setEditStaffInfo({
-                  EntryID: result[0]?.EntryID,
-                  FirstName: result[0]?.FirstName,
-                  MiddleName: result[0]?.MiddleName,
-                  Surname: result[0]?.Surname,
-                  TitleID: result[0]?.TitleID,
-                  Gender: result[0]?.Gender,
-                  DateOfBirth: formatDate(result[0]?.DateOfBirth).toString(),
-                  MaritalStatus: result[0]?.MaritalStatus,
-                  NationalityID: result[0]?.NationalityID,
-                  StateID: result[0]?.StateID,
-                  LgaID: result[0]?.LgaID,
-                  Religion: result[0]?.Religion,
-                  PhoneNumber: result[0]?.PhoneNumber,
-                  AltPhoneNumber: result[0]?.AltPhoneNumber,
-                  EmailAddress: result[0]?.EmailAddress,
-                  OfficialEmailAddress: result[0]?.OfficialEmailAddress,
-                  ContactAddress: result[0]?.ContactAddress,
-                  StaffType: result[0]?.StaffType,
-                  DesignationID: result[0]?.DesignationID,
-                  GrossPay: result[0]?.GrossPay,
-                  DepartmentCode: result[0]?.DepartmentCode,
-                  IsActive: result[0]?.IsActive,
-                  IsAcademicStaff: result[0]?.IsAcademicStaff,
-                  DateOfFirstEmployment:
-                    formatDateAndTime(result[0]?.DateOfFirstEmployment, "date") ??
-                    "N/A",
-                  DateOfCurrentEmployment:
-                    formatDateAndTime(
-                      result[0]?.DateOfCurrentEmployment,
-                      "date"
-                    ) ?? "N/A",
-                  ContractStartDate:
-                    formatDateAndTime(result[0]?.ContractStartDate, "date") ??
-                    "N/A",
-                  ContractEndDate:
-                    formatDateAndTime(result[0]?.ContractEndDate, "date") ?? "N/A",
-                  LineManagerID: result[0]?.LineManagerID,
-                  CourseCode: result[0]?.CourseCode,
-                  AddedBy: result[0]?.AddedBy,
-                  UpdatedBy: result[0]?.UpdatedBy,
-                  UpdatedDate: result[0]?.UpdatedDate,
+          action: <button
+            onClick={() => {
+              setEditStaffInfo({
+                EntryID: data[0]?.EntryID,
+                FirstName: data[0]?.FirstName,
+                MiddleName: data[0]?.MiddleName,
+                Surname: data[0]?.Surname,
+                TitleID: data[0]?.TitleID,
+                Gender: data[0]?.Gender,
+                DateOfBirth: formatDate(data[0]?.DateOfBirth).toString(),
+                MaritalStatus: data[0]?.MaritalStatus,
+                NationalityID: data[0]?.NationalityID,
+                StateID: data[0]?.StateID,
+                LgaID: data[0]?.LgaID,
+                Religion: data[0]?.Religion,
+                PhoneNumber: data[0]?.PhoneNumber,
+                AltPhoneNumber: data[0]?.AltPhoneNumber,
+                EmailAddress: data[0]?.EmailAddress,
+                OfficialEmailAddress: data[0]?.OfficialEmailAddress,
+                ContactAddress: data[0]?.ContactAddress,
+                StaffType: data[0]?.StaffType,
+                DesignationID: data[0]?.DesignationID,
+                GrossPay: data[0]?.GrossPay,
+                DepartmentCode: data[0]?.DepartmentCode,
+                IsActive: data[0]?.IsActive,
+                IsAcademicStaff: data[0]?.IsAcademicStaff,
+                DateOfFirstEmployment:
+                  formatDateAndTime(data[0]?.DateOfFirstEmployment, "date") ??
+                  "N/A",
+                DateOfCurrentEmployment:
+                  formatDateAndTime(
+                    data[0]?.DateOfCurrentEmployment,
+                    "date"
+                  ) ?? "N/A",
+                ContractStartDate:
+                  formatDateAndTime(data[0]?.ContractStartDate, "date") ??
+                  "N/A",
+                ContractEndDate:
+                  formatDateAndTime(data[0]?.ContractEndDate, "date") ?? "N/A",
+                LineManagerID: data[0]?.LineManagerID,
+                CourseCode: data[0]?.CourseCode,
+                AddedBy: data[0]?.AddedBy,
+                UpdatedBy: data[0]?.UpdatedBy,
+                UpdatedDate: data[0]?.UpdatedDate,
 
-                  action: "update",
-                })
-              }
-              }
-            >
-              <i className="fa fa-pen" />
-            </button>;
-          }
-        })
-        .catch((err) =>
-        {
-          console.log("NETWORK ERROR");
-        });
+                action: "update",
+              })
+            }
+            }
+          >
+            <i className="fa fa-pen" />
+          </button>;
+        }
+      } catch (err) {
+        console.log("NETWORK ERROR");
+      }
 
       setToggleInformation(false);
     }
   };
 
-  useEffect(() =>
-  {
-    if (!staffInformation)
-    {
+  useEffect(() => {
+    if (!staffInformation) {
       navigate("/");
     }
 
@@ -447,38 +426,31 @@ function StaffProfile(props)
     (item) => item.EntryID === staffInformation.staff[0].LgaID
   );
 
-  const getStaffRelatedData = async () =>
-  {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/${staffId}`, token)
-      .then((response) =>
-      {
-        setStaffInformation(response.data);
-        setStaff(response.data.staff);
+  const getStaffRelatedData = async () => {
+    try {
+      const { success, data } = await api.get(`staff/hr/staff-management/staff/${staffId}`);
+      if (success) {
+        setStaffInformation(data);
+        setStaff(data.staff);
         setIsLoading(false);
-      })
-      .catch((error) =>
-      {
-        console.log("NETWORK ERROR", error);
-      });
+      }
+    } catch (error) {
+      console.log("NETWORK ERROR", error);
+    }
   };
 
-  const getData = async () =>
-  {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
-      .then((response) =>
-      {
-        setData(response.data);
-      })
-      .catch((error) =>
-      {
-        console.log("NETWORK ERROR", error);
-      });
+  const getData = async () => {
+    try {
+      const { success, data } = await api.get("staff/hr/staff-management/staff/data");
+      if (success) {
+        setData(data);
+      }
+    } catch (error) {
+      console.log("NETWORK ERROR", error);
+    }
   };
 
-  const onEditBank = (e) =>
-  {
+  const onEditBank = (e) => {
     const id = e.target.id;
     const value = e.target.value;
 
@@ -488,21 +460,18 @@ function StaffProfile(props)
     });
   };
 
-  const onEditInformation = (e) =>
-  {
+  const onEditInformation = (e) => {
     const id = e.target.id;
     const value = e.target.value;
 
-    if (id === "NationalityID")
-    {
+    if (id === "NationalityID") {
       setStateList(
         data.state.filter((item) => item.NationalityID === parseInt(value))
       );
       setLgaList([]);
     }
 
-    if (id === "StateID")
-    {
+    if (id === "StateID") {
       setLgaList(data.lga.filter((item) => item.StateID === parseInt(value)));
     }
 
@@ -512,14 +481,11 @@ function StaffProfile(props)
     });
   };
 
-  const onSubmitStaffInformation = async (e) =>
-  {
+  const onSubmitStaffInformation = async (e) => {
     e.preventDefault();
 
-    if (!isAdmin)
-    {
-      if (!canEditSocial)
-      {
+    if (!isAdmin) {
+      if (!canEditSocial) {
         showAlert("UNAUTHORIZED", "You can only update your own social profile.", "error");
         return;
       }
@@ -540,34 +506,23 @@ function StaffProfile(props)
         UpdatedBy: props.loginData[0].StaffID,
       };
 
-      await axios
-        .patch(
-          `${serverLink}staff/hr/staff-management/update/staff/profile/`,
-          socialPayload,
-          token
-        )
-        .then((result) =>
-        {
-          if (result.data.message === "success")
-          {
-            toast.success("Profile updated");
-            getStaffRelatedData().then((r) => { });
-            closeHandler();
-          } else
-          {
-            showAlert("ERROR", "Unable to update profile. Please try again!", "error");
-          }
-        })
-        .catch(() =>
-        {
-          showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
-        });
+      try {
+        const { success, data } = await api.patch("staff/hr/staff-management/update/staff/profile/", socialPayload);
+        if (success && data.message === "success") {
+          toast.success("Profile updated");
+          getStaffRelatedData().then((r) => { });
+          closeHandler();
+        } else {
+          showAlert("ERROR", "Unable to update profile. Please try again!", "error");
+        }
+      } catch (error) {
+        showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+      }
 
       return;
     }
 
-    for (let key in editStaffInformation)
-    {
+    for (let key in editStaffInformation) {
       if (
         editStaffInformation.hasOwnProperty(key) &&
         key !== "AddedDate" &&
@@ -604,10 +559,8 @@ function StaffProfile(props)
         key !== "NContactAddress" &&
         key !== "NContactAddress" &&
         key !== "Relationship"
-      )
-      {
-        if (editStaffInformation[key] === "")
-        {
+      ) {
+        if (editStaffInformation[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
           return false;
         }
@@ -616,42 +569,32 @@ function StaffProfile(props)
 
     toast.info("Updating staff. Please wait..");
 
-    await axios
-      .patch(
-        `${serverLink}staff/hr/staff-management/update/staff/information/`,
-        editStaffInformation, token
-      )
-      .then((result) =>
-      {
-        if (result.data.message === "success")
-        {
-          toast.success("Staff Updated Successfully");
-          getStaff();
-          getData();
-          getStaff();
-          window.location.reload();
+    try {
+      const { success, data } = await api.patch("staff/hr/staff-management/update/staff/information/", editStaffInformation);
+      if (success && data.message === "success") {
+        toast.success("Staff Updated Successfully");
+        getStaff();
+        getData();
+        getStaff();
+        window.location.reload();
 
-        } else
-        {
-          showAlert(
-            "ERROR",
-            "Something went wrong. Please try again!",
-            "error"
-          );
-        }
-      })
-      .catch((error) =>
-      {
+      } else {
         showAlert(
-          "NETWORK ERROR",
-          "Please check your connection and try again!",
+          "ERROR",
+          "Something went wrong. Please try again!",
           "error"
         );
-      });
+      }
+    } catch (error) {
+      showAlert(
+        "NETWORK ERROR",
+        "Please check your connection and try again!",
+        "error"
+      );
+    }
   };
 
-  const onEditNOK = (e) =>
-  {
+  const onEditNOK = (e) => {
     const id = e.target.id;
     const value = e.target.value;
 
@@ -661,8 +604,7 @@ function StaffProfile(props)
     });
   };
 
-  const onEditQualification = (e) =>
-  {
+  const onEditQualification = (e) => {
     const id = e.target.id;
     const value = e.target.value;
 
@@ -672,8 +614,7 @@ function StaffProfile(props)
     });
   };
 
-  const closeHandler = () =>
-  {
+  const closeHandler = () => {
     setEditStaffBank({
       EntryID: "",
       StaffID: "",
@@ -771,50 +712,36 @@ function StaffProfile(props)
     setToggleInformation(false);
   };
 
-  const deleteItem = async (id, image) =>
-  {
-    if (id)
-    {
+  const deleteItem = async (id, image) => {
+    if (id) {
       toast.info(`Deleting... Please wait!`);
-      await axios
-        .delete(
-          `${serverLink}staff/hr/staff-management/delete/staff/document/${id}/${image}`, token
-        )
-        .then((res) =>
-        {
-          if (res.data.message === "success")
-          {
-            // props.update_app_data();
-            getStaffRelatedData().then((r) => { });
-            toast.success(`Deleted`);
-          } else
-          {
-            toast.error(
-              `Something went wrong. Please check your connection and try again!`
-            );
-          }
-        })
-        .catch((error) =>
-        {
-          console.log("NETWORK ERROR", error);
-        });
+      try {
+        const { success, data } = await api.delete(`staff/hr/staff-management/delete/staff/document/${id}/${image}`);
+        if (success && data.message === "success") {
+          // props.update_app_data();
+          getStaffRelatedData().then((r) => { });
+          toast.success(`Deleted`);
+        } else {
+          toast.error(
+            `Something went wrong. Please check your connection and try again!`
+          );
+        }
+      } catch (error) {
+        console.log("NETWORK ERROR", error);
+      }
     }
   };
 
-  const onSubmitStaffBank = async (e) =>
-  {
+  const onSubmitStaffBank = async (e) => {
     e.preventDefault();
-    for (let key in editStaffBank)
-    {
+    for (let key in editStaffBank) {
       if (
         editStaffBank.hasOwnProperty(key) &&
         key !== "InsertedBy" &&
         key !== "InsertedDate" &&
         key !== "EntryID"
-      )
-      {
-        if (editStaffBank[key] === "")
-        {
+      ) {
+        if (editStaffBank[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
           return false;
         }
@@ -823,22 +750,18 @@ function StaffProfile(props)
     toast.info(`Updating... Please wait!`);
 
     // return false;
-    axios
-      .patch(
-        `${serverLink}staff/hr/staff-management/update/staff/bank/`,
-        editStaffBank, token
-      )
-      .then((result) =>
-      {
-        if (result.data.message === "success")
-        {
-          toast.success("Bank Updated Successfully");
-          getStaffRelatedData().then((r) => { });
-          getData().then((r) => { });
-          getStaff().then((r) => { });
-          closeHandler();
-        }
-      });
+    try {
+      const { success, data } = await api.patch("staff/hr/staff-management/update/staff/bank/", editStaffBank);
+      if (success && data.message === "success") {
+        toast.success("Bank Updated Successfully");
+        getStaffRelatedData().then((r) => { });
+        getData().then((r) => { });
+        getStaff().then((r) => { });
+        closeHandler();
+      }
+    } catch (error) {
+      // Handle error if needed
+    }
 
     setEditStaffBank({
       ...editStaffBank,
@@ -853,43 +776,35 @@ function StaffProfile(props)
     });
   };
 
-  const onSubmitStaffNOK = async (e) =>
-  {
+  const onSubmitStaffNOK = async (e) => {
     e.preventDefault();
 
-    for (let key in editStaffNOK)
-    {
+    for (let key in editStaffNOK) {
       if (
         editStaffNOK.hasOwnProperty(key) &&
         key !== "EntryID" &&
         key !== "InsertBy" &&
         key !== "InsertDate"
-      )
-      {
-        if (editStaffNOK[key] === "")
-        {
+      ) {
+        if (editStaffNOK[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
           return false;
         }
       }
     }
     toast.info(`Updating... Please wait!`);
-    axios
-      .patch(
-        `${serverLink}staff/hr/staff-management/update/staff/nok/`,
-        editStaffNOK, token
-      )
-      .then((result) =>
-      {
-        if (result.data.message === "success")
-        {
-          toast.success("NOK Updated Successfully");
-          getStaffRelatedData().then((r) => { });
-          getData().then((r) => { });
-          getStaff().then((r) => { });
-          closeHandler();
-        }
-      });
+    try {
+      const { success, data } = await api.patch("staff/hr/staff-management/update/staff/nok/", editStaffNOK);
+      if (success && data.message === "success") {
+        toast.success("NOK Updated Successfully");
+        getStaffRelatedData().then((r) => { });
+        getData().then((r) => { });
+        getStaff().then((r) => { });
+        closeHandler();
+      }
+    } catch (error) {
+      // Handle error
+    }
 
     setEditStaffNOK({
       ...editStaffNOK,
@@ -907,55 +822,44 @@ function StaffProfile(props)
     return false;
   };
 
-  const onSubmitStaffQualification = async (e) =>
-  {
+  const onSubmitStaffQualification = async (e) => {
     e.preventDefault();
     const requiredFields = ["StaffID", "QualificationID", "Discipline", "InstitutionName", "Year"];
-    for (let key of requiredFields)
-    {
-      if (!editStaffQualification[key])
-      {
+    for (let key of requiredFields) {
+      if (!editStaffQualification[key]) {
         await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
         return;
       }
     }
 
     toast.info(`${isNewQualification ? "Adding" : "Updating"} qualification... Please wait!`);
-    const request = isNewQualification || !editStaffQualification.EntryID
-      ? axios.post(
-        `${serverLink}staff/hr/staff-management/staff/qualifications`,
-        editStaffQualification, token
-      )
-      : axios.patch(
-        `${serverLink}staff/hr/staff-management/update/staff/qualification/`,
-        editStaffQualification, token
-      );
 
-    request.then((result) =>
-    {
-      if (result.data.message === "success")
-      {
+    try {
+      const { success, data } = isNewQualification || !editStaffQualification.EntryID
+        ? await api.post("staff/hr/staff-management/staff/qualifications", editStaffQualification)
+        : await api.patch("staff/hr/staff-management/update/staff/qualification/", editStaffQualification);
+
+      if (success && data.message === "success") {
         toast.success(`Qualification ${isNewQualification ? "Added" : "Updated"} Successfully`);
         getStaffRelatedData().then((r) => { });
         getData().then((r) => { });
         getStaff().then((r) => { });
         closeHandler();
       }
-    });
+    } catch (error) {
+      // Handle error
+    }
   };
 
-  const getQualification = async () =>
-  {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/qualifications/`, token)
-      .then((response) =>
-      {
-        setQualifications(response.data);
-      })
-      .catch((err) =>
-      {
-        console.log("NETWORK ERROR");
-      });
+  const getQualification = async () => {
+    try {
+      const { success, data } = await api.get("staff/hr/staff-management/qualifications/");
+      if (success) {
+        setQualifications(data);
+      }
+    } catch (err) {
+      console.log("NETWORK ERROR");
+    }
   };
 
   // Datatable states for AGTable
@@ -1134,7 +1038,7 @@ function StaffProfile(props)
       const rows = staffInformation.documents.map((doc, index) => ({
         sn: index + 1,
         documentType: doc.DocumentType,
-        file: doc.Document.includes("simplefileupload.com") ? (
+        file: doc.Document?.includes("simplefileupload.com") ? (
           <a
             target="_blank"
             referrerPolicy="no-referrer"
@@ -1183,8 +1087,8 @@ function StaffProfile(props)
                   <img
                     src={
                       staffInformation.staff.length > 0
-                        ? staffInformation.staff[0].Image.includes("simplefileupload.com") ? staffInformation.staff[0].Image :
-                          staffInformation.staff[0].Image !== "" ?
+                        ? staffInformation.staff[0].Image?.includes("simplefileupload.com") ? staffInformation.staff[0].Image :
+                          staffInformation.staff[0].Image && staffInformation.staff[0].Image !== "" ?
                             `${serverLink}public/uploads/${shortCode}/hr/document/${staffInformation.staff[0].Image}` :
                             require('./avatar-male.jpg') : require('./avatar-male.jpg')
                     }
@@ -1234,14 +1138,6 @@ function StaffProfile(props)
                             />
                           </svg>
                         </span>
-                      </a>
-                      <a
-                        href="#"
-                        className="btn btn-sm btn-light-success fw-bolder ms-2 fs-8 py-1 px-3"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_upgrade_plan"
-                      >
-                        Upgrade to Pro
                       </a>
                     </div>
 
@@ -1321,160 +1217,6 @@ function StaffProfile(props)
                         </span>
                         {staffInformation.staff[0]?.EmailAddress}
                       </a>
-                    </div>
-                  </div>
-
-                  <div className="d-flex my-4">
-                    <a
-                      href="#"
-                      className="btn btn-sm btn-light me-2"
-                      id="kt_user_follow_button"
-                    >
-                      <span className="svg-icon svg-icon-3 d-none">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <rect
-                            opacity="0.5"
-                            x="7.05025"
-                            y="15.5356"
-                            width="12"
-                            height="2"
-                            rx="1"
-                            transform="rotate(-45 7.05025 15.5356)"
-                            fill="black"
-                          />
-                          <rect
-                            x="8.46447"
-                            y="7.05029"
-                            width="12"
-                            height="2"
-                            rx="1"
-                            transform="rotate(45 8.46447 7.05029)"
-                            fill="black"
-                          />
-                        </svg>
-                      </span>
-
-                      <span className="indicator-label">Follow</span>
-
-                      <span className="indicator-progress">
-                        Please wait...
-                        <span className="spinner-border spinner-border-sm align-middle ms-2"></span>
-                      </span>
-                    </a>
-                    <a
-                      href="#"
-                      className="btn btn-sm btn-primary me-3"
-                      data-bs-toggle="modal"
-                      data-bs-target="#kt_modal_offer_a_deal"
-                    >
-                      Hire Me
-                    </a>
-
-                    <div className="me-0">
-                      <button
-                        className="btn btn-sm btn-icon btn-bg-light btn-active-color-primary"
-                        data-kt-menu-trigger="click"
-                        data-kt-menu-placement="bottom-end"
-                      >
-                        <i className="bi bi-three-dots fs-3"></i>
-                      </button>
-
-                      <div
-                        className="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-bold w-200px py-3"
-                        data-kt-menu="true"
-                      >
-                        <div className="menu-item px-3">
-                          <div className="menu-content text-muted pb-2 px-3 fs-7 text-uppercase">
-                            Payments
-                          </div>
-                        </div>
-
-                        <div className="menu-item px-3">
-                          <a href="#" className="menu-link px-3">
-                            Create Invoice
-                          </a>
-                        </div>
-
-                        <div className="menu-item px-3">
-                          <a href="#" className="menu-link flex-stack px-3">
-                            Create Payment
-                            <i
-                              className="fas fa-exclamation-circle ms-2 fs-7"
-                              data-bs-toggle="tooltip"
-                              title="Specify a target name for future usage and reference"
-                            ></i>
-                          </a>
-                        </div>
-
-                        <div className="menu-item px-3">
-                          <a href="#" className="menu-link px-3">
-                            Generate Bill
-                          </a>
-                        </div>
-
-                        <div
-                          className="menu-item px-3"
-                          data-kt-menu-trigger="hover"
-                          data-kt-menu-placement="right-end"
-                        >
-                          <a href="#" className="menu-link px-3">
-                            <span className="menu-title">Subscription</span>
-                            <span className="menu-arrow"></span>
-                          </a>
-
-                          <div className="menu-sub menu-sub-dropdown w-175px py-4">
-                            <div className="menu-item px-3">
-                              <a href="#" className="menu-link px-3">
-                                Plans
-                              </a>
-                            </div>
-
-                            <div className="menu-item px-3">
-                              <a href="#" className="menu-link px-3">
-                                Billing
-                              </a>
-                            </div>
-
-                            <div className="menu-item px-3">
-                              <a href="#" className="menu-link px-3">
-                                Statements
-                              </a>
-                            </div>
-
-                            <div className="separator my-2"></div>
-
-                            <div className="menu-item px-3">
-                              <div className="menu-content px-3">
-                                <label className="form-check form-switch form-check-custom form-check-solid">
-                                  <input
-                                    className="form-check-input w-30px h-20px"
-                                    type="checkbox"
-                                    value="1"
-                                    defaultChecked="checked"
-                                    name="notifications"
-                                  />
-
-                                  <span className="form-check-label text-muted fs-6">
-                                    Recuring
-                                  </span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="menu-item px-3 my-1">
-                          <a href="#" className="menu-link px-3">
-                            Settings
-                          </a>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1701,7 +1443,7 @@ function StaffProfile(props)
                 id="overview"
                 role="tabpanel"
               >
-                <div className="card mb-5 mb-xl-10" id="kt_profile_details_view">
+                <div className="card mb-5 mb-xl-10 profile-details-card" id="kt_profile_details_view">
                   <div className="card-header cursor-pointer">
                     <div className="card-title m-0">
                       <h3 className="fw-bolder m-0">Profile Details</h3>
@@ -1968,7 +1710,7 @@ function StaffProfile(props)
               </div>
 
               <div className="tab-pane fade" id="profile" role="tabpanel">
-                <div className="card mb-5 mb-xl-10">
+                <div className="card mb-5 mb-xl-10 profile-details-card">
                   <div className="card-header cursor-pointer">
                     <div className="card-title m-0">
                       <h3 className="fw-bolder m-0">Social Profile</h3>

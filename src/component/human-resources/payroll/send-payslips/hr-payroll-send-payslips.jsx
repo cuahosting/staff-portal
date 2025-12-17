@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import { toast } from "react-toastify";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Loader from "../../../common/loader/loader";
-import { showAlert } from "../../../common/sweetalert/sweetalert";
 import AGTable from "../../../common/table/AGTable";
 import { currencyConverter } from "../../../../resources/constants";
 import { Modal } from "react-bootstrap";
 
 function HrPayrollSendPayslips(props) {
-    const token = props.LoginDetails[0].token;
-
     // State management
     const [selectedMonth, setSelectedMonth] = useState('');
     const [staffList, setStaffList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
-    const [sendingStaff, setSendingStaff] = useState({}); // Track individual sending: { staffId: true/false }
+    const [sendingStaff, setSendingStaff] = useState({});
     const [emailStats, setEmailStats] = useState({
         total: 0,
         sent: 0,
@@ -53,45 +49,27 @@ function HrPayrollSendPayslips(props) {
         if (!salaryDate) return;
 
         setIsLoading(true);
-        try {
-            const result = await axios.get(
-                `${serverLink}staff/hr/payslip/staff-list/${salaryDate}`,
-                token
-            );
+        const { success, data } = await api.get(`staff/hr/payslip/staff-list/${salaryDate}`);
 
-            if (result.data.message === 'success') {
-                const data = result.data.data;
-                setStaffList(data);
-                calculateStats(data);
-                updateTableData(data, salaryDate);
-            } else {
-                toast.error('Failed to fetch staff list');
-            }
-        } catch (err) {
-            console.error('Network error:', err);
-            toast.error('Network error while fetching staff list');
-        } finally {
-            setIsLoading(false);
+        if (success && data?.message === 'success') {
+            const staffData = data.data;
+            setStaffList(staffData);
+            calculateStats(staffData);
+            updateTableData(staffData, salaryDate);
+        } else if (success) {
+            toast.error('Failed to fetch staff list');
         }
+        setIsLoading(false);
     };
 
     // Calculate statistics
     const calculateStats = (data) => {
-        const stats = {
-            total: data.length,
-            sent: 0,
-            pending: 0,
-            failed: 0
-        };
+        const stats = { total: data.length, sent: 0, pending: 0, failed: 0 };
 
         data.forEach(staff => {
-            if (staff.EmailStatus === 'sent') {
-                stats.sent++;
-            } else if (staff.EmailStatus === 'failed') {
-                stats.failed++;
-            } else {
-                stats.pending++;
-            }
+            if (staff.EmailStatus === 'sent') stats.sent++;
+            else if (staff.EmailStatus === 'failed') stats.failed++;
+            else stats.pending++;
         });
 
         setEmailStats(stats);
@@ -103,8 +81,8 @@ function HrPayrollSendPayslips(props) {
             const statusBadge = staff.EmailStatus === 'sent'
                 ? <span className="badge badge-success">Sent</span>
                 : staff.EmailStatus === 'failed'
-                ? <span className="badge badge-danger">Failed</span>
-                : <span className="badge badge-warning">Pending</span>;
+                    ? <span className="badge badge-danger">Failed</span>
+                    : <span className="badge badge-warning">Pending</span>;
 
             const lastSent = staff.LastSentDate
                 ? new Date(staff.LastSentDate).toLocaleString()
@@ -143,18 +121,11 @@ function HrPayrollSendPayslips(props) {
             };
         });
 
-        setTableData(prevState => ({
-            ...prevState,
-            rows
-        }));
+        setTableData(prevState => ({ ...prevState, rows }));
     };
 
     // Send payslip to individual staff
     const sendIndividualPayslip = async (staffId, staffName, salaryMonth) => {
-        console.log('sendIndividualPayslip called');
-        console.log('salaryMonth parameter:', salaryMonth);
-        console.log('salaryMonth type:', typeof salaryMonth);
-
         if (!salaryMonth) {
             toast.error('Please select a month first');
             return;
@@ -162,33 +133,23 @@ function HrPayrollSendPayslips(props) {
 
         setSendingStaff(prev => ({ ...prev, [staffId]: true }));
 
-        try {
-            const result = await axios.post(
-                `${serverLink}staff/hr/payslip/send/${staffId}/${salaryMonth}`,
-                {
-                    sent_by: props.LoginDetails[0].StaffID
-                },
-                token
-            );
+        const { success, data } = await api.post(
+            `staff/hr/payslip/send/${staffId}/${salaryMonth}`,
+            { sent_by: props.LoginDetails[0].StaffID }
+        );
 
-            if (result.data.success) {
-                toast.success(`Payslip sent successfully to ${staffName}`);
-                // Refresh the list to update status
-                await getStaffList(salaryMonth);
-            } else {
-                toast.error(result.data.message || 'Failed to send payslip');
-            }
-        } catch (err) {
-            console.error('Send error:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Network error while sending payslip';
-            toast.error(errorMessage);
-        } finally {
-            setSendingStaff(prev => {
-                const updated = { ...prev };
-                delete updated[staffId];
-                return updated;
-            });
+        if (success && data?.success) {
+            toast.success(`Payslip sent successfully to ${staffName}`);
+            await getStaffList(salaryMonth);
+        } else if (success) {
+            toast.error(data?.message || 'Failed to send payslip');
         }
+
+        setSendingStaff(prev => {
+            const updated = { ...prev };
+            delete updated[staffId];
+            return updated;
+        });
     };
 
     // Send payslips to all pending staff
@@ -211,48 +172,34 @@ function HrPayrollSendPayslips(props) {
 
         setIsSending(true);
 
-        try {
-            const result = await axios.post(
-                `${serverLink}staff/hr/payslip/send-batch`,
-                { salary_date: selectedMonth },
-                token
-            );
+        const { success, data } = await api.post("staff/hr/payslip/send-batch", { salary_date: selectedMonth });
 
-            if (result.data.success) {
-                setEmailResults({
-                    successList: result.data.successList || [],
-                    failureList: result.data.failureList || [],
-                    csvPath: result.data.downloadLink || null
-                });
-                setShowResultsModal(true);
-
-                toast.success(`Sent ${result.data.totalSent} payslips successfully`);
-
-                // Refresh the list
-                await getStaffList(selectedMonth);
-            } else {
-                toast.error('Failed to send batch payslips');
-            }
-        } catch (err) {
-            console.error('Batch send error:', err);
-            toast.error('Network error while sending batch payslips');
-        } finally {
-            setIsSending(false);
+        if (success && data?.success) {
+            setEmailResults({
+                successList: data.successList || [],
+                failureList: data.failureList || [],
+                csvPath: data.downloadLink || null
+            });
+            setShowResultsModal(true);
+            toast.success(`Sent ${data.totalSent} payslips successfully`);
+            await getStaffList(selectedMonth);
+        } else if (success) {
+            toast.error('Failed to send batch payslips');
         }
+
+        setIsSending(false);
     };
 
     // Handle month selection
     const handleMonthChange = (e) => {
         const month = e.target.value;
-        console.log('handleMonthChange - Raw value:', month);
-        console.log('handleMonthChange - Type:', typeof month);
         setSelectedMonth(month);
         if (month) {
             getStaffList(month);
         }
     };
 
-    // Format month for display (converts YYYY-MM to readable format)
+    // Format month for display
     const formatMonthDisplay = (monthStr) => {
         if (!monthStr) return '';
         const [year, month] = monthStr.split('-');
@@ -263,7 +210,7 @@ function HrPayrollSendPayslips(props) {
     // Download CSV error report
     const downloadCSV = () => {
         if (emailResults.csvPath) {
-            window.open(`${serverLink.replace('/api/', '')}${emailResults.csvPath}`, '_blank');
+            window.open(emailResults.csvPath, '_blank');
         }
     };
 
@@ -336,7 +283,7 @@ function HrPayrollSendPayslips(props) {
                         {/* Statistics Cards */}
                         <div className="row g-5 g-xl-8 mb-5">
                             <div className="col-xl-3 col-md-6">
-                                <div className="card card-xl-stretch mb-xl-8" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+                                <div className="card card-xl-stretch mb-xl-8" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
                                     <div className="card-body">
                                         <div className="d-flex align-items-center">
                                             <div className="symbol symbol-50px me-5">
@@ -353,7 +300,7 @@ function HrPayrollSendPayslips(props) {
                                 </div>
                             </div>
                             <div className="col-xl-3 col-md-6">
-                                <div className="card card-xl-stretch mb-xl-8" style={{background: 'linear-gradient(135deg, #0BA360 0%, #3CBA92 100%)'}}>
+                                <div className="card card-xl-stretch mb-xl-8" style={{ background: 'linear-gradient(135deg, #0BA360 0%, #3CBA92 100%)' }}>
                                     <div className="card-body">
                                         <div className="d-flex align-items-center">
                                             <div className="symbol symbol-50px me-5">
@@ -370,7 +317,7 @@ function HrPayrollSendPayslips(props) {
                                 </div>
                             </div>
                             <div className="col-xl-3 col-md-6">
-                                <div className="card card-xl-stretch mb-xl-8" style={{background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'}}>
+                                <div className="card card-xl-stretch mb-xl-8" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
                                     <div className="card-body">
                                         <div className="d-flex align-items-center">
                                             <div className="symbol symbol-50px me-5">
@@ -387,7 +334,7 @@ function HrPayrollSendPayslips(props) {
                                 </div>
                             </div>
                             <div className="col-xl-3 col-md-6">
-                                <div className="card card-xl-stretch mb-xl-8" style={{background: 'linear-gradient(135deg, #f2709c 0%, #ff9472 100%)'}}>
+                                <div className="card card-xl-stretch mb-xl-8" style={{ background: 'linear-gradient(135deg, #f2709c 0%, #ff9472 100%)' }}>
                                     <div className="card-body">
                                         <div className="d-flex align-items-center">
                                             <div className="symbol symbol-50px me-5">
@@ -482,20 +429,14 @@ function HrPayrollSendPayslips(props) {
 
                     {emailResults.csvPath && (
                         <div className="text-center">
-                            <button
-                                className="btn btn-primary"
-                                onClick={downloadCSV}
-                            >
+                            <button className="btn btn-primary" onClick={downloadCSV}>
                                 Download Error Report (CSV)
                             </button>
                         </div>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <button
-                        className="btn btn-secondary"
-                        onClick={() => setShowResultsModal(false)}
-                    >
+                    <button className="btn btn-secondary" onClick={() => setShowResultsModal(false)}>
                         Close
                     </button>
                 </Modal.Footer>

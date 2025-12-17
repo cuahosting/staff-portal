@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
@@ -8,8 +8,7 @@ import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { encryptData, shortCode } from "../../../resources/constants";
 import { connect } from "react-redux";
-import
-{
+import {
     setLoginDetails,
     setPermissionDetails
 } from "../../../actions/setactiondetails";
@@ -17,9 +16,7 @@ import JoditEditor from "jodit-react";
 import DOMPurify from "dompurify";
 import AGTable from "../../common/table/AGTable";
 
-function EditStaffProfile(props)
-{
-    const token = props.loginData[0].token;
+function EditStaffProfile(props) {
 
     const editorRef = React.createRef();
     const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +89,7 @@ function EditStaffProfile(props)
         Discipline: "",
         InstitutionName: "",
         Year: "",
-      });
+    });
 
     const [addStaffNOK, setAddStaffNOK] = useState({
         StaffID: staffId,
@@ -106,7 +103,7 @@ function EditStaffProfile(props)
         InsertBy: staffId,
         InsertDate: "",
     });
-    
+
 
     // STAFF INFORMATION
     const [editStaffInformation, setEditStaffInformation] = useState({
@@ -151,18 +148,11 @@ function EditStaffProfile(props)
     const [isDragging, setIsDragging] = useState(false);
 
     const getQualification = async () => {
-        await axios
-          .get(`${serverLink}staff/hr/staff-management/qualifications/`, token)
-          .then((response) => {
-            setQualifications(response.data);
-          })
-          .catch((err) => {
-            console.log("NETWORK ERROR");
-          });
-      };
+        const { success, data } = await api.get("staff/hr/staff-management/qualifications/");
+        if (success && data) { setQualifications(data); }
+    };
 
-    const staffInformationForm = () =>
-    {
+    const staffInformationForm = () => {
         setEditStaffInformation({
             EntryID: staffInformation.staff[0]?.EntryID,
             UpdatedBy: props.loginData[0]?.StaffID,
@@ -182,8 +172,7 @@ function EditStaffProfile(props)
     };
 
 
-    const changeStaffPasswordForm = () =>
-    {
+    const changeStaffPasswordForm = () => {
         setChangeStaffPassword({
             StaffID: staffInformation.staff[0].StaffID,
             Password: staffInformation.staff[0].Password,
@@ -191,10 +180,8 @@ function EditStaffProfile(props)
         setToggleChangePassword(true);
     };
 
-    useEffect(() =>
-    {
-        if (!staffInformation)
-        {
+    useEffect(() => {
+        if (!staffInformation) {
             navigate("/");
         }
         getQualification().then((r) => { });
@@ -202,21 +189,14 @@ function EditStaffProfile(props)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const getStaffRelatedData = async () =>
-    {
-        await axios
-            .get(`${serverLink}staff/hr/staff-management/staff/${staffId}`, token)
-            .then((response) =>
-            {
-                setStaffInformation(response.data);
-                updateQualificationsDatatable(response.data.qualifications);
-                updateNokDatatable(response.data.nok);
-                updatePublicationsDatatable(response.data.publications || []);
-            })
-            .catch((error) =>
-            {
-                console.log("NETWORK ERROR", error);
-            });
+    const getStaffRelatedData = async () => {
+        const { success, data: response } = await api.get(`staff/hr/staff-management/staff/${staffId}`);
+        if (success && response) {
+            setStaffInformation(response);
+            updateQualificationsDatatable(response.qualifications);
+            updateNokDatatable(response.nok);
+            updatePublicationsDatatable(response.publications || []);
+        }
         setIsLoading(false);
     };
 
@@ -288,8 +268,7 @@ function EditStaffProfile(props)
         });
     };
 
-    const onEditInformation = (e) =>
-    {
+    const onEditInformation = (e) => {
         const id = e.target.id;
         const value = e.target.value;
 
@@ -299,23 +278,20 @@ function EditStaffProfile(props)
         });
     };
 
-    const onBiographyChanged = (e) =>
-    {
+    const onBiographyChanged = (e) => {
         setEditStaffInformation({
             ...editStaffInformation,
             "Biography": e
         })
     }
-    const onResearchChanged = (e) =>
-    {
+    const onResearchChanged = (e) => {
         setEditStaffInformation({
             ...editStaffInformation,
             "Research": e
         })
     }
 
-    const onEditPassword = (e) =>
-    {
+    const onEditPassword = (e) => {
         const id = e.target.id;
         const value = e.target.value;
 
@@ -325,10 +301,8 @@ function EditStaffProfile(props)
         });
     };
 
-    const onSubmitStaffInformation = async () =>
-    {
-        for (let key in editStaffInformation)
-        {
+    const onSubmitStaffInformation = async () => {
+        for (let key in editStaffInformation) {
             if (
                 editStaffInformation.hasOwnProperty(key) &&
                 key !== "Biography" &&
@@ -342,10 +316,8 @@ function EditStaffProfile(props)
                 key !== "Academia" &&
                 key !== "Orcid" &&
                 key !== "EmailAddress"
-            )
-            {
-                if (editStaffInformation[key] === "")
-                {
+            ) {
+                if (editStaffInformation[key] === "") {
                     await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
                     return false;
                 }
@@ -353,39 +325,21 @@ function EditStaffProfile(props)
         }
 
         toast.info("Updating staff. Please wait..");
-        await axios
-            .patch(
-                `${serverLink}staff/hr/staff-management/update/staff/profile/`,
-                editStaffInformation, token
-            )
-            .then((result) =>
-            {
-                if (result.data.message === "success")
-                {
-                    toast.success("Staff Updated Successfully");
-                    getStaffRelatedData();
-                    closeHandler();
-                } else
-                {
-                    showAlert(
-                        "ERROR",
-                        "Something went wrong. Please try again!",
-                        "error"
-                    );
-                }
-            })
-            .catch((error) =>
-            {
-                showAlert(
-                    "NETWORK ERROR",
-                    "Please check your connection and try again!",
-                    "error"
-                );
-            });
+        const { success, data } = await api.patch("staff/hr/staff-management/update/staff/profile/", editStaffInformation);
+        if (success) {
+            if (data.message === "success") {
+                toast.success("Staff Updated Successfully");
+                getStaffRelatedData();
+                closeHandler();
+            } else {
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
+        } else {
+            showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+        }
     };
 
-    const closeHandler = () =>
-    {
+    const closeHandler = () => {
         setChangeStaffPassword({
             OldPassword: "",
             NewPassword: "",
@@ -411,33 +365,27 @@ function EditStaffProfile(props)
         setToggleInformation(false);
     };
 
-    const signOut = () =>
-    {
+    const signOut = () => {
         props.setOnLoginDetails([]);
         props.setOnPermissionDetails([]);
     };
 
-    const onUpdateStaffPassport = async (e) =>
-    {
+    const onUpdateStaffPassport = async (e) => {
         e.preventDefault();
-        for (let key in addStaffDocument)
-        {
+        for (let key in addStaffDocument) {
             if (
                 addStaffDocument.hasOwnProperty(key) &&
                 key !== "UpdatedBy" &&
                 key !== "UpdatedDate"
-            )
-            {
-                if (addStaffDocument[key] === "")
-                {
+            ) {
+                if (addStaffDocument[key] === "") {
                     await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
                     return false;
                 }
             }
         }
 
-        if (addStaffDocument.file.size / 1024 > 2048)
-        {
+        if (addStaffDocument.file.size / 1024 > 2048) {
             toast.error(`File Size Can't be more than 2MB`);
             return false;
         }
@@ -447,52 +395,28 @@ function EditStaffProfile(props)
         let formData = new FormData();
         formData.append("file", addStaffDocument.file);
 
-        await axios
-            .post(`${serverLink}staff/hr/staff-management/update/staff/passport/profile`, formData, token)
-            .then((res) =>
-            {
-                if (res.data.type === "success")
-                {
-                    const sendData = {
-                        StaffID: addStaffDocument.StaffID,
-                        Image: res.data.file.filename,
-                        UpdatedBy: props.loginData[0].StaffID,
-                        UpdatedDate: addStaffDocument.UpdatedDate,
-                    };
+        const { success, data } = await api.post("staff/hr/staff-management/update/staff/passport/profile", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        if (success && data.type === "success") {
+            const sendData = {
+                StaffID: addStaffDocument.StaffID,
+                Image: data.file.filename,
+                UpdatedBy: props.loginData[0].StaffID,
+                UpdatedDate: addStaffDocument.UpdatedDate,
+            };
 
-                    axios.patch(`${serverLink}staff/hr/staff-management/update/staff/passport`, sendData, token)
-                        .then((res) =>
-                        {
-                            if (res.data.message === "success")
-                            {
-                                toast.success(`Passport Updated Successfully`);
-                                getStaffRelatedData();
-                            } else
-                            {
-                                toast.error(`Something went wrong submitting your document!`);
-                                // DELETE IMAGE FROM PATH
-                            }
-                        })
-                        .catch((error) =>
-                        {
-                            console.log("Error", error);
-                        });
-                } else
-                {
-                    console.log("error", res);
-                    toast.error(
-                        `Something went wrong uploading your document. Please try again!`
-                    );
-                }
-            })
-            .catch((error) =>
-            {
-                console.log("NETWORK ERROR", error);
-            });
+            const patchRes = await api.patch("staff/hr/staff-management/update/staff/passport", sendData);
+            if (patchRes.success && patchRes.data.message === "success") {
+                toast.success(`Passport Updated Successfully`);
+                getStaffRelatedData();
+            } else {
+                toast.error(`Something went wrong submitting your document!`);
+            }
+        } else {
+            toast.error(`Something went wrong uploading your document. Please try again!`);
+        }
     };
 
-    const onEditUpdateStaffPassport = (e) =>
-    {
+    const onEditUpdateStaffPassport = (e) => {
         const id = e.target.id;
         const value = id === "file" ? e.target.files[0] : e.target.value;
 
@@ -502,19 +426,15 @@ function EditStaffProfile(props)
         });
     };
 
-    const onSubmitStaffChangePassword = async () =>
-    {
-        for (let key in changeStaffPassword)
-        {
+    const onSubmitStaffChangePassword = async () => {
+        for (let key in changeStaffPassword) {
             if (
                 changeStaffPassword.hasOwnProperty(key) &&
                 key !== "UpdatedBy" &&
                 key !== "UpdatedDate" &&
                 key !== "StaffID"
-            )
-            {
-                if (changeStaffPassword[key] === "")
-                {
+            ) {
+                if (changeStaffPassword[key] === "") {
                     await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
                     return false;
                 }
@@ -523,14 +443,12 @@ function EditStaffProfile(props)
 
         toast.info("Updating staff password. Please wait..");
 
-        if (changeStaffPassword.NewPassword !== changeStaffPassword.ConfirmPassword)
-        {
+        if (changeStaffPassword.NewPassword !== changeStaffPassword.ConfirmPassword) {
             await showAlert("Password Does Not Matched", `Please try again.`, "error");
             return false;
         }
 
-        if (changeStaffPassword.Password !== encryptData(changeStaffPassword.OldPassword))
-        {
+        if (changeStaffPassword.Password !== encryptData(changeStaffPassword.OldPassword)) {
             await showAlert("Wrong Password", `Old Password is Wrong.`, "error");
             return false;
         }
@@ -542,87 +460,50 @@ function EditStaffProfile(props)
             Password: encryptData(changeStaffPassword.NewPassword),
         };
 
-        await axios
-            .patch(
-                `${serverLink}staff/hr/staff-management/update/staff/password`,
-                sendData, token
-            )
-            .then((result) =>
-            {
-                if (result.data.message === "success")
-                {
-                    toast.success("Staff Password Changed Successfully");
-                    signOut();
-                } else
-                {
-                    showAlert(
-                        "ERROR",
-                        "Something went wrong. Please try again!",
-                        "error"
-                    );
-                }
-            })
-            .catch((error) =>
-            {
-                showAlert(
-                    "NETWORK ERROR",
-                    "Please check your connection and try again!",
-                    "error"
-                );
-            });
-    };
-
-    const deleteItem = async (id, image) =>
-    {
-        if (id)
-        {
-            toast.info(`Deleting... Please wait!`);
-            await axios
-                .delete(
-                    `${serverLink}staff/hr/staff-management/delete/staff/document/${id}/${image}`, token
-                )
-                .then((res) =>
-                {
-                    if (res.data.message === "success")
-                    {
-                        // props.update_app_data();
-                        getStaffRelatedData().then((r) => { });
-                        toast.success(`Deleted`);
-                    } else
-                    {
-                        toast.error(
-                            `Something went wrong. Please check your connection and try again!`
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
-                    console.log("NETWORK ERROR", error);
-                });
+        const { success, data } = await api.patch("staff/hr/staff-management/update/staff/password", sendData);
+        if (success) {
+            if (data.message === "success") {
+                toast.success("Staff Password Changed Successfully");
+                signOut();
+            } else {
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
+            }
+        } else {
+            showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
         }
     };
 
-    const handlePassportUpload = async () =>
-    {
-        if (editStaffInformation.update_passport === true)
-        {
+    const deleteItem = async (id, image) => {
+        if (id) {
+            toast.info(`Deleting... Please wait!`);
+            const { success, data } = await api.delete(`staff/hr/staff-management/delete/staff/document/${id}/${image}`);
+            if (success) {
+                if (data.message === "success") {
+                    getStaffRelatedData().then((r) => { });
+                    toast.success(`Deleted`);
+                } else {
+                    toast.error(`Something went wrong. Please check your connection and try again!`);
+                }
+            } else {
+                console.log("NETWORK ERROR");
+            }
+        }
+    };
+
+    const handlePassportUpload = async () => {
+        if (editStaffInformation.update_passport === true) {
             toast.info("please wait...")
             let formData = new FormData();
             formData.append("file", editStaffInformation.file);
             formData.append("StaffID", props.loginData[0]?.StaffID)
-            await axios.post(`${serverLink}staff/hr/staff-management/upload/staff/passport`, formData).then((res) =>
-            {
-                if (res.data.type === "success")
-                {
-                    toast.success(`Passport Updated Successfully`);
-                    getStaffRelatedData();
-                } else
-                {
-                    toast.error(`Something went wrong submitting your document!`);
-                }
-            })
-        } else
-        {
+            const { success, data } = await api.post("staff/hr/staff-management/upload/staff/passport", formData, { headers: { "Content-Type": "multipart/form-data" } });
+            if (success && data.type === "success") {
+                toast.success(`Passport Updated Successfully`);
+                getStaffRelatedData();
+            } else {
+                toast.error(`Something went wrong submitting your document!`);
+            }
+        } else {
             toast.error("please select passport")
         }
 
@@ -655,21 +536,16 @@ function EditStaffProfile(props)
 
     }
 
-    const onEdit = (e) =>
-    {
-        if (e.target.id === "file")
-        {
+    const onEdit = (e) => {
+        if (e.target.id === "file") {
             const file = e.target.files[0]
-            if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg")
-            {
+            if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") {
 
-            } else
-            {
+            } else {
                 toast.error("Only .png, .jpg and .jpeg format allowed!");
                 return;
             }
-            if (file.size > 1000000)
-            {
+            if (file.size > 1000000) {
                 toast.error("max file size is 1mb")
                 return;
 
@@ -731,49 +607,45 @@ function EditStaffProfile(props)
     const onEditStaffQualifications = (e) => {
         const id = e.target.id;
         const value = id === "file" ? e.target.files[0] : e.target.value;
-    
-    setAddStaffQualifications({
-        ...addStaffQualifications,
-        [id]: value,
-      });
-  
-      getQualification().then((r) => { });
+
+        setAddStaffQualifications({
+            ...addStaffQualifications,
+            [id]: value,
+        });
+
+        getQualification().then((r) => { });
     };
-  
+
     const handleStaffEdit = (e) => {
-      setAddStaffQualifications({
-        ...addStaffQualifications,
-        [e.target.id]: e.target.value,
-      });
+        setAddStaffQualifications({
+            ...addStaffQualifications,
+            [e.target.id]: e.target.value,
+        });
     }
 
     const onSubmitStaffQualifications = async (e) => {
         e.preventDefault();
         for (let key in addStaffQualifications) {
-          if (
-            addStaffQualifications.hasOwnProperty(key) &&
-            key !== "InsertBy" &&
-            key !== "InsertDate"
-          ) {
-            if (addStaffQualifications[key] === "") {
-              await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
-              return false;
+            if (
+                addStaffQualifications.hasOwnProperty(key) &&
+                key !== "InsertBy" &&
+                key !== "InsertDate"
+            ) {
+                if (addStaffQualifications[key] === "") {
+                    await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
+                    return false;
+                }
             }
-          }
         }
 
         // console.log("Staff Documents", addStaffQualifications);
         // return false;
         toast.info(`Submitting... Please wait!`);
-        await axios
-          .post(
-            `${serverLink}staff/hr/staff-management/staff/qualifications`,
-            addStaffQualifications, token
-          )
-          .then((res) => {
-            if (res.data.message === "success") {
-              console.log("Response Type", res.data);
-              toast.success("Qualification Added Successfully");
+        const { success, data } = await api.post("staff/hr/staff-management/staff/qualifications", addStaffQualifications);
+        if (success) {
+            if (data.message === "success") {
+                console.log("Response Type", data);
+                toast.success("Qualification Added Successfully");
                 setAddStaffQualifications({
                     ...addStaffQualifications,
                     QualificationID: "",
@@ -785,14 +657,13 @@ function EditStaffProfile(props)
                 getStaffRelatedData();
                 document.getElementById("closeQualificationModal").click();
             } else {
-              console.log("error", res);
-              toast.error(`Something went wrong. Please try again!`);
+                console.log("error", data);
+                toast.error(`Something went wrong. Please try again!`);
             }
-          })
-          .catch((error) => {
-            console.log("NETWORK ERROR", error);
-          });
-      };
+        } else {
+            console.log("NETWORK ERROR");
+        }
+    };
 
     const onDeleteStaffQualification = async (qualificationId) => {
         const confirmDelete = await showAlert(
@@ -804,23 +675,18 @@ function EditStaffProfile(props)
 
         if (confirmDelete) {
             toast.info("Deleting qualification... Please wait!");
-            await axios
-                .delete(
-                    `${serverLink}staff/hr/staff-management/staff/delete/qualifications/${qualificationId}`,
-                    token
-                )
-                .then((res) => {
-                    if (res.data.message === "success") {
-                        toast.success("Qualification Deleted Successfully");
-                        getStaffRelatedData();
-                    } else {
-                        toast.error("Something went wrong. Please try again!");
-                    }
-                })
-                .catch((error) => {
-                    console.log("NETWORK ERROR", error);
-                    toast.error("Failed to delete qualification. Please try again!");
-                });
+            const { success, data } = await api.delete(`staff/hr/staff-management/staff/delete/qualifications/${qualificationId}`);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Qualification Deleted Successfully");
+                    getStaffRelatedData();
+                } else {
+                    toast.error("Something went wrong. Please try again!");
+                }
+            } else {
+                console.log("NETWORK ERROR");
+                toast.error("Failed to delete qualification. Please try again!");
+            }
         }
     };
 
@@ -852,39 +718,33 @@ function EditStaffProfile(props)
         }
 
         toast.info(`Submitting... Please wait!`);
-        await axios
-            .post(
-                `${serverLink}staff/hr/staff-management/attach/staff/nok`,
-                addStaffNOK,
-                token
-            )
-            .then((res) => {
-                if (res.data.message === "success") {
-                    toast.success("Next of Kin Added Successfully");
-                    setAddStaffNOK({
-                        ...addStaffNOK,
-                        FirstName: "",
-                        Surname: "",
-                        MiddleName: "",
-                        Relationship: "",
-                        PhoneNumber: "",
-                        Address: "",
-                        EmailAddress: "",
-                    });
-                    // Refresh data and close modal
-                    getStaffRelatedData();
-                    document.getElementById("closeNOKModal").click();
-                } else if (res.data.message === "exist") {
-                    toast.warning("Next of Kin already exists. Please update or delete the existing record.");
-                } else {
-                    console.log("error", res);
-                    toast.error(`Something went wrong. Please try again!`);
-                }
-            })
-            .catch((error) => {
-                console.log("NETWORK ERROR", error);
-                toast.error("Network error. Please check your connection!");
-            });
+        const { success, data } = await api.post("staff/hr/staff-management/attach/staff/nok", addStaffNOK);
+        if (success) {
+            if (data.message === "success") {
+                toast.success("Next of Kin Added Successfully");
+                setAddStaffNOK({
+                    ...addStaffNOK,
+                    FirstName: "",
+                    Surname: "",
+                    MiddleName: "",
+                    Relationship: "",
+                    PhoneNumber: "",
+                    Address: "",
+                    EmailAddress: "",
+                });
+                // Refresh data and close modal
+                getStaffRelatedData();
+                document.getElementById("closeNOKModal").click();
+            } else if (data.message === "exist") {
+                toast.warning("Next of Kin already exists. Please update or delete the existing record.");
+            } else {
+                console.log("error", data);
+                toast.error(`Something went wrong. Please try again!`);
+            }
+        } else {
+            console.log("NETWORK ERROR");
+            toast.error("Network error. Please check your connection!");
+        }
     };
 
     const onDeleteStaffNOK = async (nokId) => {
@@ -897,23 +757,18 @@ function EditStaffProfile(props)
 
         if (confirmDelete) {
             toast.info("Deleting next of kin... Please wait!");
-            await axios
-                .delete(
-                    `${serverLink}staff/hr/staff-management/staff/delete/nok/${nokId}`,
-                    token
-                )
-                .then((res) => {
-                    if (res.data.message === "success") {
-                        toast.success("Next of Kin Deleted Successfully");
-                        getStaffRelatedData();
-                    } else {
-                        toast.error("Something went wrong. Please try again!");
-                    }
-                })
-                .catch((error) => {
-                    console.log("NETWORK ERROR", error);
-                    toast.error("Failed to delete next of kin. Please try again!");
-                });
+            const { success, data } = await api.delete(`staff/hr/staff-management/staff/delete/nok/${nokId}`);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Next of Kin Deleted Successfully");
+                    getStaffRelatedData();
+                } else {
+                    toast.error("Something went wrong. Please try again!");
+                }
+            } else {
+                console.log("NETWORK ERROR");
+                toast.error("Failed to delete next of kin. Please try again!");
+            }
         }
     };
 
@@ -1392,89 +1247,89 @@ function EditStaffProfile(props)
 
 
                                         <div className="tab-pane fade" id="qualifications" role="tabpanel">
-    <div className="card shadow-sm">
-        <div className="card-header bg-light border-0 pt-5">
-            <div className="d-flex justify-content-between align-items-center">
-                <h3 className="card-title fw-bold">My Qualifications</h3>
-                <button
-                    style={{ float: "right" }}
-                    className="btn btn-primary btn-sm"
-                    data-bs-toggle="modal"
-                    data-bs-target="#kt_modal_add_qualification"
-                >
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Add Qualification
-                </button>
-            </div>
-        </div>
-        <div className="card-body">
-            {staffInformation.qualifications && staffInformation.qualifications.length > 0 ? (
-                <AGTable data={qualificationsDatatable} />
-            ) : (
-                <div className="text-center py-10">
-                    <div className="mb-5">
-                        <i className="bi bi-journal-bookmark fs-3x text-muted"></i>
-                    </div>
-                    <h4 className="text-gray-800 mb-3">No Qualifications Added</h4>
-                    <p className="text-gray-600 mb-5">
-                        You haven't added any qualifications yet. Click the button above to add your first qualification.
-                    </p>
-                    <button
-                        className="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_add_qualification"
-                    >
-                        <i className="bi bi-plus-circle me-2"></i>
-                        Add Your First Qualification
-                    </button>
-                </div>
-            )}
-        </div>
-    </div>
-</div>
+                                            <div className="card shadow-sm">
+                                                <div className="card-header bg-light border-0 pt-5">
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <h3 className="card-title fw-bold">My Qualifications</h3>
+                                                        <button
+                                                            style={{ float: "right" }}
+                                                            className="btn btn-primary btn-sm"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#kt_modal_add_qualification"
+                                                        >
+                                                            <i className="bi bi-plus-circle me-2"></i>
+                                                            Add Qualification
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="card-body">
+                                                    {staffInformation.qualifications && staffInformation.qualifications.length > 0 ? (
+                                                        <AGTable data={qualificationsDatatable} />
+                                                    ) : (
+                                                        <div className="text-center py-10">
+                                                            <div className="mb-5">
+                                                                <i className="bi bi-journal-bookmark fs-3x text-muted"></i>
+                                                            </div>
+                                                            <h4 className="text-gray-800 mb-3">No Qualifications Added</h4>
+                                                            <p className="text-gray-600 mb-5">
+                                                                You haven't added any qualifications yet. Click the button above to add your first qualification.
+                                                            </p>
+                                                            <button
+                                                                className="btn btn-primary"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#kt_modal_add_qualification"
+                                                            >
+                                                                <i className="bi bi-plus-circle me-2"></i>
+                                                                Add Your First Qualification
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
 
 
                                         <div className="tab-pane fade" id="next-of-kin" role="tabpanel">
-    <div className="card shadow-sm">
-        <div className="card-header bg-light border-0 pt-5">
-            <div className="d-flex justify-content-between align-items-center">
-                <h3 className="card-title fw-bold">Next of Kin</h3>
-                <button
-                    style={{ float: "right" }}
-                    className="btn btn-primary btn-sm"
-                    data-bs-toggle="modal"
-                    data-bs-target="#kt_modal_add_nok"
-                >
-                    <i className="bi bi-person-plus me-2"></i>
-                    Add Next of Kin
-                </button>
-            </div>
-        </div>
-        <div className="card-body">
-            {staffInformation.nok && staffInformation.nok.length > 0 ? (
-                <AGTable data={nokDatatable} />
-            ) : (
-                <div className="text-center py-10">
-                    <div className="mb-5">
-                        <i className="bi bi-people fs-3x text-muted"></i>
-                    </div>
-                    <h4 className="text-gray-800 mb-3">No Next of Kin Added</h4>
-                    <p className="text-gray-600 mb-5">
-                        You haven't added any next of kin information yet. Click the button above to add your emergency contact.
-                    </p>
-                    <button
-                        className="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#kt_modal_add_nok"
-                    >
-                        <i className="bi bi-person-plus me-2"></i>
-                        Add Next of Kin
-                    </button>
-                </div>
-            )}
-        </div>
-    </div>
-</div>
+                                            <div className="card shadow-sm">
+                                                <div className="card-header bg-light border-0 pt-5">
+                                                    <div className="d-flex justify-content-between align-items-center">
+                                                        <h3 className="card-title fw-bold">Next of Kin</h3>
+                                                        <button
+                                                            style={{ float: "right" }}
+                                                            className="btn btn-primary btn-sm"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#kt_modal_add_nok"
+                                                        >
+                                                            <i className="bi bi-person-plus me-2"></i>
+                                                            Add Next of Kin
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="card-body">
+                                                    {staffInformation.nok && staffInformation.nok.length > 0 ? (
+                                                        <AGTable data={nokDatatable} />
+                                                    ) : (
+                                                        <div className="text-center py-10">
+                                                            <div className="mb-5">
+                                                                <i className="bi bi-people fs-3x text-muted"></i>
+                                                            </div>
+                                                            <h4 className="text-gray-800 mb-3">No Next of Kin Added</h4>
+                                                            <p className="text-gray-600 mb-5">
+                                                                You haven't added any next of kin information yet. Click the button above to add your emergency contact.
+                                                            </p>
+                                                            <button
+                                                                className="btn btn-primary"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#kt_modal_add_nok"
+                                                            >
+                                                                <i className="bi bi-person-plus me-2"></i>
+                                                                Add Next of Kin
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
 
 
                                         <div className="tab-pane fade" id="nok" role="tabpanel">
@@ -1509,8 +1364,8 @@ function EditStaffProfile(props)
                                                                 viewBox="0 0 16 16"
                                                                 style={{ marginBottom: '10px' }}
                                                             >
-                                                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                                                <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                                                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                                                                <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
                                                             </svg>
                                                             <p style={{ margin: '10px 0', fontWeight: 'bold', color: isDragging ? '#007bff' : '#333' }}>
                                                                 {editStaffInformation.file
@@ -1549,85 +1404,85 @@ function EditStaffProfile(props)
 
                                             </div>
                                         </div>
-                                        
+
                                         <div className="tab-pane fade" id="documents" role="tabpanel">
-    <div className="card-body p-0 tab-pane fade active show" id="kt_referrals_2" role="tabpanel">
+                                            <div className="card-body p-0 tab-pane fade active show" id="kt_referrals_2" role="tabpanel">
 
-        {/* Header */}
-        <div className="col-12">
-            <h5 className="pt-10 fw-bold">Update Password</h5>
-            <hr />
-        </div>
+                                                {/* Header */}
+                                                <div className="col-12">
+                                                    <h5 className="pt-10 fw-bold">Update Password</h5>
+                                                    <hr />
+                                                </div>
 
-        {/* Vertical Form */}
-        <div className="col-8 pt-3">
+                                                {/* Vertical Form */}
+                                                <div className="col-8 pt-3">
 
-            <div className="form-group mb-4">
-                <label htmlFor="OldPassword" className="fw-semibold">Old Password</label>
-                <input
-                    type="password"
-                    id="OldPassword"
-                    className="form-control"
-                    placeholder="Enter old password"
-                    required
-                    value={changeStaffPassword.OldPassword}
-                    onChange={onEditPassword}
-                />
-            </div>
+                                                    <div className="form-group mb-4">
+                                                        <label htmlFor="OldPassword" className="fw-semibold">Old Password</label>
+                                                        <input
+                                                            type="password"
+                                                            id="OldPassword"
+                                                            className="form-control"
+                                                            placeholder="Enter old password"
+                                                            required
+                                                            value={changeStaffPassword.OldPassword}
+                                                            onChange={onEditPassword}
+                                                        />
+                                                    </div>
 
-            <div className="form-group mb-4">
-                <label htmlFor="NewPassword" className="fw-semibold">New Password</label>
-                <input
-                    type="password"
-                    id="NewPassword"
-                    className="form-control"
-                    placeholder="Enter new password"
-                    required
-                    value={changeStaffPassword.NewPassword}
-                    onChange={onEditPassword}
-                />
-            </div>
+                                                    <div className="form-group mb-4">
+                                                        <label htmlFor="NewPassword" className="fw-semibold">New Password</label>
+                                                        <input
+                                                            type="password"
+                                                            id="NewPassword"
+                                                            className="form-control"
+                                                            placeholder="Enter new password"
+                                                            required
+                                                            value={changeStaffPassword.NewPassword}
+                                                            onChange={onEditPassword}
+                                                        />
+                                                    </div>
 
-            <div className="form-group mb-4">
-                <label htmlFor="ConfirmPassword" className="fw-semibold">Confirm Password</label>
-                <input
-                    type="password"
-                    id="ConfirmPassword"
-                    className="form-control"
-                    placeholder="Re-enter new password"
-                    value={changeStaffPassword.ConfirmPassword}
-                    onChange={onEditPassword}
-                />
-            </div>
+                                                    <div className="form-group mb-4">
+                                                        <label htmlFor="ConfirmPassword" className="fw-semibold">Confirm Password</label>
+                                                        <input
+                                                            type="password"
+                                                            id="ConfirmPassword"
+                                                            className="form-control"
+                                                            placeholder="Re-enter new password"
+                                                            value={changeStaffPassword.ConfirmPassword}
+                                                            onChange={onEditPassword}
+                                                        />
+                                                    </div>
 
-            {/* Action Buttons */}
-            <div className="d-flex gap-3 pt-2">
-                
+                                                    {/* Action Buttons */}
+                                                    <div className="d-flex gap-3 pt-2">
 
-                <button
-                    className="btn btn-primary btn-sm w-100"
-                    onClick={onSubmitStaffChangePassword}
-                >
-                    Save Changes
-                </button>
-            </div>
-        </div>
 
-        {/* Security Tips */}
-        <div className="mt-10 p-5 bg-light-primary rounded">
-            <h6 className="fw-bold mb-3">🔒 Security Tips</h6>
-            <ul className="m-0 ps-4">
-                <li>Use at least 8 characters, including uppercase, lowercase, numbers, and symbols.</li>
-                <li>Do not reuse old passwords.</li>
-                <li>Avoid using personal information such as name or date of birth.</li>
-                <li>Never share your password with anyone.</li>
-                <li>Change your password regularly to enhance security.</li>
-                <li>Log out of your account after completing sensitive tasks.</li>
-            </ul>
-        </div>
+                                                        <button
+                                                            className="btn btn-primary btn-sm w-100"
+                                                            onClick={onSubmitStaffChangePassword}
+                                                        >
+                                                            Save Changes
+                                                        </button>
+                                                    </div>
+                                                </div>
 
-    </div>
-</div>
+                                                {/* Security Tips */}
+                                                <div className="mt-10 p-5 bg-light-primary rounded">
+                                                    <h6 className="fw-bold mb-3">🔒 Security Tips</h6>
+                                                    <ul className="m-0 ps-4">
+                                                        <li>Use at least 8 characters, including uppercase, lowercase, numbers, and symbols.</li>
+                                                        <li>Do not reuse old passwords.</li>
+                                                        <li>Avoid using personal information such as name or date of birth.</li>
+                                                        <li>Never share your password with anyone.</li>
+                                                        <li>Change your password regularly to enhance security.</li>
+                                                        <li>Log out of your account after completing sensitive tasks.</li>
+                                                    </ul>
+                                                </div>
+
+                                            </div>
+                                        </div>
 
                                     </div>
                                     {/*NAV APPEARANCE(ENDS)*/}
@@ -1901,21 +1756,17 @@ function EditStaffProfile(props)
     );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails,
     };
 };
-const mapDispatchToProps = (dispatch) =>
-{
+const mapDispatchToProps = (dispatch) => {
     return {
-        setOnLoginDetails: (p) =>
-        {
+        setOnLoginDetails: (p) => {
             dispatch(setLoginDetails(p));
         },
-        setOnPermissionDetails: (p) =>
-        {
+        setOnPermissionDetails: (p) => {
             dispatch(setPermissionDetails(p));
         }
     };

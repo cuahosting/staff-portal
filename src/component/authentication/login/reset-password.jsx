@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { setLoginDetails } from "../../../actions/setactiondetails";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { EmailTemplates, encryptData, projectLogo, sendEmail } from "../../../resources/constants";
+import { NavLink, useNavigate } from "react-router-dom";
+import { encryptData, projectLogo } from "../../../resources/constants";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 
 function ResetPassword(props) {
     const navigate = useNavigate();
-    const token = window.location.href.split('/')[4]
+    const token = window.location.href.split('/')[4];
     const [reset, setReset] = useState({
         Password: "",
         cPassword: "",
@@ -17,26 +16,24 @@ function ResetPassword(props) {
     });
 
     const ValidateToken = async () => {
-        await axios
-            .get(`${serverLink}login/forget_password/validate_token/${token}`)
-            .then((res) => {
-                if (res.data.length === 0) {
-                    navigate('/')
-                } else {
-                    setReset({
-                        ...reset,
-                        EmailAddress: res.data[0].EmailAddress
-                    })
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR", err);
-            });
+        const { success, data } = await api.get(`login/forget_password/validate_token/${token}`);
+
+        if (success) {
+            if (!data || data.length === 0) {
+                navigate('/');
+            } else {
+                setReset({
+                    ...reset,
+                    EmailAddress: data[0].EmailAddress
+                });
+            }
+        }
     };
 
     useEffect(() => {
         ValidateToken();
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const onEdit = (e) => {
         setReset({
@@ -45,30 +42,30 @@ function ResetPassword(props) {
         });
     };
 
-
     const onSubmit = async (e) => {
         e.preventDefault();
         if (reset.Password !== reset.cPassword) {
             toast.error('Password does not match');
             return;
         }
+
         const formData = {
             Password: encryptData(reset.Password),
             EmailAddress: reset.EmailAddress
+        };
+
+        const { success, data } = await api.patch(
+            `login/forget_password/change_password/${token}`,
+            formData
+        );
+
+        if (success && data?.message === "success") {
+            toast.success('Your password have been changed successfully.');
+            navigate('/');
+        } else if (success) {
+            toast.error('Please try again.');
         }
-        await axios.patch(`${serverLink}login/forget_password/change_password/${token}`, formData)
-            .then((result) => {
-                if (result.data.message === "success") {
-                    toast.success('Your password have been changed successfully.');
-                    navigate('/')
-                } else {
-                    toast.error('Please try again.')
-                }
-            }).catch((e) => {
-                toast.error('Please try again.')
-                console.log('NETWORK ERROR')
-            })
-    }
+    };
 
     return (
         <>

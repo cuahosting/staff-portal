@@ -1,0 +1,151 @@
+/* Staff Profile Enhanced Styles - Grid Layout */
+
+/* Profile Details Card */
+.profile-details-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: none;
+    overflow: hidden;
+}
+
+.profile-details-card .card-header {
+    background: linear-gradient(135deg, #3699FF 0%, #1e5b99 100%);
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+.profile-details-card .card-header .card-title h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.profile-details-card .card-header .btn-primary {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.profile-details-card .card-header .btn-primary:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Card Body - Grid Layout */
+.profile-details-card .card-body {
+    padding: 1.25rem;
+}
+
+/* Convert rows to grid items */
+.profile-details-card .card-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+/* Each row becomes a grid cell */
+.profile-details-card .card-body .row.mb-7 {
+    display: flex;
+    flex-direction: column;
+    margin: 0 !important;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #3699FF;
+    transition: all 0.2s ease;
+}
+
+.profile-details-card .card-body .row.mb-7:hover {
+    background: #eef5fc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(54, 153, 255, 0.15);
+}
+
+/* Small label on top */
+.profile-details-card .card-body .row.mb-7 label,
+.profile-details-card .card-body .row.mb-7 .col-lg-4 {
+    width: 100%;
+    max-width: 100%;
+    flex: none;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    padding: 0;
+}
+
+.profile-details-card .card-body .row.mb-7 label i {
+    display: none;
+}
+
+/* Large data value below */
+.profile-details-card .card-body .row.mb-7 .col-lg-8,
+.profile-details-card .card-body .row.mb-7>div:last-child {
+    width: 100%;
+    max-width: 100%;
+    flex: none;
+    padding: 0;
+}
+
+.profile-details-card .card-body .row.mb-7 .col-lg-8 span,
+.profile-details-card .card-body .row.mb-7 .col-lg-8 a {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #212529;
+    display: block;
+    word-break: break-word;
+}
+
+.profile-details-card .card-body .row.mb-7 .col-lg-8 a {
+    color: #3699FF;
+    text-decoration: none;
+}
+
+.profile-details-card .card-body .row.mb-7 .col-lg-8 a:hover {
+    color: #1e5b99;
+    text-decoration: underline;
+}
+
+/* Badge styling */
+.profile-details-card .card-body .row.mb-7 .badge-success {
+    background-color: #50cd89;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.35rem;
+    vertical-align: middle;
+}
+
+/* Responsive grid */
+@media (min-width: 768px) {
+    .profile-details-card .card-body {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .profile-details-card .card-body {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .profile-details-card .card-body {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Full width for long content items like address */
+.profile-details-card .card-body .row.mb-7:has(.col-lg-8 span:empty),
+.profile-details-card .card-body .row.mb-7:has(a[href*="@"]) {
+    grid-column: span 2;
+}

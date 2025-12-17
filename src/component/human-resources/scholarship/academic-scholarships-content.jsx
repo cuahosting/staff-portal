@@ -4,6 +4,7 @@ import api from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
+import PageHeader from "../../common/pageheader/pageheader";
 
 function AcademicScholarshipsContent(props) {
     const token = props.loginData[0]?.token;
@@ -79,12 +80,12 @@ function AcademicScholarshipsContent(props) {
         data.forEach((item, index) => {
             rows.push({
                 sn: index + 1,
-                TierName: <span className="fw-bold">{item.TierName}</span>,
-                MinGPA: item.MinGPA.toFixed(2),
-                MaxGPA: item.MaxGPA.toFixed(2),
+                TierName: <span className="fw-bold">{item.TierName || `Tier ${index + 1}`}</span>,
+                MinGPA: (item.MinGPA ?? item.minGPA)?.toFixed(2) || "N/A",
+                MaxGPA: (item.MaxGPA ?? item.maxGPA)?.toFixed(2) || "N/A",
                 Scholarship: (
                     <span className="badge badge-light-primary">
-                        {item.ScholarshipName}
+                        {item.ScholarshipName || `${item.percentage || 0}%`}
                     </span>
                 ),
                 Status: item.IsActive === 1 ? (
@@ -120,13 +121,27 @@ function AcademicScholarshipsContent(props) {
         setTierDatatable({ ...tierDatatable, rows });
     };
 
-    const getQualifiedStudents = async () => {
-        const result = await api.get("staff/ac-finance/academic-scholarships/qualified-students", token);
+    const calculateTierName = (gpa) => {
+        if (!gpa) return "N/A";
+        const val = parseFloat(gpa);
+        if (val >= 4.50) return "First Class";
+        if (val >= 3.50) return "Second Class Upper";
+        if (val >= 2.50) return "Second Class Lower";
+        if (val >= 2.00) return "Third Class";
+        return "N/A";
+    };
 
-        if (result.success && result.data?.data) {
-            const data = result.data.data;
-            setQualifiedStudents(data);
-            buildStudentTable(data);
+    const getQualifiedStudents = async () => {
+        try {
+            const result = await api.get("staff/ac-finance/academic-scholarships/qualified-students", token);
+
+            if (result.success && result.data?.data) {
+                const data = result.data.data;
+                setQualifiedStudents(data);
+                buildStudentTable(data);
+            }
+        } catch (error) {
+            console.error("Error fetching qualified students:", error);
         }
     };
 
@@ -136,14 +151,14 @@ function AcademicScholarshipsContent(props) {
             rows.push({
                 sn: index + 1,
                 StudentID: item.StudentID,
-                FullName: <span className="fw-bold">{item.FullName}</span>,
+                FullName: <span className="fw-bold">{item.StudentName || item.FullName}</span>,
                 Programme: item.CourseName,
-                GPA: <span className="badge badge-light-info">{item.GPA?.toFixed(2) || "N/A"}</span>,
-                Tier: item.TierName || "N/A",
+                GPA: <span className="badge badge-light-info">{item.GPA ? parseFloat(item.GPA).toFixed(2) : "N/A"}</span>,
+                Tier: item.TierName || `${calculateTierName(item.GPA) || "N/A"}`,
                 Scholarship: item.ScholarshipName ? (
                     <span className="badge badge-light-primary">{item.ScholarshipName}</span>
                 ) : (
-                    <span className="text-muted">-</span>
+                    <span className="badge badge-light-primary">{item.ScholarshipPercentage ? `${item.ScholarshipPercentage}%` : "0%"}</span>
                 ),
                 Status: item.IsAssigned ? (
                     <span className="badge badge-light-success">Assigned</span>
@@ -156,155 +171,105 @@ function AcademicScholarshipsContent(props) {
         setStudentDatatable({ ...studentDatatable, rows });
     };
 
+
+
     const getScholarships = async () => {
-        const result = await api.get("staff/ac-finance/scholarships/active", token);
-
-        if (result.success && result.data?.data) {
-            setScholarshipList(result.data.data);
-        }
-    };
-
-    const onEditTier = (item) => {
-        setFormData({
-            TierName: item.TierName,
-            MinGPA: item.MinGPA,
-            MaxGPA: item.MaxGPA,
-            ScholarshipID: item.ScholarshipID,
-            InsertedBy: staffID,
-            EntryID: item.AcademicScholarshipTierID,
-        });
-        setShowModal(true);
-    };
-
-    const onToggleTierStatus = async (item) => {
-        const action = item.IsActive === 1 ? "deactivate" : "activate";
-        const confirmed = await showAlert(
-            "CONFIRM",
-            `Are you sure you want to ${action} this tier?`,
-            "warning"
-        );
-
-        if (confirmed) {
-            const result = await api.patch(
-                `staff/ac-finance/academic-scholarships/tier/update/${item.AcademicScholarshipTierID}`,
-                { IsActive: item.IsActive === 1 ? 0 : 1, UpdatedBy: staffID },
-                token
-            );
-
-            if (result.success && result.message === "success") {
-                toast.success(`Tier ${action}d successfully`);
-                getTiers();
+        try {
+            const result = await api.get("staff/ac-finance/scholarships/active", token);
+            if (result.success && result.data?.data) {
+                setScholarshipList(result.data.data);
             }
-        }
-    };
-
-    const onDeleteTier = async (item) => {
-        const confirmed = await showAlert(
-            "DELETE",
-            "Delete this GPA tier? Students assigned via this tier will not be affected.",
-            "warning"
-        );
-
-        if (confirmed) {
-            const result = await api.delete(
-                `staff/ac-finance/academic-scholarships/tier/delete/${item.AcademicScholarshipTierID}`,
-                token
-            );
-
-            if (result.success && result.message === "success") {
-                toast.success("Tier deleted successfully");
-                getTiers();
-            }
+        } catch (error) {
+            console.error("Error fetching scholarships", error);
         }
     };
 
     const onEdit = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.id]: e.target.value,
-        });
+        setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
-    const onSubmit = async () => {
-        if (formData.TierName.trim() === "") {
-            showAlert("ERROR", "Please enter a tier name", "error");
-            return;
-        }
-        if (formData.MinGPA === "" || parseFloat(formData.MinGPA) < 0) {
-            showAlert("ERROR", "Please enter a valid minimum GPA", "error");
-            return;
-        }
-        if (formData.MaxGPA === "" || parseFloat(formData.MaxGPA) < 0) {
-            showAlert("ERROR", "Please enter a valid maximum GPA", "error");
-            return;
-        }
-        if (parseFloat(formData.MinGPA) >= parseFloat(formData.MaxGPA)) {
-            showAlert("ERROR", "Minimum GPA must be less than maximum GPA", "error");
-            return;
-        }
-        if (!formData.ScholarshipID) {
-            showAlert("ERROR", "Please select a scholarship", "error");
-            return;
-        }
+    const onEditTier = (item) => {
+        setFormData({
+            TierName: "", // Backend tiers don't have names
+            MinGPA: item.minGPA,
+            MaxGPA: item.maxGPA,
+            ScholarshipID: "",
+            EntryID: "1" // Dummy ID to trigger 'Update' mode in modal
+        });
+        setShowModal(true);
+    };
 
-        const payload = {
-            ...formData,
-            MinGPA: parseFloat(formData.MinGPA),
-            MaxGPA: parseFloat(formData.MaxGPA),
-        };
+    const onToggleTierStatus = (item) => {
+        toast.info("System-defined tiers cannot be modified.");
+    };
 
-        if (formData.EntryID === "") {
-            const result = await api.post("staff/ac-finance/academic-scholarships/tier/add", payload, token);
+    const onDeleteTier = (item) => {
+        toast.info("System-defined tiers cannot be deleted.");
+    };
 
-            if (result.success && result.message === "success") {
-                toast.success("GPA tier added successfully");
-                setShowModal(false);
-                resetForm();
-                getTiers();
-            } else if (result.message === "overlap") {
-                showAlert("OVERLAP", "This GPA range overlaps with an existing tier", "error");
-            }
-        } else {
-            const result = await api.patch(
-                `staff/ac-finance/academic-scholarships/tier/update/${formData.EntryID}`,
-                { ...payload, UpdatedBy: staffID },
-                token
-            );
-
-            if (result.success && result.message === "success") {
-                toast.success("GPA tier updated successfully");
-                setShowModal(false);
-                resetForm();
-                getTiers();
-            }
-        }
+    const onSubmit = () => {
+        toast.info("Modifying system tiers is not currently supported.");
+        setShowModal(false);
     };
 
     const processAcademicScholarships = async () => {
-        const confirmed = await showAlert(
-            "PROCESS SCHOLARSHIPS",
-            "This will automatically assign scholarships to all qualified students based on their GPA. Continue?",
-            "warning"
-        );
+        if (qualifiedStudents.length === 0) {
+            toast.warning("No qualified students to process.");
+            return;
+        }
 
-        if (confirmed) {
-            const result = await api.post(
-                "staff/ac-finance/academic-scholarships/process",
-                { InsertedBy: staffID },
-                token
-            );
+        const confirm = await showAlert({
+            title: "Process Scholarships?",
+            text: `This will assign academic scholarships to ${qualifiedStudents.length} eligible students.`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes, Process"
+        });
 
-            if (result.success) {
-                toast.success(`${result.data?.assigned || 0} students assigned scholarships`);
-                getQualifiedStudents();
+        if (confirm.isConfirmed) {
+            setIsLoading(true);
+            try {
+                // Fetch current semester
+                const semResult = await api.get("staff/settings/dashboard/current_semester", token);
+                const semester = semResult.data?.data?.SemesterCode || semResult.data?.SemesterCode;
+
+                if (!semester) {
+                    throw new Error("Could not determine current semester");
+                }
+
+                const payload = {
+                    students: qualifiedStudents.map(s => ({ StudentID: s.StudentID, GPA: s.GPA })),
+                    SchoolSemesterUsed: semester,
+                    InsertedBy: staffID
+                };
+
+                const result = await api.post("staff/ac-finance/academic-scholarships/award-bulk", payload, token);
+
+                if (result.success || result.data?.success) {
+                    toast.success("Scholarships processed successfully!");
+                    getQualifiedStudents(); // Refresh list
+                } else {
+                    toast.error("Failed to process scholarships.");
+                }
+            } catch (error) {
+                console.error("Error processing scholarships:", error);
+                toast.error("An error occurred while processing.");
+            } finally {
+                setIsLoading(false);
             }
         }
     };
 
     useEffect(() => {
         const fetchData = async () => {
-            await Promise.all([getTiers(), getScholarships(), getQualifiedStudents()]);
-            setIsLoading(false);
+            try {
+                await Promise.all([getTiers(), getScholarships(), getQualifiedStudents()]);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                toast.error("Some data failed to load");
+            } finally {
+                setIsLoading(false);
+            }
         };
         fetchData();
     }, []);
@@ -312,124 +277,128 @@ function AcademicScholarshipsContent(props) {
     if (isLoading) return <Loader />;
 
     return (
-        <>
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 className="mb-1">Academic (GPA-Based) Scholarships</h4>
-                    <p className="text-muted mb-0">
-                        Define GPA tiers and automatically assign scholarships to qualifying students
-                    </p>
-                </div>
-                <div className="d-flex gap-3">
-                    <div className="btn-group">
-                        <button
-                            className={`btn ${activeView === "tiers" ? "btn-primary" : "btn-light"}`}
-                            onClick={() => setActiveView("tiers")}
-                        >
-                            <i className="fa fa-layer-group me-2"></i>GPA Tiers
-                        </button>
-                        <button
-                            className={`btn ${activeView === "students" ? "btn-primary" : "btn-light"}`}
-                            onClick={() => setActiveView("students")}
-                        >
-                            <i className="fa fa-users me-2"></i>Qualified Students
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Info Alert */}
-            <div className="alert alert-info d-flex align-items-center mb-4">
-                <i className="fa fa-info-circle me-3 fs-4"></i>
-                <div>
-                    Academic scholarships are automatically assigned based on student GPA. Define GPA tiers
-                    below, then process to assign scholarships to all qualifying students.
-                </div>
-            </div>
-
-            {activeView === "tiers" ? (
-                <>
-                    {/* Tier Actions */}
-                    <div className="d-flex justify-content-between mb-4">
-                        <div></div>
-                        <div className="d-flex gap-2">
+        <div className="d-flex flex-column flex-row-fluid">
+            <PageHeader
+                title="Academic (GPA) Scholarships"
+                items={["Human Resources", "Scholarship", "Academic (GPA)"]}
+                buttons={
+                    <div className="d-flex gap-2">
+                        {/* View Switcher */}
+                        <div className="btn-group me-2">
                             <button
-                                className="btn btn-success"
-                                onClick={processAcademicScholarships}
+                                className={`btn btn-sm ${activeView === "tiers" ? "btn-primary" : "btn-light"}`}
+                                onClick={() => setActiveView("tiers")}
                             >
-                                <i className="fa fa-cogs me-2"></i>
-                                Process Scholarships
+                                <i className="fa fa-layer-group me-2"></i>GPA Tiers
                             </button>
                             <button
-                                className="btn btn-primary"
-                                onClick={() => {
-                                    resetForm();
-                                    setShowModal(true);
-                                }}
+                                className={`btn btn-sm ${activeView === "students" ? "btn-primary" : "btn-light"}`}
+                                onClick={() => setActiveView("students")}
                             >
-                                <i className="fa fa-plus me-2"></i>
-                                Add GPA Tier
+                                <i className="fa fa-users me-2"></i>Qualified Students
                             </button>
                         </div>
-                    </div>
 
-                    {/* Tiers Table */}
-                    <AGTable data={tierDatatable} />
-                </>
-            ) : (
-                <>
-                    {/* Students Stats */}
-                    <div className="row g-4 mb-4">
-                        <div className="col-md-4">
-                            <div className="card bg-light-primary">
-                                <div className="card-body py-3">
-                                    <div className="d-flex align-items-center">
-                                        <i className="fa fa-users fs-2 text-primary me-3"></i>
-                                        <div>
-                                            <div className="fs-4 fw-bold">{qualifiedStudents.length}</div>
-                                            <div className="text-muted small">Total Qualified</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="card bg-light-success">
-                                <div className="card-body py-3">
-                                    <div className="d-flex align-items-center">
-                                        <i className="fa fa-check-circle fs-2 text-success me-3"></i>
-                                        <div>
-                                            <div className="fs-4 fw-bold">
-                                                {qualifiedStudents.filter(s => s.IsAssigned).length}
-                                            </div>
-                                            <div className="text-muted small">Assigned</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="card bg-light-warning">
-                                <div className="card-body py-3">
-                                    <div className="d-flex align-items-center">
-                                        <i className="fa fa-clock fs-2 text-warning me-3"></i>
-                                        <div>
-                                            <div className="fs-4 fw-bold">
-                                                {qualifiedStudents.filter(s => !s.IsAssigned).length}
-                                            </div>
-                                            <div className="text-muted small">Pending</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        {/* Actions for Tiers View */}
+                        {activeView === "tiers" && (
+                            <>
+                                <button
+                                    className="btn btn-sm btn-light-success"
+                                    onClick={processAcademicScholarships}
+                                >
+                                    <i className="fa fa-cogs me-2"></i>
+                                    Process
+                                </button>
+                                <button
+                                    className="btn btn-sm btn-primary"
+                                    onClick={() => {
+                                        resetForm();
+                                        setShowModal(true);
+                                    }}
+                                >
+                                    <i className="fa fa-plus me-2"></i>
+                                    Add Tier
+                                </button>
+                            </>
+                        )}
+                    </div>
+                }
+            />
+
+            <div className="flex-column-fluid">
+                {/* Info Alert */}
+                <div className="alert alert-info d-flex align-items-center mb-4">
+                    <i className="fa fa-info-circle me-3 fs-4"></i>
+                    <div>
+                        Academic scholarships are automatically assigned based on student GPA. Define GPA tiers
+                        below, then process to assign scholarships to all qualifying students.
+                    </div>
+                </div>
+
+                {activeView === "tiers" ? (
+                    <div className="card">
+                        <div className="card-body py-4">
+                            <AGTable data={tierDatatable} />
                         </div>
                     </div>
+                ) : (
+                    <>
+                        {/* Students Stats */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-4">
+                                <div className="card bg-light-primary">
+                                    <div className="card-body py-3">
+                                        <div className="d-flex align-items-center">
+                                            <i className="fa fa-users fs-2 text-primary me-3"></i>
+                                            <div>
+                                                <div className="fs-4 fw-bold">{qualifiedStudents.length}</div>
+                                                <div className="text-muted small">Total Qualified</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="card bg-light-success">
+                                    <div className="card-body py-3">
+                                        <div className="d-flex align-items-center">
+                                            <i className="fa fa-check-circle fs-2 text-success me-3"></i>
+                                            <div>
+                                                <div className="fs-4 fw-bold">
+                                                    {qualifiedStudents.filter(s => s.IsAssigned).length}
+                                                </div>
+                                                <div className="text-muted small">Assigned</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="card bg-light-warning">
+                                    <div className="card-body py-3">
+                                        <div className="d-flex align-items-center">
+                                            <i className="fa fa-clock fs-2 text-warning me-3"></i>
+                                            <div>
+                                                <div className="fs-4 fw-bold">
+                                                    {qualifiedStudents.filter(s => !s.IsAssigned).length}
+                                                </div>
+                                                <div className="text-muted small">Pending</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    {/* Students Table */}
-                    <AGTable data={studentDatatable} />
-                </>
-            )}
+                        {/* Students Table */}
+                        <div className="card">
+                            <div className="card-body py-4">
+                                <AGTable data={studentDatatable} />
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
 
             {/* Modal */}
             {showModal && (
@@ -539,7 +508,7 @@ function AcademicScholarshipsContent(props) {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
 

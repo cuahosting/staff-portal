@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
@@ -13,7 +12,6 @@ import { Rtt } from "@mui/icons-material";
 
 
 function FinanceBudgetReport(props) {
-    const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "Department", "Budgeted Amt.", "Allocated Amt.", "Balance", "Status", "Items", "Activities", "Inserted By", "Inserted Date", "Items | Tracking"];
     const formDataVariable = { entry_id: '', year: "", inserted_by: props.LoginDetails[0].StaffID, Decision: "", Description: "", Amount: 0, RecievedBy: "", BudgetID: "" }
@@ -30,34 +28,37 @@ function FinanceBudgetReport(props) {
 
 
     const getData = async () => {
-        const { data } = await axios.get(`${serverLink}staff/finance/finance-and-budget/financial-year`, token);
-        const results = data.data;
-        let rows = [];
-        if (results.length > 0) {
-            results.map((x) => {
-                rows.push({
-                    value: x.EntryID,
-                    label: `${formatDateAndTime(x.StartDate, "date")}  to  ${formatDateAndTime(x.EndDate, "date")}`,
-                    StartDate: formatDate(x.StartDate),
-                    EndDate: formatDate(x.EndDate)
+        const { success, data } = await api.get("staff/finance/finance-and-budget/financial-year");
+        if (success) {
+            const results = data.data;
+            let rows = [];
+            if (results.length > 0) {
+                results.map((x) => {
+                    rows.push({
+                        value: x.EntryID,
+                        label: `${formatDateAndTime(x.StartDate, "date")}  to  ${formatDateAndTime(x.EndDate, "date")}`,
+                        StartDate: formatDate(x.StartDate),
+                        EndDate: formatDate(x.EndDate)
+                    })
                 })
-            })
-            setYearsList(rows)
+                setYearsList(rows)
+            }
         }
 
-        const staff = await axios.get(`${serverLink}staff/report/staff/list/status/1`, token);
-        let _staff = []
-        if (staff.data.length > 0) {
-            staff.data.map((x) => {
-                _staff.push({
-                    value: x.StaffID,
-                    label: x.StaffName,
+        const staffResult = await api.get("staff/report/staff/list/status/1");
+        if (staffResult.success) {
+            let _staff = []
+            if (staffResult.data.length > 0) {
+                staffResult.data.map((x) => {
+                    _staff.push({
+                        value: x.StaffID,
+                        label: x.StaffName,
+                    })
                 })
-            })
-            setStaffList(_staff)
+                setStaffList(_staff)
+            }
         }
         setIsLoading(false)
-
     }
 
     const onYearChange = (e) => {
@@ -85,10 +86,11 @@ function FinanceBudgetReport(props) {
             year: year
         })
         try {
-            await axios.get(`${serverLink}staff/finance/finance-and-budget/budget-report/${year.value}`, token).then((res) => {
-                const budgets = res.data.budgets;
-                const budget_items = res.data.budget_items;
-                const budget_track = res.data.budget_track;
+            const { success, data: res } = await api.get(`staff/finance/finance-and-budget/budget-report/${year.value}`);
+            if (success) {
+                const budgets = res.budgets;
+                const budget_items = res.budget_items;
+                const budget_track = res.budget_track;
                 let rows = []
                 if (budgets.length > 0) {
                     budgets.map((x, i) => {
@@ -170,8 +172,7 @@ function FinanceBudgetReport(props) {
                 } else {
                     setBudgetList([])
                 }
-            })
-
+            }
         } catch (e) {
             console.log(e)
             toast.error("Error Fetching Report, please try again!!!")
@@ -216,8 +217,9 @@ function FinanceBudgetReport(props) {
             RecievedBy: formData.RecievedBy.value,
         }
         try {
-            await axios.post(`${serverLink}staff/finance/finance-and-budget/budget-approval`, payload, token).then((res) => {
-                if (res.data.message === "success") {
+            const { success, data: res } = await api.post("staff/finance/finance-and-budget/budget-approval", payload);
+            if (success) {
+                if (res.message === "success") {
                     toast.success(`Succesful`);
                     getReport(formData.year.value)
                     setFormData({
@@ -227,16 +229,16 @@ function FinanceBudgetReport(props) {
                         Description: "",
                     })
                     document.getElementById("close_details_modal").click();
-                } else if (res.data.message === "completed") {
+                } else if (res.message === "completed") {
                     toast.error("Sorry!, this budget has been allocated completely")
-                } else if (res.data.message === "exceeds") {
+                } else if (res.message === "exceeds") {
                     toast.error("Sorry!, Allocated amount would exceed budgeted amount, please reduce the amount you want to allocate")
-                } else if (res.data.message === "no budget") {
+                } else if (res.message === "no budget") {
                     toast.error("no budget found")
                 } else {
                     toast.error("failed")
                 }
-            })
+            }
         } catch (e) {
             toast.error("Something went wrong, please try again...")
         }
@@ -262,15 +264,27 @@ function FinanceBudgetReport(props) {
                         <h3>Approval</h3>
                         <div className="col-md-3 mt-5">
                             <label>Decision</label>
-                            <select className="form-control" id="Decision" onChange={onEdit} value={formData.Decision}>
-                                <option value={""}>--select--</option>
-                                <option value={"Reviewed"}>Reviewed</option>
-                                <option value={"Approved"}>Approved</option>
-                                <option value={"Rejected"}>Rejected</option>
-                                <option value={"Partial Allocation"}>Partial Allocation</option>
-                                <option value={"Full Allocation"}>Full Allocation</option>
-                            </select>
-                        </div>
+                            <SearchSelect
+                                id="Decision"
+                                value={[
+                                    { value: "Reviewed", label: "Reviewed" },
+                                    { value: "Approved", label: "Approved" },
+                                    { value: "Rejected", label: "Rejected" },
+                                    { value: "Partial Allocation", label: "Partial Allocation" },
+                                    { value: "Full Allocation", label: "Full Allocation" }
+                                ].find(opt => opt.value === formData.Decision) || null}
+                                options={[
+                                    { value: "Reviewed", label: "Reviewed" },
+                                    { value: "Approved", label: "Approved" },
+                                    { value: "Rejected", label: "Rejected" },
+                                    { value: "Partial Allocation", label: "Partial Allocation" },
+                                    { value: "Full Allocation", label: "Full Allocation" }
+                                ]}
+                                onChange={(selected) => onEdit({ target: { id: 'Decision', value: selected?.value || '' } })}
+                                placeholder="--select--"
+                                isClearable={false}
+                            />
+                        </div>"
                         <div className="col-md-9 mt-5">
                             <label>Description</label>
                             <input type="text" name="Description" id="Description" className="form-control" onChange={onEdit} value={formData.Description} />

@@ -192,7 +192,7 @@ export default function InventoryPurchaseOrderForm(props) {
                     </div>
                 </div>
 
-                <div className="col-md-12 pb-4" id="vendor_select" style={{ display: 'none' }}>
+                <div className="col-md-12 pb-4" id="vendor_select" style={{ display: props.value.purchase_from === 'Vendor' ? 'block' : 'none' }}>
                     <label htmlFor="vendor_id">Select Vendor</label>
                     <SearchSelect
                         id="vendor_id"
@@ -202,7 +202,7 @@ export default function InventoryPurchaseOrderForm(props) {
                         placeholder="Select Vendor"
                     />
                 </div>
-                <div className="col-md-12 pb-3" id="manufacturer_select" style={{ display: 'none' }}>
+                <div className="col-md-12 pb-3" id="manufacturer_select" style={{ display: props.value.purchase_from === 'Manufacturer' ? 'block' : 'none' }}>
                     <label htmlFor="manufacturer_id">Select Manufacturer</label>
                     <SearchSelect
                         id="manufacturer_id"

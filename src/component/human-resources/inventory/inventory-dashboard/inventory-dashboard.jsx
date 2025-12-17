@@ -2,16 +2,14 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import InventoryForm from "./inventory-form";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 function InventoryDashboard(props) {
-    const token = props.loginData[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState("off");
     const [datatable, setDatatable] = useState({
@@ -95,24 +93,24 @@ function InventoryDashboard(props) {
     })
 
     const getData = async () => {
-        await axios
-            .get(`${serverLink}staff/inventory/item/view`, token)
-            .then((result) => {
+        try {
+            const { success, data: result } = await api.get("staff/inventory/item/view");
+            if (success) {
                 let rows = []
                 let rowData = []
-                let itemData = result.data.Item;
+                let itemData = result.Item;
 
                 //Set Vendor Dropdown Items
-                if (result.data.Vendor.length > 0) {
-                    result.data.Vendor.map((row) => {
+                if (result.Vendor.length > 0) {
+                    result.Vendor.map((row) => {
                         rows.push({ value: row.EntryID, label: row.VendorName })
                     });
                     setVendor(rows)
                 }
 
                 //Set Location Dropdown Items
-                if (result.data.Location.length > 0) {
-                    result.data.Location.map((row) => {
+                if (result.Location.length > 0) {
+                    result.Location.map((row) => {
                         rowData.push({ value: row.EntryID, label: row.LocationName })
                     });
                     setLocation(rowData)
@@ -170,7 +168,7 @@ function InventoryDashboard(props) {
                             </Link>
                         ),
                         Report: (
-                            <Link to={`/human-resources/inventory/item/report/${btoa(item.EntryID)}`} className="btn btn-sm" style={{backgroundColor: '#425b5e'}}>
+                            <Link to={`/human-resources/inventory/item/report/${btoa(item.EntryID)}`} className="btn btn-sm" style={{ backgroundColor: '#425b5e' }}>
                                 <i className="fa fa-list-alt text-white" />
                             </Link>
                         ),
@@ -182,8 +180,11 @@ function InventoryDashboard(props) {
                     columns: datatable.columns,
                     rows: rowSet,
                 });
+            }
             setIsLoading(false)
-            });
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     };
 
     const onEdit = (e) => {
@@ -243,54 +244,54 @@ function InventoryDashboard(props) {
             return false;
         }
 
-            setIsFormLoading("on");
-            await axios
-                .post(`${serverLink}staff/inventory/item/receive`, formData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Item Received Successful");
-                        setIsFormLoading("off");
-                        getData();
-                        setFormData({
-                            ...formData,
-                            ItemID: "",
-                            ManufacturerID: "",
-                            VendorID: "",
-                            VendorID2: "",
-                            CategoryID: "",
-                            SubCategoryID: "",
-                            LocationID: "",
-                            LocationID2: "",
-                            Photo: "",
-                            UnitPrice: 0,
-                            Quantity: 0,
-                            Description: "",
-                            EntryID: "",
-                            ItemName: "",
-                            ManufacturerName: "",
-                            VendorName: "",
-                            VendorName2: "",
-                            CategoryName: "",
-                            SubCategoryName: "",
-                            LocationName: "",
-                            QuantityAvailable: 0,
-                        });
-                        document.getElementById("closeModal").click();
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
+        setIsFormLoading("on");
+        try {
+            const { success, data } = await api.post("staff/inventory/item/receive", formData);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Item Received Successful");
+                    setIsFormLoading("off");
+                    getData();
+                    setFormData({
+                        ...formData,
+                        ItemID: "",
+                        ManufacturerID: "",
+                        VendorID: "",
+                        VendorID2: "",
+                        CategoryID: "",
+                        SubCategoryID: "",
+                        LocationID: "",
+                        LocationID2: "",
+                        Photo: "",
+                        UnitPrice: 0,
+                        Quantity: 0,
+                        Description: "",
+                        EntryID: "",
+                        ItemName: "",
+                        ManufacturerName: "",
+                        VendorName: "",
+                        VendorName2: "",
+                        CategoryName: "",
+                        SubCategoryName: "",
+                        LocationName: "",
+                        QuantityAvailable: 0,
+                    });
+                    document.getElementById("closeModal").click();
+                } else {
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            }
+        } catch (error) {
+            showAlert(
+                "NETWORK ERROR",
+                "Please check your connection and try again!",
+                "error"
+            );
+        }
 
     };
 

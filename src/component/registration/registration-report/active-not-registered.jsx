@@ -1,49 +1,36 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useMemo } from "react";
+import { api } from "../../../resources/api";
 import { toast } from "react-toastify";
-import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import ReportTable from "../../common/table/ReportTable";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
+import SearchSelect from "../../common/select/SearchSelect";
 
 const ActiveNotRegistered = (props) => {
-  const token = props.loginData[0].token;
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
-  const [semester, setSemester] = useState({
-    code: "",
-  });
+  const [semester, setSemester] = useState({ code: "" });
   const [semesterList, setSemesterList] = useState([]);
   const [tableHeight, setTableHeight] = useState("600px");
   const [canSeeReport, setCanSeeReport] = useState(false);
-  const columns = [
-    "S/N",
-    "StudentID",
-    "Student Name",
-    "Course",
-    "Student Level",
-    "Student Semester",
-  ];
+  const columns = ["S/N", "StudentID", "Student Name", "Course", "Student Level", "Student Semester"];
+
+  const semesterOptions = useMemo(() => {
+    return semesterList.map(s => ({ value: s.SemesterCode, label: s.Description }));
+  }, [semesterList]);
 
   const handleChange = (e) => {
-    setSemester({
-      ...semester,
-      [e.target.id]: e.target.value,
-    });
+    setSemester({ ...semester, [e.target.id]: e.target.value });
   };
 
   useEffect(() => {
     const getSemesters = async () => {
-      axios
-        .get(`${serverLink}registration/registration-report/semester-list/`, token)
-        .then((response) => {
-          setSemesterList(response.data);
-          setIsLoading(false);
-        })
-        .catch((ex) => {
-          console.error(ex);
-        });
+      const { success, data } = await api.get("registration/registration-report/semester-list/");
+      if (success && data) {
+        setSemesterList(data);
+      }
+      setIsLoading(false);
     };
     getSemesters();
   }, []);
@@ -51,50 +38,26 @@ const ActiveNotRegistered = (props) => {
   const handleSubmit = async (e) => {
     setIsLoading(true);
     e.preventDefault();
-    await axios
-      .get(
-        `${serverLink}registration/registration-report/active-not-registered/${semester.code}`, token
-      )
-      .then((res) => {
-        const result = res.data;
-        if (result.length > 0) {
-          let rows = [];
-          result.map((item, index) => {
-            rows.push([
-              index + 1,
-              item.StudentID,
-              item.StudentName,
-              item.Course,
-              item.StudentLevel,
-              item.StudentSemester,
-            ]);
-          });
-          setTableHeight(result.length > 100 ? "1000px" : "600px");
-          setData(rows);
-          setCanSeeReport(true);
-        } else {
-          toast.error("There are no student in this department");
-          canSeeReport(false);
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        toast.error("NETWORK ERROR");
-      });
+    const { success, data: result } = await api.get(`registration/registration-report/active-not-registered/${semester.code}`);
+    if (success && result?.length > 0) {
+      const rows = result.map((item, index) => [
+        index + 1, item.StudentID, item.StudentName, item.Course, item.StudentLevel, item.StudentSemester
+      ]);
+      setTableHeight(result.length > 100 ? "1000px" : "600px");
+      setData(rows);
+      setCanSeeReport(true);
+    } else if (success) {
+      toast.error("There are no student in this department");
+      setCanSeeReport(false);
+    }
+    setIsLoading(false);
   };
 
   return isLoading ? (
     <Loader />
   ) : (
     <div className="d-flex flex-column flex-row-fluid">
-      <PageHeader
-        title={"Active Student Not Registered"}
-        items={[
-          "Registration",
-          "Registration Report",
-          "Active Students Not Registered",
-        ]}
-      />
+      <PageHeader title={"Active Student Not Registered"} items={["Registration", "Registration Report", "Active Students Not Registered"]} />
       <div className="flex-column-fluid">
         <div className="card">
           <div className="card-body pt-2">
@@ -103,30 +66,19 @@ const ActiveNotRegistered = (props) => {
                 <form onSubmit={handleSubmit}>
                   <div className="row fv-row">
                     <div className="col-md-9 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
-                        Select Semester
-                      </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select Semester"
+                      <label className="required fs-6 fw-bold mb-2">Select Semester</label>
+                      <SearchSelect
                         id="code"
-                        onChange={handleChange}
-                        value={semester.code}
-                        required
-                      >
-                        <option value="">Select option</option>
-                        {semesterList.map((s, i) => (
-                          <option key={i} value={s.SemesterCode}>
-                            {s.Description}
-                          </option>
-                        ))}
-                      </select>
+                        value={semesterOptions.find(opt => opt.value === semester.code) || null}
+                        options={semesterOptions}
+                        onChange={(selected) => handleChange({ target: { id: 'code', value: selected?.value || '' } })}
+                        placeholder="Select option"
+                        isClearable={false}
+                      />
                     </div>
                     <div className="col-md-3">
                       <div className="row ">
-                        <button type="submit" className="btn btn-primary mt-8">
-                          Submit
-                        </button>
+                        <button type="submit" className="btn btn-primary mt-8">Submit</button>
                       </div>
                     </div>
                   </div>
@@ -136,14 +88,7 @@ const ActiveNotRegistered = (props) => {
             {canSeeReport ? (
               <div className="row">
                 <div className="col-md-12 mt-5">
-                  {
-                    <ReportTable
-                      title={`Active Not Registered`}
-                      columns={columns}
-                      data={data}
-                      height={tableHeight}
-                    />
-                  }
+                  <ReportTable title={`Active Not Registered`} columns={columns} data={data} height={tableHeight} />
                 </div>
               </div>
             ) : null}
@@ -153,11 +98,9 @@ const ActiveNotRegistered = (props) => {
     </div>
   );
 };
+
 const mapStateToProps = (state) => {
-  return {
-      loginData: state.LoginDetails,
-  };
+  return { loginData: state.LoginDetails };
 };
 
 export default connect(mapStateToProps, null)(ActiveNotRegistered);
- 

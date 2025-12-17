@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
 import api from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { currencyConverter } from "../../../../resources/constants";
 import { connect } from "react-redux";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function OutstandingReport(props) {
     const token = props.loginData[0]?.token;
@@ -42,6 +43,28 @@ function OutstandingReport(props) {
         ],
         rows: [],
     });
+
+    // Options for SearchSelect
+    const semesterOptions = useMemo(() => {
+        return semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: s.SemesterName || s.SemesterCode
+        }));
+    }, [semesterList]);
+
+    const levelOptions = useMemo(() => {
+        return [{ value: '', label: 'All' }, ...levelList.map(l => ({
+            value: l.Level,
+            label: l.LevelName || l.Level
+        }))];
+    }, [levelList]);
+
+    const programmeOptions = useMemo(() => {
+        return [{ value: '', label: 'All' }, ...programmeList.map(p => ({
+            value: p.CourseID,
+            label: p.CourseName
+        }))];
+    }, [programmeList]);
 
     const getReportData = async () => {
         if (!filters.SemesterCode) {
@@ -257,51 +280,36 @@ function OutstandingReport(props) {
                         <div className="row g-3 align-items-end">
                             <div className="col-md-2">
                                 <label className="form-label required">Semester</label>
-                                <select
+                                <SearchSelect
                                     id="SemesterCode"
-                                    className="form-select form-select-solid"
-                                    value={filters.SemesterCode}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">Select</option>
-                                    {semesterList.map((s) => (
-                                        <option key={s.SemesterCode} value={s.SemesterCode}>
-                                            {s.SemesterName || s.SemesterCode}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={semesterOptions.find(opt => opt.value === filters.SemesterCode) || null}
+                                    options={semesterOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                    placeholder="Select"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-2">
                                 <label className="form-label">Level</label>
-                                <select
+                                <SearchSelect
                                     id="Level"
-                                    className="form-select form-select-solid"
-                                    value={filters.Level}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">All</option>
-                                    {levelList.map((l) => (
-                                        <option key={l.LevelID || l.Level} value={l.Level}>
-                                            {l.LevelName || l.Level}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={levelOptions.find(opt => opt.value === filters.Level) || levelOptions[0]}
+                                    options={levelOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'Level', value: selected?.value || '' } })}
+                                    placeholder="All"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-3">
                                 <label className="form-label">Programme</label>
-                                <select
+                                <SearchSelect
                                     id="ProgrammeID"
-                                    className="form-select form-select-solid"
-                                    value={filters.ProgrammeID}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">All</option>
-                                    {programmeList.map((p) => (
-                                        <option key={p.CourseID} value={p.CourseID}>
-                                            {p.CourseName}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={programmeOptions.find(opt => opt.value === filters.ProgrammeID) || programmeOptions[0]}
+                                    options={programmeOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'ProgrammeID', value: selected?.value || '' } })}
+                                    placeholder="All"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-2">
                                 <label className="form-label">Min Amount</label>

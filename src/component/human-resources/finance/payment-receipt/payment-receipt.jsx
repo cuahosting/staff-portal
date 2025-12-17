@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import {projectName, serverLink} from "../../../../resources/url";
+import { api } from "../../../../resources/api";
+import { projectName } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import {
     currencyConverter,
@@ -16,11 +16,10 @@ import { connect } from "react-redux";
 import AGTable from "../../../common/table/AGTable";
 
 function PaymentReceipt(props) {
-    const token = props.loginData[0].token;
 
     const url_link = window.location.href;
     const page_id = url_link.split('/');
-    const PaymentID = decryptData(page_id[page_id.length -1])
+    const PaymentID = decryptData(page_id[page_id.length - 1])
     const [isLoading, setIsLoading] = useState(true);
     const [record, setRecord] = useState({});
     const [itemList, setItemList] = useState([]);
@@ -45,49 +44,48 @@ function PaymentReceipt(props) {
     });
 
     const loadReceiptItems = async () => {
-        await axios.get(`${serverLink}staff/finance/get_payment_data/${PaymentID}`, token)
-            .then((result) => {
-                if (result.data.paymentHistory.length > 0) {
-                    setRecord(result.data.paymentHistory[0])
-                    setItemList(result.data.paymentItems)
+        try {
+            const { success, data: result } = await api.get(`staff/finance/get_payment_data/${PaymentID}`);
+            if (success && result.paymentHistory.length > 0) {
+                setRecord(result.paymentHistory[0])
+                setItemList(result.paymentItems)
 
-                    // Build items datatable
-                    if (result.data.paymentItems.length > 0) {
-                        let rows = [];
-                        result.data.paymentItems.forEach((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                description: item.Description,
-                                total: currencyConverter(parseFloat(item.Amount))
-                            });
-                        });
-                        // Add total row
+                // Build items datatable
+                if (result.paymentItems.length > 0) {
+                    let rows = [];
+                    result.paymentItems.forEach((item, index) => {
                         rows.push({
-                            sn: '',
-                            description: <strong>TOTAL:</strong>,
-                            total: <strong>{currencyConverter(result.data.paymentHistory[0].TotalExpectedAmount)}</strong>
+                            sn: index + 1,
+                            description: item.Description,
+                            total: currencyConverter(parseFloat(item.Amount))
                         });
-                        setItemsDatatable({
-                            ...itemsDatatable,
-                            rows: rows,
-                        });
-                    }
-
-                    setIsLoading(false)
-                }else{
-                    window.location.href = '/'
+                    });
+                    // Add total row
+                    rows.push({
+                        sn: '',
+                        description: <strong>TOTAL:</strong>,
+                        total: <strong>{currencyConverter(result.paymentHistory[0].TotalExpectedAmount)}</strong>
+                    });
+                    setItemsDatatable({
+                        ...itemsDatatable,
+                        rows: rows,
+                    });
                 }
-            })
-            .catch(error => {
+
+                setIsLoading(false)
+            } else {
                 window.location.href = '/'
-            });
+            }
+        } catch (error) {
+            window.location.href = '/'
+        }
     }
 
-    useEffect(()=> {
+    useEffect(() => {
         loadReceiptItems();
     }, []);
 
-   const currencyConverter = (amount) => {
+    const currencyConverter = (amount) => {
         const formatter = new Intl.NumberFormat('en-NG', {
             style: 'currency',
             currency: 'NGN',
@@ -96,30 +94,30 @@ function PaymentReceipt(props) {
     }
 
     return isLoading ? (
-            <Loader />
-            ) : (
-            <div className="container offset-sm-2" id="MainBody">
-                <div className="col-md-7 ">
-                    <div className="col-lg-12 bgImg hero-image">
-                        <div className="head-main mt-5">
-                            <div className="head-item">
-                                <img src={projectLogo} alt="Logo" width={70} height={70}  style={{marginRight: '15px'}}/>
-                                <span>
-                                             <h4 className="m-0 text-left">{projectName}</h4>
-                                             <span className="">{projectAddress}</span><br/>
-                                             <span>Date: {dateNow}</span>
-                                        </span>
+        <Loader />
+    ) : (
+        <div className="container offset-sm-2" id="MainBody">
+            <div className="col-md-7 ">
+                <div className="col-lg-12 bgImg hero-image">
+                    <div className="head-main mt-5">
+                        <div className="head-item">
+                            <img src={projectLogo} alt="Logo" width={70} height={70} style={{ marginRight: '15px' }} />
+                            <span>
+                                <h4 className="m-0 text-left">{projectName}</h4>
+                                <span className="">{projectAddress}</span><br />
+                                <span>Date: {dateNow}</span>
+                            </span>
 
-                            </div>
                         </div>
-                        <br/>
-                        <div className="text-center" style={{marginBottom: '0px'}}><b>{record.SemesterCode} Payment Ticket</b></div>
-                        <BarcodeImage value={PaymentID} height={60} width={2.0}/>
+                    </div>
+                    <br />
+                    <div className="text-center" style={{ marginBottom: '0px' }}><b>{record.SemesterCode} Payment Ticket</b></div>
+                    <BarcodeImage value={PaymentID} height={60} width={2.0} />
 
-                        <div className="item-data mt-5 ">
-                            <div className="">
-                                <table>
-                                    <tbody>
+                    <div className="item-data mt-5 ">
+                        <div className="">
+                            <table>
+                                <tbody>
                                     <tr>
                                         <th>Student ID: </th>
                                         <td className="fw-bold">{record.StudentID}</td>
@@ -140,13 +138,13 @@ function PaymentReceipt(props) {
                                         <th>Semester: </th>
                                         <td className="fw-bold"> {record.StudentSemester}</td>
                                     </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
+                        </div>
 
-                            <div className="">
-                                <table>
-                                    <tbody>
+                        <div className="">
+                            <table>
+                                <tbody>
                                     <tr>
                                         <th>Total Due: </th>
                                         <td><b>{currencyConverter(record.TotalExpectedAmount)}</b></td>
@@ -163,20 +161,20 @@ function PaymentReceipt(props) {
                                         <th>Payment Date: </th>
                                         <td> <b>  {formatDateAndTime(record.InsertedDate, 'date')}</b></td>
                                     </tr>
-                                    </tbody>
-                                </table>
+                                </tbody>
+                            </table>
 
-                            </div>
                         </div>
-                        <div className="">
-                            <AGTable data={itemsDatatable} paging={false} />
-                        </div>
-
+                    </div>
+                    <div className="">
+                        <AGTable data={itemsDatatable} paging={false} />
                     </div>
 
-                    <button id="printPageButton" onClick={printNow} className="btn btn-secondary">Print <i className="bi-printer"/></button>
                 </div>
+
+                <button id="printPageButton" onClick={printNow} className="btn btn-secondary">Print <i className="bi-printer" /></button>
             </div>
+        </div>
     )
 }
 const mapStateToProps = (state) => {

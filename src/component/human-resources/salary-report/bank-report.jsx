@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux/es/exports";
-import { serverLink } from "../../../resources/url";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
 import {
@@ -11,10 +10,9 @@ import {
 } from "../../../resources/constants";
 import { toast } from "react-toastify";
 import AGTable from "../../common/table/AGTable";
-import {showConfirm} from "../../common/sweetalert/sweetalert";
+import { showConfirm } from "../../common/sweetalert/sweetalert";
 
 function BankReport(props) {
-    const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [reportData, setReportData] = useState([])
@@ -82,16 +80,11 @@ function BankReport(props) {
     };
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/human-resources/finance-report/get-banks`, token)
-            .then((res) => {
-                if (res.data.length > 0) {
-                    setBanks(res.data)
-                }
-                setIsLoading(false)
-            }).catch((e) => {
-                setIsLoading(false)
-                toast.error("error getting bank data")
-            })
+        const { success, data } = await api.get("staff/human-resources/finance-report/get-banks");
+        if (success && data.length > 0) {
+            setBanks(data)
+        }
+        setIsLoading(false)
     }
 
     const getSalaryReport = async (salary_month) => {
@@ -99,23 +92,18 @@ function BankReport(props) {
             setDatatable(prev => ({ ...prev, rows: [] }));
         } else {
             setIsLoading(true)
-            await axios.get(`${serverLink}staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`, token)
-                .then((res) => {
-                    if (res.data.length > 0) {
-                        setReportData(res.data)
-                        setReportDataBK(res.data)
-                        setIsVCApproved(res.data.every(e => e.vc_approval === true))
-                        setIsBursarApproved(res.data.every(e => e.bursar_approval === true))
-                        buildTableData(res.data);
-                    } else {
-                        setReportData([]);
-                        setDatatable(prev => ({ ...prev, rows: [] }));
-                    }
-                    setIsLoading(false)
-                }).catch((e) => {
-                    setIsLoading(false)
-                    toast.error("error getting allowances")
-                })
+            const { success, data } = await api.get(`staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`);
+            if (success && data.length > 0) {
+                setReportData(data)
+                setReportDataBK(data)
+                setIsVCApproved(data.every(e => e.vc_approval === true))
+                setIsBursarApproved(data.every(e => e.bursar_approval === true))
+                buildTableData(data);
+            } else {
+                setReportData([]);
+                setDatatable(prev => ({ ...prev, rows: [] }));
+            }
+            setIsLoading(false)
         }
     }
 
@@ -162,33 +150,25 @@ function BankReport(props) {
 
     const vc_approval = async () => {
         toast.info(`Please wait!...`);
-        try {
-            const sendData = {salary_date: formData.month_id}
-            const res = await axios.patch(`${serverLink}staff/human-resources/finance-report/vc-approval`, sendData, token);
-            if (res.data.message === "success") {
-                toast.success(`VC Approval Successful`);
-                getSalaryReport(formData.month_id)
-            } else {
-                toast.error(`Something went wrong. Please check your connection and try again!`);
-            }
-        } catch (error) {
-            console.error("NETWORK ERROR", error);
+        const sendData = { salary_date: formData.month_id }
+        const { success, data } = await api.patch("staff/human-resources/finance-report/vc-approval", sendData);
+        if (success && data.message === "success") {
+            toast.success(`VC Approval Successful`);
+            getSalaryReport(formData.month_id)
+        } else {
+            toast.error(`Something went wrong. Please check your connection and try again!`);
         }
     };
 
     const bursar_approval = async () => {
         toast.info(`Please wait!...`);
-        try {
-            const sendData = {salary_date: formData.month_id}
-            const res = await axios.patch(`${serverLink}staff/human-resources/finance-report/bursar-approval`, sendData, token);
-            if (res.data.message === "success") {
-                toast.success(`Bursar Approval Successful`);
-                getSalaryReport(formData.month_id)
-            } else {
-                toast.error(`Something went wrong. Please check your connection and try again!`);
-            }
-        } catch (error) {
-            console.error("NETWORK ERROR", error);
+        const sendData = { salary_date: formData.month_id }
+        const { success, data } = await api.patch("staff/human-resources/finance-report/bursar-approval", sendData);
+        if (success && data.message === "success") {
+            toast.success(`Bursar Approval Successful`);
+            getSalaryReport(formData.month_id)
+        } else {
+            toast.error(`Something went wrong. Please check your connection and try again!`);
         }
     };
 
@@ -206,11 +186,11 @@ function BankReport(props) {
                         <div className="form-group">
                             <label htmlFor="month_id">Select Salary Month</label>
                             <input type="month" id="month_id"
-                                   className="form-control"
-                                   value={formData.month_id}
-                                   onChange={onChange}
-                                   max={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}`}
-                                   required/>
+                                className="form-control"
+                                value={formData.month_id}
+                                onChange={onChange}
+                                max={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}`}
+                                required />
                         </div>
                     </div>
                     {/* <div className="col-md-6 pb-3">
@@ -236,22 +216,22 @@ function BankReport(props) {
                     {
                         reportData.length > 0 ?
                             !(IsVCApproved && IsBursarApproved) ?
-                            <h4 className="alert alert-info mb-3">
-                                This payroll schedule has not been approved. Please approve it before submitting to the bank.
-                            </h4>
-                            : <></> : <></>
+                                <h4 className="alert alert-info mb-3">
+                                    This payroll schedule has not been approved. Please approve it before submitting to the bank.
+                                </h4>
+                                : <></> : <></>
                     }
 
                     {
                         reportData.length > 0 &&
-                        <div style={{marginBottom: '10px'}} className="d-flex justify-content-end">
+                        <div style={{ marginBottom: '10px' }} className="d-flex justify-content-end">
                             {
                                 !IsBursarApproved &&
                                 <button
                                     type="button"
                                     className="btn btn-primary"
-                                    onClick={()=>showConfirm("Warning", `Are you sure you want to approve payroll schedule for ${formatDateAndTime(formData.month_id, "month_and_year")} ?`, "warning")
-                                        .then( async (confirm) => {
+                                    onClick={() => showConfirm("Warning", `Are you sure you want to approve payroll schedule for ${formatDateAndTime(formData.month_id, "month_and_year")} ?`, "warning")
+                                        .then(async (confirm) => {
                                             if (confirm) {
                                                 bursar_approval()
                                             }
@@ -263,11 +243,11 @@ function BankReport(props) {
                             {
                                 !IsVCApproved &&
                                 <button
-                                    style={{marginLeft: '10px'}}
+                                    style={{ marginLeft: '10px' }}
                                     type="button"
                                     className="btn btn-info"
-                                    onClick={()=>showConfirm("Warning", `Are you sure you want to approve payroll schedule for ${formatDateAndTime(formData.month_id, "month_and_year")} ?`, "warning")
-                                        .then( async (confirm) => {
+                                    onClick={() => showConfirm("Warning", `Are you sure you want to approve payroll schedule for ${formatDateAndTime(formData.month_id, "month_and_year")} ?`, "warning")
+                                        .then(async (confirm) => {
                                             if (confirm) {
                                                 vc_approval()
                                             }
@@ -290,21 +270,21 @@ function BankReport(props) {
                                     </div>
                                     {(IsVCApproved && IsBursarApproved) &&
                                         <div className="d-flex justify-content-between p-4 print-only">
-                                            <p style={{fontSize: '14px'}}>
-                                                <img src={require('../../../images/vc_sign.jpeg')} style={{height: '70px', width: '200px'}} alt="VC Signature"/><br/>
-                                                Vice Chancellor<br/>
-                                                Vice Chancellor<br/>
-                                                Cosmopolitan University<br/>
-                                                Central Area Abuja, Nigeria <br/>
-                                                <br/>
+                                            <p style={{ fontSize: '14px' }}>
+                                                <img src={require('../../../images/vc_sign.jpeg')} style={{ height: '70px', width: '200px' }} alt="VC Signature" /><br />
+                                                Vice Chancellor<br />
+                                                Vice Chancellor<br />
+                                                Cosmopolitan University<br />
+                                                Central Area Abuja, Nigeria <br />
+                                                <br />
                                             </p>
 
-                                            <p style={{fontSize: '14px'}}>
-                                                <img src={require('../../../images/bursar.jpeg')} style={{height: '70px', width: '200px'}} alt="Bursar Signature"/><br/>
-                                                Bursar<br/>
-                                                Chief Financial Officer<br/>
-                                                Cosmopolitan University<br/>
-                                                Central Area Abuja, Nigeria <br/>
+                                            <p style={{ fontSize: '14px' }}>
+                                                <img src={require('../../../images/bursar.jpeg')} style={{ height: '70px', width: '200px' }} alt="Bursar Signature" /><br />
+                                                Bursar<br />
+                                                Chief Financial Officer<br />
+                                                Cosmopolitan University<br />
+                                                Central Area Abuja, Nigeria <br />
                                             </p>
                                         </div>
                                     }

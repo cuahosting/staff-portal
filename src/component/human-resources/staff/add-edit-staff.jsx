@@ -3,6 +3,7 @@ import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
 import axios from "axios";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -11,8 +12,8 @@ import { serverLink } from "../../../resources/url";
 import { formatDate, formatDateAndTime, encryptData, projectDomain, removeSpace } from "../../../resources/constants";
 import { Link } from "react-router-dom";
 import SearchSelect from "../../common/select/SearchSelect";
-import { projectName, simpleFileUploadAPIKey } from "../../../resources/url";
-import SimpleFileUpload from "react-simple-file-upload";
+// import { projectName, simpleFileUploadAPIKey } from "../../../resources/url";
+// import SimpleFileUpload from "react-simple-file-upload";
 
 
 function AddEditStaff(props) {
@@ -68,7 +69,6 @@ function AddEditStaff(props) {
   });
 
   const [lastId, setLastId] = useState("");
-  const [newId, setNewId] = useState("");
   const password = encryptData("123456789");
   const [insertUser, setInsertUser] = useState("");
 
@@ -93,6 +93,9 @@ function AddEditStaff(props) {
     StaffType: "",
     DesignationID: "",
     GrossPay: "",
+    IsDeduction: "",
+    IsPension: "",
+    IsWebsite: "",
     DepartmentCode: "",
     IsActive: "",
     IsAcademicStaff: "",
@@ -147,212 +150,235 @@ function AddEditStaff(props) {
   const [nationalities, setNaytionalities] = useState([])
   const [stateList, setStateList] = useState([]);
   const [lgaList, setLgaList] = useState([]);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const steps = [
+    { title: "Personal Details", fields: ["TitleID", "StaffID", "DateOfBirth", "FirstName", "MiddleName", "Surname", "Religion", "Gender", "MaritalStatus", "IsAcademicStaff", "IsActive"] },
+    { title: "Contact & Origin", fields: ["NationalityID", "StateID", "LgaID", "PhoneNumber", "EmailAddress", "ContactAddress"] },
+    { title: "Administrative Details", fields: ["StaffType", "DesignationID", "DepartmentCode", "CourseCode", "LineManagerID", "DateOfFirstEmployment", "DateOfCurrentEmployment", "ContractStartDate", "ContractEndDate"] },
+    { title: "Salary Information", fields: ["GrossPay"] },
+    { title: "Social Networks", fields: [] }
+  ];
+
+  const validateStep = (stepIndex) => {
+    const fields = steps[stepIndex].fields;
+    for (const field of fields) {
+      if (!createStaff[field] || createStaff[field] === "") {
+        showAlert("EMPTY FIELD", `Please enter ${field.replace(/([A-Z])/g, ' $1').trim()}`, "error");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const nextStep = (e) => {
+    e.preventDefault();
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => prev + 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const prevStep = (e) => {
+    e.preventDefault();
+    setCurrentStep((prev) => prev - 1);
+    window.scrollTo(0, 0);
+  };
 
   const getData = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
-      .then((response) => {
-        setData(response.data);
+    try {
+      const { success, data } = await api.get("staff/hr/staff-management/staff/data");
+      if (success) {
+        setData(data);
         let nat = [];
-        response.data.country.length > 0 &&
-          response.data.country.map((row) => {
+        data.country.length > 0 &&
+          data.country.map((row) => {
             nat.push({ value: row.EntryID, label: row.Country })
           })
         setNaytionalities(nat)
-      })
-
-      .catch((error) => {
-        console.log("NETWORK ERROR", error);
-      });
+      }
+    } catch (error) {
+      console.log("NETWORK ERROR", error);
+    }
   };
 
   const getStaff = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((result) => {
-        if (result.data.length > 0) {
-          let rows = [];
-          result.data.map((staff, index) => {
-            rows.push({
-              sn: index + 1,
-              EntryID: staff.EntryID,
-              StaffID: staff.StaffID,
-              FirstName: staff.FirstName,
-              MiddleName: staff.MiddleName,
-              Surname: staff.Surname,
-              TitleID: staff.TitleID,
-              Gender: staff.Gender,
-              DateOfBirth:
-                formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
-              MaritalStatus: staff.MaritalStatus,
-              NationalityID: staff.NationalityID,
-              StateID: staff.StateID,
-              LgaID: staff.LgaID,
-              Religion: staff.Religion,
-              PhoneNumber: staff.PhoneNumber,
-              AltPhoneNumber: staff.AltPhoneNumber,
-              EmailAddress: staff.EmailAddress,
-              OfficialEmailAddress: staff.OfficialEmailAddress,
-              ContactAddress: staff.ContactAddress,
-              StaffType: staff.StaffType,
-              DesignationID: staff.DesignationID,
-              GrossPay: staff.GrossPay,
-              DepartmentCode: staff.DepartmentCode,
-              IsActive: staff.IsActive,
-              IsAcademicStaff: staff.IsAcademicStaff,
-              DateOfFirstEmployment:
-                formatDateAndTime(staff.DateOfFirstEmployment, "date") ?? "N/A",
-              DateOfCurrentEmployment:
-                formatDateAndTime(staff.DateOfCurrentEmployment, "date") ??
-                "N/A",
-              ContractStartDate:
-                formatDateAndTime(staff.ContractStartDate, "date") ?? "N/A",
-              ContractEndDate:
-                formatDateAndTime(staff.ContractEndDate, "date") ?? "N/A",
-              LineManagerID: staff.LineManagerID,
-              CourseCode: staff.CourseCode,
-              AddedBy: staff.AddedBy,
-              UpdatedBy: staff.UpdatedBy,
-              UpdatedDate: staff.UpdatedDate,
-              BankID: staff.BankID,
-              AccountNumber: staff.AccountNumber,
-              BVN: staff.BVN,
-              AccountType: staff.AccountType,
-              NFirstName: staff.NFirstName,
-              NSurname: staff.NSurname,
-              NMiddleName: staff.NMiddleName,
-              Relationship: staff.Relationship,
-              NPhoneNumber: staff.NPhoneNumber,
-              NEmailAddress: staff.NEmailAddress,
-              NContactAddress: staff.NContactAddress,
-              Biography: staff.Biography,
-              file: staff.file,
-              Research: staff.Research,
-              Facebook: staff.Facebook,
-              Linkedin: staff.Linkedin,
-              Twitter: staff.Twitter,
-              Scholar: staff.Scholar,
-              Researchgate: staff.Researchgate,
-              Academia: staff.Academia,
-              Orcid: staff.Orcid,
-              action: (
+    try {
+      const { success, data } = await api.get("staff/hr/staff-management/staff/list");
+      if (success && data.length > 0) {
+        let rows = [];
+        data.map((staff, index) => {
+          rows.push({
+            sn: index + 1,
+            EntryID: staff.EntryID,
+            StaffID: staff.StaffID,
+            FirstName: staff.FirstName,
+            MiddleName: staff.MiddleName,
+            Surname: staff.Surname,
+            TitleID: staff.TitleID,
+            Gender: staff.Gender,
+            DateOfBirth:
+              formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
+            MaritalStatus: staff.MaritalStatus,
+            NationalityID: staff.NationalityID,
+            StateID: staff.StateID,
+            LgaID: staff.LgaID,
+            Religion: staff.Religion,
+            PhoneNumber: staff.PhoneNumber,
+            AltPhoneNumber: staff.AltPhoneNumber,
+            EmailAddress: staff.EmailAddress,
+            OfficialEmailAddress: staff.OfficialEmailAddress,
+            ContactAddress: staff.ContactAddress,
+            StaffType: staff.StaffType,
+            DesignationID: staff.DesignationID,
+            GrossPay: staff.GrossPay,
+            DepartmentCode: staff.DepartmentCode,
+            IsActive: staff.IsActive,
+            IsAcademicStaff: staff.IsAcademicStaff,
+            DateOfFirstEmployment:
+              formatDateAndTime(staff.DateOfFirstEmployment, "date") ?? "N/A",
+            DateOfCurrentEmployment:
+              formatDateAndTime(staff.DateOfCurrentEmployment, "date") ??
+              "N/A",
+            ContractStartDate:
+              formatDateAndTime(staff.ContractStartDate, "date") ?? "N/A",
+            ContractEndDate:
+              formatDateAndTime(staff.ContractEndDate, "date") ?? "N/A",
+            LineManagerID: staff.LineManagerID,
+            CourseCode: staff.CourseCode,
+            AddedBy: staff.AddedBy,
+            UpdatedBy: staff.UpdatedBy,
+            UpdatedDate: staff.UpdatedDate,
+            BankID: staff.BankID,
+            AccountNumber: staff.AccountNumber,
+            BVN: staff.BVN,
+            AccountType: staff.AccountType,
+            NFirstName: staff.NFirstName,
+            NSurname: staff.NSurname,
+            NMiddleName: staff.NMiddleName,
+            Relationship: staff.Relationship,
+            NPhoneNumber: staff.NPhoneNumber,
+            NEmailAddress: staff.NEmailAddress,
+            NContactAddress: staff.NContactAddress,
+            Biography: staff.Biography,
+            file: staff.file,
+            Research: staff.Research,
+            Facebook: staff.Facebook,
+            Linkedin: staff.Linkedin,
+            Twitter: staff.Twitter,
+            Scholar: staff.Scholar,
+            Researchgate: staff.Researchgate,
+            Academia: staff.Academia,
+            Orcid: staff.Orcid,
+            action: (
+              <button
+                className="btn btn-sm btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#kt_modal_general"
+                onClick={() => {
+                  const nat = nationalities.filter(x => x.value === staff.NationalityID)[0];
+                  setCreateStaff({
+                    EntryID: staff.EntryID,
+                    FirstName: staff.FirstName,
+                    MiddleName: staff.MiddleName,
+                    Surname: staff.Surname,
+                    TitleID: staff.TitleID,
+                    Gender: staff.Gender,
+                    DateOfBirth:
+                      formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
+                    MaritalStatus: staff.MaritalStatus,
+                    NationalityID: { value: nat?.EntryID, label: nat?.Country }, //staff.NationalityID,
+                    StateID: staff.StateID,
+                    LgaID: staff.LgaID,
+                    Religion: staff.Religion,
+                    PhoneNumber: staff.PhoneNumber,
+                    AltPhoneNumber: staff.AltPhoneNumber,
+                    EmailAddress: staff.EmailAddress,
+                    OfficialEmailAddress: staff.OfficialEmailAddress,
+                    ContactAddress: staff.ContactAddress,
+                    StaffType: staff.StaffType,
+                    DesignationID: staff.DesignationID,
+                    GrossPay: staff.GrossPay,
+                    DepartmentCode: staff.DepartmentCode,
+                    IsActive: staff.IsActive,
+                    IsAcademicStaff: staff.IsAcademicStaff,
+                    DateOfFirstEmployment:
+                      formatDateAndTime(
+                        staff.DateOfFirstEmployment,
+                        "date"
+                      ) ?? "N/A",
+                    DateOfCurrentEmployment:
+                      formatDateAndTime(
+                        staff.DateOfCurrentEmployment,
+                        "date"
+                      ) ?? "N/A",
+                    ContractStartDate:
+                      formatDateAndTime(staff.ContractStartDate, "date") ??
+                      "N/A",
+                    ContractEndDate:
+                      formatDateAndTime(staff.ContractEndDate, "date") ??
+                      "N/A",
+                    LineManagerID: staff.LineManagerID,
+                    CourseCode: staff.CourseCode,
+                    AddedBy: staff.AddedBy,
+                    UpdatedBy: props.loginData[0].StaffID,
+                    UpdatedDate: props.loginData[0].StaffID,
+                    BankID: staff.BankID,
+                    AccountNumber: staff.AccountNumber,
+                    BVN: staff.BVN,
+                    AccountType: staff.AccountType,
+                    NFirstName: staff.NFirstName,
+                    NSurname: staff.NSurname,
+                    NMiddleName: staff.NMiddleName,
+                    Relationship: staff.Relationship,
+                    NPhoneNumber: staff.NPhoneNumber,
+                    NEmailAddress: staff.NEmailAddress,
+                    NContactAddress: staff.NContactAddress,
+                    Biography: staff.Biography,
+                    file: staff.file,
+                    Research: staff.Research,
+                    Facebook: staff.Facebook,
+                    Linkedin: staff.Linkedin,
+                    Twitter: staff.Twitter,
+                    Scholar: staff.Scholar,
+                    Researchgate: staff.Researchgate,
+                    Academia: staff.Academia,
+                    Orcid: staff.Orcid,
+                    update_passport: false,
+                    file2: staff.Image,
+                    action: "update",
+                  })
+                }
+                }
+              >
+                <i className="fa fa-pen" />
+              </button>
+            ),
+            view: (
+              <Link
+                to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
+              >
                 <button
                   className="btn btn-sm btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() => {
-                    setNewId(staff.StaffID);
-                    const nat = nationalities.filter(x => x.value === staff.NationalityID)[0];
-                    setCreateStaff({
-                      EntryID: staff.EntryID,
-                      FirstName: staff.FirstName,
-                      MiddleName: staff.MiddleName,
-                      Surname: staff.Surname,
-                      TitleID: staff.TitleID,
-                      Gender: staff.Gender,
-                      DateOfBirth:
-                        formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
-                      MaritalStatus: staff.MaritalStatus,
-                      NationalityID: { value: nat.EntryID, label: nat.Country }, //staff.NationalityID,
-                      StateID: staff.StateID,
-                      LgaID: staff.LgaID,
-                      Religion: staff.Religion,
-                      PhoneNumber: staff.PhoneNumber,
-                      AltPhoneNumber: staff.AltPhoneNumber,
-                      EmailAddress: staff.EmailAddress,
-                      OfficialEmailAddress: staff.OfficialEmailAddress,
-                      ContactAddress: staff.ContactAddress,
-                      StaffType: staff.StaffType,
-                      DesignationID: staff.DesignationID,
-                      GrossPay: staff.GrossPay,
-                      DepartmentCode: staff.DepartmentCode,
-                      IsActive: staff.IsActive,
-                      IsAcademicStaff: staff.IsAcademicStaff,
-                      DateOfFirstEmployment:
-                        formatDateAndTime(
-                          staff.DateOfFirstEmployment,
-                          "date"
-                        ) ?? "N/A",
-                      DateOfCurrentEmployment:
-                        formatDateAndTime(
-                          staff.DateOfCurrentEmployment,
-                          "date"
-                        ) ?? "N/A",
-                      ContractStartDate:
-                        formatDateAndTime(staff.ContractStartDate, "date") ??
-                        "N/A",
-                      ContractEndDate:
-                        formatDateAndTime(staff.ContractEndDate, "date") ??
-                        "N/A",
-                      LineManagerID: staff.LineManagerID,
-                      CourseCode: staff.CourseCode,
-                      AddedBy: staff.AddedBy,
-                      UpdatedBy: props.loginData[0].StaffID,
-                      UpdatedDate: props.loginData[0].StaffID,
-                      BankID: staff.BankID,
-                      AccountNumber: staff.AccountNumber,
-                      BVN: staff.BVN,
-                      AccountType: staff.AccountType,
-                      NFirstName: staff.NFirstName,
-                      NSurname: staff.NSurname,
-                      NMiddleName: staff.NMiddleName,
-                      Relationship: staff.Relationship,
-                      NPhoneNumber: staff.NPhoneNumber,
-                      NEmailAddress: staff.NEmailAddress,
-                      NContactAddress: staff.NContactAddress,
-                      Biography: staff.Biography,
-                      file: staff.file,
-                      Research: staff.Research,
-                      Facebook: staff.Facebook,
-                      Linkedin: staff.Linkedin,
-                      Twitter: staff.Twitter,
-                      Scholar: staff.Scholar,
-                      Researchgate: staff.Researchgate,
-                      Academia: staff.Academia,
-                      Orcid: staff.Orcid,
-                      update_passport: false,
-                      file2: staff.Image,
-                      action: "update",
-                    })
-                  }
-                  }
-                >
-                  <i className="fa fa-pen" />
-                </button>
-              ),
-              view: (
-                <Link
                   to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
                 >
-                  <button
-                    className="btn btn-sm btn-primary"
-                    to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
-                  >
-                    <i className="fa fa-eye" />
-                  </button>
-                </Link>
-                //
-                // <button
-                //     className="btn btn-sm btn-primary"
-                //     to={`/staff/${staff.StaffID}`.toLowerCase()}
-                // >
-                //   <i className="fa fa-eye" />
-                // </button>
-              ),
-            });
+                  <i className="fa fa-eye" />
+                </button>
+              </Link>
+            ),
           });
+        });
 
-          setDatatable({
-            ...datatable,
-            columns: datatable.columns,
-            rows: rows,
-          });
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+        setDatatable({
+          ...datatable,
+          columns: datatable.columns,
+          rows: rows,
+        });
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.log("NETWORK ERROR", err);
+    }
   };
   const handleNationalityChange = (e) => {
     console.log(e)
@@ -436,7 +462,7 @@ function AddEditStaff(props) {
       'DateOfFirstEmployment', 'DateOfCurrentEmployment', 'ContractStartDate',
       'ContractEndDate', 'LineManagerID', 'CourseCode', 'Password', 'AddedBy',
       'UpdatedBy', 'Biography', 'Research', 'Facebook', 'Linkedin', 'Twitter',
-      'Scholar', 'Researchgate', 'Academia', 'Orcid'
+      'Scholar', 'Researchgate', 'Academia', 'Orcid', 'IsDeduction', 'IsPension', 'IsWebsite'
     ];
 
     textFields.forEach(field => {
@@ -463,21 +489,20 @@ function AddEditStaff(props) {
   };
 
   const getLastStaffID = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/data`, token)
-      .then((response) => {
-        setLastId(response.data.lastId[0].StaffID);
-
-        const indexOfId = lastId.split("E")[1];
+    try {
+      const { success, data } = await api.get("staff/hr/staff-management/staff/data");
+      if (success) {
+        setLastId(data.lastId[0].StaffID);
+        const indexOfId = data.lastId[0].StaffID.split("E")[1];
         const lastIndex = Number(indexOfId) + 1;
 
         const padStaffID = (lastIndex, places) =>
           String(lastIndex).padStart(places, "0");
-        setNewId(`E${padStaffID(lastIndex, 4)}`);
-      })
-      .catch((error) => {
-        console.log("NETWORK ERROR", error);
-      });
+        // setNewId(`E${padStaffID(lastIndex, 4)}`);
+      }
+    } catch (error) {
+      console.log("NETWORK ERROR", error);
+    }
   };
 
   const onSubmit = async (e) => {
@@ -505,23 +530,17 @@ function AddEditStaff(props) {
         UpdatedBy: props.loginData[0].StaffID,
       };
 
-      await axios
-        .patch(
-          `${serverLink}staff/hr/staff-management/update/staff/profile/`,
-          socialPayload,
-          token
-        )
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Profile updated");
-            getStaff();
-          } else {
-            showAlert("ERROR", "Unable to update profile. Please try again!", "error");
-          }
-        })
-        .catch(() => {
-          showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
-        });
+      try {
+        const { success, data: result } = await api.patch("staff/hr/staff-management/update/staff/profile/", socialPayload);
+        if (success && result.message === "success") {
+          toast.success("Profile updated");
+          getStaff();
+        } else {
+          showAlert("ERROR", "Unable to update profile. Please try again!", "error");
+        }
+      } catch {
+        showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+      }
 
       return;
     }
@@ -567,7 +586,11 @@ function AddEditStaff(props) {
         key !== "LgaID" &&
         key !== "file2" &&
         key !== "file" &&
-        key != "update_passport"
+        key !== "file" &&
+        key !== "update_passport" &&
+        key !== "IsDeduction" &&
+        key !== "IsPension" &&
+        key !== "IsWebsite"
       ) {
         if (createStaff[key] === "") {
           await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
@@ -589,7 +612,7 @@ function AddEditStaff(props) {
       if (createStaff.EmailAddress !== "") {
         const sendData = {
           EntryID: createStaff.EntryID,
-          StaffID: newId,
+          StaffID: createStaff.StaffID,
           FirstName: createStaff.FirstName,
           MiddleName: createStaff.MiddleName,
           Surname: createStaff.Surname,
@@ -651,7 +674,7 @@ function AddEditStaff(props) {
 
         axios
           .post(
-            `${serverLink}staff/hr/staff-management/add/staff/multipart/${newId}`,
+            `${serverLink}staff/hr/staff-management/add/staff/multipart/${createStaff.StaffID}`,
             formData,
             {
               headers: {
@@ -817,12 +840,28 @@ function AddEditStaff(props) {
     }
   };
 
+  /*
   useEffect(() => {
     getLastStaffID().then((r) => { });
     getStaff().then((r) => { });
     getData().then((r) => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  */
+
+  useEffect(() => {
+    getStaff().then((r) => { });
+    getData().then((r) => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /*
+  useEffect(() => {
+    if (newId && !createStaff.StaffID) {
+      setCreateStaff(prev => ({ ...prev, StaffID: newId }));
+    }
+  }, [newId]);
+  */
 
   const handlePassportUpload = (url) => {
     console.log(url)
@@ -835,6 +874,30 @@ function AddEditStaff(props) {
     }
   }
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.target.classList.add('drag-active');
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.target.classList.remove('drag-active');
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.target.classList.remove('drag-active');
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      const event = { target: { id: 'file', files: [file] } };
+      onEdit(event);
+    }
+  };
+
   return isLoading ? (
     <Loader />
   ) : (
@@ -842,77 +905,70 @@ function AddEditStaff(props) {
       <PageHeader
         title={"Add Staff"}
         items={["Human Resource", "Staff Management", "Add Staff"]}
+        buttons={
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={!isAdmin}
+            data-bs-toggle="modal"
+            data-bs-target="#kt_modal_general"
+            onClick={() =>
+              setCreateStaff({
+                ...createStaff,
+                EntryID: "",
+                FirstName: "",
+                MiddleName: "",
+                Surname: "",
+                TitleID: "",
+                Gender: "",
+                DateOfBirth: "",
+                MaritalStatus: "",
+                NationalityID: "",
+                StateID: "",
+                LgaID: "",
+                Religion: "",
+                PhoneNumber: "",
+                AltPhoneNumber: "",
+                EmailAddress: "",
+                OfficialEmailAddress: "",
+                ContactAddress: "",
+                StaffType: "",
+                DesignationID: "",
+                GrossPay: "",
+                DepartmentCode: "",
+                IsActive: "",
+                IsAcademicStaff: "",
+                DateOfFirstEmployment: "",
+                DateOfCurrentEmployment: "",
+                ContractStartDate: "",
+                ContractEndDate: "",
+                LineManagerID: "",
+                CourseCode: "",
+                Password: createStaff.Password,
+                AddedDate: "",
+                AddedBy: insertUser,
+                UpdatedBy: insertUser,
+                UpdatedDate: "",
+                Biography: "",
+                file: "",
+                Research: "",
+                Facebook: "",
+                Linkedin: "",
+                Twitter: "",
+                Scholar: "",
+                Researchgate: "",
+                Academia: "",
+                Orcid: "",
+              })
+            }
+          >
+            Add Staff
+          </button>
+        }
       />
       <div className="flex-column-fluid">
         <div className="card">
-          <div className="card-header border-0 pt-6">
-            <div className="card-title" />
-            <div className="card-toolbar">
-              <div
-                className="d-flex justify-content-end"
-                data-kt-customer-table-toolbar="base"
-              >
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={!isAdmin}
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateStaff({
-                      ...createStaff,
-                      EntryID: "",
-                      FirstName: "",
-                      MiddleName: "",
-                      Surname: "",
-                      TitleID: "",
-                      Gender: "",
-                      DateOfBirth: "",
-                      MaritalStatus: "",
-                      NationalityID: "",
-                      StateID: "",
-                      LgaID: "",
-                      Religion: "",
-                      PhoneNumber: "",
-                      AltPhoneNumber: "",
-                      EmailAddress: "",
-                      OfficialEmailAddress: "",
-                      ContactAddress: "",
-                      StaffType: "",
-                      DesignationID: "",
-                      GrossPay: "",
-                      DepartmentCode: "",
-                      IsActive: "",
-                      IsAcademicStaff: "",
-                      DateOfFirstEmployment: "",
-                      DateOfCurrentEmployment: "",
-                      ContractStartDate: "",
-                      ContractEndDate: "",
-                      LineManagerID: "",
-                      CourseCode: "",
-                      Password: createStaff.Password,
-                      AddedDate: "",
-                      AddedBy: insertUser,
-                      UpdatedBy: insertUser,
-                      UpdatedDate: "",
-                      Biography: "",
-                      file: "",
-                      Research: "",
-                      Facebook: "",
-                      Linkedin: "",
-                      Twitter: "",
-                      Scholar: "",
-                      Researchgate: "",
-                      Academia: "",
-                      Orcid: "",
-                    })
-                  }
-                >
-                  Add Staff
-                </button>
-              </div>
-            </div>
-          </div>
+
           <div className="card-body p-0">
             <AGTable data={datatable} />
           </div>
@@ -924,544 +980,581 @@ function AddEditStaff(props) {
             width: "500px",
           }}
         >
-          <form onSubmit={onSubmit} >
+          <form onSubmit={onSubmit}>
+            {/* Progress Stepper */}
+            <div className="d-flex justify-content-between mb-10">
+              {steps.map((step, index) => (
+                <div key={index} className={`d-flex flex-column align-items-center ${index === currentStep ? 'text-primary' : 'text-muted'}`}>
+                  <div className={`rounded-circle d-flex align-items-center justify-content-center mb-2 ${index === currentStep ? 'bg-primary text-white' : 'bg-light'}`}
+                    style={{ width: '30px', height: '30px', fontWeight: 'bold' }}>
+                    {index + 1}
+                  </div>
+                  <small className="d-none d-md-block" style={{ fontSize: '10px' }}>{step.title}</small>
+                </div>
+              ))}
+            </div>
+
             <fieldset disabled={!isAdmin}>
-              <h5>Basic Information</h5>
-              <hr />
+              {currentStep === 0 && (
+                <>
+                  <h5 className="fw-bold">Personal Details</h5>
+                  <hr />
+                  <div className="row">
+                    <div className="col-lg-12">
+                      <div className="form-group">
+                        <label htmlFor="file">Passport (optional) <strong className="text-danger"><small>File must not exceed 1mb</small></strong></label>
+                        <div
+                          className={`upload-drop-zone ${createStaff.file ? 'has-file' : ''}`}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          onClick={() => document.getElementById('file').click()}
+                          style={{
+                            border: '2px dashed #009ef7',
+                            borderRadius: '0.475rem',
+                            padding: '2rem',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            backgroundColor: '#f8f9fa',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          <i className="fa fa-cloud-upload-alt fs-3x text-primary mb-2"></i>
+                          <div className="fs-5 fw-bold text-gray-800 mb-1">
+                            {createStaff.file ? createStaff.file.name : "Drag & drop your file here"}
+                          </div>
+                          <div className="fs-7 fw-bold text-gray-500">
+                            or click to upload
+                          </div>
+                        </div>
+                        <input
+                          type="file"
+                          accept=".pdf, .jpg, .png, .jpeg"
+                          id="file"
+                          name="file"
+                          className="d-none"
+                          onChange={onEdit}
+                        />
+                        <span className="alert-info mt-2 d-block">
+                          Only .pdf, .jpg, .png, .jpeg are allowed
+                        </span>
+                      </div>
+                    </div>
 
-              <div className="row">
-                <div className="col-lg-12">
-                  <div className="form-group">
-                    <label htmlFor="file">Passport (optional) <strong className="text-danger"><small>File must not exceed 1mb</small></strong> </label>
-                    {/* <SimpleFileUpload
-                    apiKey={simpleFileUploadAPIKey}
-                    tag={`${projectName}-passport`}
-                    onSuccess={handlePassportUpload}
-                    accepted={"image/*"}
-                    maxFileSize={1}
-                    preview="false"
-                    width="100%"
-                    height="100"
-                  /> */}
-                    <input
-                      type="file"
-                      accept=".pdf, .jpg, .png, .jpeg"
-                      id="file"
-                      name="file"
-                      className="form-control"
-                      placeholder="file"
-                      onChange={onEdit}
-                    />
-                    <span className="alert-info">
-                      Only .pdf, .jpg, .png, .jpeg are allowed
-                    </span>
-                  </div>
-                </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="TitleID">Title</label>
+                        <SearchSelect
+                          id="TitleID"
+                          value={data.title ? data.title.map(item => ({ label: item.TitleName, value: item.EntryID })).find(op => op.value === createStaff.TitleID) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'TitleID', value: selected?.value || '' } })}
+                          options={data.title ? data.title.map(item => ({ label: item.TitleName, value: item.EntryID })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="StaffID">Staff ID <span className="text-danger">*</span></label>
+                        <input
+                          type="text"
+                          id="StaffID"
+                          className="form-control"
+                          placeholder="Staff ID"
+                          required
+                          value={createStaff.StaffID}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="DateOfBirth">Date of Birth</label>
+                        <input
+                          type="date"
+                          id="DateOfBirth"
+                          className="form-control"
+                          placeholder="Date of Birth*"
+                          required
+                          max={`${currentYear - 13}-01-01`}
+                          value={formatDate(createStaff.DateOfBirth)}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
 
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="TitleID">Title</label>
-                    <SearchSelect
-                      id="TitleID"
-                      value={data.title ? data.title.map(item => ({ label: item.TitleName, value: item.EntryID })).find(op => op.value === createStaff.TitleID) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'TitleID', value: selected?.value || '' } })}
-                      options={data.title ? data.title.map(item => ({ label: item.TitleName, value: item.EntryID })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="FirstName">First Name</label>
-                    <input
-                      type="text"
-                      id="FirstName"
-                      className="form-control"
-                      placeholder="First Name*"
-                      required
-                      value={createStaff.FirstName}
-                      onChange={onEdit}
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="MiddleName">Middle Name</label>
-                    <input
-                      type="text"
-                      id="MiddleName"
-                      className="form-control"
-                      placeholder="Middle Name"
-                      value={createStaff.MiddleName}
-                      onChange={onEdit}
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="Surname">Surname</label>
-                    <input
-                      type="text"
-                      id="Surname"
-                      className="form-control"
-                      placeholder="Surname"
-                      value={createStaff.Surname}
-                      onChange={onEdit}
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="PhoneNumber">Phone Number</label>
-                    <input
-                      type="tel"
-                      id="PhoneNumber"
-                      className="form-control"
-                      placeholder="Phone Number*"
-                      required
-                      value={createStaff.PhoneNumber}
-                      onChange={onEdit}
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="EmailAddress">Email Address</label>
-                    <input
-                      type="email"
-                      id="EmailAddress"
-                      className="form-control"
-                      placeholder="Email Address"
-                      value={createStaff.EmailAddress}
-                      onChange={onEdit}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="DateOfBirth">Date of Birth</label>
-                    <input
-                      type="date"
-                      id="DateOfBirth"
-                      className="form-control"
-                      placeholder="Date of Birth*"
-                      required
-                      max={`${currentYear - 13}-01-01`}
-                      value={formatDate(createStaff.DateOfBirth)}
-                      onChange={onEdit}
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="Religion">Religion</label>
-                    <SearchSelect
-                      id="Religion"
-                      value={[{ label: 'Islam', value: 'Islam' }, { label: 'Christianity', value: 'Christianity' }, { label: 'Others', value: 'Others' }].find(op => op.value === createStaff.Religion) || null}
-                      onChange={(selected) => onEdit({ target: { id: 'Religion', value: selected?.value || '' } })}
-                      options={[{ label: 'Islam', value: 'Islam' }, { label: 'Christianity', value: 'Christianity' }, { label: 'Others', value: 'Others' }]}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-4 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="Gender">Gender</label>
-                    <SearchSelect
-                      id="Gender"
-                      value={[{ label: 'Female', value: 'Female' }, { label: 'Male', value: 'Male' }, { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.Gender) || null}
-                      onChange={(selected) => onEdit({ target: { id: 'Gender', value: selected?.value || '' } })}
-                      options={[{ label: 'Female', value: 'Female' }, { label: 'Male', value: 'Male' }, { label: 'N/A', value: 'N/A' }]}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="NationalityID">Nationality</label>
-                    <SearchSelect
-                      id="NationalityID"
-                      value={data.country ? data.country.map(item => ({ label: item.Country, value: item.EntryID })).find(op => op.value === createStaff.NationalityID) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'NationalityID', value: selected?.value || '' } })}
-                      options={data.country ? data.country.map(item => ({ label: item.Country, value: item.EntryID })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="StateID">State of Origin</label>
-                    <SearchSelect
-                      id="StateID"
-                      value={stateList ? stateList.map(item => ({ label: item.StateName, value: item.EntryID })).find(op => op.value === createStaff.StateID) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'StateID', value: selected?.value || '' } })}
-                      options={stateList ? stateList.map(item => ({ label: item.StateName, value: item.EntryID })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="LgaID">Local Government</label>
-                    <SearchSelect
-                      id="LgaID"
-                      value={lgaList ? lgaList.map(item => ({ label: item.LgaName, value: item.EntryID })).find(op => op.value === createStaff.LgaID) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'LgaID', value: selected?.value || '' } })}
-                      options={lgaList ? lgaList.map(item => ({ label: item.LgaName, value: item.EntryID })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="MaritalStatus">Marital Status</label>
-                    <SearchSelect
-                      id="MaritalStatus"
-                      value={[{ label: 'Married', value: 'Married' }, { label: 'Single', value: 'Single' }, { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.MaritalStatus) || null}
-                      onChange={(selected) => onEdit({ target: { id: 'MaritalStatus', value: selected?.value || '' } })}
-                      options={[{ label: 'Married', value: 'Married' }, { label: 'Single', value: 'Single' }, { label: 'N/A', value: 'N/A' }]}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-12 col-md-12 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="ContactAddress">Contact Address</label>
-                    <textarea
-                      className="form-control"
-                      rows="3"
-                      id="ContactAddress"
-                      placeholder="Contact Address"
-                      required
-                      value={createStaff.ContactAddress}
-                      onChange={onEdit}
-                    />
-                  </div>
-                </div>
-              </div>
-              <h5 className="pt-10">Administrative Details</h5>
-              <hr />
-              <div className="row">
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="StaffType">Staff Type</label>
-                    <SearchSelect
-                      id="StaffType"
-                      value={data.stafftype ? data.stafftype.map(item => ({ label: item.TypeName, value: item.TypeName })).find(op => op.value === createStaff.StaffType) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'StaffType', value: selected?.value || '' } })}
-                      options={data.stafftype ? data.stafftype.map(item => ({ label: item.TypeName, value: item.TypeName })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="FirstName">First Name</label>
+                        <input
+                          type="text"
+                          id="FirstName"
+                          className="form-control"
+                          placeholder="First Name*"
+                          required
+                          value={createStaff.FirstName}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="MiddleName">Middle Name</label>
+                        <input
+                          type="text"
+                          id="MiddleName"
+                          className="form-control"
+                          placeholder="Middle Name"
+                          value={createStaff.MiddleName}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Surname">Surname</label>
+                        <input
+                          type="text"
+                          id="Surname"
+                          className="form-control"
+                          placeholder="Surname"
+                          value={createStaff.Surname}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
 
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="DesignationID">Designation</label>
-                    <SearchSelect
-                      id="DesignationID"
-                      value={data.designation ? data.designation.map(item => ({ label: item.DesignationName, value: item.EntryID })).find(op => op.value === createStaff.DesignationID) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'DesignationID', value: selected?.value || '' } })}
-                      options={data.designation ? data.designation.map(item => ({ label: item.DesignationName, value: item.EntryID })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Religion">Religion</label>
+                        <SearchSelect
+                          id="Religion"
+                          value={[{ label: 'Islam', value: 'Islam' }, { label: 'Christianity', value: 'Christianity' }, { label: 'Others', value: 'Others' }].find(op => op.value === createStaff.Religion) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'Religion', value: selected?.value || '' } })}
+                          options={[{ label: 'Islam', value: 'Islam' }, { label: 'Christianity', value: 'Christianity' }, { label: 'Others', value: 'Others' }]}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Gender">Gender</label>
+                        <SearchSelect
+                          id="Gender"
+                          value={[{ label: 'Female', value: 'Female' }, { label: 'Male', value: 'Male' }, { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.Gender) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'Gender', value: selected?.value || '' } })}
+                          options={[{ label: 'Female', value: 'Female' }, { label: 'Male', value: 'Male' }, { label: 'N/A', value: 'N/A' }]}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
 
-                <div className="col-lg-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="GrossPay">Gross Pay</label>
-                    <input
-                      type="float"
-                      id="GrossPay"
-                      className="form-control"
-                      placeholder="Gross Pay"
-                      value={createStaff.GrossPay}
-                      onChange={onEdit}
-                      required
-                    />
-                  </div>
-                </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="MaritalStatus">Marital Status</label>
+                        <SearchSelect
+                          id="MaritalStatus"
+                          value={[{ label: 'Married', value: 'Married' }, { label: 'Single', value: 'Single' }, { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.MaritalStatus) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'MaritalStatus', value: selected?.value || '' } })}
+                          options={[{ label: 'Married', value: 'Married' }, { label: 'Single', value: 'Single' }, { label: 'N/A', value: 'N/A' }]}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
 
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="DateOfFirstEmployment">
-                      Date Of First Employment
-                    </label>
-                    <input
-                      type="date"
-                      id="DateOfFirstEmployment"
-                      className="form-control"
-                      placeholder="Date Of First Employment"
-                      required
-                      value={formatDate(createStaff.DateOfFirstEmployment)}
-                      onChange={onEdit}
-                    />
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="IsAcademicStaff">Is Academic Staff?</label>
+                        <SearchSelect
+                          id="IsAcademicStaff"
+                          value={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }].find(op => op.value === createStaff.IsAcademicStaff?.toString()) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'IsAcademicStaff', value: selected?.value || '' } })}
+                          options={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }]}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="IsActive">Is Staff Active?</label>
+                        <SearchSelect
+                          id="IsActive"
+                          value={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }].find(op => op.value === createStaff.IsActive?.toString()) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'IsActive', value: selected?.value || '' } })}
+                          options={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }]}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
 
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="DateOfCurrentEmployment">
-                      Date Of Current Employment
-                    </label>
-                    <input
-                      type="date"
-                      id="DateOfCurrentEmployment"
-                      className="form-control"
-                      placeholder="Date Of Current Employment"
-                      value={formatDate(createStaff.DateOfCurrentEmployment)}
-                      onChange={onEdit}
-                      required
-                    />
+              {currentStep === 1 && (
+                <>
+                  <h5 className="fw-bold">Contact & Origin Details</h5>
+                  <hr />
+                  <div className="row">
+                    <div className="col-lg-6 col-md-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="NationalityID">Nationality</label>
+                        <SearchSelect
+                          id="NationalityID"
+                          value={data.country ? data.country.map(item => ({ label: item.Country, value: item.EntryID })).find(op => op.value === createStaff.NationalityID) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'NationalityID', value: selected?.value || '' } })}
+                          options={data.country ? data.country.map(item => ({ label: item.Country, value: item.EntryID })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="StateID">State of Origin</label>
+                        <SearchSelect
+                          id="StateID"
+                          value={stateList ? stateList.map(item => ({ label: item.StateName, value: item.EntryID })).find(op => op.value === createStaff.StateID) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'StateID', value: selected?.value || '' } })}
+                          options={stateList ? stateList.map(item => ({ label: item.StateName, value: item.EntryID })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="LgaID">Local Government</label>
+                        <SearchSelect
+                          id="LgaID"
+                          value={lgaList ? lgaList.map(item => ({ label: item.LgaName, value: item.EntryID })).find(op => op.value === createStaff.LgaID) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'LgaID', value: selected?.value || '' } })}
+                          options={lgaList ? lgaList.map(item => ({ label: item.LgaName, value: item.EntryID })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="PhoneNumber">Phone Number</label>
+                        <input
+                          type="tel"
+                          id="PhoneNumber"
+                          className="form-control"
+                          placeholder="Phone Number*"
+                          required
+                          value={createStaff.PhoneNumber}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="EmailAddress">Email Address</label>
+                        <input
+                          type="email"
+                          id="EmailAddress"
+                          className="form-control"
+                          placeholder="Email Address"
+                          value={createStaff.EmailAddress}
+                          onChange={onEdit}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-12 col-md-12 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="ContactAddress">Contact Address</label>
+                        <textarea
+                          className="form-control"
+                          rows="3"
+                          id="ContactAddress"
+                          placeholder="Contact Address"
+                          required
+                          value={createStaff.ContactAddress}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
 
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="ContractStartDate">Contract Start Date</label>
-                    <input
-                      type="date"
-                      id="ContractStartDate"
-                      required
-                      className="form-control"
-                      placeholder="Contract Start Date"
-                      value={formatDate(createStaff.ContractStartDate)}
-                      onChange={onEdit}
-                    />
+              {currentStep === 2 && (
+                <>
+                  <h5 className="fw-bold">Administrative Details</h5>
+                  <hr />
+                  <div className="row">
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="StaffType">Staff Type</label>
+                        <SearchSelect
+                          id="StaffType"
+                          value={data.stafftype ? data.stafftype.map(item => ({ label: item.TypeName, value: item.TypeName })).find(op => op.value === createStaff.StaffType) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'StaffType', value: selected?.value || '' } })}
+                          options={data.stafftype ? data.stafftype.map(item => ({ label: item.TypeName, value: item.TypeName })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="DesignationID">Designation</label>
+                        <SearchSelect
+                          id="DesignationID"
+                          value={data.designation ? data.designation.map(item => ({ label: item.DesignationName, value: item.EntryID })).find(op => op.value === createStaff.DesignationID) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'DesignationID', value: selected?.value || '' } })}
+                          options={data.designation ? data.designation.map(item => ({ label: item.DesignationName, value: item.EntryID })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-4 col-md-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="DepartmentCode">Department</label>
+                        <SearchSelect
+                          id="DepartmentCode"
+                          value={data.department ? data.department.map(item => ({ label: item.DepartmentName, value: item.DepartmentCode })).find(op => op.value === createStaff.DepartmentCode) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'DepartmentCode', value: selected?.value || '' } })}
+                          options={data.department ? data.department.map(item => ({ label: item.DepartmentName, value: item.DepartmentCode })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-4 col-md-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="CourseCode">Course</label>
+                        <SearchSelect
+                          id="CourseCode"
+                          value={data.course ? [...data.course.map(item => ({ label: item.CourseName, value: item.CourseCode })), { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.CourseCode) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'CourseCode', value: selected?.value || '' } })}
+                          options={data.course ? [...data.course.map(item => ({ label: item.CourseName, value: item.CourseCode })), { label: 'N/A', value: 'N/A' }] : [{ label: 'N/A', value: 'N/A' }]}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 col-md-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="LineManagerID">Line Manager</label>
+                        <SearchSelect
+                          id="LineManagerID"
+                          value={data.linemanager ? data.linemanager.map(item => ({ label: `${item.StaffID} -- ${item.FirstName} ${item.MiddleName} ${item.Surname}`, value: item.StaffID })).find(op => op.value === createStaff.LineManagerID) || null : null}
+                          onChange={(selected) => onEdit({ target: { id: 'LineManagerID', value: selected?.value || '' } })}
+                          options={data.linemanager ? data.linemanager.map(item => ({ label: `${item.StaffID} -- ${item.FirstName} ${item.MiddleName} ${item.Surname}`, value: item.StaffID })) : []}
+                          placeholder="Select Option"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-6 col-md-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="DateOfFirstEmployment">
+                          Date Of First Employment
+                        </label>
+                        <input
+                          type="date"
+                          id="DateOfFirstEmployment"
+                          className="form-control"
+                          placeholder="Date Of First Employment"
+                          required
+                          value={formatDate(createStaff.DateOfFirstEmployment)}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-6 col-md-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="DateOfCurrentEmployment">
+                          Date Of Current Employment
+                        </label>
+                        <input
+                          type="date"
+                          id="DateOfCurrentEmployment"
+                          className="form-control"
+                          placeholder="Date Of Current Employment"
+                          value={formatDate(createStaff.DateOfCurrentEmployment)}
+                          onChange={onEdit}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-6 col-md-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="ContractStartDate">Contract Start Date</label>
+                        <input
+                          type="date"
+                          id="ContractStartDate"
+                          required
+                          className="form-control"
+                          placeholder="Contract Start Date"
+                          value={formatDate(createStaff.ContractStartDate)}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-6 col-md-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="ContractEndDate">Contract End Date</label>
+                        <input
+                          type="date"
+                          required
+                          id="ContractEndDate"
+                          className="form-control"
+                          placeholder="Contract End Date"
+                          value={createStaff.ContractEndDate}
+                          onChange={onEdit}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
 
-                <div className="col-lg-6 col-md-6 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="ContractEndDate">Contract End Date</label>
-                    <input
-                      type="date"
-                      required
-                      id="ContractEndDate"
-                      className="form-control"
-                      placeholder="Contract End Date"
-                      value={createStaff.ContractEndDate}
-                      //value={formatDate(createStaff.ContractEndDate)}
-                      onChange={onEdit}
-                    />
+              {currentStep === 3 && (
+                <>
+                  <div className="col-lg-12 pt-10">
+                    <h5 className="fw-bold">Salary Information</h5>
+                    <hr />
                   </div>
-                </div>
+                  <div className="row">
+                    <div className="col-lg-3 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="GrossPay">Gross Pay</label>
+                        <input
+                          type="number"
+                          id="GrossPay"
+                          className="form-control"
+                          placeholder="Gross Pay"
+                          value={createStaff.GrossPay}
+                          onChange={onEdit}
+                          required
+                        />
+                      </div>
+                    </div>
 
-                <div className="col-lg-4 col-md-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="LineManagerID">Line Manager</label>
-                    <SearchSelect
-                      id="LineManagerID"
-                      value={data.linemanager ? data.linemanager.map(item => ({ label: `${item.StaffID} -- ${item.FirstName} ${item.MiddleName} ${item.Surname}`, value: item.StaffID })).find(op => op.value === createStaff.LineManagerID) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'LineManagerID', value: selected?.value || '' } })}
-                      options={data.linemanager ? data.linemanager.map(item => ({ label: `${item.StaffID} -- ${item.FirstName} ${item.MiddleName} ${item.Surname}`, value: item.StaffID })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
+                    <div className="col-lg-3 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="IsDeduction">Is Deduction?</label>
+                        <SearchSelect
+                          id="IsDeduction"
+                          value={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }].find(op => op.value === createStaff.IsDeduction?.toString()) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'IsDeduction', value: selected?.value || '' } })}
+                          options={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }]}
+                          placeholder="Select Option"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-3 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="IsPension">Is Pension?</label>
+                        <SearchSelect
+                          id="IsPension"
+                          value={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }].find(op => op.value === createStaff.IsPension?.toString()) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'IsPension', value: selected?.value || '' } })}
+                          options={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }]}
+                          placeholder="Select Option"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-lg-3 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="IsWebsite">Is Website?</label>
+                        <SearchSelect
+                          id="IsWebsite"
+                          value={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }].find(op => op.value === createStaff.IsWebsite?.toString()) || null}
+                          onChange={(selected) => onEdit({ target: { id: 'IsWebsite', value: selected?.value || '' } })}
+                          options={[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }]}
+                          placeholder="Select Option"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
 
-                <div className="col-lg-4 col-md-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="DepartmentCode">Department</label>
-                    <SearchSelect
-                      id="DepartmentCode"
-                      value={data.department ? data.department.map(item => ({ label: item.DepartmentName, value: item.DepartmentCode })).find(op => op.value === createStaff.DepartmentCode) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'DepartmentCode', value: selected?.value || '' } })}
-                      options={data.department ? data.department.map(item => ({ label: item.DepartmentName, value: item.DepartmentCode })) : []}
-                      placeholder="Select Option"
-                      required
-                    />
+              {currentStep === 4 && (
+                <>
+                  <h5 className="fw-bold">Social Networks (optional)</h5>
+                  <hr />
+                  <div className="row">
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Facebook">Facebook</label>
+                        <input type="text" id="Facebook" className="form-control" placeholder="Facebook" value={createStaff.Facebook} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Twitter">Twitter</label>
+                        <input type="text" id="Twitter" className="form-control" placeholder="Twitter" value={createStaff.Twitter} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-4 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Linkedin">LinkedIn</label>
+                        <input type="text" id="Linkedin" className="form-control" placeholder="LinkedIn" value={createStaff.Linkedin} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Scholar">Scholar</label>
+                        <input type="text" id="Scholar" className="form-control" placeholder="Scholar" value={createStaff.Scholar} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Researchgate">Researchgate</label>
+                        <input type="text" id="Researchgate" className="form-control" placeholder="Researchgate" value={createStaff.Researchgate} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Academia">Academia</label>
+                        <input type="text" id="Academia" className="form-control" placeholder="Academia" value={createStaff.Academia} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Orcid">Orcid</label>
+                        <input type="text" id="Orcid" className="form-control" placeholder="Orcid" value={createStaff.Orcid} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-12 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Biography">Biography</label>
+                        <textarea className="form-control" rows="3" id="Biography" placeholder="Biography" value={createStaff.Biography} onChange={onEdit} />
+                      </div>
+                    </div>
+                    <div className="col-lg-6 col-md-12 pt-5">
+                      <div className="form-group">
+                        <label htmlFor="Research">Research</label>
+                        <textarea className="form-control" rows="3" id="Research" placeholder="Research" value={createStaff.Research} onChange={onEdit} />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
 
-                <div className="col-lg-4 col-md-4 pt-5">
-                  <div className="form-group">
-                    <label htmlFor="CourseCode">Course</label>
-                    <SearchSelect
-                      id="CourseCode"
-                      value={data.course ? [...data.course.map(item => ({ label: item.CourseName, value: item.CourseCode })), { label: 'N/A', value: 'N/A' }].find(op => op.value === createStaff.CourseCode) || null : null}
-                      onChange={(selected) => onEdit({ target: { id: 'CourseCode', value: selected?.value || '' } })}
-                      options={data.course ? [...data.course.map(item => ({ label: item.CourseName, value: item.CourseCode })), { label: 'N/A', value: 'N/A' }] : [{ label: 'N/A', value: 'N/A' }]}
-                      placeholder="Select Option"
-                      required
-                    />
-                  </div>
-                </div>
-
-              </div>
             </fieldset>
-            <h5 className="pt-10">Social Networks (optional section)</h5>
-            <hr />
-
-            <div className="col-lg-4 pt-5">
-              <div className="form-group">
-                <label htmlFor="Facebook">Facebook</label>
-                <input
-                  type="text"
-                  id="Facebook"
-                  className="form-control"
-                  placeholder="Facebook"
-                  value={createStaff.Facebook}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-4 pt-5">
-              <div className="form-group">
-                <label htmlFor="Twitter">Twitter</label>
-                <input
-                  type="text"
-                  id="Twitter"
-                  className="form-control"
-                  placeholder="Twitter"
-                  value={createStaff.Twitter}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-4 pt-5">
-              <div className="form-group">
-                <label htmlFor="LinkedIn">LinkedIn</label>
-                <input
-                  type="text"
-                  id="Linkedin"
-                  className="form-control"
-                  placeholder="LinkedIn"
-                  value={createStaff.Linkedin}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-6 pt-5">
-              <div className="form-group">
-                <label htmlFor="Scholar">Scholar</label>
-                <input
-                  type="text"
-                  id="Scholar"
-                  className="form-control"
-                  placeholder="Scholar"
-                  value={createStaff.Scholar}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-6 pt-5">
-              <div className="form-group">
-                <label htmlFor="Researchgate">Researchgate</label>
-                <input
-                  type="text"
-                  id="Researchgate"
-                  className="form-control"
-                  placeholder="Researchgate"
-                  value={createStaff.Researchgate}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-6 pt-5">
-              <div className="form-group">
-                <label htmlFor="Academia">Academia</label>
-                <input
-                  type="text"
-                  id="Academia"
-                  className="form-control"
-                  placeholder="Academia"
-                  value={createStaff.Academia}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-6 pt-5">
-              <div className="form-group">
-                <label htmlFor="Orcid">Orcid</label>
-                <input
-                  type="text"
-                  id="Orcid"
-                  className="form-control"
-                  placeholder="Orcid"
-                  value={createStaff.Orcid}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-6 col-md-12 pt-5">
-              <div className="form-group">
-                <label htmlFor="Biography"> Biography</label>
-                <textarea
-                  className="form-control"
-                  rows="3"
-                  id="Biography"
-                  placeholder="Biography"
-                  value={createStaff.Biography}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-            <div className="col-lg-6 col-md-12 pt-5">
-              <div className="form-group">
-                <label htmlFor="Research">Research</label>
-                <textarea
-                  className="form-control"
-                  rows="3"
-                  id="Research"
-                  placeholder="Research"
-                  value={createStaff.Research}
-                  onChange={onEdit}
-                />
-              </div>
-            </div>
-
-            {/*<h5 className="pt-10">Next of Kin Details</h5>*/}
-            {/*<hr />*/}
-
-            {/*<div className="col-lg-4 pt-5">*/}
-            {/*  <div className="form-group">*/}
-            {/*    <label htmlFor="NFirstName">First Name</label>*/}
-            {/*    <input*/}
-            {/*      type="text"*/}
-            {/*      id="NFirstName"*/}
-            {/*      className="form-control"*/}
-            {/*      placeholder="First Name"*/}
-            {/*      value={createStaff.NFirstName}*/}
-            {/*      onChange={onEdit}*/}
-            {/*    />*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-            {/*<div className="col-lg-4 pt-5">*/}
-            {/*  <div className="form-group">*/}
-            {/*    <label htmlFor="NSurname">Surname</label>*/}
-            {/*    <input*/}
-            {/*      type="text"*/}
-            {/*      id="NSurname"*/}
-            {/*      className="form-control"*/}
-            {/*      placeholder="Surname"*/}
-            {/*      value={createStaff.NSurname}*/}
-            {/*      onChange={onEdit}*/}
-            {/*    />*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-            {/*<div className="col-lg-4 pt-5">*/}
-            {/*  <div className="form-group">*/}
-            {/*    <label htmlFor="NMiddleName">Middle Name</label>*/}
-            {/*    <input*/}
-            {/*      type="text"*/}
-            {/*      id="NMiddleName"*/}
-            {/*      className="form-control"*/}
-            {/*      placeholder="Middle Name"*/}
-            {/*      value={createStaff.NMiddleName}*/}
-            {/*      onChange={onEdit}*/}
             {/*    />*/}
             {/*  </div>*/}
             {/*</div>*/}
@@ -1531,46 +1624,32 @@ function AddEditStaff(props) {
             {/*  </div>*/}
             {/*</div>*/}
 
-            <h5 className="pt-10">Account Status</h5>
-            <hr />
-            <div className="col-lg-6 col-md-6 pt-5">
-              <div className="form-group">
-                <label htmlFor="IsAcademicStaff">Is Academic Staff?</label>
-                <select
-                  id="IsAcademicStaff"
-                  className="form-control"
-                  value={createStaff.IsAcademicStaff}
-                  onChange={onEdit}
-                  required
-                >
-                  <option value="">Select Option</option>
-                  <option value="1">Yes</option>
-                  <option value="0">No</option>
-                </select>
-              </div>
-            </div>
-            <div className="col-lg-6 col-md-6 pt-5">
-              <div className="form-group">
-                <label htmlFor="IsActive">Is Staff Active?</label>
-                <select
-                  id="IsActive"
-                  className="form-control"
-                  value={createStaff.IsActive}
-                  onChange={onEdit}
-                  required
-                >
-                  <option value="">Select Option</option>
-                  <option value="1">Yes</option>
-                  <option value="0">No</option>
-                </select>
-              </div>
-            </div>
-
-
-            <div className="form-group pt-10">
-              <button type="submit" className="btn btn-primary w-100">
-                Submit
+            <div className="d-flex justify-content-between pt-10">
+              <button
+                type="button"
+                className="btn btn-light-primary"
+                onClick={prevStep}
+                disabled={currentStep === 0}
+              >
+                Previous
               </button>
+
+              {currentStep < steps.length - 1 ? (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={nextStep}
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                >
+                  Submit
+                </button>
+              )}
             </div>
           </form>
         </Modal>

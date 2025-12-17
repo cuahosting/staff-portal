@@ -1,5 +1,6 @@
 import React from "react";
-import {formatDate} from "../../../../resources/constants";
+import { formatDate } from "../../../../resources/constants";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 export default function TimetableSemesterForm(props) {
     return (
@@ -75,17 +76,22 @@ export default function TimetableSemesterForm(props) {
                     Status
                 </label>
                 <div className="enhanced-input-wrapper">
-                    <select
+                    <SearchSelect
                         id="Status"
-                        onChange={props.onEdit}
-                        value={props.data.Status}
-                        className="form-control form-control-lg form-control-solid enhanced-input"
-                    >
-                        <option>Select Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">In-Active</option>
-                        <option value="future">Future</option>
-                    </select>
+                        value={[
+                            { value: "active", label: "Active" },
+                            { value: "inactive", label: "In-Active" },
+                            { value: "future", label: "Future" }
+                        ].find(opt => opt.value === props.data.Status) || null}
+                        options={[
+                            { value: "active", label: "Active" },
+                            { value: "inactive", label: "In-Active" },
+                            { value: "future", label: "Future" }
+                        ]}
+                        onChange={(selected) => props.onEdit({ target: { id: 'Status', value: selected?.value || '' } })}
+                        placeholder="Select Status"
+                        isClearable={false}
+                    />
                 </div>
             </div>
 
@@ -110,7 +116,7 @@ export default function TimetableSemesterForm(props) {
                 <button onClick={props.onSubmit} id="kt_modal_new_address_submit" data-kt-indicator={props.isFormLoading} className="btn btn-primary w-100">
                     <span className="indicator-label">Submit</span>
                     <span className="indicator-progress">Please wait...
-                            <span className="spinner-border spinner-border-sm align-middle ms-2"/>
+                        <span className="spinner-border spinner-border-sm align-middle ms-2" />
                     </span>
                 </button>
             </div>

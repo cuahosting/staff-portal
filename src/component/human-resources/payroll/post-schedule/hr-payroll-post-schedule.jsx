@@ -1,22 +1,20 @@
-import React, {useEffect, useState} from "react";
-import {connect} from "react-redux";
-import {ProgressBar} from "react-bootstrap";
-import axios from "axios";
-import {serverLink} from "../../../../resources/url";
-import {toast} from "react-toastify";
+import React, { useEffect, useState } from "react";
+import { connect } from "react-redux";
+import { ProgressBar } from "react-bootstrap";
+import { api, apiClient } from "../../../../resources/api";
+import { serverLink } from "../../../../resources/url";
+import { toast } from "react-toastify";
 import PageHeader from "../../../common/pageheader/pageheader";
 import Loader from "../../../common/loader/loader";
-import {showAlert} from "../../../common/sweetalert/sweetalert";
+import { showAlert } from "../../../common/sweetalert/sweetalert";
 import AGTable from "../../../common/table/AGTable";
-import {currencyConverter} from "../../../../resources/constants";
+import { currencyConverter } from "../../../../resources/constants";
 
 function HrPayrollPostSchedule(props) {
-    const token = props.loginData[0].token;
-
     const [createItem, setCreateItem] = useState({
         salary_date: '',
         inserted_by: props.loginData[0].StaffID
-    })
+    });
     const [canSubmit, setCanSubmit] = useState(false);
     const [staffList, setStaffList] = useState([]);
     const [allowanceList, setAllowanceList] = useState([]);
@@ -66,88 +64,58 @@ function HrPayrollPostSchedule(props) {
     });
 
     const getRecord = async () => {
-        await axios
-            .get(`${serverLink}staff/report/staff/list/status/1`, token)
-            .then((result) => {
-                const data = result.data;
-                setStaffList(data)
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
-        await axios
-            .get(`${serverLink}staff/hr/payroll/salary/settings/record`, token)
-            .then((result) => {
-                const data = result.data;
-                setSalarySetting(data)
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
-        await axios
-            .get(`${serverLink}staff/hr/payroll/pension/salary/enrolled`, token)
-            .then((result) => {
-                const data = result.data;
-                setPensionStaffList(data)
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
-        await axios
-            .get(`${serverLink}staff/hr/payroll/pension/setting`, token)
-            .then((result) => {
-                const data = result.data;
-                setPensionSetting(data)
-                setIsLoading(false)
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+        const [staffRes, salaryRes, pensionStaffRes, pensionSettingRes] = await Promise.all([
+            api.get("staff/report/staff/list/status/1"),
+            api.get("staff/hr/payroll/salary/settings/record"),
+            api.get("staff/hr/payroll/pension/salary/enrolled"),
+            api.get("staff/hr/payroll/pension/setting")
+        ]);
 
-    }
+        if (staffRes.success) setStaffList(staffRes.data || []);
+        if (salaryRes.success) setSalarySetting(salaryRes.data || []);
+        if (pensionStaffRes.success) setPensionStaffList(pensionStaffRes.data || []);
+        if (pensionSettingRes.success) setPensionSetting(pensionSettingRes.data || []);
 
-    useEffect(() => {
-        getRecord()
-    }, [])
-
-    const onEdit = async (e) => {
-        setCreateItem({
-            ...createItem,
-            [e.target.id]: e.target.value,
-        });
-        setIsLoading(true)
-        setCanSubmit(false)
-
-        await axios.post(`${serverLink}staff/hr/payroll/salary/check_if_ran`, {salary_date: e.target.value}, token)
-            .then(result => {
-                if (result.data > 0) {
-                    toast.error(`Salary already ran for ${e.target.value}`);
-                    setCanSubmit(false)
-                } else {
-                    setCanSubmit(true);
-                }
-            })
-            .catch(err => {
-                console.log('NETWORK ERROR', err)
-            });
-
-        await axios.post(`${serverLink}staff/hr/payroll/salary/get_allowance_list`, {salary_date: e.target.value}, token)
-            .then(result => {
-                setAllowanceList(result.data)
-                setIsLoading(false)
-            })
-            .catch(err => {
-                console.log('NETWORK ERROR', err)
-            });
+        setIsLoading(false);
     };
 
+    useEffect(() => {
+        getRecord();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const onEdit = async (e) => {
+        setCreateItem({ ...createItem, [e.target.id]: e.target.value });
+        setIsLoading(true);
+        setCanSubmit(false);
+
+        const [checkRes, allowanceRes] = await Promise.all([
+            api.post("staff/hr/payroll/salary/check_if_ran", { salary_date: e.target.value }),
+            api.post("staff/hr/payroll/salary/get_allowance_list", { salary_date: e.target.value })
+        ]);
+
+        if (checkRes.success) {
+            if (checkRes.data > 0) {
+                toast.error(`Salary already ran for ${e.target.value}`);
+                setCanSubmit(false);
+            } else {
+                setCanSubmit(true);
+            }
+        }
+
+        if (allowanceRes.success) {
+            setAllowanceList(allowanceRes.data || []);
+        }
+
+        setIsLoading(false);
+    };
 
     // Calculate tax using Payee percentage from hr_salary_settings
     const calcSalaryPayee = (monthlySalary) => {
         const taxPercentage = salarySetting[0]?.Payee || 0;
         const monthlyTax = (taxPercentage / 100) * monthlySalary;
         return Math.round(monthlyTax * 100) / 100;
-    }
+    };
 
     // Generate preview breakdown for all staff
     const generatePreview = () => {
@@ -187,11 +155,9 @@ function HrPayrollPostSchedule(props) {
             let pensionData = null;
 
             if (item.IsPension === 1) {
-                // Pension is 8% of Gross
                 pensionEmployee = 0.08 * gross;
                 pensionEmployer = (pensionSetting[0].EmployerContribution / 100) * gross;
 
-                // Get pension admin ID from pension staff records if available
                 const check_staff_pension = pensionStaffList.filter(i => i.StaffID === item.StaffID);
                 pensionData = {
                     employee: pensionEmployee,
@@ -211,17 +177,13 @@ function HrPayrollPostSchedule(props) {
                 { item_name: 'Wardrobe', salary_type: 'Allowance', amount: wardrobe },
             ];
 
-            // Only add Payee deduction if calculated (isDeductions = 1)
             if (payee > 0) {
                 salaryItems.push({ item_name: 'Payee', salary_type: 'Deduction', amount: payee });
             }
-
-            // Add pension deduction if applicable (IsPension = 1)
             if (pensionEmployee > 0) {
                 salaryItems.push({ item_name: 'Pension', salary_type: 'Deduction', amount: pensionEmployee });
             }
 
-            // Add custom allowances/deductions
             let customAllowances = 0;
             let customDeductions = 0;
             if (allowanceList.length > 0) {
@@ -237,7 +199,6 @@ function HrPayrollPostSchedule(props) {
                 });
             }
 
-            // Calculate totals
             const totalAllowances = basic + housing + transport + fringe + medical + wardrobe + customAllowances;
             const totalDeductions = payee + pensionEmployee + customDeductions;
             const netPay = totalAllowances - totalDeductions;
@@ -281,16 +242,8 @@ function HrPayrollPostSchedule(props) {
         });
 
         setSalaryBreakdown(breakdown);
-        setPreviewTable({
-            ...previewTable,
-            rows: breakdown
-        });
-        setPostingProgress({
-            current: 0,
-            total: breakdown.length,
-            percentage: 0,
-            variant: 'danger'
-        });
+        setPreviewTable({ ...previewTable, rows: breakdown });
+        setPostingProgress({ current: 0, total: breakdown.length, percentage: 0, variant: 'danger' });
         setShowPreviewModal(true);
     };
 
@@ -309,7 +262,6 @@ function HrPayrollPostSchedule(props) {
             const staff = salaryBreakdown[i];
             setCurrentPostingStaff(`${staff.StaffID} - ${staff.FullName}`);
 
-            // Update status to processing
             updatedBreakdown[i] = {
                 ...updatedBreakdown[i],
                 status: <span className="badge badge-light-info">Processing...</span>,
@@ -317,36 +269,22 @@ function HrPayrollPostSchedule(props) {
             };
             setPreviewTable({ ...previewTable, rows: [...updatedBreakdown] });
 
-            try {
-                const response = await axios.post(
-                    `${serverLink}staff/hr/payroll/salary/post/batch`,
-                    {
-                        staff_id: staff.StaffID,
-                        salary_date: createItem.salary_date,
-                        inserted_by: createItem.inserted_by,
-                        salary_items: staff.salaryItems,
-                        pension_data: staff.pensionData
-                    },
-                    token
-                );
+            const { success, data } = await api.post("staff/hr/payroll/salary/post/batch", {
+                staff_id: staff.StaffID,
+                salary_date: createItem.salary_date,
+                inserted_by: createItem.inserted_by,
+                salary_items: staff.salaryItems,
+                pension_data: staff.pensionData
+            });
 
-                if (response.data.message === 'success') {
-                    successCount++;
-                    updatedBreakdown[i] = {
-                        ...updatedBreakdown[i],
-                        status: <span className="badge badge-light-success">Posted</span>,
-                        statusText: 'Posted'
-                    };
-                } else {
-                    failedCount++;
-                    updatedBreakdown[i] = {
-                        ...updatedBreakdown[i],
-                        status: <span className="badge badge-light-danger">Failed</span>,
-                        statusText: 'Failed'
-                    };
-                }
-            } catch (error) {
-                console.error(`Error posting salary for ${staff.StaffID}:`, error);
+            if (success && data?.message === 'success') {
+                successCount++;
+                updatedBreakdown[i] = {
+                    ...updatedBreakdown[i],
+                    status: <span className="badge badge-light-success">Posted</span>,
+                    statusText: 'Posted'
+                };
+            } else {
                 failedCount++;
                 updatedBreakdown[i] = {
                     ...updatedBreakdown[i],
@@ -355,19 +293,13 @@ function HrPayrollPostSchedule(props) {
                 };
             }
 
-            // Update progress
             const percentage = Math.round(((i + 1) / salaryBreakdown.length) * 100);
             let variant = 'danger';
             if (percentage > 25 && percentage <= 50) variant = 'warning';
             else if (percentage > 50 && percentage <= 75) variant = 'info';
             else if (percentage > 75) variant = 'success';
 
-            setPostingProgress({
-                current: i + 1,
-                total: salaryBreakdown.length,
-                percentage: percentage,
-                variant: variant
-            });
+            setPostingProgress({ current: i + 1, total: salaryBreakdown.length, percentage, variant });
             setPreviewTable({ ...previewTable, rows: [...updatedBreakdown] });
         }
 
@@ -388,7 +320,6 @@ function HrPayrollPostSchedule(props) {
             return;
         }
 
-        // Confirm action
         const confirmSend = window.confirm(
             `Are you sure you want to send payslips to all staff for ${new Date(createItem.salary_date + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}?\n\nThis will send emails to all staff members with salary data for this month.`
         );
@@ -398,54 +329,38 @@ function HrPayrollPostSchedule(props) {
         setIsSendingEmails(true);
         setEmailProgress({ current: 0, total: 0, percentage: 0 });
 
-        try {
-            const response = await axios.post(
-                `${serverLink}staff/hr/payslip/send-batch`,
-                {
-                    salary_date: createItem.salary_date,
-                    sent_by: props.loginData[0].StaffID
-                },
-                {
-                    ...token,
-                    onDownloadProgress: (progressEvent) => {
-                        // This helps track the request progress
-                        console.log('Request progress:', progressEvent);
-                    }
-                }
-            );
+        const { success, data } = await api.post("staff/hr/payslip/send-batch", {
+            salary_date: createItem.salary_date,
+            sent_by: props.loginData[0].StaffID
+        });
 
-            if (response.data.message === 'success') {
-                const { successCount, failureCount, successList, failureList, csvPath } = response.data;
+        if (success && data?.message === 'success') {
+            const { successCount, failureCount, successList, failureList, csvPath } = data;
 
-                setEmailResults({
-                    successList: successList || [],
-                    failureList: failureList || [],
-                    csvPath: csvPath || null
-                });
+            setEmailResults({
+                successList: successList || [],
+                failureList: failureList || [],
+                csvPath: csvPath || null
+            });
 
-                setEmailProgress({
-                    current: successCount + failureCount,
-                    total: successCount + failureCount,
-                    percentage: 100
-                });
+            setEmailProgress({
+                current: successCount + failureCount,
+                total: successCount + failureCount,
+                percentage: 100
+            });
 
-                // Show results modal
-                setShowEmailResultsModal(true);
+            setShowEmailResultsModal(true);
 
-                if (failureCount === 0) {
-                    toast.success(`All ${successCount} payslips sent successfully!`);
-                } else {
-                    toast.warning(`${successCount} payslips sent, ${failureCount} failed. See error report.`);
-                }
+            if (failureCount === 0) {
+                toast.success(`All ${successCount} payslips sent successfully!`);
             } else {
-                toast.error(response.data.message || 'Failed to send payslips');
+                toast.warning(`${successCount} payslips sent, ${failureCount} failed. See error report.`);
             }
-        } catch (error) {
-            console.error('Error sending batch payslips:', error);
-            toast.error(error.response?.data?.message || 'Failed to send payslips');
-        } finally {
-            setIsSendingEmails(false);
+        } else if (success) {
+            toast.error(data?.message || 'Failed to send payslips');
         }
+
+        setIsSendingEmails(false);
     };
 
     // Close email results modal
@@ -467,7 +382,7 @@ function HrPayrollPostSchedule(props) {
     };
 
     return isLoading ? (
-        <Loader/>
+        <Loader />
     ) : (
         <div className="d-flex flex-column flex-row-fluid">
             <PageHeader
@@ -478,7 +393,7 @@ function HrPayrollPostSchedule(props) {
                 <div className="row g-5 g-xl-8">
                     {/* Stats Cards */}
                     <div className="col-xl-4">
-                        <div className="card card-xl-stretch mb-xl-8" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+                        <div className="card card-xl-stretch mb-xl-8" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
                             <div className="card-body">
                                 <div className="d-flex align-items-center">
                                     <div className="symbol symbol-50px me-5">
@@ -495,7 +410,7 @@ function HrPayrollPostSchedule(props) {
                         </div>
                     </div>
                     <div className="col-xl-4">
-                        <div className="card card-xl-stretch mb-xl-8" style={{background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'}}>
+                        <div className="card card-xl-stretch mb-xl-8" style={{ background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)' }}>
                             <div className="card-body">
                                 <div className="d-flex align-items-center">
                                     <div className="symbol symbol-50px me-5">
@@ -512,7 +427,7 @@ function HrPayrollPostSchedule(props) {
                         </div>
                     </div>
                     <div className="col-xl-4">
-                        <div className="card card-xl-stretch mb-xl-8" style={{background: 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)'}}>
+                        <div className="card card-xl-stretch mb-xl-8" style={{ background: 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)' }}>
                             <div className="card-body">
                                 <div className="d-flex align-items-center">
                                     <div className="symbol symbol-50px me-5">
@@ -560,7 +475,7 @@ function HrPayrollPostSchedule(props) {
                                             </label>
                                             <input
                                                 type="month"
-                                                id={"salary_date"}
+                                                id="salary_date"
                                                 max={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}`}
                                                 onChange={onEdit}
                                                 value={createItem.salary_date}
@@ -571,10 +486,7 @@ function HrPayrollPostSchedule(props) {
                                     <div className="col-lg-6">
                                         <div className="mb-0">
                                             {canSubmit ? (
-                                                <button
-                                                    onClick={generatePreview}
-                                                    className="btn btn-primary btn-lg w-100"
-                                                >
+                                                <button onClick={generatePreview} className="btn btn-primary btn-lg w-100">
                                                     <i className="fa fa-eye me-2"></i>
                                                     Preview & Post Salary for {createItem.salary_date ? new Date(createItem.salary_date + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Selected Month'}
                                                 </button>
@@ -695,32 +607,23 @@ function HrPayrollPostSchedule(props) {
                                         </span>
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-icon btn-light"
-                                    onClick={closePreviewModal}
-                                    disabled={isPosting}
-                                >
+                                <button type="button" className="btn btn-sm btn-icon btn-light" onClick={closePreviewModal} disabled={isPosting}>
                                     <i className="fa fa-times"></i>
                                 </button>
                             </div>
                             <div className="modal-body p-0">
-                                {/* Progress Section - Only show during/after posting */}
+                                {/* Progress Section */}
                                 {(isPosting || postingProgress.percentage > 0) && (
                                     <div className="bg-light border-bottom p-4">
                                         <div className="row align-items-center">
                                             <div className="col-lg-8">
                                                 <div className="d-flex align-items-center mb-2">
-                                                    {isPosting && (
-                                                        <span className="spinner-border spinner-border-sm me-2 text-primary"></span>
-                                                    )}
+                                                    {isPosting && <span className="spinner-border spinner-border-sm me-2 text-primary"></span>}
                                                     <span className="fw-bold fs-6">
                                                         {isPosting ? 'Posting Salaries...' : 'Posting Complete'}
                                                     </span>
                                                     {currentPostingStaff && (
-                                                        <span className="text-muted ms-3">
-                                                            Processing: {currentPostingStaff}
-                                                        </span>
+                                                        <span className="text-muted ms-3">Processing: {currentPostingStaff}</span>
                                                     )}
                                                 </div>
                                                 <ProgressBar
@@ -794,7 +697,7 @@ function HrPayrollPostSchedule(props) {
                                             </div>
                                         </div>
                                         <div className="col-lg-2 col-md-4 col-6">
-                                            <div className="border rounded p-3 text-center" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+                                            <div className="border rounded p-3 text-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
                                                 <span className="text-white opacity-75 d-block fs-7">Total Net Pay</span>
                                                 <span className="fw-bold fs-6 text-white">
                                                     {currencyConverter(salaryBreakdown.reduce((sum, s) => sum + s.NetPay, 0))}
@@ -820,12 +723,7 @@ function HrPayrollPostSchedule(props) {
                                         </span>
                                     </div>
                                     <div className="d-flex gap-2">
-                                        <button
-                                            type="button"
-                                            className="btn btn-light"
-                                            onClick={closePreviewModal}
-                                            disabled={isPosting}
-                                        >
+                                        <button type="button" className="btn btn-light" onClick={closePreviewModal} disabled={isPosting}>
                                             <i className="fa fa-times me-2"></i>
                                             {postingProgress.percentage === 100 ? 'Close' : 'Cancel'}
                                         </button>
@@ -898,11 +796,7 @@ function HrPayrollPostSchedule(props) {
                                         </span>
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    className="btn btn-sm btn-icon btn-light"
-                                    onClick={closeEmailResultsModal}
-                                >
+                                <button type="button" className="btn btn-sm btn-icon btn-light" onClick={closeEmailResultsModal}>
                                     <i className="fa fa-times"></i>
                                 </button>
                             </div>
@@ -1010,11 +904,7 @@ function HrPayrollPostSchedule(props) {
                                             </a>
                                         )}
                                     </div>
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary"
-                                        onClick={closeEmailResultsModal}
-                                    >
+                                    <button type="button" className="btn btn-primary" onClick={closeEmailResultsModal}>
                                         <i className="fa fa-check me-2"></i>
                                         Close
                                     </button>
@@ -1025,7 +915,7 @@ function HrPayrollPostSchedule(props) {
                 </div>
             )}
         </div>
-    )
+    );
 }
 
 const mapStateToProps = (state) => {

@@ -1,26 +1,25 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
 import ReportTable from "../../../common/table/ReportTable";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 import InventoryAllocateForm from "./inventory-allocate-form";
 function InventoryAllocation(props) {
-    let token = props.loginData[0].token
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState(false);
     const { slug } = useParams();
     if (slug === "") window.location.href = '/';
 
     const initialValue = {
-        request_id: '',  location_id: "", branch_id: "", branch_id2: '', location_id2: "", allocated_to_id: "", allocated_department_id: "",
-        department_id: "", department_id2: "", booking_code: "", employee_id: '', employee_id2: '', full_name: '', department_name: '', phone_number: '', email_address: '', inserted_by: '', isUpdate: false}
+        request_id: '', location_id: "", branch_id: "", branch_id2: '', location_id2: "", allocated_to_id: "", allocated_department_id: "",
+        department_id: "", department_id2: "", booking_code: "", employee_id: '', employee_id2: '', full_name: '', department_name: '', phone_number: '', email_address: '', inserted_by: '', isUpdate: false
+    }
     const [formData, setFormData] = useState(initialValue);
     const [departmentList, setDepartmentList] = useState([])
     const [department, setDepartment] = useState([])
@@ -32,61 +31,60 @@ function InventoryAllocation(props) {
     let _room = [];
 
     const columns = ["S/N", "Item Name", "Available Quantity", "Quantity", "Check"];
-    const [tableData,setTableData] = useState([]);
+    const [tableData, setTableData] = useState([]);
 
     const fetchData = async () => {
         toast.info("Please wait...")
-        await axios.get(`${serverLink}staff/inventory/allocation/data`, token)
-            .then(res => {
-                if (res.data.message === 'success') {
-                    const departmentRow = []; const locationData = [];
+        try {
+            const { success, data } = await api.get("staff/inventory/allocation/data");
+            if (success && data.message === 'success') {
+                const departmentRow = []; const locationData = [];
 
-                    setItems(res.data.Items)
-                    setDepartmentList(res.data.Department)
-                    //Set Department Dropdown
-                    if (res.data.Department.length > 0) {
-                        res.data.Department.map((row) => {
-                            departmentRow.push({value: row.department_id, label: row.department_name})
-                        });
-                        setDepartment(departmentRow)
-                    }
-
-                    //Set Location Dropdown Items
-                    if (res.data.Location.length > 0) {
-                        res.data.Location.map((row) => {
-                            locationData.push({ value: row.location_id, label: row.location_name })
-                        });
-                        setLocation(locationData)
-                    }
-
-                    onItemChange(res.data.Items)
-
-                    const guestRow = [];
-                    //Set Guest Dropdown
-                    if (res.data.Employee.length > 0) {
-                        res.data.Employee.map((row) => {
-                            guestRow.push({value: row.employee_id, label: row.full_name, department_id: row.department_id, department_name: row.department_name, phone_number: row.phone_number, email_address: row.email_address})
-                        });
-                        setGuest(guestRow)
-                    }
-
-                } else {
-                    toast.info("Something went wrong. Please try again!")
+                setItems(data.Items)
+                setDepartmentList(data.Department)
+                //Set Department Dropdown
+                if (data.Department.length > 0) {
+                    data.Department.map((row) => {
+                        departmentRow.push({ value: row.department_id, label: row.department_name })
+                    });
+                    setDepartment(departmentRow)
                 }
-                setIsLoading(false)
-            })
-            .catch(e => {
-                toast.error(`${e.response.statusText}: ${e.response.data}`)
-            })
+
+                //Set Location Dropdown Items
+                if (data.Location.length > 0) {
+                    data.Location.map((row) => {
+                        locationData.push({ value: row.location_id, label: row.location_name })
+                    });
+                    setLocation(locationData)
+                }
+
+                onItemChange(data.Items)
+
+                const guestRow = [];
+                //Set Guest Dropdown
+                if (data.Employee.length > 0) {
+                    data.Employee.map((row) => {
+                        guestRow.push({ value: row.employee_id, label: row.full_name, department_id: row.department_id, department_name: row.department_name, phone_number: row.phone_number, email_address: row.email_address })
+                    });
+                    setGuest(guestRow)
+                }
+
+            } else {
+                toast.info("Something went wrong. Please try again!")
+            }
+            setIsLoading(false)
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     }
 
     useEffect(() => {
         fetchData()
-    },[])
+    }, [])
 
     const onQuantityChange = (e) => {
         let quantity_available = e.target.getAttribute("quantity_available");
-        if (e.target.value > parseInt(quantity_available)){
+        if (e.target.value > parseInt(quantity_available)) {
             toast.error("Quantity cannot be greater than the available quantity");
             e.target.value = 1;
             return false;
@@ -135,39 +133,39 @@ function InventoryAllocation(props) {
         const row = [];
         if (itemData.length > 0) {
             itemData.map((r, i) => {
-                row.push([i+1, r.item_name, r.quantity_available,
-                    (
-                        <input
-                            type="number"
-                            id={`quantity-${r.item_id}`}
-                            quantity_available={r.quantity_available}
-                            item_id={r.item_id}
-                            className="quantity form-control"
-                            name="quantity"
-                            min={1}
-                            defaultValue={1}
-                            onChange={onQuantityChange}
-                            style={{width: '90px', height: '30px'}}
-                        />
-                    ),
-                    (
-                        <input
-                            type="button"
-                            id="checkItem"
-                            item_id={r.item_id}
-                            data={JSON.stringify(r)}
-                            className="btn btn-sm btn-primary checkItem"
-                            name="checkItem"
-                            value={"Add"}
-                            onClick={(e)=>{
-                                onCheck(e)
-                            }}
-                        />
-                    )
+                row.push([i + 1, r.item_name, r.quantity_available,
+                (
+                    <input
+                        type="number"
+                        id={`quantity-${r.item_id}`}
+                        quantity_available={r.quantity_available}
+                        item_id={r.item_id}
+                        className="quantity form-control"
+                        name="quantity"
+                        min={1}
+                        defaultValue={1}
+                        onChange={onQuantityChange}
+                        style={{ width: '90px', height: '30px' }}
+                    />
+                ),
+                (
+                    <input
+                        type="button"
+                        id="checkItem"
+                        item_id={r.item_id}
+                        data={JSON.stringify(r)}
+                        className="btn btn-sm btn-primary checkItem"
+                        name="checkItem"
+                        value={"Add"}
+                        onClick={(e) => {
+                            onCheck(e)
+                        }}
+                    />
+                )
                 ])
             })
             setTableData(row)
-        }else{
+        } else {
             setTableData([])
         }
     }
@@ -177,10 +175,10 @@ function InventoryAllocation(props) {
         let itemSet = JSON.parse(itemString);
         let item_id = e.target.getAttribute("item_id");
         let quantity = document.getElementById(`quantity-${item_id}`).value
-        let itemData = {item_id: itemSet.item_id, item_name: itemSet.item_name, quantity: parseInt(quantity), branch_id: formData.branch_id, allocated_to_id: formData.employee_id, allocated_department_id: formData.department_id, inserted_by: formData.inserted_by }
+        let itemData = { item_id: itemSet.item_id, item_name: itemSet.item_name, quantity: parseInt(quantity), branch_id: formData.branch_id, allocated_to_id: formData.employee_id, allocated_department_id: formData.department_id, inserted_by: formData.inserted_by }
         let quantity_available = itemSet.quantity_available;
 
-        if (parseInt(quantity_available) < 1){
+        if (parseInt(quantity_available) < 1) {
             toast.error("The selected item is out of stock");
             return false;
         }
@@ -190,14 +188,14 @@ function InventoryAllocation(props) {
             return false;
         }
 
-        setCart(prevState => [...prevState.filter(e=>e.item_id.toString() !== item_id.toString()), itemData])
-        _cart2.filter(e=>e.item_id.toString() !== item_id.toString()).push(itemData)
+        setCart(prevState => [...prevState.filter(e => e.item_id.toString() !== item_id.toString()), itemData])
+        _cart2.filter(e => e.item_id.toString() !== item_id.toString()).push(itemData)
     }
 
     const handleFormValueChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.id] : e.target.value
+            [e.target.id]: e.target.value
         })
     }
 
@@ -227,10 +225,10 @@ function InventoryAllocation(props) {
 
         setIsFormLoading(true)
         if (formData.request_id === '') {
-            await axios
-                .post(`${serverLink}staff/inventory/allocation/request/post`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.post("staff/inventory/allocation/request/post", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Item(s) Allocated Successfully");
                         setFormData({ ...initialValue })
                         fetchData();
@@ -244,21 +242,20 @@ function InventoryAllocation(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         } else {
-            await axios
-                .patch(`${serverLink}staff/services/request/update`, sendData, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
+            try {
+                const { success, data } = await api.patch("staff/services/request/update", sendData);
+                if (success) {
+                    if (data.message === "success") {
                         toast.success("Service Request Updated Successfully");
                         fetchData();
                         setFormData({ ...formData, ...initialValue })
@@ -271,15 +268,15 @@ function InventoryAllocation(props) {
                             "error"
                         );
                     }
-                })
-                .catch((error) => {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     }
 
@@ -296,8 +293,8 @@ function InventoryAllocation(props) {
                     </div>
                     <div className="card-body p-0">
                         <InventoryAllocateForm
-                            value = {formData}
-                            setFormData = {setFormData}
+                            value={formData}
+                            setFormData={setFormData}
                             isFormLoading={isFormLoading}
                             onDepartmentChange={onDepartmentChange}
                             onLocationChange={onLocationChange}

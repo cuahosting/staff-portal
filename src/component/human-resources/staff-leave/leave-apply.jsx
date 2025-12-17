@@ -1,9 +1,6 @@
-import axios from "axios";
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
@@ -14,16 +11,13 @@ import { toast } from "react-toastify";
 import { formatDate, formatDateAndTime } from "../../../resources/constants";
 import Loader from "../../common/loader/loader";
 
-
-
 const StaffLeaveApply = (props) => {
-    const token = props.loginDetails[0].token;
-
     const editorRef = React.createRef();
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["SN", "Action", "Staff", "Leave Type", "Start Date", "End Date", "Days Taken", "Resumption Date", "Stage"];
     const [data, setData] = useState([]);
     const [StaffList, setStaffList] = useState([]);
+
     // Hardcode available leave types for now
     const leaveCategory = [
         { Name: "Main", LeaveDaysAllowed: 30 },
@@ -33,11 +27,12 @@ const StaffLeaveApply = (props) => {
         { Name: "Paternity", LeaveDaysAllowed: 10 },
         { Name: "Study", LeaveDaysAllowed: 30 },
     ];
-    let [leaveForm, setLeaveForm] = useState(false)
+
+    let [leaveForm, setLeaveForm] = useState(false);
     const [notCompleted, setNotCompleted] = useState([]);
     const [daysTakenByType, setDaysTakenByType] = useState({});
+    const staff_id = props.loginDetails[0].StaffID;
 
-    const staff_id = props.loginDetails[0].StaffID
     const [leave, setLeave] = useState({
         LeaveType: "",
         StartDate: "",
@@ -49,115 +44,86 @@ const StaffLeaveApply = (props) => {
         Comment: "",
         SemesterCode: props.currentSemester,
         InsertedBy: props.loginDetails[0].StaffID
+    });
 
-    })
     const getData = async () => {
-        try {
-            // await axios.get(`${serverLink}staff/human-resources/staff-leave/staff-list`, token)
-            //     .then((result) => {
-            //         let rows_ = []
-            //         if (result.data.length > 0) {
-            //             setStaffList(result.data);
-            //         }
-            //     })
+        const { success, data: resultData } = await api.get(`staff/human-resources/staff-leave/leave-applications/${staff_id}`);
 
-            await axios.get(`${serverLink}staff/human-resources/staff-leave/leave-applications/${staff_id}`, token)
-                .then((result) => {
-                    let rows = [];
-                    if (result.data.length > 0) {
-                        let not_completed = result.data.filter(x => x.ActionStage === 0 || x.ActionStage === 1 || x.ActionStage === 2);
-                        setNotCompleted(not_completed)
+        if (success && resultData?.length > 0) {
+            const not_completed = resultData.filter(x => x.ActionStage === 0 || x.ActionStage === 1 || x.ActionStage === 2);
+            setNotCompleted(not_completed);
 
-                        // calculate days taken per leave type (approved only)
-                        const taken = {};
-                        result.data
-                            .filter(x => x.ApplicationStatus === 1)
-                            .forEach((x) => {
-                                taken[x.LeaveType] = (taken[x.LeaveType] || 0) + Number(x.DaysTaken || 0);
-                            });
-                        setDaysTakenByType(taken);
+            // calculate days taken per leave type (approved only)
+            const taken = {};
+            resultData
+                .filter(x => x.ApplicationStatus === 1)
+                .forEach((x) => {
+                    taken[x.LeaveType] = (taken[x.LeaveType] || 0) + Number(x.DaysTaken || 0);
+                });
+            setDaysTakenByType(taken);
 
-                        result.data.forEach((item, index) => {
-                            const staffLabel = item.ReliefStaffID ? `${item.ReliefStaffID}` : props.loginDetails[0].StaffID;
-                            rows.push([
-                                index + 1,
-                                (
-                                    <>
-                                        {
-                                            item.ActionStage === 1 ?
-                                                <button className="btn btn-sm btn-primary" onClick={() => { handleBegin(item) }}  >
-                                                    Begin</button>
-                                                : item.ActionStage === 2 ?
-                                                    <button className="btn btn-sm btn-primary" onClick={() => { handleResume(item) }}  >
-                                                        Resume</button>
-                                                    :
-                                                    <>--</>
-                                        }
-                                    </>
-                                ),
-                                staffLabel,
-                                item.LeaveType,
-                                formatDateAndTime(item.StartDate, "date"),
-                                formatDateAndTime(item.EndDate, "date"),
-                                item.DaysTaken,
-                                formatDateAndTime(item.ResumptionDate, "date"),
-                                <label className={item.ActionStage === 0 ? "badge badge-secondary"
-                                    : item.ActionStage === 1 ? "badge badge-primary"
-                                        : item.ActionStage === 2 ? "badge badge-info"
-                                            : item.ActionStage === 3 ? "badge badge-success"
-                                                : "badge badge-danger"}>
-                                    {
-                                        item.ActionStage === 0 ? "Pending Approval" : item.ActionStage === 1 ? "Approved" : item.ActionStage === 2 ? "Started" : item.ActionStage === 3 ? "Completed" : "Denied"
-                                    }
-                                </label>
-                            ])
-                        })
-                    }
-                    setData(rows)
-                    setIsLoading(false);
-                })
-        } catch (e) {
-            showAlert("Network Error", "please check your connection", "error")
-
+            const rows = resultData.map((item, index) => {
+                const staffLabel = item.ReliefStaffID ? `${item.ReliefStaffID}` : props.loginDetails[0].StaffID;
+                return [
+                    index + 1,
+                    <>
+                        {item.ActionStage === 1 ? (
+                            <button className="btn btn-sm btn-primary" onClick={() => handleBegin(item)}>Begin</button>
+                        ) : item.ActionStage === 2 ? (
+                            <button className="btn btn-sm btn-primary" onClick={() => handleResume(item)}>Resume</button>
+                        ) : (
+                            <>--</>
+                        )}
+                    </>,
+                    staffLabel,
+                    item.LeaveType,
+                    formatDateAndTime(item.StartDate, "date"),
+                    formatDateAndTime(item.EndDate, "date"),
+                    item.DaysTaken,
+                    formatDateAndTime(item.ResumptionDate, "date"),
+                    <label className={
+                        item.ActionStage === 0 ? "badge badge-secondary"
+                            : item.ActionStage === 1 ? "badge badge-primary"
+                                : item.ActionStage === 2 ? "badge badge-info"
+                                    : item.ActionStage === 3 ? "badge badge-success"
+                                        : "badge badge-danger"
+                    }>
+                        {item.ActionStage === 0 ? "Pending Approval"
+                            : item.ActionStage === 1 ? "Approved"
+                                : item.ActionStage === 2 ? "Started"
+                                    : item.ActionStage === 3 ? "Completed"
+                                        : "Denied"}
+                    </label>
+                ];
+            });
+            setData(rows);
         }
-    }
-
-    useEffect(() => {
-        getData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+        setIsLoading(false);
+    };
 
     const getStaffList = async () => {
-        axios.get(`${serverLink}staff/academics/timetable-planner/staff/list`, token)
-            .then((response) => {
-                let rows = [];
-                if (response.data.length > 0) {
-                    response.data.forEach((row) => {
-                        rows.push({ value: row.StaffID, label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname })
-                    });
-                    setStaffList(rows)
-                }
-                else {
-                    setStaffList([])
-                }
-                setIsLoading(false);
-            })
-            .catch((ex) => {
-                console.error(ex);
-            });
+        const { success, data } = await api.get("staff/academics/timetable-planner/staff/list");
+
+        if (success && data?.length > 0) {
+            const rows = data.map(row => ({
+                value: row.StaffID,
+                label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname
+            }));
+            setStaffList(rows);
+        } else {
+            setStaffList([]);
+        }
     };
 
     useEffect(() => {
+        getData();
         getStaffList();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onEdit = (e) => {
         const { id, value } = e.target;
-        const updated = {
-            ...leave,
-            [id]: value
-        };
+        const updated = { ...leave, [id]: value };
 
         const startVal = id === "StartDate" ? value : leave.StartDate;
         const endVal = id === "EndDate" ? value : leave.EndDate;
@@ -171,52 +137,49 @@ const StaffLeaveApply = (props) => {
         }
 
         setLeave(updated);
-    }
+    };
+
     const onStaffChange = async (e) => {
         setLeave({
             ...leave,
             ReliefStaffID2: e,
             ReliefStaffID: e?.value || ""
-        })
-    }
+        });
+    };
 
     const handleBegin = (item) => {
         showConfirm("Warning", "Are you sure you want to begin your leave days?", "warning")
             .then(async (isConfirmed) => {
                 if (isConfirmed) {
-                    try {
-                        await axios.patch(`${serverLink}staff/human-resources/staff-leave/begin-staff-leave/${item.EntryID}`, { InsertedBy: props.loginDetails[0].InsertedBy }, token)
-                            .then((result) => {
-                                if (result.data.message === "success") {
-                                    getData();
-                                    toast.success("leave successfully started.")
-                                }
-                            })
-                    } catch (e) {
-                        showAlert("Error", "Netwrok error, check your connection", "error")
+                    const { success, data } = await api.patch(
+                        `staff/human-resources/staff-leave/begin-staff-leave/${item.EntryID}`,
+                        { InsertedBy: props.loginDetails[0].InsertedBy }
+                    );
+
+                    if (success && data?.message === "success") {
+                        getData();
+                        toast.success("Leave successfully started.");
                     }
                 }
-            })
-    }
+            });
+    };
 
     const handleResume = (item) => {
         showConfirm("Warning", "Are you sure you have completed your leave days?", "warning")
             .then(async (isConfirmed) => {
                 if (isConfirmed) {
-                    try {
-                        await axios.patch(`${serverLink}staff/human-resources/staff-leave/resume-staff/${item.EntryID}`, { InsertedBy: props.loginDetails[0].InsertedBy }, token)
-                            .then((result) => {
-                                if (result.data.message === "success") {
-                                    getData();
-                                    toast.success("leave successfully completed.")
-                                }
-                            })
-                    } catch (e) {
-                        showAlert("Error", "Netwrok error, check your connection", "error")
+                    const { success, data } = await api.patch(
+                        `staff/human-resources/staff-leave/resume-staff/${item.EntryID}`,
+                        { InsertedBy: props.loginDetails[0].InsertedBy }
+                    );
+
+                    if (success && data?.message === "success") {
+                        getData();
+                        toast.success("Leave successfully completed.");
                     }
                 }
-            })
-    }
+            });
+    };
 
     // Business-day helpers
     const isWeekend = (d) => {
@@ -247,17 +210,18 @@ const StaffLeaveApply = (props) => {
     const onSubmit = async (e) => {
         e.preventDefault();
         if (leave.LeaveType === "") {
-            showAlert("Error", "please select leave type", "error");
+            showAlert("Error", "Please select leave type", "error");
             return;
         }
         if (leave.StartDate === "") {
-            showAlert("Error", "please select StartDate", "error");
+            showAlert("Error", "Please select StartDate", "error");
             return;
         }
         if (leave.EndDate === "") {
-            showAlert("Error", "please select EndDate", "error");
+            showAlert("Error", "Please select EndDate", "error");
             return;
         }
+
         const selectedCategory = leaveCategory.find((c) => c.Name === leave.LeaveType);
         if (!selectedCategory) {
             showAlert("Error", "Invalid leave type selected", "error");
@@ -279,44 +243,33 @@ const StaffLeaveApply = (props) => {
         }
 
         applyLeave();
-
-    }
+    };
 
     const applyLeave = async () => {
-        try {
-            await axios.post(`${serverLink}staff/human-resources/staff-leave/apply-leave`, leave, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        getData();
-                        setLeaveForm(false);
-                        setLeave({
-                            ...leave,
-                            LeaveType: "",
-                            StartDate: "",
-                            EndDate: "",
-                            DaysTaken: "",
-                            ResumptionDate: "",
-                            ReliefStaffID: "",
-                            Comment: "",
-                        })
-                        toast.success("leave application successful, kindly await response from the HR");
+        const { success, data } = await api.post("staff/human-resources/staff-leave/apply-leave", leave);
 
-                    } else {
-                        toast.error("failed, please try again!")
-                    }
-                })
-
-        } catch (e) {
-            showAlert("Error", "Network error, please check your connection", "error")
+        if (success && data?.message === "success") {
+            getData();
+            setLeaveForm(false);
+            setLeave({
+                ...leave,
+                LeaveType: "",
+                StartDate: "",
+                EndDate: "",
+                DaysTaken: "",
+                ResumptionDate: "",
+                ReliefStaffID: "",
+                Comment: "",
+            });
+            toast.success("Leave application successful, kindly await response from the HR");
+        } else if (success) {
+            toast.error("Failed, please try again!");
         }
-    }
-    const OnCommentChange = (e) => {
-        setLeave({
-            ...leave,
-            Comment: e
-        })
-    }
+    };
 
+    const OnCommentChange = (e) => {
+        setLeave({ ...leave, Comment: e });
+    };
 
     return isLoading ? (<Loader />) : (
         <div className="d-flex flex-column flex-row-fluid">
@@ -328,56 +281,49 @@ const StaffLeaveApply = (props) => {
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
                     <div className="card-header border-0 pt-6">
-                        <div className="card-title" ><h2>Leave Application</h2></div>
+                        <div className="card-title"><h2>Leave Application</h2></div>
 
                         <div className="card-toolbar">
-                            {
-                                leaveCategory.length > 0 ?
-                                    <div className="d-flex justify-content-end"
-                                        data-kt-customer-table-toolbar="base">
-                                        <button
-                                            disabled={notCompleted.length > 0 ? true : false}
-                                            type="button"
-                                            className="btn btn-primary"
-                                            onClick={() => {
-                                                setLeaveForm(leaveForm = !leaveForm);
-                                                setLeave({
-                                                    ...leave,
-                                                    LeaveType: "",
-                                                    StartDate: "",
-                                                    EndDate: "",
-                                                    DaysTaken: "",
-                                                    ResumptionDate: "",
-                                                    ReliefStaffID: "",
-                                                    Comment: "",
-                                                })
-                                            }} >
-                                            {notCompleted.length > 0 ? "You cannot apply for leave now" : " Apply for leave"}
-
-                                        </button>
-                                    </div>
-                                    :
-                                    <div>
-                                        <label className="alert alert-warning">Sorry, you can not apply for leave now, kindly contact the HR</label>
-                                    </div>
-                            }
+                            {leaveCategory.length > 0 ? (
+                                <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
+                                    <button
+                                        disabled={notCompleted.length > 0}
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => {
+                                            setLeaveForm(!leaveForm);
+                                            setLeave({
+                                                ...leave,
+                                                LeaveType: "",
+                                                StartDate: "",
+                                                EndDate: "",
+                                                DaysTaken: "",
+                                                ResumptionDate: "",
+                                                ReliefStaffID: "",
+                                                Comment: "",
+                                            });
+                                        }}
+                                    >
+                                        {notCompleted.length > 0 ? "You cannot apply for leave now" : "Apply for leave"}
+                                    </button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="alert alert-warning">Sorry, you cannot apply for leave now, kindly contact the HR</label>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-
-
                     <div className="card-body p-0">
                         <div>
-                            {
-                                leaveCategory.length > 0 &&
+                            {leaveCategory.length > 0 && (
                                 <div className="row col-md-12">
                                     <div className="d-flex flex-wrap">
                                         {leaveCategory.map((cat, idx) => (
                                             <div key={idx} className="border border-gray-300 border-dashed rounded min-w-175px py-3 px-4 me-6 mb-3">
                                                 <div className="d-flex align-items-center">
-                                                    <div className="fs-2x fw-bold counted">
-                                                        {cat.LeaveDaysAllowed}
-                                                    </div>
+                                                    <div className="fs-2x fw-bold counted">{cat.LeaveDaysAllowed}</div>
                                                 </div>
                                                 <div className="fw-semibold fs-6 text-gray-600">{cat.Name} Days Allowed</div>
                                                 <div className="text-gray-600">Taken: {daysTakenByType[cat.Name] || 0}</div>
@@ -385,10 +331,9 @@ const StaffLeaveApply = (props) => {
                                         ))}
                                     </div>
                                 </div>
-                            }
-                            {
-                                leaveForm === true &&
-                                <form onSubmit={onSubmit} >
+                            )}
+                            {leaveForm === true && (
+                                <form onSubmit={onSubmit}>
                                     <div className="form-group">
                                         <label htmlFor="LeaveType">LeaveType</label>
                                         <SearchSelect
@@ -404,19 +349,13 @@ const StaffLeaveApply = (props) => {
                                         <div className="col-md-6">
                                             <div className="form-group">
                                                 <label htmlFor="StartDate">Start Date</label>
-                                                <input
-                                                    type="date" required id={"StartDate"} onChange={onEdit} value={leave.StartDate}
-                                                    className={"form-control"}
-                                                />
+                                                <input type="date" required id="StartDate" onChange={onEdit} value={leave.StartDate} className="form-control" />
                                             </div>
                                         </div>
                                         <div className="col-md-6">
                                             <div className="form-group">
                                                 <label htmlFor="StartDate">End Date</label>
-                                                <input
-                                                    type="date" disabled={leave.StartDate === "" ? true : false} required id={"EndDate"} min={leave.StartDate} onChange={onEdit} value={leave.EndDate}
-                                                    className={"form-control"}
-                                                />
+                                                <input type="date" disabled={leave.StartDate === ""} required id="EndDate" min={leave.StartDate} onChange={onEdit} value={leave.EndDate} className="form-control" />
                                             </div>
                                         </div>
                                     </div>
@@ -425,19 +364,13 @@ const StaffLeaveApply = (props) => {
                                         <div className="col-md-6">
                                             <div className="form-group">
                                                 <label htmlFor="DaysTaken">Number of Days</label>
-                                                <input
-                                                    type="number" disabled id={"DaysTaken"} onChange={onEdit} value={leave.DaysTaken}
-                                                    className={"form-control"}
-                                                />
+                                                <input type="number" disabled id="DaysTaken" onChange={onEdit} value={leave.DaysTaken} className="form-control" />
                                             </div>
                                         </div>
                                         <div className="col-md-6">
                                             <div className="form-group">
                                                 <label htmlFor="ResumptionDate">Resumption Date</label>
-                                                <input
-                                                    type="date" disabled id={"ResumptionDate"} onChange={onEdit} value={leave.ResumptionDate}
-                                                    className={"form-control"}
-                                                />
+                                                <input type="date" disabled id="ResumptionDate" onChange={onEdit} value={leave.ResumptionDate} className="form-control" />
                                             </div>
                                         </div>
                                     </div>
@@ -464,79 +397,42 @@ const StaffLeaveApply = (props) => {
                                     </div>
                                     <br />
                                     <div className="form-group pt-2">
-                                        <button type="submit" className="btn btn-primary w-100" >
+                                        <button type="submit" className="btn btn-primary w-100">
                                             <span className="indicator-label">Submit</span>
                                         </button>
                                     </div>
                                 </form>
-                            }
+                            )}
                         </div>
                         <div className="col-md-12" style={{ overflowX: 'auto' }}>
-                            {
-                                data.length > 0 &&
-                                <ReportTable data={data} columns={columns} height="700px" />
-                            }
+                            {data.length > 0 && <ReportTable data={data} columns={columns} height="700px" />}
                         </div>
                     </div>
 
                     <Modal title={"Manage leave"} id={"leave"} close={"leave"}>
-                        <form onSubmit={onSubmit} >
+                        <form onSubmit={onSubmit}>
                             <div className="form-group">
                                 <label htmlFor="Name">Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    id={"Name"}
-                                    onChange={onEdit}
-                                    value={leave.Name}
-                                    className={"form-control"}
-                                    placeholder={"Enter Name"}
-                                />
+                                <input type="text" required id="Name" onChange={onEdit} value={leave.Name} className="form-control" placeholder="Enter Name" />
                             </div>
                             <br />
                             <div className="form-group">
                                 <label htmlFor="Description">Description</label>
-                                <input
-                                    type="text"
-                                    required
-                                    id={"Description"}
-                                    onChange={onEdit}
-                                    value={leave.Description}
-                                    className={"form-control"}
-                                    placeholder={"Enter Description"}
-                                />
+                                <input type="text" required id="Description" onChange={onEdit} value={leave.Description} className="form-control" placeholder="Enter Description" />
                             </div>
                             <br />
                             <div className="form-group">
                                 <label htmlFor="LeaveDaysAllowed">LeaveDaysAllowed</label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    id={"LeaveDaysAllowed"}
-                                    onChange={onEdit}
-                                    value={leave.LeaveDaysAllowed}
-                                    className={"form-control"}
-                                    placeholder={"Enter LeaveDaysAllowed"}
-                                />
+                                <input type="number" required min="0" id="LeaveDaysAllowed" onChange={onEdit} value={leave.LeaveDaysAllowed} className="form-control" placeholder="Enter LeaveDaysAllowed" />
                             </div>
                             <br />
                             <div className="form-group">
                                 <label htmlFor="CasualDaysAllowed">CasualDaysAllowed</label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    id={"CasualDaysAllowed"}
-                                    onChange={onEdit}
-                                    value={leave.CasualDaysAllowed}
-                                    className={"form-control"}
-                                    placeholder={"Enter CasualDaysAllowed"}
-                                />
+                                <input type="number" required min="0" id="CasualDaysAllowed" onChange={onEdit} value={leave.CasualDaysAllowed} className="form-control" placeholder="Enter CasualDaysAllowed" />
                             </div>
                             <br />
                             <div className="form-group pt-2">
-                                <button type="submit" className="btn btn-primary w-100" >
+                                <button type="submit" className="btn btn-primary w-100">
                                     <span className="indicator-label">Submit</span>
                                 </button>
                             </div>
@@ -545,13 +441,14 @@ const StaffLeaveApply = (props) => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 const mapStateToProps = (state) => {
     return {
         loginDetails: state.LoginDetails,
         currentSemester: state.currentSemester
-    }
-}
+    };
+};
+
 export default connect(mapStateToProps, null)(StaffLeaveApply);

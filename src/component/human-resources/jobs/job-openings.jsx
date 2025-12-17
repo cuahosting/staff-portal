@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
@@ -11,9 +10,7 @@ import JobOpeningsForm from "./job-openings-form";
 import { encryptData, formatDate, formatDateAndTime, projectJobsURL } from "../../../resources/constants";
 
 
-function JobOpenings(props)
-{
-    const token = props.LoginDetails[0].token;
+function JobOpenings(props) {
 
     const [isFormLoading, setIsFormLoading] = useState('off');
 
@@ -48,103 +45,80 @@ function JobOpenings(props)
         InsertedBy: props.LoginDetails[0].StaffID,
     });
 
-    const getMetaData = async () =>
-    {
+    const getMetaData = async () => {
         let faculties_ = []
-        await axios.get(`${serverLink}staff/academics/faculty/list`, token)
-            .then((result) =>
-            {
-                if (result.data.length > 0)
-                {
-                    faculties_ = result.data;
-                    setFacultyList(result.data)
-                }
-            })
+        const facultyResult = await api.get("staff/academics/faculty/list");
+        if (facultyResult.success && facultyResult.data.length > 0) {
+            faculties_ = facultyResult.data;
+            setFacultyList(facultyResult.data)
+        }
 
         let depts_ = []
-        await axios.get(`${serverLink}staff/academics/department/list`, token)
-            .then((result) =>
-            {
-                if (result.data.length > 0)
-                {
-                    depts_ = result.data;
-                    setDepartmentList(result.data)
-                    setDepartment(result.data)
-                }
-            })
+        const deptResult = await api.get("staff/academics/department/list");
+        if (deptResult.success && deptResult.data.length > 0) {
+            depts_ = deptResult.data;
+            setDepartmentList(deptResult.data)
+            setDepartment(deptResult.data)
+        }
     }
 
-    const getData = async () =>
-    {
-        await axios.get(`${serverLink}jobs/job-openings/all/list`, token)
-            .then((result) =>
-            {
-                if (result.data.length > 0)
-                {
-                    let rows = [];
-                    result.data.map((item, index) =>
-                    {
-                        rows.push([
-                            item.Position,
-                            departmentList.filter(x => x.DepartmentCode.toLowerCase() === item.Department.toLowerCase())[0]?.DepartmentName,
-                            facultyList.filter(x => x.FacultyCode.toLowerCase() === item.Faculty.toLowerCase())[0]?.FacultyName,
-                            formatDateAndTime(item.OpeningDate, 'date'),
-                            formatDateAndTime(item.ClosingDate, 'date'),
-                            item.Urgent === '1' ? 'Urgent' : 'Normal',
-                            item.Status === '1' ? 'Open' : 'Closed',
-                            item.Type,
-                            item.ViewCount,
-                            item.Applicants,
-                            <button
-                                className="btn btn-sm btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#jobs"
-                                onClick={() =>
-                                {
-                                    setIsLoading(true)
-                                    setDepartmentList(department.filter(x => x.FacultyCode.toLowerCase() === item.Faculty.toLowerCase()))
-                                    setCreateJob({
-                                        EntryID: item.EntryID,
-                                        Position: item.Position,
-                                        Department: item.Department,
-                                        Faculty: item.Faculty,
-                                        OpeningDate: formatDate(item.OpeningDate).toString(),
-                                        ClosingDate: formatDate(item.ClosingDate).toString(),
-                                        Urgent: item.Urgent,
-                                        Status: item.Status,
-                                        Type: item.Type,
-                                        ViewCount: item.ViewCount,
-                                        Applicants: item.Applicants,
-                                        Description: item.Description,
-                                        Requirements: item.Requirements,
-                                        InterviewDate: item.InterViewDate,
-                                        InterviewTime: item.InterviewTime,
-                                        InterviewVenue: item.InterviewVenue,
-                                        action: "update",
-                                    });
-                                    setIsLoading(false)
-                                }
-                                }
-                            >
-                                <i className="fa fa-pen" />
-                            </button>
-                        ])
-                    })
-                    setData(rows)
-                }
-                setIsLoading(false);
+    const getData = async () => {
+        const { success, data } = await api.get("jobs/job-openings/all/list");
+        if (success && data.length > 0) {
+            let rows = [];
+            data.map((item, index) => {
+                rows.push([
+                    item.Position,
+                    departmentList.filter(x => x.DepartmentCode.toLowerCase() === item.Department.toLowerCase())[0]?.DepartmentName,
+                    facultyList.filter(x => x.FacultyCode.toLowerCase() === item.Faculty.toLowerCase())[0]?.FacultyName,
+                    formatDateAndTime(item.OpeningDate, 'date'),
+                    formatDateAndTime(item.ClosingDate, 'date'),
+                    item.Urgent === '1' ? 'Urgent' : 'Normal',
+                    item.Status === '1' ? 'Open' : 'Closed',
+                    item.Type,
+                    item.ViewCount,
+                    item.Applicants,
+                    <button
+                        className="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#jobs"
+                        onClick={() => {
+                            setIsLoading(true)
+                            setDepartmentList(department.filter(x => x.FacultyCode.toLowerCase() === item.Faculty.toLowerCase()))
+                            setCreateJob({
+                                EntryID: item.EntryID,
+                                Position: item.Position,
+                                Department: item.Department,
+                                Faculty: item.Faculty,
+                                OpeningDate: formatDate(item.OpeningDate).toString(),
+                                ClosingDate: formatDate(item.ClosingDate).toString(),
+                                Urgent: item.Urgent,
+                                Status: item.Status,
+                                Type: item.Type,
+                                ViewCount: item.ViewCount,
+                                Applicants: item.Applicants,
+                                Description: item.Description,
+                                Requirements: item.Requirements,
+                                InterviewDate: item.InterViewDate,
+                                InterviewTime: item.InterviewTime,
+                                InterviewVenue: item.InterviewVenue,
+                                action: "update",
+                            });
+                            setIsLoading(false)
+                        }
+                        }
+                    >
+                        <i className="fa fa-pen" />
+                    </button>
+                ])
             })
-            .catch((err) =>
-            {
-                console.log(err)
-                console.log('NETWORK ERROR');
-            });
+            setData(rows)
+        }
+        setIsLoading(false);
     }
 
-    const onEdit = (e) =>
-    {
-        if (e.target.id === "Faculty")
-        {
+    const onEdit = (e) => {
+        if (e.target.id === "Faculty") {
             const dept = department?.filter(x => x.FacultyCode.toLowerCase() === e.target.value.toLowerCase())
             setDepartmentList(dept)
             setCreateJob({
@@ -160,35 +134,29 @@ function JobOpenings(props)
 
     };
 
-    const onDescriptionChange = (e) =>
-    {
+    const onDescriptionChange = (e) => {
         setCreateJob({
             ...createJob,
             "Description": e
         })
     }
-    const onRequiremnetChange = (e) =>
-    {
+    const onRequiremnetChange = (e) => {
         setCreateJob({
             ...createJob,
             "Requirements": e
         })
     }
 
-    const onSubmit = async () =>
-    {
-        for (let key in createJob)
-        {
+    const onSubmit = async () => {
+        for (let key in createJob) {
             if (
                 createJob.hasOwnProperty(key) &&
                 key !== "ViewCount" &&
                 key !== "Applicants" &&
                 key !== "EntryID" &&
                 key !== "InsertedBy"
-            )
-            {
-                if (createJob[key] === "")
-                {
+            ) {
+                if (createJob[key] === "") {
                     await showAlert("EMPTY FIELD", `Please enter ${key}`, "error");
                     return false;
                 }
@@ -196,122 +164,88 @@ function JobOpenings(props)
 
         }
 
-        if (createJob.EntryID === "")
-        {
+        if (createJob.EntryID === "") {
             setIsFormLoading('on')
-            await axios
-                .post(`${serverLink}jobs/job-openings/staff/add_job`, createJob, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Job Added Successfully");
-                        getData()
-                        setCreateJob({
-                            ...createJob,
-                            EntryID: "",
-                            Position: "",
-                            Department: "",
-                            Faculty: "",
-                            OpeningDate: "",
-                            ClosingDate: "",
-                            Urgent: "",
-                            Status: "",
-                            Type: "",
-                            ViewCount: "",
-                            Applicants: "",
-                            Description: "",
-                            Requirements: "",
-                            InterviewDate: "",
-                            InterviewTime: "",
-                            InterviewVenue: "",
-                        });
-                        setIsFormLoading('off')
-                        document.getElementById("closeModal").click();
-                    }
-                    else if (result.data.message === "exist")
-                    {
-                        showAlert("OPENING EXIST", "Job already exist!", "error");
-                    }
-                    else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
-        } else
-        {
+            const { success, data } = await api.post("jobs/job-openings/staff/add_job", createJob);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Job Added Successfully");
+                    getData()
+                    setCreateJob({
+                        ...createJob,
+                        EntryID: "",
+                        Position: "",
+                        Department: "",
+                        Faculty: "",
+                        OpeningDate: "",
+                        ClosingDate: "",
+                        Urgent: "",
+                        Status: "",
+                        Type: "",
+                        ViewCount: "",
+                        Applicants: "",
+                        Description: "",
+                        Requirements: "",
+                        InterviewDate: "",
+                        InterviewTime: "",
+                        InterviewVenue: "",
+                    });
+                    setIsFormLoading('off')
+                    document.getElementById("closeModal").click();
+                }
+                else if (data.message === "exist") {
+                    showAlert("OPENING EXIST", "Job already exist!", "error");
+                }
+                else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
+        } else {
             setIsFormLoading('on')
-            await axios
-                .patch(`${serverLink}jobs/job-openings/staff/update_job/${createJob.EntryID}`, createJob, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Venue Updated Successfully");
-                        getData();
-                        setCreateJob({
-                            ...createJob,
-                            EntryID: "",
-                            Position: "",
-                            Department: "",
-                            Faculty: "",
-                            OpeningDate: "",
-                            ClosingDate: "",
-                            Urgent: "",
-                            Status: "",
-                            Type: "",
-                            ViewCount: "",
-                            Applicants: "",
-                            Description: "",
-                            Requirements: "",
-                            InterviewDate: "",
-                            InterviewTime: "",
-                            InterviewVenue: "",
-                        });
-                        setIsFormLoading('off')
-                        document.getElementById("closeModal").click();
-                    } else
-                    {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
-                    console.log(error)
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.patch(`jobs/job-openings/staff/update_job/${createJob.EntryID}`, createJob);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Venue Updated Successfully");
+                    getData();
+                    setCreateJob({
+                        ...createJob,
+                        EntryID: "",
+                        Position: "",
+                        Department: "",
+                        Faculty: "",
+                        OpeningDate: "",
+                        ClosingDate: "",
+                        Urgent: "",
+                        Status: "",
+                        Type: "",
+                        ViewCount: "",
+                        Applicants: "",
+                        Description: "",
+                        Requirements: "",
+                        InterviewDate: "",
+                        InterviewTime: "",
+                        InterviewVenue: "",
+                    });
+                    setIsFormLoading('off')
+                    document.getElementById("closeModal").click();
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         // getMetaData();
 
         // getData()
     }, []);
 
-    const GoToPortal = () =>
-    {
+    const GoToPortal = () => {
         window.location.href = `${projectJobsURL}/admin/login/${encryptData(props.LoginDetails[0].StaffID)}`
     }
 
@@ -396,8 +330,7 @@ function JobOpenings(props)
             </>
         )
 }
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         LoginDetails: state.LoginDetails,
         FacultyList: state.FacultyList,

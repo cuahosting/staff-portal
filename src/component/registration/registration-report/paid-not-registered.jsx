@@ -1,114 +1,69 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useMemo } from "react";
+import { api } from "../../../resources/api";
 import { toast } from "react-toastify";
-import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import ReportTable from "../../common/table/ReportTable";
 import PageHeader from "../../common/pageheader/pageheader";
 import { connect } from "react-redux";
+import SearchSelect from "../../common/select/SearchSelect";
 
 const PaidNotRegistered = (props) => {
-  const token = props.loginData[0].token;
-
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
   const [desc, setDesc] = useState([]);
-  const [semester, setSemester] = useState({
-    code: "",
-    desc: "",
-  });
+  const [semester, setSemester] = useState({ code: "", desc: "" });
   const [semesterList, setSemesterList] = useState([]);
   const [tableHeight, setTableHeight] = useState("600px");
   const [canSeeReport, setCanSeeReport] = useState(false);
-  const columns = [
-    "S/N",
-    "StudentID",
-    "Student Name",
-    "Course",
-    "Student Level",
-    "Student Semester",
-    "Email Address",
-  ];
+  const columns = ["S/N", "StudentID", "Student Name", "Course", "Student Level", "Student Semester", "Email Address"];
+
+  const semesterOptions = useMemo(() => {
+    return semesterList.map(s => ({ value: s.SemesterCode, label: s.Description }));
+  }, [semesterList]);
+
+  const descOptions = useMemo(() => {
+    return desc.map(d => ({ value: d.Description, label: d.Description }));
+  }, [desc]);
 
   const handleChange = (e) => {
-    setSemester({
-      ...semester,
-      [e.target.id]: e.target.value,
-    });
+    setSemester({ ...semester, [e.target.id]: e.target.value });
   };
 
   useEffect(() => {
-    const getSemesters = async () => {
-      axios
-        .get(`${serverLink}registration/registration-report/semester-list/`, token)
-        .then((response) => {
-          setSemesterList(response.data);
-          setIsLoading(false);
-        })
-        .catch((ex) => {
-          console.error(ex);
-        });
+    const getInitialData = async () => {
+      const [semesterRes, descRes] = await Promise.all([
+        api.get("registration/registration-report/semester-list/"),
+        api.get("registration/registration-report/fees-description/")
+      ]);
+      if (semesterRes.success && semesterRes.data) setSemesterList(semesterRes.data);
+      if (descRes.success && descRes.data) setDesc(descRes.data);
+      setIsLoading(false);
     };
-    getSemesters();
-  }, []);
-
-  useEffect(() => {
-    const getDetail = async () => {
-      axios
-        .get(`${serverLink}registration/registration-report/fees-description/`, token)
-        .then((response) => {
-          setDesc(response.data);
-          setIsLoading(false);
-        })
-        .catch((ex) => {
-          console.error(ex);
-        });
-    };
-    getDetail();
+    getInitialData();
   }, []);
 
   const handleSubmit = async (e) => {
     setIsLoading(true);
     e.preventDefault();
-    await axios
-      .post(
-        `${serverLink}registration/registration-report/paid-not-registered/`, { code: semester.code, desc: semester.desc}, token)
-      .then((res) => {
-        const result = res.data;
-        if (result.length > 0) {
-          let rows = [];
-          result.map((item, index) => {
-            rows.push([
-              index + 1,
-              item.StudentID,
-              item.StudentName,
-              item.CourseName,
-              item.StudentLevel,
-              item.StudentSemester,
-              item.EmailAddress,
-            ]);
-          });
-          setTableHeight(result.length > 100 ? "1000px" : "600px");
-          setData(rows);
-          setCanSeeReport(true);
-        } else {
-          toast.error("There are no students with this descriptions");
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        toast.error("NETWORK ERROR");
-      });
+    const { success, data: result } = await api.post("registration/registration-report/paid-not-registered/", { code: semester.code, desc: semester.desc });
+    if (success && result?.length > 0) {
+      const rows = result.map((item, index) => [
+        index + 1, item.StudentID, item.StudentName, item.CourseName, item.StudentLevel, item.StudentSemester, item.EmailAddress
+      ]);
+      setTableHeight(result.length > 100 ? "1000px" : "600px");
+      setData(rows);
+      setCanSeeReport(true);
+    } else if (success) {
+      toast.error("There are no students with this descriptions");
+    }
+    setIsLoading(false);
   };
 
   return isLoading ? (
     <Loader />
   ) : (
     <div className="d-flex flex-column flex-row-fluid">
-      <PageHeader
-        title={"Paid Not Registered"}
-        items={["Registration", "Registration Report", "Paid Not Registered"]}
-      />
+      <PageHeader title={"Paid Not Registered"} items={["Registration", "Registration Report", "Paid Not Registered"]} />
       <div className="flex-column-fluid">
         <div className="card">
           <div className="card-body pt-2">
@@ -117,51 +72,15 @@ const PaidNotRegistered = (props) => {
                 <form onSubmit={handleSubmit}>
                   <div className="row fv-row">
                     <div className="col-md-4 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
-                        Select Semester
-                      </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select Semester"
-                        id="code"
-                        onChange={handleChange}
-                        value={semester.code}
-                        required
-                      >
-                        <option value="">Select option</option>
-                        {semesterList.map((s, i) => (
-                          <option key={i} value={s.SemesterCode}>
-                            {s.Description}
-                          </option>
-                        ))}
-                      </select>
+                      <label className="required fs-6 fw-bold mb-2">Select Semester</label>
+                      <SearchSelect id="code" value={semesterOptions.find(opt => opt.value === semester.code) || null} options={semesterOptions} onChange={(selected) => handleChange({ target: { id: 'code', value: selected?.value || '' } })} placeholder="Select option" isClearable={false} />
                     </div>
                     <div className="col-md-4 fv-row">
-                      <label className="required fs-6 fw-bold mb-2">
-                        Select Report
-                      </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select Description"
-                        id="desc"
-                        onChange={handleChange}
-                        value={semester.desc}
-                        required
-                      >
-                        <option value="">Select option</option>
-                        {desc.map((d, i) => (
-                          <option key={i} value={d.Description}>
-                            {d.Description}
-                          </option>
-                        ))}
-                      </select>
+                      <label className="required fs-6 fw-bold mb-2">Select Report</label>
+                      <SearchSelect id="desc" value={descOptions.find(opt => opt.value === semester.desc) || null} options={descOptions} onChange={(selected) => handleChange({ target: { id: 'desc', value: selected?.value || '' } })} placeholder="Select option" isClearable={false} />
                     </div>
                     <div className="col-md-4">
-                      <div className="row ">
-                        <button type="submit" className="btn btn-primary mt-8">
-                          Submit
-                        </button>
-                      </div>
+                      <div className="row "><button type="submit" className="btn btn-primary mt-8">Submit</button></div>
                     </div>
                   </div>
                 </form>
@@ -170,14 +89,7 @@ const PaidNotRegistered = (props) => {
             {canSeeReport ? (
               <div className="row">
                 <div className="col-md-12 mt-5">
-                  {
-                    <ReportTable
-                      title={`Paid Not Registered`}
-                      columns={columns}
-                      data={data}
-                      height={tableHeight}
-                    />
-                  }
+                  <ReportTable title={`Paid Not Registered`} columns={columns} data={data} height={tableHeight} />
                 </div>
               </div>
             ) : null}
@@ -187,11 +99,9 @@ const PaidNotRegistered = (props) => {
     </div>
   );
 };
+
 const mapStateToProps = (state) => {
-  return {
-      loginData: state.LoginDetails,
-  };
+  return { loginData: state.LoginDetails };
 };
 
 export default connect(mapStateToProps, null)(PaidNotRegistered);
-

@@ -1,75 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { formatDate, formatDateAndTime } from "../../../resources/constants";
 import { connect } from "react-redux";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function SemesterRegistrationSettings(props) {
-  const token = props.loginData[0].token;
-
   const [isLoading, setIsLoading] = useState(true);
-  const [
-    registrationSettingsRecordDatatable,
-    setRegistrationSettingsRecordDatatable,
-  ] = useState({
+  const [registrationSettingsRecordDatatable, setRegistrationSettingsRecordDatatable] = useState({
     columns: [
-      {
-        label: "S/N",
-        field: "sn",
-      },
-      {
-        label: "Min Credit Load",
-        field: "MinCreditLoad",
-      },
-      {
-        label: "Max Credit Load",
-        field: "MaxCreditLoad",
-      },
-      {
-        label: "Min Spill Over",
-        field: "MinSpillOver",
-      },
-      {
-        label: "Semester Code",
-        field: "SemesterCode",
-      },
-      {
-        label:"StartDate",
-        field:"StartDate"
-      },
-      {
-        label:"EndDate",
-        field:"EndDate"
-      },
-      {
-        label: "Action",
-        field: "action",
-      },
+      { label: "S/N", field: "sn" },
+      { label: "Min Credit Load", field: "MinCreditLoad" },
+      { label: "Max Credit Load", field: "MaxCreditLoad" },
+      { label: "Min Spill Over", field: "MinSpillOver" },
+      { label: "Semester Code", field: "SemesterCode" },
+      { label: "StartDate", field: "StartDate" },
+      { label: "EndDate", field: "EndDate" },
+      { label: "Action", field: "action" },
     ],
     rows: [],
   });
-  const [createRegistrationSettingsRecord, setCreateRegistrationSettings] =
-    useState({
-      EntryID: "",
-      MinCreditLoad: "",
-      MaxCreditLoad: "",
-      MinSpillOver: "",
-      SemesterCode: "",
-      StartDate: "",
-      EndDate: "",
-      InsertedOn: "",
-      InsertedBy: `${props.loginData[0].StaffID}`,
-      UpdatedOn: "",
-      UpdatedBy: `${props.loginData[0].StaffID}`,
-    });
+  const [createRegistrationSettingsRecord, setCreateRegistrationSettings] = useState({
+    EntryID: "",
+    MinCreditLoad: "",
+    MaxCreditLoad: "",
+    MinSpillOver: "",
+    SemesterCode: "",
+    StartDate: "",
+    EndDate: "",
+    InsertedOn: "",
+    InsertedBy: `${props.loginData[0].StaffID}`,
+    UpdatedOn: "",
+    UpdatedBy: `${props.loginData[0].StaffID}`,
+  });
 
   const [data, setData] = useState([]);
+
+  const semesterOptions = useMemo(() => {
+    return data.map(item => ({
+      value: item.SemesterCode,
+      label: `${item.SemesterName} (${item.Status})`
+    }));
+  }, [data]);
 
   const resetItem = () => {
     setCreateRegistrationSettings({
@@ -85,80 +62,61 @@ function SemesterRegistrationSettings(props) {
       InsertedBy: `${props.loginData[0].StaffID}`,
       UpdatedOn: "",
       UpdatedBy: `${props.loginData[0].StaffID}`,
-    })
-  }
+    });
+  };
 
   const getProcessRelatedRecord = async () => {
-    await axios
-      .get(`${serverLink}staff/timetable/timetable/semester`, token)
-      .then((response) => {
-        setData(response.data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+    const { success, data: responseData } = await api.get("staff/timetable/timetable/semester");
+    if (success && responseData) {
+      setData(responseData);
+    }
+    setIsLoading(false);
   };
 
   const getSemesterRegistrationRecords = async () => {
-    await axios
-      .get(`${serverLink}staff/registration/settings`, token)
-      .then((result) => {
-        if (result.data.length > 0) {
-          let rows = [];
-          result.data.map((semester, index) => {
-            rows.push({
-              sn: index + 1,
-              EntryID: semester.EntryID,
-              MinCreditLoad: semester.MinCreditLoad,
-              MaxCreditLoad: semester.MaxCreditLoad,
-              MinSpillOver: semester.MinSpillOver,
-              SemesterCode: semester.SemesterCode,
-              StartDate: formatDateAndTime(semester.StartDate, "date") ?? "N/A",
-              EndDate: formatDateAndTime(semester.EndDate, "date") ?? "N/A",
-              InsertedOn: semester.InsertedOn,
-              InsertedBy: semester.InsertedBy,
-              UpdatedOn: semester.UpdatedOn,
-              UpdatedBy: semester.UpdatedBy,
-              action: (
-                <button
-                  className="btn btn-sm btn-primary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#kt_modal_general"
-                  onClick={() =>
-                    setCreateRegistrationSettings({
-                      EntryID: semester.EntryID,
-                      MinCreditLoad: semester.MinCreditLoad,
-                      MaxCreditLoad: semester.MaxCreditLoad,
-                      MinSpillOver: semester.MinSpillOver,
-                      SemesterCode: semester.SemesterCode,
-                      StartDate: formatDate(semester.StartDate).toString(),
-                      EndDate: formatDate(semester.EndDate).toString(),
-                      InsertedOn: semester.InsertedOn,
-                      InsertedBy: `${props.loginData[0].StaffID}`,
-                      UpdatedOn: semester.UpdatedOn,
-                      UpdatedBy: `${props.loginData[0].StaffID}`,
-                    })
-                  }
-                >
-                  <i className="fa fa-pen" />
-                </button>
-              ),
-            });
-          });
-
-          setRegistrationSettingsRecordDatatable({
-            ...registrationSettingsRecordDatatable,
-            columns: registrationSettingsRecordDatatable.columns,
-            rows: rows,
-          });
-        }
-
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+    const { success, data: resultData } = await api.get("staff/registration/settings");
+    if (success && resultData?.length > 0) {
+      const rows = resultData.map((semester, index) => ({
+        sn: index + 1,
+        EntryID: semester.EntryID,
+        MinCreditLoad: semester.MinCreditLoad,
+        MaxCreditLoad: semester.MaxCreditLoad,
+        MinSpillOver: semester.MinSpillOver,
+        SemesterCode: semester.SemesterCode,
+        StartDate: formatDateAndTime(semester.StartDate, "date") ?? "N/A",
+        EndDate: formatDateAndTime(semester.EndDate, "date") ?? "N/A",
+        InsertedOn: semester.InsertedOn,
+        InsertedBy: semester.InsertedBy,
+        UpdatedOn: semester.UpdatedOn,
+        UpdatedBy: semester.UpdatedBy,
+        action: (
+          <button
+            className="btn btn-sm btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#kt_modal_general"
+            onClick={() =>
+              setCreateRegistrationSettings({
+                EntryID: semester.EntryID,
+                MinCreditLoad: semester.MinCreditLoad,
+                MaxCreditLoad: semester.MaxCreditLoad,
+                MinSpillOver: semester.MinSpillOver,
+                SemesterCode: semester.SemesterCode,
+                StartDate: formatDate(semester.StartDate).toString(),
+                EndDate: formatDate(semester.EndDate).toString(),
+                InsertedOn: semester.InsertedOn,
+                InsertedBy: `${props.loginData[0].StaffID}`,
+                UpdatedOn: semester.UpdatedOn,
+                UpdatedBy: `${props.loginData[0].StaffID}`,
+              })
+            }
+          >
+            <i className="fa fa-pen" />
+          </button>
+        ),
+      }));
+      setRegistrationSettingsRecordDatatable({ ...registrationSettingsRecordDatatable, rows });
+    }
+    setIsLoading(false);
   };
 
   const onEdit = (e) => {
@@ -187,68 +145,34 @@ function SemesterRegistrationSettings(props) {
 
     if (createRegistrationSettingsRecord.EntryID === "") {
       toast.info("Submitting. Please wait...");
-      await axios
-        .post(
-          `${serverLink}staff/registration/add/settings`,
-          createRegistrationSettingsRecord, token
-        )
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Settings submitted successfully");
-            getSemesterRegistrationRecords();
-            getProcessRelatedRecord();
-            resetItem();
-          } else if (result.data.message === "exist") {
-            showAlert("RECORD EXIST", "Record already exist!", "error");
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
-          showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
-            "error"
-          );
-        });
+      const { success, data } = await api.post("staff/registration/add/settings", createRegistrationSettingsRecord);
+      if (success && data?.message === "success") {
+        toast.success("Settings submitted successfully");
+        getSemesterRegistrationRecords();
+        getProcessRelatedRecord();
+        resetItem();
+      } else if (success && data?.message === "exist") {
+        showAlert("RECORD EXIST", "Record already exist!", "error");
+      } else if (success) {
+        showAlert("ERROR", "Something went wrong. Please try again!", "error");
+      }
     } else {
       toast.info("Updating. Please wait...");
-      await axios
-        .patch(
-          `${serverLink}staff/registration/update/settings/`,
-          createRegistrationSettingsRecord, token
-        )
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Settings updated successfully");
-            getSemesterRegistrationRecords();
-            getProcessRelatedRecord();
-            resetItem();
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
-          showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
-            "error"
-          );
-        });
+      const { success, data } = await api.patch("staff/registration/update/settings/", createRegistrationSettingsRecord);
+      if (success && data?.message === "success") {
+        toast.success("Settings updated successfully");
+        getSemesterRegistrationRecords();
+        getProcessRelatedRecord();
+        resetItem();
+      } else if (success) {
+        showAlert("ERROR", "Something went wrong. Please try again!", "error");
+      }
     }
   };
 
   useEffect(() => {
-    getSemesterRegistrationRecords().then((r) => {});
-    getProcessRelatedRecord().then((r) => {});
+    Promise.all([getSemesterRegistrationRecords(), getProcessRelatedRecord()]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (
@@ -264,10 +188,7 @@ function SemesterRegistrationSettings(props) {
           <div className="card-header border-0 pt-6">
             <div className="card-title" />
             <div className="card-toolbar">
-              <div
-                className="d-flex justify-content-end"
-                data-kt-customer-table-toolbar="base"
-              >
+              <div className="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
                 <button
                   type="button"
                   className="btn btn-primary"
@@ -288,28 +209,14 @@ function SemesterRegistrationSettings(props) {
           <div className="col-lg-12 col-md-12">
             <div className="form-group">
               <label htmlFor="SemesterCode">Semester</label>
-              <select
+              <SearchSelect
                 id="SemesterCode"
-                name="SemesterCode"
-                value={createRegistrationSettingsRecord.SemesterCode}
-                className="form-control"
-                onChange={onEdit}
-              >
-                <option value="">Select Option</option>
-                {data.length > 0 ? (
-                  <>
-                    {data.map((item, index) => {
-                      return (
-                        <option key={index} value={item.SemesterCode}>
-                          {item.SemesterName} ({item.Status})
-                        </option>
-                      );
-                    })}
-                  </>
-                ) : (
-                  ""
-                )}
-              </select>
+                value={semesterOptions.find(opt => opt.value === createRegistrationSettingsRecord.SemesterCode) || null}
+                options={semesterOptions}
+                onChange={(selected) => onEdit({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                placeholder="Select Option"
+                isClearable={false}
+              />
             </div>
           </div>
           <div className="col-lg-12 col-md-12 pt-5">

@@ -13,12 +13,10 @@ import {
   setPermissionDetails,
   setCurrentSemester
 } from "../../../actions/setactiondetails";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { projectLogo } from "../../../resources/constants";
 
 function Header(props) {
-  const token = props.loginData[0].token
   const [isOpen, setIsOpen] = useState(false);
   const toggleDrawer = () => {
     setIsOpen((prevState) => !prevState);
@@ -36,7 +34,7 @@ function Header(props) {
     signOut();
   }
 
-  const {getLastActiveTime } = useIdleTimer({
+  const { getLastActiveTime } = useIdleTimer({
     timeout: 1000 * 60 * SESSION_IDLE_MINUTES,
     onIdle: handleOnIdle,
     debounce: 500,
@@ -48,30 +46,28 @@ function Header(props) {
     return () => {
       window.removeEventListener("resize", handleWindowSizeChange);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getFaculty = async () => {
-    await axios
-      .get(`${serverLink}staff/academics/faculty/list`, token)
-      .then((result) => {
-        if (result.data.length > 0) {
-          props.setOnFacultyList(result.data);
-        }
-      });
+    const [facultyRes, departmentRes, semesterRes] = await Promise.all([
+      api.get("staff/academics/faculty/list"),
+      api.get("staff/academics/department/list"),
+      api.get("staff/settings/dashboard/current_semester")
+    ]);
 
-    await axios
-      .get(`${serverLink}staff/academics/department/list`, token)
-      .then((result) => {
-        if (result.data.length > 0) {
-          props.setOnDepartmentList(result.data);
-        }
-      });
+    if (facultyRes.success && facultyRes.data?.length > 0) {
+      props.setOnFacultyList(facultyRes.data);
+    }
 
-    axios.get(`${serverLink}staff/settings/dashboard/current_semester`, token)
-      .then((result)=>{
-        let semester = result.data[0].SemesterCode;
-        props.setOnCurrentSemester(semester)
-      })
+    if (departmentRes.success && departmentRes.data?.length > 0) {
+      props.setOnDepartmentList(departmentRes.data);
+    }
+
+    if (semesterRes.success && semesterRes.data?.length > 0) {
+      const semester = semesterRes.data[0].SemesterCode;
+      props.setOnCurrentSemester(semester);
+    }
   };
 
   const isMobile = width <= 768;
@@ -196,11 +192,13 @@ function Header(props) {
     </>
   );
 }
+
 const mapStateToProps = (state) => {
   return {
     loginData: state.LoginDetails,
   };
 };
+
 const mapDispatchToProps = (dispatch) => {
   return {
     setOnLoginDetails: (p) => {
@@ -215,9 +213,10 @@ const mapDispatchToProps = (dispatch) => {
     setOnDepartmentList: (p) => {
       dispatch(setDepartmentsList(p));
     },
-    setOnCurrentSemester:(p)=>{
+    setOnCurrentSemester: (p) => {
       dispatch(setCurrentSemester(p));
     }
   };
 };
+
 export default connect(mapStateToProps, mapDispatchToProps)(Header);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
+import { api } from "../../../../resources/api";
 import axios from "axios";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
@@ -12,9 +13,7 @@ import InventoryPurchaseOrderProcessing from "./inventory-purchase-order-process
 import InventoryPurchaseOrderUpdate from "./inventory-purchase-order-update";
 import { currencyConverter } from "../../../../resources/constants";
 import { serverLink } from "../../../../resources/url";
-function InventoryPurchaseOrder(props)
-{
-    let token = props.loginData[0].token
+function InventoryPurchaseOrder(props) {
     let DepartmentCode = props.loginData[0].DepartmentCode
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setIsFormLoading] = useState(false);
@@ -73,219 +72,188 @@ function InventoryPurchaseOrder(props)
     let _items2 = [];
     let _cart2 = [];
 
-    const fetchData = async () =>
-    {
-        await axios.get(`${serverLink}staff/inventory/purchase-request/data/list/${DepartmentCode}`, token)
-            .then(res =>
-            {
-                if (res.data.message === 'success')
-                {
-                    const rowData = []; const vendorData = []; const itemData = []; const locationData = []; let requested_from_name = "";
-                    const _manufacturer = res.data.Manufacturer; const _vendor = res.data.Vendor; const _items = res.data.Items; const purchase_request_item = res.data.RequestItems; const budget_item = res.data.BudgetItem;
+    const fetchData = async () => {
+        try {
+            const { success, data: res } = await api.get(`staff/inventory/purchase-request/data/list/${DepartmentCode}`);
+            if (success && res.message === 'success') {
+                const rowData = []; const vendorData = []; const itemData = []; const locationData = []; let requested_from_name = "";
+                const _manufacturer = res.Manufacturer; const _vendor = res.Vendor; const _items = res.Items; const purchase_request_item = res.RequestItems; const budget_item = res.BudgetItem;
 
-                    setItems(_items)
-                    setItems2(_items)
-                    setBudgetItems(budget_item)
+                setItems(_items)
+                setItems2(_items)
+                setBudgetItems(budget_item)
 
-                    //Set Manufacturer Dropdown Items
-                    if (res.data.Manufacturer.length > 0)
-                    {
-                        res.data.Manufacturer.map((row) =>
-                        {
-                            rowData.push({ value: row.manufacturer_id, label: row.manufacturer_name })
-                        });
-                        setManufacturer(rowData)
-                    }
-
-                    //Set vendor Dropdown Items
-                    if (res.data.Vendor.length > 0)
-                    {
-                        res.data.Vendor.map((row) =>
-                        {
-                            vendorData.push({ value: row.vendor_id, label: row.vendor_name, phone: row.phone_number, email: row.email_address, address: row.address })
-                        });
-                        setVendor(vendorData)
-                    }
-
-                    //Set Location Dropdown Items
-                    if (res.data.Location.length > 0)
-                    {
-                        res.data.Location.map((row) =>
-                        {
-                            locationData.push({ value: row.location_id, label: row.location_name })
-                        });
-                        setLocation(locationData)
-                    }
-
-
-                    const rows = [];
-                    if (res.data.ItemView.length > 0)
-                    {
-                        res.data.ItemView.map((r, i) =>
-                        {
-                            let selected_order = purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString());
-
-                            // Create nested items table as JSX
-                            const itemsTable = purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).length === 0 ? '--' :
-                                <table className={"table table-bordered table-row-bordered table-striped"} style={{ border: '1px solid #eeeeee' }}>
-                                    <thead>
-                                        <tr>
-                                            <th style={{ border: '1px solid #cccccc' }}>Item</th>
-                                            <th style={{ border: '1px solid #cccccc' }}>Relevant Budget Item</th>
-                                            <th style={{ border: '1px solid #cccccc' }}>Unit Price</th>
-                                            <th style={{ border: '1px solid #cccccc' }}>Qty</th>
-                                            <th style={{ border: '1px solid #cccccc' }}>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).map((d, p) =>
-                                            {
-                                                return (
-                                                    <tr key={p}>
-                                                        <td style={{ border: '1px solid #cccccc' }}>{d.item_name}</td>
-                                                        <td style={{ border: '1px solid #cccccc' }}>{d.budget_item_name}</td>
-                                                        <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.amount)}</td>
-                                                        <td style={{ border: '1px solid #cccccc' }}>{d.quantity}</td>
-                                                        <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.total)}</td>
-                                                    </tr>
-                                                )
-                                            })
-                                        }
-                                    </tbody>
-                                </table>;
-
-                            rows.push({
-                                sn: i + 1,
-                                request_type: r.request_type,
-                                requested_from: r.requested_from,
-                                amount_expected: currencyConverter(r.amount_expected),
-                                amount_paid: currencyConverter(r.amount_paid),
-                                balance: currencyConverter(r.balance),
-                                status: r.status,
-                                payment_status: r.payment_status,
-                                items: itemsTable,
-                                update: r.status === "pending" ? (
-                                    <button
-                                        className="btn btn-link p-0 text-primary"
-                                        title="Edit"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        onClick={() =>
-                                        {
-                                            if (r.request_type === "Manufacturer")
-                                            {
-                                                if (_manufacturer.length > 0)
-                                                {
-                                                    requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
-                                                }
-                                            } else
-                                            {
-                                                if (_vendor.length > 0)
-                                                {
-                                                    requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
-                                                }
-                                            }
-                                            setFormType("Update Inventory Purchase Order Form");
-                                            setSelectedOrderItems(selected_order)
-                                            setSelectedOrderItems2(selected_order)
-                                            setSelectedOrder({
-                                                ...selectedOrder,
-                                                request_id: r.request_id,
-                                                request_type: r.request_type,
-                                                requested_from: r.requested_from,
-                                                requested_from_name: requested_from_name,
-                                                amount_expected: r.amount_expected,
-                                                amount_paid: r.amount_paid,
-                                                balance: r.balance,
-                                                status: r.status,
-                                            })
-                                        }
-                                        }
-                                    >
-                                        <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-pen" />
-                                    </button>
-                                ) : "--",
-                                received_item: r.status === "pending" ? (
-                                    <button
-                                        className="btn btn-link p-0 text-primary"
-                                        title="Receive"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#kt_modal_general"
-                                        onClick={() =>
-                                        {
-                                            if (r.request_type === "Manufacturer")
-                                            {
-                                                if (_manufacturer.length > 0)
-                                                {
-                                                    requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
-                                                }
-                                            } else
-                                            {
-                                                if (_vendor.length > 0)
-                                                {
-                                                    requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
-                                                }
-                                            }
-                                            setFormType("Receive Inventory Purchase Order Form");
-                                            setSelectedOrderItems(selected_order)
-                                            setSelectedOrder({
-                                                ...selectedOrder,
-                                                request_id: r.request_id,
-                                                request_type: r.request_type,
-                                                requested_from: r.requested_from,
-                                                amount_expected: r.amount_expected,
-                                                requested_from_name: requested_from_name,
-                                                amount_paid: r.amount_paid,
-                                                balance: r.balance,
-                                                status: r.status,
-                                            })
-                                        }
-                                        }
-                                    >
-                                        <i style={{ fontSize: '15px', color:"blue" }} className="fa fa-arrow-circle-down" />
-                                    </button>
-                                ) : "--"
-                            })
-                        })
-                        setDatatable({
-                            ...datatable,
-                            rows: rows,
-                        });
-                    }
-                } else
-                {
-                    toast.info("Something went wrong. Please try again!")
+                //Set Manufacturer Dropdown Items
+                if (res.Manufacturer.length > 0) {
+                    res.Manufacturer.map((row) => {
+                        rowData.push({ value: row.manufacturer_id, label: row.manufacturer_name })
+                    });
+                    setManufacturer(rowData)
                 }
-                setIsLoading(false)
-            })
-            .catch(e =>
-            {
-                toast.error(`${e.response.statusText}: ${e.response.data}`)
-            })
+
+                //Set vendor Dropdown Items
+                if (res.Vendor.length > 0) {
+                    res.Vendor.map((row) => {
+                        vendorData.push({ value: row.vendor_id, label: row.vendor_name, phone: row.phone_number, email: row.email_address, address: row.address })
+                    });
+                    setVendor(vendorData)
+                }
+
+                //Set Location Dropdown Items
+                if (res.Location.length > 0) {
+                    res.Location.map((row) => {
+                        locationData.push({ value: row.location_id, label: row.location_name })
+                    });
+                    setLocation(locationData)
+                }
+
+
+                const rows = [];
+                if (res.ItemView.length > 0) {
+                    res.ItemView.map((r, i) => {
+                        let selected_order = purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString());
+
+                        // Create nested items table as JSX
+                        const itemsTable = purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).length === 0 ? '--' :
+                            <table className={"table table-bordered table-row-bordered table-striped"} style={{ border: '1px solid #eeeeee' }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ border: '1px solid #cccccc' }}>Item</th>
+                                        <th style={{ border: '1px solid #cccccc' }}>Relevant Budget Item</th>
+                                        <th style={{ border: '1px solid #cccccc' }}>Unit Price</th>
+                                        <th style={{ border: '1px solid #cccccc' }}>Qty</th>
+                                        <th style={{ border: '1px solid #cccccc' }}>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        purchase_request_item.filter(e => e.request_id.toString() === r.request_id.toString()).map((d, p) => {
+                                            return (
+                                                <tr key={p}>
+                                                    <td style={{ border: '1px solid #cccccc' }}>{d.item_name}</td>
+                                                    <td style={{ border: '1px solid #cccccc' }}>{d.budget_item_name}</td>
+                                                    <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.amount)}</td>
+                                                    <td style={{ border: '1px solid #cccccc' }}>{d.quantity}</td>
+                                                    <td style={{ border: '1px solid #cccccc' }}>{currencyConverter(d.total)}</td>
+                                                </tr>
+                                            )
+                                        })
+                                    }
+                                </tbody>
+                            </table>;
+
+                        rows.push({
+                            sn: i + 1,
+                            request_type: r.request_type,
+                            requested_from: r.requested_from,
+                            amount_expected: currencyConverter(r.amount_expected),
+                            amount_paid: currencyConverter(r.amount_paid),
+                            balance: currencyConverter(r.balance),
+                            status: r.status,
+                            payment_status: r.payment_status,
+                            items: itemsTable,
+                            update: r.status === "pending" ? (
+                                <button
+                                    className="btn btn-link p-0 text-primary"
+                                    title="Edit"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#kt_modal_general"
+                                    onClick={() => {
+                                        if (r.request_type === "Manufacturer") {
+                                            if (_manufacturer.length > 0) {
+                                                requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
+                                            }
+                                        } else {
+                                            if (_vendor.length > 0) {
+                                                requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
+                                            }
+                                        }
+                                        setFormType("Update Inventory Purchase Order Form");
+                                        setSelectedOrderItems(selected_order)
+                                        setSelectedOrderItems2(selected_order)
+                                        setSelectedOrder({
+                                            ...selectedOrder,
+                                            request_id: r.request_id,
+                                            request_type: r.request_type,
+                                            requested_from: r.requested_from,
+                                            requested_from_name: requested_from_name,
+                                            amount_expected: r.amount_expected,
+                                            amount_paid: r.amount_paid,
+                                            balance: r.balance,
+                                            status: r.status,
+                                        })
+                                    }
+                                    }
+                                >
+                                    <i style={{ fontSize: '15px', color: "blue" }} className="fa fa-pen" />
+                                </button>
+                            ) : "--",
+                            received_item: r.status === "pending" ? (
+                                <button
+                                    className="btn btn-link p-0 text-primary"
+                                    title="Receive"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#kt_modal_general"
+                                    onClick={() => {
+                                        if (r.request_type === "Manufacturer") {
+                                            if (_manufacturer.length > 0) {
+                                                requested_from_name = _manufacturer.filter(e => e.manufacturer_id.toString() === r.requested_from.toString())[0]?.manufacturer_name;
+                                            }
+                                        } else {
+                                            if (_vendor.length > 0) {
+                                                requested_from_name = _vendor.filter(e => e.vendor_id.toString() === r.requested_from.toString())[0]?.vendor_name;
+                                            }
+                                        }
+                                        setFormType("Receive Inventory Purchase Order Form");
+                                        setSelectedOrderItems(selected_order)
+                                        setSelectedOrder({
+                                            ...selectedOrder,
+                                            request_id: r.request_id,
+                                            request_type: r.request_type,
+                                            requested_from: r.requested_from,
+                                            amount_expected: r.amount_expected,
+                                            requested_from_name: requested_from_name,
+                                            amount_paid: r.amount_paid,
+                                            balance: r.balance,
+                                            status: r.status,
+                                        })
+                                    }
+                                    }
+                                >
+                                    <i style={{ fontSize: '15px', color: "blue" }} className="fa fa-arrow-circle-down" />
+                                </button>
+                            ) : "--"
+                        })
+                    })
+                    setDatatable({
+                        ...datatable,
+                        rows: rows,
+                    });
+                }
+            } else {
+                toast.info("Something went wrong. Please try again!")
+            }
+            setIsLoading(false)
+        } catch (e) {
+            toast.error("NETWORK ERROR")
+        }
     }
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         fetchData()
     }, [])
 
-    const handleFormValueChange = (e) =>
-    {
-        if (e.target.id === "purchase_from")
-        {
+    const handleFormValueChange = (e) => {
+        if (e.target.id === "purchase_from") {
             document.getElementById('vendor_select').style.display = "none";
             document.getElementById('manufacturer_select').style.display = "none";
             document.getElementById('items_section').style.display = "none";
             document.getElementById('selected_items_section').style.display = "none";
-            if (e.target.value === "Manufacturer")
-            {
+            if (e.target.value === "Manufacturer") {
                 document.getElementById('manufacturer_select').style.display = "block";
-            } else if (e.target.value === "Vendor")
-            {
+            } else if (e.target.value === "Vendor") {
                 document.getElementById('vendor_select').style.display = "block";
-            } else
-            {
+            } else {
                 document.getElementById('vendor_select').style.display = "none";
                 document.getElementById('manufacturer_select').style.display = "none";
             }
@@ -297,8 +265,7 @@ function InventoryPurchaseOrder(props)
                 vendor_id: "",
                 vendor_id2: "",
             })
-        } else
-        {
+        } else {
             setFormData({
                 ...formData,
                 [e.target.id]: e.target.value
@@ -307,8 +274,7 @@ function InventoryPurchaseOrder(props)
 
     }
 
-    const onManufacturerChange = (e) =>
-    {
+    const onManufacturerChange = (e) => {
         setFormData({
             ...formData,
             manufacturer_id: e.value,
@@ -316,8 +282,7 @@ function InventoryPurchaseOrder(props)
         })
     }
 
-    const onVendorChange = (e) =>
-    {
+    const onVendorChange = (e) => {
         setFormData({
             ...formData,
             vendor_id: e.value,
@@ -329,8 +294,7 @@ function InventoryPurchaseOrder(props)
         })
     }
 
-    const onLocationChange = (e) =>
-    {
+    const onLocationChange = (e) => {
         setSelectedOrder({
             ...selectedOrder,
             location_id: e.value,
@@ -339,36 +303,29 @@ function InventoryPurchaseOrder(props)
         })
     }
 
-    const onFormSubmit = async (e) =>
-    {
+    const onFormSubmit = async (e) => {
         e.preventDefault();
         let request_type = "";
         let requested_from = "";
 
-        if (cart.length < 1)
-        {
+        if (cart.length < 1) {
             toast.error("Please select at least 1 item");
             return false;
         }
-        if (formData.purchase_from.toString().trim() === "")
-        {
+        if (formData.purchase_from.toString().trim() === "") {
             toast.error("Please select where you are purchasing from");
             return false;
         }
 
-        if (formData.purchase_from.toString().trim() === "Manufacturer")
-        {
-            if (formData.manufacturer_id.toString().trim() === "")
-            {
+        if (formData.purchase_from.toString().trim() === "Manufacturer") {
+            if (formData.manufacturer_id.toString().trim() === "") {
                 toast.error("Please Select the Manufacturer");
                 return false;
             }
             request_type = "Manufacturer";
             requested_from = formData.manufacturer_id;
-        } else
-        {
-            if (formData.vendor_id.toString().trim() === "")
-            {
+        } else {
+            if (formData.vendor_id.toString().trim() === "") {
                 toast.error("Please Select the Vendor");
                 return false;
             }
@@ -386,78 +343,61 @@ function InventoryPurchaseOrder(props)
             updated_by: props.loginData[0].StaffID
         }
         setIsFormLoading(true)
-        if (formData.request_id === '')
-        {
-            await axios
-                .post(`${serverLink}staff/inventory/purchase_request/add`, sendData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Form Submitted Successfully");
-                        fetchData();
-                        setFormData({ ...formData, ...initialValue })
-                        setCart([])
-                        setIsFormLoading(false)
-                        document.getElementById("closeModal").click();
-                    } else
-                    {
-                        setIsFormLoading(false)
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+        if (formData.request_id === '') {
+            try {
+                const { success, data: result } = await api.post("staff/inventory/purchase_request/add", sendData);
+                if (success && result.message === "success") {
+                    toast.success("Form Submitted Successfully");
+                    fetchData();
+                    setFormData({ ...formData, ...initialValue })
+                    setCart([])
+                    setIsFormLoading(false)
+                    document.getElementById("closeModal").click();
+                } else {
                     setIsFormLoading(false)
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
-
-        } else
-        {
-
-            await axios
-                .patch(`${serverLink}staff/inventory/item/update`, sendData, token)
-                .then((result) =>
-                {
-                    if (result.data.message === "success")
-                    {
-                        toast.success("Item Updated Successfully");
-                        fetchData();
-                        setFormData({ ...formData, ...initialValue })
-                        setIsFormLoading(false)
-                        document.getElementById("closeModal").click();
-                    } else
-                    {
-                        setIsFormLoading(false)
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) =>
-                {
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
+        } else {
+            try {
+                const { success, data: result } = await api.patch("staff/inventory/item/update", sendData);
+                if (success && result.message === "success") {
+                    toast.success("Item Updated Successfully");
+                    fetchData();
+                    setFormData({ ...formData, ...initialValue })
+                    setIsFormLoading(false)
+                    document.getElementById("closeModal").click();
+                } else {
                     setIsFormLoading(false)
                     showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
+                        "ERROR",
+                        "Something went wrong. Please try again!",
                         "error"
                     );
-                });
+                }
+            } catch (error) {
+                setIsFormLoading(false)
+                showAlert(
+                    "NETWORK ERROR",
+                    "Please check your connection and try again!",
+                    "error"
+                );
+            }
         }
     }
 
-    const onUpdate = async (e) =>
-    {
+    const onUpdate = async (e) => {
         e.preventDefault();
         let send_data = [];
         let total_amount_paid = 0;
@@ -468,10 +408,8 @@ function InventoryPurchaseOrder(props)
         let budget_input = document.getElementsByClassName("budget");
         let budget_name_input = document.getElementsByClassName("budget_name");
 
-        for (let i = 0; i < input.length; i++)
-        {
-            if (input[i].value.toString() === "")
-            {
+        for (let i = 0; i < input.length; i++) {
+            if (input[i].value.toString() === "") {
                 showAlert("Empty Field", "Item amount cannot be empty, use 0 instead", "error");
                 return false;
                 break;
@@ -480,7 +418,7 @@ function InventoryPurchaseOrder(props)
             let request_id = +input[i].getAttribute("request_id");
             let item_id = +input[i].getAttribute("item_id");
             let quantity_received = +input[i].getAttribute("quantity_received");
-            
+
             let quantity2 = +qtr_input[i].value;
             let amount_paid = parseFloat(input[i].value);
             let budget_item_id = parseFloat(budget_input[i].value);
@@ -488,7 +426,7 @@ function InventoryPurchaseOrder(props)
 
             let total_amount = amount_paid * quantity2;
             total_amount_paid += +total_amount;
-            const budget_item_amount = budgetItems.filter(e=> e.EntryID === budget_item_id);
+            const budget_item_amount = budgetItems.filter(e => e.EntryID === budget_item_id);
             console.log(budget_item_amount)
 
             if (!budget_item_amount.length || typeof budget_item_amount[0].Total !== "number") {
@@ -506,7 +444,8 @@ function InventoryPurchaseOrder(props)
             }
 
             // let payment_status = balance < 1 ? "paid" : "unpaid";
-            send_data.push({ amount: amount_paid, total: total_amount, request_id: request_id, quantity: quantity2, quantity_received: quantity_received, item_id: item_id , budget_item_id: budget_item_id , budget_item_name: budget_item_name })        }
+            send_data.push({ amount: amount_paid, total: total_amount, request_id: request_id, quantity: quantity2, quantity_received: quantity_received, item_id: item_id, budget_item_id: budget_item_id, budget_item_name: budget_item_name })
+        }
         let balance = total_amount_paid - amount_paid;
         let sendData = {
             ...selectedOrder,
@@ -520,49 +459,42 @@ function InventoryPurchaseOrder(props)
 
         setIsFormLoading(true)
 
-        await axios
-            .post(`${serverLink}staff/inventory/purchase_request/update`, sendData, token)
-            .then((result) =>
-            {
-                if (result.data.message === "success")
-                {
-                    toast.success("Purchase Order Updated Successfully");
-                    fetchData();
-                    setSelectedOrder({
-                        ...selectedOrder,
-                        request_id: '',
-                        request_type: '',
-                        requested_from: '',
-                        amount_expected: '',
-                        amount_paid: '',
-                        balance: '',
-                        status: '',
-                    })
-                    setIsFormLoading(false)
-                    document.getElementById("closeModal").click();
-                } else
-                {
-                    setIsFormLoading(false)
-                    showAlert(
-                        "ERROR",
-                        "Something went wrong. Please try again!",
-                        "error"
-                    );
-                }
-            })
-            .catch((error) =>
-            {
+        try {
+            const { success, data: result } = await api.post("staff/inventory/purchase_request/update", sendData);
+            if (success && result.message === "success") {
+                toast.success("Purchase Order Updated Successfully");
+                fetchData();
+                setSelectedOrder({
+                    ...selectedOrder,
+                    request_id: '',
+                    request_type: '',
+                    requested_from: '',
+                    amount_expected: '',
+                    amount_paid: '',
+                    balance: '',
+                    status: '',
+                })
+                setIsFormLoading(false)
+                document.getElementById("closeModal").click();
+            } else {
                 setIsFormLoading(false)
                 showAlert(
-                    "NETWORK ERROR",
-                    "Please check your connection and try again!",
+                    "ERROR",
+                    "Something went wrong. Please try again!",
                     "error"
                 );
-            });
+            }
+        } catch (error) {
+            setIsFormLoading(false)
+            showAlert(
+                "NETWORK ERROR",
+                "Please check your connection and try again!",
+                "error"
+            );
+        }
     }
 
-    const onReceiveItems = async (e) =>
-    {
+    const onReceiveItems = async (e) => {
         e.preventDefault();
         let send_data = [];
         let total_amount_paid = 0;
@@ -570,10 +502,8 @@ function InventoryPurchaseOrder(props)
         let amount_paid = document.getElementById("amount_paid").value;
         let input = document.getElementsByClassName("amount");
         let qtr_input = document.getElementsByClassName("quantity");
-        for (let i = 0; i < qtr_input.length; i++)
-        {
-            if (qtr_input[i].value.toString() === "")
-            {
+        for (let i = 0; i < qtr_input.length; i++) {
+            if (qtr_input[i].value.toString() === "") {
                 showAlert("Empty Field", "Item amount cannot be empty, use 0 instead", "error");
                 return false;
                 break;
@@ -591,8 +521,7 @@ function InventoryPurchaseOrder(props)
             send_data.push({ amount: amount, total: total_amount, request_id: request_id, quantity: quantity2, item_id: item_id, item_name: item_name, status: status })
         }
 
-        if (selectedOrder.location_id.toString().trim() === "")
-        {
+        if (selectedOrder.location_id.toString().trim() === "") {
             toast.error("Please select storage location");
             return false;
         }
@@ -612,109 +541,94 @@ function InventoryPurchaseOrder(props)
         setIsFormLoading(true)
         // return false;
 
-        await axios
-            .post(`${serverLink}staff/inventory/purchase_request/received`, sendData, token)
-            .then((result) =>
-            {
-                if (result.data.message === "success")
-                {
-                    if (sendData.imagefile !== "")
-                    {
-                        const formData = new FormData();
-                        formData.append('photo', sendData.imagefile);
-                        formData.append('entry_id', result.data.entry_id)
-                        axios.patch(`${serverLink}staff/inventory/uploadItemsPhoto`, formData)
-                            .then(res =>
-                            {
-                                if (res.data.message === "uploaded")
-                                {
-                                    toast.success("Purchase Order Received Successfully");
-                                    fetchData();
-                                    setSelectedOrder({
-                                        ...selectedOrder,
-                                        request_id: '',
-                                        request_type: '',
-                                        requested_from_name: '',
-                                        amount_expected: '',
-                                        amount_paid: '',
-                                        location_id: '',
-                                        location_id2: '',
-                                        location_name: '',
-                                        balance: '',
-                                        status: '',
-                                    })
-                                    setIsFormLoading(false)
-                                    document.getElementById("closeModal").click();
-                                } else
-                                {
-                                    setIsFormLoading(false)
-                                    showAlert(
-                                        "ERROR",
-                                        "Something went wrong uploading image. Please try again!",
-                                        "error"
-                                    );
-                                }
-                            })
-                            .catch(err =>
-                            {
+        try {
+            const { success, data: result } = await api.post("staff/inventory/purchase_request/received", sendData);
+            if (success && result.message === "success") {
+                if (sendData.imagefile !== "") {
+                    const formData = new FormData();
+                    formData.append('photo', sendData.imagefile);
+                    formData.append('entry_id', result.entry_id)
+                    axios.patch(`${serverLink}staff/inventory/uploadItemsPhoto`, formData)
+                        .then(res => {
+                            if (res.data.message === "uploaded") {
+                                toast.success("Purchase Order Received Successfully");
+                                fetchData();
+                                setSelectedOrder({
+                                    ...selectedOrder,
+                                    request_id: '',
+                                    request_type: '',
+                                    requested_from_name: '',
+                                    amount_expected: '',
+                                    amount_paid: '',
+                                    location_id: '',
+                                    location_id2: '',
+                                    location_name: '',
+                                    balance: '',
+                                    status: '',
+                                })
+                                setIsFormLoading(false)
+                                document.getElementById("closeModal").click();
+                            } else {
                                 setIsFormLoading(false)
                                 showAlert(
                                     "ERROR",
-                                    "Something went wrong. Please try again!",
+                                    "Something went wrong uploading image. Please try again!",
                                     "error"
                                 );
-                                console.error('ERROR', err);
-                            });
-                    } else
-                    {
-                        toast.success("Purchase Order Received Successfully");
-                        fetchData();
-                        setSelectedOrder({
-                            ...selectedOrder,
-                            request_id: '',
-                            request_type: '',
-                            requested_from_name: '',
-                            amount_expected: '',
-                            amount_paid: '',
-                            location_id: '',
-                            location_id2: '',
-                            location_name: '',
-                            balance: '',
-                            status: '',
+                            }
                         })
-                        setIsFormLoading(false)
-                        document.getElementById("closeModal").click();
-                    }
-
-                } else
-                {
+                        .catch(err => {
+                            setIsFormLoading(false)
+                            showAlert(
+                                "ERROR",
+                                "Something went wrong. Please try again!",
+                                "error"
+                            );
+                            console.error('ERROR', err);
+                        });
+                } else {
+                    toast.success("Purchase Order Received Successfully");
+                    fetchData();
+                    setSelectedOrder({
+                        ...selectedOrder,
+                        request_id: '',
+                        request_type: '',
+                        requested_from_name: '',
+                        amount_expected: '',
+                        amount_paid: '',
+                        location_id: '',
+                        location_id2: '',
+                        location_name: '',
+                        balance: '',
+                        status: '',
+                    })
                     setIsFormLoading(false)
-                    showAlert(
-                        "ERROR",
-                        "Something went wrong. Please try again!",
-                        "error"
-                    );
+                    document.getElementById("closeModal").click();
                 }
-            })
-            .catch((error) =>
-            {
+            } else {
                 setIsFormLoading(false)
                 showAlert(
-                    "NETWORK ERROR",
-                    "Please check your connection and try again!",
+                    "ERROR",
+                    "Something went wrong. Please try again!",
                     "error"
                 );
-            });
+            }
+        } catch (error) {
+            setIsFormLoading(false)
+            showAlert(
+                "NETWORK ERROR",
+                "Please check your connection and try again!",
+                "error"
+            );
+        }
     }
 
-    const onCancel = async (e) =>
-    {
+    const onCancel = async (e) => {
         e.preventDefault();
         let send_data = [];
         let request_order = selectedOrder;
         let input = document.getElementsByClassName("amount");
-        for (let i = 0; i < input.length; i++)
-        {
+        for (let i = 0; i < input.length; i++) {
             let request_id = +input[i].getAttribute("request_id");
             let item_id = +input[i].getAttribute("item_id");
             send_data.push({ request_id: request_id, status: "canceled", item_id: item_id })
@@ -730,12 +644,10 @@ function InventoryPurchaseOrder(props)
 
         setIsFormLoading(true)
 
-        await axios
-            .post(`${serverLink}staff/inventory/purchase_request/cancel`, sendData, token)
-            .then((result) =>
-            {
-                if (result.data.message === "success")
-                {
+        try {
+            const { success, data } = await api.post("staff/inventory/purchase_request/cancel", sendData);
+            if (success) {
+                if (data.message === "success") {
                     toast.success("Purchase Order Canceled Successfully");
                     fetchData();
                     setSelectedOrder({
@@ -750,8 +662,7 @@ function InventoryPurchaseOrder(props)
                     })
                     setIsFormLoading(false)
                     document.getElementById("closeModal").click();
-                } else
-                {
+                } else {
                     setIsFormLoading(false)
                     showAlert(
                         "ERROR",
@@ -759,40 +670,33 @@ function InventoryPurchaseOrder(props)
                         "error"
                     );
                 }
-            })
-            .catch((error) =>
-            {
-                setIsFormLoading(false)
-                showAlert(
-                    "NETWORK ERROR",
-                    "Please check your connection and try again!",
-                    "error"
-                );
-            });
+            }
+        } catch (error) {
+            setIsFormLoading(false)
+            showAlert(
+                "NETWORK ERROR",
+                "Please check your connection and try again!",
+                "error"
+            );
+        }
     }
 
-    const onImageChange = (event) =>
-    {
-        if (event.target.files && event.target.files[0])
-        {
+    const onImageChange = (event) => {
+        if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0]
-            if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg")
-            {
-            } else
-            {
+            if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") {
+            } else {
                 showAlert("Oops!", "Only .png, .jpg and .jpeg format allowed!", "error")
                 return false;
             }
-            if (file.size > 2000000)
-            {
+            if (file.size > 2000000) {
                 showAlert("Oops!", "max file size is 2mb", "error")
                 return false;
             }
 
             let reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = (e) =>
-            {
+            reader.onload = (e) => {
                 setSelectedOrder({
                     ...selectedOrder,
                     imagefile: event.target.files[0],
@@ -824,8 +728,7 @@ function InventoryPurchaseOrder(props)
                                     className="btn btn-primary"
                                     data-bs-toggle="modal"
                                     data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                    {
+                                    onClick={() => {
                                         setFormType("Inventory Purchase Order Form");
                                         setFormData(initialValue);
                                     }
@@ -893,8 +796,7 @@ function InventoryPurchaseOrder(props)
     );
 }
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         loginData: state.LoginDetails,
     };

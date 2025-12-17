@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../../common/loader/loader";
 import AGTable from "../../../common/table/AGTable";
-import {toast} from "react-toastify";
-import {showAlert, showConfirm, showContentAlert} from "../../../common/sweetalert/sweetalert";
+import { toast } from "react-toastify";
+import { showAlert, showConfirm, showContentAlert } from "../../../common/sweetalert/sweetalert";
 import PageHeader from "../../../common/pageheader/pageheader";
 
 function FinanceAllowResult(props) {
-    const token = props.LoginDetails[0].token;
 
     const [isFormLoading, setIsFormLoading] = useState('off');
     const [requestBy, setRequestBy] = useState("");
@@ -58,46 +56,39 @@ function FinanceAllowResult(props) {
     });
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/student-manager/finance/result/clearance`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    let rows = [];
-                    result.data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            StudentID: item.StudentID,
-                            FirstName: item.FirstName,
-                            MiddleName: item.MiddleName,
-                            Surname: item.Surname,
-                            StudentLevel: item.StudentLevel,
-                            StudentSemester: item.StudentSemester,
-                            CourseName: item.CourseName,
-                            unblock: (
-                                <button className="btn btn-primary btn-sm" onClick={()=>onAllowResult(item)}> Unblock <i className="fa fa-unlock"/></button>
-                            ),
-                            unblockRequest: (
-                                <button className="btn btn-primary btn-sm" onClick={()=>onAllowResultRequest(item)}> Unblock Request <i className="fa fa-send"/></button>
-                            ),
-                        });
-                    });
-                    setStudentDatatable({
-                        ...studentDatatable,
-                        columns: studentDatatable.columns,
-                        rows: rows,
-                    });
-
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log(err)
-                console.log('NETWORK ERROR');
+        const { success, data } = await api.get("staff/student-manager/finance/result/clearance");
+        if (success && data && data.length > 0) {
+            let rows = [];
+            data.map((item, index) => {
+                rows.push({
+                    sn: index + 1,
+                    StudentID: item.StudentID,
+                    FirstName: item.FirstName,
+                    MiddleName: item.MiddleName,
+                    Surname: item.Surname,
+                    StudentLevel: item.StudentLevel,
+                    StudentSemester: item.StudentSemester,
+                    CourseName: item.CourseName,
+                    unblock: (
+                        <button className="btn btn-primary btn-sm" onClick={() => onAllowResult(item)}> Unblock <i className="fa fa-unlock" /></button>
+                    ),
+                    unblockRequest: (
+                        <button className="btn btn-primary btn-sm" onClick={() => onAllowResultRequest(item)}> Unblock Request <i className="fa fa-send" /></button>
+                    ),
+                });
             });
+            setStudentDatatable({
+                ...studentDatatable,
+                columns: studentDatatable.columns,
+                rows: rows,
+            });
+        }
+        setIsLoading(false);
     }
 
 
     const onAllowResult = async (data) => {
-        let sendData ={
+        let sendData = {
             StudentID: data.StudentID,
             FirstName: data.FirstName,
             MiddleName: data.MiddleName,
@@ -116,26 +107,19 @@ function FinanceAllowResult(props) {
             "CONFIRM UNBLOCKING",
             `Are you sure you want to unblock ${studentName} for Result?`,
             "warning"
-        ).then( async (IsConfirmed) => {
-            if (IsConfirmed)  {
-                await axios.post(`${serverLink}staff/finance/allow-student-result`, sendData, token)
-                    .then(result => {
-                        if (result.data.message === "success") {
-                            getData()
-                            toast.success("Result Access Granted Successfully");
-                        }else {
-                            showAlert(
-                                "ERROR",
-                                "Something went wrong. Please try again!",
-                                "error"
-                            );
-                        }
-                    })
-                    .catch(err => {
-                        console.error('ERROR', err);
-                    })
-            } else {
-
+        ).then(async (IsConfirmed) => {
+            if (IsConfirmed) {
+                const { success, data } = await api.post("staff/finance/allow-student-result", sendData);
+                if (success && data.message === "success") {
+                    getData()
+                    toast.success("Result Access Granted Successfully");
+                } else {
+                    showAlert(
+                        "ERROR",
+                        "Something went wrong. Please try again!",
+                        "error"
+                    );
+                }
             }
         });
     }
@@ -145,12 +129,12 @@ function FinanceAllowResult(props) {
         let studentName = `${data.FirstName} ${data.MiddleName} ${data.Surname}`
         showContentAlert(
             `Unblock  ${studentName} `,
-        ).then( async (StaffID) => {
+        ).then(async (StaffID) => {
             if (!StaffID) {
-                throw  showAlert("EMPTY FIELD", "Please enter the StaffID", "error");
+                throw showAlert("EMPTY FIELD", "Please enter the StaffID", "error");
                 return false;
-            }else{
-                let sendData ={
+            } else {
+                let sendData = {
                     StudentID: data.StudentID,
                     FirstName: data.FirstName,
                     MiddleName: data.MiddleName,
@@ -163,11 +147,11 @@ function FinanceAllowResult(props) {
                     InsertedBy: props.LoginDetails[0].StaffID,
                     RequestBy: StaffID
                 };
-                return await axios.post(`${serverLink}staff/finance/allow-student-result`, sendData, token)
+                return await api.post("staff/finance/allow-student-result", sendData)
             }
 
         }).then(result => {
-            if (result.data.message === "success") {
+            if (result.success && result.data.message === "success") {
                 getData()
                 toast.success("Request Sent Successfully");
                 showAlert(
@@ -175,7 +159,7 @@ function FinanceAllowResult(props) {
                     "Request Sent Successfully",
                     "success"
                 );
-            }else {
+            } else {
                 showAlert(
                     "ERROR",
                     "Something went wrong. Please try again!",
@@ -202,18 +186,18 @@ function FinanceAllowResult(props) {
     }, []);
 
     return isLoading ? (
-            <Loader />
-        ) :
+        <Loader />
+    ) :
         (
             <>
-                <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width:'100%' }}>
+                <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width: '100%' }}>
                     <div className="">
                         <PageHeader
                             title={"FINANCE UNBLOCK STUDENT RESULT"}
                             items={["Human-Resources", "Finance", "Finance Unblock Student Result"]}
                         />
-                        <div className="row col-md-12" style={{width:'100%'}}>
-                            <AGTable data={studentDatatable}/>
+                        <div className="row col-md-12" style={{ width: '100%' }}>
+                            <AGTable data={studentDatatable} />
                         </div>
                     </div>
 

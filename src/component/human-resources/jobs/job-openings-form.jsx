@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import JoditEditor from "jodit-react";
 import { formatDate } from "../../../resources/constants";
+import SearchSelect from "../../common/select/SearchSelect";
 
 
 const JobOpeningsForm = (props) => {
@@ -11,6 +12,35 @@ const JobOpeningsForm = (props) => {
 
     }, [])
     const job = props.createJob
+
+    const facultyOptions = useMemo(() => {
+        return props.FacultyList.map(x => ({
+            value: x.FacultyCode,
+            label: x.FacultyName
+        }));
+    }, [props.FacultyList]);
+
+    const departmentOptions = useMemo(() => {
+        return props.DepartmentList.map(x => ({
+            value: x.DepartmentCode,
+            label: x.DepartmentName
+        }));
+    }, [props.DepartmentList]);
+
+    const typeOptions = [
+        { value: 'FullTime', label: 'Full Time' },
+        { value: 'Casual', label: 'Casual' }
+    ];
+
+    const urgentOptions = [
+        { value: '1', label: 'YES' },
+        { value: '0', label: 'NO' }
+    ];
+
+    const statusOptions = [
+        { value: '1', label: 'Open' },
+        { value: '0', label: 'Close' }
+    ];
 
     //const { editorState } = editorState;
     return (
@@ -32,47 +62,27 @@ const JobOpeningsForm = (props) => {
                 <div className="col-md-6 mt-4">
                     <div className="form-group">
                         <label htmlFor="Faculty">Faculty</label>
-                        <select id="Faculty" onChange={props.onEdit}
-                            value={job.Faculty}
-                            className="form-select form-select-solid"
-                            data-kt-select2="true"
-                            data-placeholder="Select option"
-                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                            <option value={""}>-select Faculty-</option>
-                            {props.FacultyList.length > 0 ?
-                                <>
-                                    {props.FacultyList.map((x, y) => {
-                                        return (
-                                            <option key={y} value={x.FacultyCode}>{x.FacultyName}</option>
-                                        )
-                                    })}
-                                </>
-                                :
-                                <></>}
-                        </select>
+                        <SearchSelect
+                            id="Faculty"
+                            value={facultyOptions.find(opt => opt.value === job.Faculty) || null}
+                            options={facultyOptions}
+                            onChange={(selected) => props.onEdit({ target: { id: 'Faculty', value: selected?.value || '' } })}
+                            placeholder="-select Faculty-"
+                            isClearable={false}
+                        />
                     </div>
                 </div>
                 <div className="col-md-6 mt-4">
                     <div className="form-group">
                         <label htmlFor="Department">Department</label>
-                        <select id="Department" onChange={props.onEdit}
-                            value={job.Department}
-                            className="form-select form-select-solid"
-                            data-kt-select2="true"
-                            data-placeholder="Select option"
-                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                            <option value={""}>-select Department-</option>
-                            {props.DepartmentList.length > 0 ?
-                                <>
-                                    {props.DepartmentList.map((x, y) => {
-                                        return (
-                                            <option key={y} value={x.DepartmentCode}>{x.DepartmentName}</option>
-                                        )
-                                    })}
-                                </>
-                                :
-                                <></>}
-                        </select>
+                        <SearchSelect
+                            id="Department"
+                            value={departmentOptions.find(opt => opt.value === job.Department) || null}
+                            options={departmentOptions}
+                            onChange={(selected) => props.onEdit({ target: { id: 'Department', value: selected?.value || '' } })}
+                            placeholder="-select Department-"
+                            isClearable={false}
+                        />
                     </div>
                 </div>
                 <div className="col-md-6 mt-4">
@@ -102,46 +112,40 @@ const JobOpeningsForm = (props) => {
                 <div className="col-md-4 mt-4">
                     <div className="form-group">
                         <label htmlFor="Type">Job Type</label>
-                        <select id="Type" onChange={props.onEdit}
-                            value={job.Type}
-                            className="form-select form-select-solid"
-                            data-kt-select2="true"
-                            data-placeholder="Select option"
-                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                            <option value={""}>-select Type-</option>
-                            <option value={"FullTime"}>Full Time</option>
-                            <option value={"Casual"}>Casual</option>
-                        </select>
+                        <SearchSelect
+                            id="Type"
+                            value={typeOptions.find(opt => opt.value === job.Type) || null}
+                            options={typeOptions}
+                            onChange={(selected) => props.onEdit({ target: { id: 'Type', value: selected?.value || '' } })}
+                            placeholder="-select Type-"
+                            isClearable={false}
+                        />
                     </div>
                 </div>
                 <div className="col-md-4 mt-4">
                     <div className="form-group">
                         <label htmlFor="Urgent">Is Urgent? </label>
-                        <select id="Urgent" onChange={props.onEdit}
-                            value={job.Urgent}
-                            className="form-select form-select-solid"
-                            data-kt-select2="true"
-                            data-placeholder="Select option"
-                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                            <option value={""}>-select Is Urgent-</option>
-                            <option value={"1"}>YES</option>
-                            <option value={"0"}>NO</option>
-                        </select>
+                        <SearchSelect
+                            id="Urgent"
+                            value={urgentOptions.find(opt => opt.value === job.Urgent?.toString()) || null}
+                            options={urgentOptions}
+                            onChange={(selected) => props.onEdit({ target: { id: 'Urgent', value: selected?.value || '' } })}
+                            placeholder="-select Is Urgent-"
+                            isClearable={false}
+                        />
                     </div>
                 </div>
                 <div className="col-md-4 mt-4">
                     <div className="form-group">
                         <label htmlFor="Status">Status </label>
-                        <select id="Status" onChange={props.onEdit}
-                            value={job.Status}
-                            className="form-select form-select-solid"
-                            data-kt-select2="true"
-                            data-placeholder="Select option"
-                            data-dropdown-parent="#kt_menu_624456606a84b" data-allow-clear="true">
-                            <option value={""}>-select Status-</option>
-                            <option value={"1"}>Open</option>
-                            <option value={"0"}>Close</option>
-                        </select>
+                        <SearchSelect
+                            id="Status"
+                            value={statusOptions.find(opt => opt.value === job.Status?.toString()) || null}
+                            options={statusOptions}
+                            onChange={(selected) => props.onEdit({ target: { id: 'Status', value: selected?.value || '' } })}
+                            placeholder="-select Status-"
+                            isClearable={false}
+                        />
                     </div>
                 </div>
                 <div className="col-md-12">

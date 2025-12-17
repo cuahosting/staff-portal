@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Modal from "../../../common/modal/modal";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
@@ -61,6 +61,19 @@ function FeeSchedules(props) {
         { value: "First Semester", label: "First Semester" },
         { value: "Second Semester", label: "Second Semester" },
     ];
+
+    const levelSelectOptions = levelOptions.map(level => ({
+        value: level,
+        label: `${level} Level`
+    }));
+
+    const feeItemOptions = useMemo(() => {
+        return feeItemList.map(item => ({
+            value: item.FeeItemID,
+            label: `${item.Name} (${currencyConverter(item.Amount)})`,
+            amount: item.Amount
+        }));
+    }, [feeItemList]);
 
     // Reset Forms
     const resetForm = () => {
@@ -423,36 +436,27 @@ function FeeSchedules(props) {
                                     <div className="col-md-6">
                                         <div className="form-group mb-4">
                                             <label className="required form-label">Level</label>
-                                            <select
+                                            <SearchSelect
                                                 id="Level"
-                                                className="form-select form-select-solid"
-                                                value={formData.Level}
-                                                onChange={onEdit}
-                                            >
-                                                <option value="">Select Level</option>
-                                                {levelOptions.map((level) => (
-                                                    <option key={level} value={level}>
-                                                        {level} Level
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                value={levelSelectOptions.find(opt => opt.value === formData.Level) || null}
+                                                options={levelSelectOptions}
+                                                onChange={(selected) => setFormData({ ...formData, Level: selected?.value || '' })}
+                                                placeholder="Select Level"
+                                                isClearable={false}
+                                            />
                                         </div>
                                     </div>
                                     <div className="col-md-6">
                                         <div className="form-group mb-4">
                                             <label className="required form-label">Student Type</label>
-                                            <select
+                                            <SearchSelect
                                                 id="ScheduleType"
-                                                className="form-select form-select-solid"
-                                                value={formData.ScheduleType}
-                                                onChange={onEdit}
-                                            >
-                                                {scheduleTypeOptions.map((opt) => (
-                                                    <option key={opt.value} value={opt.value}>
-                                                        {opt.label}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                value={scheduleTypeOptions.find(opt => opt.value === formData.ScheduleType) || null}
+                                                options={scheduleTypeOptions}
+                                                onChange={(selected) => setFormData({ ...formData, ScheduleType: selected?.value || '0' })}
+                                                placeholder="Select Type"
+                                                isClearable={false}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -519,27 +523,20 @@ function FeeSchedules(props) {
                                 <h6 className="mb-3">Add Fee Item</h6>
                                 <div className="row g-3">
                                     <div className="col-md-6">
-                                        <select
-                                            className="form-select form-select-solid"
-                                            value={linkItemForm.FeeItemID}
-                                            onChange={(e) => {
-                                                const item = feeItemList.find(
-                                                    (f) => f.FeeItemID === parseInt(e.target.value)
-                                                );
+                                        <SearchSelect
+                                            id="FeeItemID"
+                                            value={feeItemOptions.find(opt => opt.value === parseInt(linkItemForm.FeeItemID)) || null}
+                                            options={feeItemOptions}
+                                            onChange={(selected) => {
                                                 setLinkItemForm({
                                                     ...linkItemForm,
-                                                    FeeItemID: e.target.value,
-                                                    CustomAmount: item?.Amount || "",
+                                                    FeeItemID: selected?.value || '',
+                                                    CustomAmount: selected?.amount || '',
                                                 });
                                             }}
-                                        >
-                                            <option value="">Select Fee Item</option>
-                                            {feeItemList.map((item) => (
-                                                <option key={item.FeeItemID} value={item.FeeItemID}>
-                                                    {item.Name} ({currencyConverter(item.Amount)})
-                                                </option>
-                                            ))}
-                                        </select>
+                                            placeholder="Select Fee Item"
+                                            isClearable={false}
+                                        />
                                     </div>
                                     <div className="col-md-4">
                                         <input

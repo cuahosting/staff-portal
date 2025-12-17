@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
@@ -12,7 +11,6 @@ import swal from "sweetalert";
 import SearchSelect from "../../common/select/SearchSelect";
 
 function FinanceTransaction(props) {
-    const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "Action", "Transaction Date", "Year", "Description", "Debit Account", "Credit Account", "Amount", "Added By", "Added Date"];
     const [dataTable, setDataTable] = useState([]);
@@ -38,61 +36,49 @@ function FinanceTransaction(props) {
     }
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/finance/finance-and-budget/transaction-data`, token)
-            .then((result) => {
-                if (result.data.message === 'success') {
-                    const year_list = result.data.year;
-                    setYearList(year_list)
-                    const account_list = result.data.account;
-                    setAccountList(account_list)
-                    let account_list_array = [];
-                    if (account_list.length > 0) {
-                        account_list.map(r => {
-                            account_list_array.push({ value: r.EntryID, label: `${r.AccountName} (${r.AccountType})` })
-                        })
-                    }
-                    setAccountOptions(account_list_array)
-                    if (result.data.data.length > 0) {
-                        let rows = [];
-                        result.data.data.map((item, index) => {
-                            rows.push([
-                                index + 1,
-                                <div className="btn-group">
-                                    {/*<button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"*/}
-                                    {/*        onClick={()=>setFormData({*/}
-                                    {/*            ...formData,*/}
-                                    {/*            entry_id: item.EntryID, transaction_date: formatDate(item.TransactionDate), description:item.Description, debit_account_id:item.DebitAccountID, credit_account_id:item.CreditAccountID,*/}
-                                    {/*            debit:item.Debit, credit:item.Credit, year:item.YearID, amount:item.Amount*/}
-                                    {/*        })}*/}
-                                    {/*><i className="fa fa-pen" /></button>*/}
-                                    <button className="btn btn-danger btn-sm"
-                                        onClick={() => {
-                                            swal({
-                                                title: "Are you sure?",
-                                                text: "Once deleted, you will not be able to recover the transaction!",
-                                                icon: "warning",
-                                                buttons: true,
-                                                dangerMode: true,
-                                            }).then((willDelete) => {
-                                                if (willDelete) {
-                                                    handleDelete(item.EntryID);
-                                                }
-                                            });
-                                        }}
-                                    ><i className="fa fa-trash" /></button>
-                                </div>,
-                                formatDateAndTime(item.TransactionDate, 'date'), getAccountYear(year_list, item.YearID), item.Description, getAccountName(account_list, item.DebitAccountID), getAccountName(account_list, item.CreditAccountID),
-                                currencyConverter(item.Amount), item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date')
-                            ]);
-                        });
-                        setDataTable(rows)
-                    }
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR")
-            });
+        const { success, data: result } = await api.get("staff/finance/finance-and-budget/transaction-data");
+        if (success && result.message === 'success') {
+            const year_list = result.year;
+            setYearList(year_list)
+            const account_list = result.account;
+            setAccountList(account_list)
+            let account_list_array = [];
+            if (account_list.length > 0) {
+                account_list.map(r => {
+                    account_list_array.push({ value: r.EntryID, label: `${r.AccountName} (${r.AccountType})` })
+                })
+            }
+            setAccountOptions(account_list_array)
+            if (result.data.length > 0) {
+                let rows = [];
+                result.data.map((item, index) => {
+                    rows.push([
+                        index + 1,
+                        <div className="btn-group">
+                            <button className="btn btn-danger btn-sm"
+                                onClick={() => {
+                                    swal({
+                                        title: "Are you sure?",
+                                        text: "Once deleted, you will not be able to recover the transaction!",
+                                        icon: "warning",
+                                        buttons: true,
+                                        dangerMode: true,
+                                    }).then((willDelete) => {
+                                        if (willDelete) {
+                                            handleDelete(item.EntryID);
+                                        }
+                                    });
+                                }}
+                            ><i className="fa fa-trash" /></button>
+                        </div>,
+                        formatDateAndTime(item.TransactionDate, 'date'), getAccountYear(year_list, item.YearID), item.Description, getAccountName(account_list, item.DebitAccountID), getAccountName(account_list, item.CreditAccountID),
+                        currencyConverter(item.Amount), item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date')
+                    ]);
+                });
+                setDataTable(rows)
+            }
+        }
+        setIsLoading(false);
     }
 
     const handleSubmit = async (e) => {
@@ -115,50 +101,41 @@ function FinanceTransaction(props) {
         toast.info("Submitting...");
 
         if (formData.entry_id === '') {
-            await axios.post(`${serverLink}staff/finance/finance-and-budget/transaction`, sendData, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Transaction Added Successfully");
-                        document.getElementById("closeModal").click();
-                        getData();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.post("staff/finance/finance-and-budget/transaction", sendData);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Transaction Added Successfully");
+                    document.getElementById("closeModal").click();
+                    getData();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         } else {
-            await axios.patch(`${serverLink}staff/finance/finance-and-budget/transaction`, sendData, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Transaction Updated Successfully");
-                        getData();
-                        document.getElementById("closeModal").click();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.patch("staff/finance/finance-and-budget/transaction", sendData);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Transaction Updated Successfully");
+                    getData();
+                    document.getElementById("closeModal").click();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         }
     }
 
     const handleDelete = async (item) => {
         toast.info("Deleting...")
-        await axios.delete(`${serverLink}staff/finance/finance-and-budget/transaction/${item}/${formData.inserted_by}`, token)
-            .then(res => {
-                if (res.data.message === 'success') {
-                    toast.success("Transaction Deleted Successfully");
-                    getData();
-                } else {
-                    toast.error(res.data.message)
-                }
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR")
-            })
+        const { success, data } = await api.delete(`staff/finance/finance-and-budget/transaction/${item}/${formData.inserted_by}`);
+        if (success) {
+            if (data.message === 'success') {
+                toast.success("Transaction Deleted Successfully");
+                getData();
+            } else {
+                toast.error(data.message)
+            }
+        }
     }
 
     useEffect(() => {

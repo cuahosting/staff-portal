@@ -8,6 +8,7 @@ import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { currencyConverter } from "../../../../resources/constants";
 import { connect } from "react-redux";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function FeeItems(props) {
     const token = props.loginData[0]?.token;
@@ -51,7 +52,7 @@ function FeeItems(props) {
         "ICT",
         "Development",
         "Other",
-    ];
+    ].map(cat => ({ value: cat, label: cat }));
 
     const resetForm = () => {
         setFormData({
@@ -331,19 +332,14 @@ function FeeItems(props) {
                         <label htmlFor="Category" className="required form-label">
                             Category
                         </label>
-                        <select
+                        <SearchSelect
                             id="Category"
-                            onChange={onEdit}
-                            value={formData.Category}
-                            className="form-select form-select-solid"
-                        >
-                            <option value="">Select Category</option>
-                            {categoryOptions.map((cat, index) => (
-                                <option key={index} value={cat}>
-                                    {cat}
-                                </option>
-                            ))}
-                        </select>
+                            value={categoryOptions.find(opt => opt.value === formData.Category) || null}
+                            options={categoryOptions}
+                            onChange={(selected) => onEdit({ target: { id: 'Category', value: selected?.value || '' } })}
+                            placeholder="Select Category"
+                            isClearable={false}
+                        />
                     </div>
 
                     <div className="form-group pt-4">

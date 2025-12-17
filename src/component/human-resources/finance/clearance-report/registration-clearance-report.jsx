@@ -1,7 +1,6 @@
-import axios from "axios";
+import { api } from "../../../../resources/api";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import { connect } from "react-redux";
 import ReportTable from "../../../common/table/ReportTable";
@@ -10,7 +9,6 @@ import SearchSelect from "../../../common/select/SearchSelect";
 import { formatDateAndTime } from "../../../../resources/constants";
 
 const RegistrationClearanceReport = (props) => {
-    const token = props.login[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState([]);
     const [semesterList, setSemesterList] = useState([]);
@@ -39,56 +37,51 @@ const RegistrationClearanceReport = (props) => {
         });
         setIsLoading(true);
         e.preventDefault();
-        await axios
-            .get(
-                `${serverLink}staff/student-manager/registration/clearance/report/${e.target.value}`, token
-            )
-            .then((res) => {
-                const result = res.data;
-                if (result.length > 0) {
-                    let rows = [];
-                    result.map((item, index) => {
-                        rows.push([
-                            index + 1,
-                            item.StudentID,
-                            item.IsRegistration,
-                            item.InsertedBy,
-                            formatDateAndTime(item.InsertedDate, "date"),
-                            item.UpdatedBy,
-                            // capitalize(item.Semester),
-                            formatDateAndTime(item.UpdatedDate, "date"),
-                        ]);
-                    });
-                    setTableHeight(result.length > 100 ? "1000px" : "600px");
-                    setData(rows);
-                    setCanSeeReport(true);
-                } else {
-                    toast.error("No student for the selected semester.");
-                    setCanSeeReport(false);
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR");
-                setIsLoading(false);
-            });
+        try {
+            const { success, data: result } = await api.get(
+                `staff/student-manager/registration/clearance/report/${e.target.value}`
+            );
+            if (success && result.length > 0) {
+                let rows = [];
+                result.map((item, index) => {
+                    rows.push([
+                        index + 1,
+                        item.StudentID,
+                        item.IsRegistration,
+                        item.InsertedBy,
+                        formatDateAndTime(item.InsertedDate, "date"),
+                        item.UpdatedBy,
+                        formatDateAndTime(item.UpdatedDate, "date"),
+                    ]);
+                });
+                setTableHeight(result.length > 100 ? "1000px" : "600px");
+                setData(rows);
+                setCanSeeReport(true);
+            } else {
+                toast.error("No student for the selected semester.");
+                setCanSeeReport(false);
+            }
+            setIsLoading(false);
+        } catch (err) {
+            toast.error("NETWORK ERROR");
+            setIsLoading(false);
+        }
     };
 
     const getSemesters = async () => {
-        axios
-            .get(`${serverLink}registration/registration-report/semester-list/`, token)
-            .then((response) => {
+        try {
+            const { success, data } = await api.get("registration/registration-report/semester-list/");
+            if (success && data.length > 0) {
                 let rows = [];
-                response.data.length > 0 &&
-                    response.data.map((row) => {
-                        rows.push({ label: row.Description + " " + "(" + row.SemesterCode + ")", value: row.SemesterCode });
-                    });
+                data.map((row) => {
+                    rows.push({ label: row.Description + " " + "(" + row.SemesterCode + ")", value: row.SemesterCode });
+                });
                 setSemesterList(rows);
-                setIsLoading(false);
-            })
-            .catch((ex) => {
-                console.error(ex);
-            });
+            }
+            setIsLoading(false);
+        } catch (ex) {
+            console.error(ex);
+        }
     }
     useEffect(() => {
         getSemesters().then((r) => { });

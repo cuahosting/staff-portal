@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux/es/exports";
-import { serverLink } from "../../../resources/url";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import PageHeader from "../../common/pageheader/pageheader";
-import {currencyConverter, moneyFormat} from "../../../resources/constants";
+import { currencyConverter, moneyFormat } from "../../../resources/constants";
 import { toast } from "react-toastify";
 import AGTable from "../../common/table/AGTable";
 
 function PensionScheduleReport(props) {
-    const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [reportData, setReportData] = useState([]);
@@ -93,21 +91,16 @@ function PensionScheduleReport(props) {
             setDatatable(prev => ({ ...prev, rows: [] }));
         } else {
             setIsLoading(true)
-            await axios.get(`${serverLink}staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`, token)
-                .then((res) => {
-                    console.log(res.data)
-                    if (res.data.length > 0) {
-                        setReportData(res.data)
-                        buildTableData(res.data);
-                    } else {
-                        setReportData([]);
-                        setDatatable(prev => ({ ...prev, rows: [] }));
-                    }
-                    setIsLoading(false)
-                }).catch((e) => {
-                    setIsLoading(false)
-                    toast.error("error getting allowances")
-                })
+            const { success, data } = await api.get(`staff/human-resources/finance-report/payroll/schedule?salary_month=${salary_month}`);
+            if (success && data.length > 0) {
+                console.log(data)
+                setReportData(data)
+                buildTableData(data);
+            } else {
+                setReportData([]);
+                setDatatable(prev => ({ ...prev, rows: [] }));
+            }
+            setIsLoading(false)
         }
     }
 
@@ -122,7 +115,7 @@ function PensionScheduleReport(props) {
     }
 
     useEffect(() => {
-        setTimeout(()=>{
+        setTimeout(() => {
             setIsLoading(false)
         }, 2000);
     }, []);
@@ -140,11 +133,11 @@ function PensionScheduleReport(props) {
                     <div className="form-group">
                         <label htmlFor="month_id">Select Salary Month</label>
                         <input type="month" id="month_id"
-                               className="form-control"
-                               value={formData.month_id}
-                               onChange={onChange}
-                               max={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}`}
-                               required/>
+                            className="form-control"
+                            value={formData.month_id}
+                            onChange={onChange}
+                            max={`${new Date().getFullYear()}-${new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : new Date().getMonth() + 1}`}
+                            required />
                     </div>
                 </div>
             </div>

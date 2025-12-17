@@ -1,4 +1,5 @@
 import React from "react";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 export default function InventorySubCategoryForm(props) {
     return (
@@ -7,20 +8,14 @@ export default function InventorySubCategoryForm(props) {
                 <div className={"row"}>
                     <div className="form-group col-md-12 mb-4">
                         <label htmlFor="category_id">Category Name</label>
-                        <select
-                            id={"category_id"}
-                            onChange={props.onChange}
-                            value={props.value.category_id}
-                            className={"form-control"}
-                        >
-                            <option>Select Category Name</option>
-                            {
-                                props.categoryList.length > 0 && props.categoryList.map((category, index) => {
-                                    return <option key={index} value={category.category_id}>{category.category_name}</option>
-                                })
-                            }
-
-                        </select>
+                        <SearchSelect
+                            id="category_id"
+                            value={props.categoryList.map(category => ({ value: category.category_id.toString(), label: category.category_name })).find(opt => opt.value === props.value.category_id?.toString()) || null}
+                            options={props.categoryList.map(category => ({ value: category.category_id.toString(), label: category.category_name }))}
+                            onChange={(selected) => props.onChange({ target: { id: 'category_id', value: selected?.value || '' } })}
+                            placeholder="Select Category Name"
+                            isClearable={false}
+                        />
                     </div>
 
                     <div className="form-group col-md-12 mb-4">
@@ -49,7 +44,7 @@ export default function InventorySubCategoryForm(props) {
                 {
                     props.isFormLoading ?
                         <button id="kt_docs_formvalidation_text_submit" type="button" className="btn btn-primary">
-                            <span> Please wait... <span className="spinner-border spinner-border-sm align-middle ms-2"/> </span>
+                            <span> Please wait... <span className="spinner-border spinner-border-sm align-middle ms-2" /> </span>
                         </button>
                         :
                         <button type="submit" className="btn btn-lg btn-block btn-primary">Submit</button>

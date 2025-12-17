@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import PageHeader from "../../common/pageheader/pageheader";
-import axios from "axios";
+import { api } from "../../../resources/api";
 import { serverLink } from "../../../resources/url";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
@@ -17,7 +17,6 @@ const PHOTO_DIRECTIONS = [
 ];
 
 function UploadStaffPhoto(props) {
-    const token = props.loginData[0]?.token;
     const currentUser = props.loginData[0]?.StaffID;
 
     const [isLoading, setIsLoading] = useState(true);
@@ -37,15 +36,14 @@ function UploadStaffPhoto(props) {
 
     const getStaffList = async () => {
         try {
-            const response = await axios.get(
-                `${serverLink}staff/hr/staff-management/staff/list`,
-                token
-            );
-            const rows = response.data.map((row) => ({
-                label: `${row.StaffID} -- ${row.FirstName} ${row.MiddleName || ''} ${row.Surname}`,
-                value: row.StaffID
-            }));
-            setStaffList(rows);
+            const { success, data } = await api.get("staff/hr/staff-management/staff/list");
+            if (success && data) {
+                const rows = data.map((row) => ({
+                    label: `${row.StaffID} -- ${row.FirstName} ${row.MiddleName || ''} ${row.Surname}`,
+                    value: row.StaffID
+                }));
+                setStaffList(rows);
+            }
             setIsLoading(false);
         } catch (err) {
             console.error("Error fetching staff list:", err);
@@ -56,11 +54,12 @@ function UploadStaffPhoto(props) {
 
     const getStaffPhotos = async (staffId) => {
         try {
-            const response = await axios.get(
-                `${serverLink}staff/hr/staff-management/staff/photos/${staffId}`,
-                token
-            );
-            setExistingPhotos(response.data || {});
+            const { success, data } = await api.get(`staff/hr/staff-management/staff/photos/${staffId}`);
+            if (success) {
+                setExistingPhotos(data || {});
+            } else {
+                setExistingPhotos({});
+            }
         } catch (err) {
             console.error("Error fetching staff photos:", err);
             setExistingPhotos({});
@@ -139,12 +138,13 @@ function UploadStaffPhoto(props) {
 
         try {
             toast.info('Deleting photo...');
-            await axios.delete(
-                `${serverLink}staff/hr/staff-management/staff/photos/${selectedStaff}/${direction}`,
-                token
-            );
-            toast.success('Photo deleted successfully');
-            getStaffPhotos(selectedStaff);
+            const { success } = await api.delete(`staff/hr/staff-management/staff/photos/${selectedStaff}/${direction}`);
+            if (success) {
+                toast.success('Photo deleted successfully');
+                getStaffPhotos(selectedStaff);
+            } else {
+                toast.error('Failed to delete photo');
+            }
         } catch (err) {
             console.error("Error deleting photo:", err);
             toast.error('Failed to delete photo');
@@ -175,19 +175,14 @@ function UploadStaffPhoto(props) {
                 formData.append(direction, file);
             });
 
-            const response = await axios.post(
-                `${serverLink}staff/hr/staff-management/staff/photos/upload`,
+            const { success, data } = await api.post(
+                "staff/hr/staff-management/staff/photos/upload",
                 formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        ...token?.headers
-                    }
-                }
+                { headers: { 'Content-Type': 'multipart/form-data' } }
             );
 
-            if (response.data.message === 'success') {
-                toast.success(`Photos ${response.data.action} successfully!`);
+            if (success && data.message === 'success') {
+                toast.success(`Photos ${data.action} successfully!`);
                 setPhotoFiles({});
                 setPhotoPreviews({});
                 getStaffPhotos(selectedStaff);
@@ -204,7 +199,12 @@ function UploadStaffPhoto(props) {
 
     const getPhotoUrl = (filename) => {
         if (!filename) return null;
-        return `${serverLink}public/uploads/${process.env.REACT_APP_PROJECT_CODE || 'CU'}/hr/photos/${filename}`;
+        // Check if it's already a full URL (external storage like simplefileupload.com)
+        if (filename.startsWith('http://') || filename.startsWith('https://')) {
+            return filename;
+        }
+        // Otherwise, construct the local server path
+        return `${serverLink}public/uploads/CU/hr/photos/${filename}`;
     };
 
     const renderPhotoCard = (direction) => {

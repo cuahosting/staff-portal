@@ -1,0 +1,364 @@
+/* Student Payment Analysis Table Styles - Light Theme with Scroll Snap */
+
+.payment-analysis-table-container {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+.payment-analysis-table-scroll {
+    overflow-x: auto;
+    max-height: 70vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but allow scrolling */
+.payment-analysis-table-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.payment-analysis-table-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.payment-analysis-table-scroll::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 4px;
+}
+
+.payment-analysis-table-scroll::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+.payment-analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+    color: #1e293b;
+}
+
+.payment-analysis-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.payment-analysis-table th {
+    background: #f8fafc;
+    color: #334155;
+    padding: 14px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Semester group headers */
+.payment-analysis-table th.semester-group {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+    color: white;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 16px 12px;
+    scroll-snap-align: start;
+}
+
+.payment-analysis-table th.semester-border {
+    border-left: 4px solid #1e3a5f;
+}
+
+/* Sub-header color coding - sleek pastel tones */
+.payment-analysis-table th.sub-header {
+    font-size: 0.75rem;
+    padding: 10px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.payment-analysis-table th.sub-header.results {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.payment-analysis-table th.sub-header.expected {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.payment-analysis-table th.sub-header.payment {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.payment-analysis-table th.sub-header.balance {
+    background: #fce7f3;
+    color: #9f1239;
+}
+
+.payment-analysis-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    background: #ffffff;
+    text-align: center;
+}
+
+/* Semester border */
+.payment-analysis-table td.semester-border,
+.payment-analysis-table th.semester-border {
+    border-left: 4px solid #1e3a5f;
+}
+
+/* Column-based highlighting */
+.payment-analysis-table td.results-cell:hover,
+.payment-analysis-table th.sub-header.results:hover~td.results-cell {
+    background: #e2e8f0 !important;
+}
+
+/* Sticky Columns */
+.payment-analysis-table .sticky-col {
+    position: sticky;
+    z-index: 10;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+}
+
+.payment-analysis-table thead th.sticky-col {
+    z-index: 25;
+    background: #f8fafc;
+}
+
+.payment-analysis-table .col-sn {
+    left: 0;
+    min-width: 45px;
+    max-width: 45px;
+    text-align: center;
+    color: #64748b;
+    font-weight: 500;
+    background: #fafafa;
+}
+
+.payment-analysis-table .col-print {
+    left: 45px;
+    min-width: 50px;
+    max-width: 50px;
+    text-align: center;
+    background: #fafafa;
+}
+
+.payment-analysis-table .col-id {
+    left: 95px;
+    min-width: 145px;
+    color: #0369a1;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.payment-analysis-table .col-name {
+    left: 240px;
+    min-width: 180px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    text-align: left;
+    color: #1e293b;
+}
+
+.payment-analysis-table .col-course {
+    left: 420px;
+    min-width: 140px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #059669;
+    font-size: 0.8rem;
+    text-align: left;
+    border-right: 3px solid #1e3a5f;
+}
+
+/* Column-based color coding - sleek pastels */
+.payment-analysis-table .results-cell {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    min-width: 60px;
+}
+
+.payment-analysis-table .results-cell.has-value {
+    color: #1e293b;
+}
+
+.payment-analysis-table .expected-cell {
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-family: 'Consolas', monospace;
+    font-size: 0.8rem;
+    min-width: 110px;
+}
+
+.payment-analysis-table .payment-cell {
+    background: #f0fdf4;
+    color: #15803d;
+    font-family: 'Consolas', monospace;
+    font-size: 0.8rem;
+    min-width: 120px;
+}
+
+.payment-analysis-table .payment-cell.clickable {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.payment-analysis-table .payment-cell.clickable:hover {
+    background: #bbf7d0 !important;
+    text-decoration: underline;
+}
+
+.payment-analysis-table .payment-count {
+    font-size: 0.65rem;
+    color: #16a34a;
+    margin-left: 4px;
+    opacity: 0.8;
+}
+
+.payment-analysis-table .balance-cell {
+    background: #fef2f2;
+    font-family: 'Consolas', monospace;
+    font-size: 0.8rem;
+    min-width: 100px;
+}
+
+.payment-analysis-table .balance-cell.positive {
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+.payment-analysis-table .balance-cell.negative-balance {
+    color: #15803d;
+    font-weight: 600;
+}
+
+.payment-analysis-table .balance-cell.zero {
+    color: #94a3b8;
+}
+
+.payment-analysis-table .cell-zero {
+    color: #cbd5e1;
+    font-weight: 400;
+}
+
+/* Column hover highlight */
+.payment-analysis-table tbody td:hover {
+    filter: brightness(0.95);
+}
+
+/* Semester navigation buttons */
+.semester-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.semester-nav-btn {
+    padding: 6px 16px;
+    border: 2px solid #1e3a5f;
+    background: white;
+    color: #1e3a5f;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.semester-nav-btn:hover {
+    background: #1e3a5f;
+    color: white;
+}
+
+.semester-nav-btn.active {
+    background: #1e3a5f;
+    color: white;
+}
+
+/* Print Button */
+.payment-analysis-table .print-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.payment-analysis-table .print-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Alternating row colors - very subtle */
+.payment-analysis-table tbody tr:nth-child(even) td {
+    filter: brightness(0.98);
+}
+
+/* Summary stats styling */
+.payment-stats-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 10px;
+    padding: 15px 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.payment-stats-card .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.payment-stats-card.primary .stat-value {
+    color: #1e40af;
+}
+
+.payment-stats-card.success .stat-value {
+    color: #059669;
+}
+
+/* Print Styles */
+@media print {
+    .payment-analysis-table-container {
+        box-shadow: none;
+        border: none;
+    }
+
+    .payment-analysis-table th,
+    .payment-analysis-table td {
+        border: 1px solid #ddd !important;
+        padding: 6px !important;
+    }
+
+    .payment-analysis-table th.semester-group {
+        background: #1e3a5f !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .payment-analysis-table .sticky-col {
+        position: relative !important;
+        left: auto !important;
+    }
+
+    .col-print,
+    .print-btn {
+        display: none !important;
+    }
+}

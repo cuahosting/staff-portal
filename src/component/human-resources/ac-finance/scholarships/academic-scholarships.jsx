@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AGTable from "../../../common/table/AGTable";
 import api from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function AcademicScholarships(props) {
     const token = props.loginData[0]?.token;
@@ -49,6 +50,13 @@ function AcademicScholarships(props) {
         InsertedBy: staffID,
         EntryID: "",
     });
+
+    const scholarshipOptions = useMemo(() => {
+        return scholarshipList.map(s => ({
+            value: s.ScholarshipID,
+            label: s.Name
+        }));
+    }, [scholarshipList]);
 
     const [showModal, setShowModal] = useState(false);
     const [activeView, setActiveView] = useState("tiers"); // tiers or students
@@ -504,19 +512,14 @@ function AcademicScholarships(props) {
                                     <label htmlFor="ScholarshipID" className="required form-label">
                                         Scholarship to Assign
                                     </label>
-                                    <select
+                                    <SearchSelect
                                         id="ScholarshipID"
-                                        className="form-select form-select-solid"
-                                        value={formData.ScholarshipID}
-                                        onChange={onEdit}
-                                    >
-                                        <option value="">Select Scholarship</option>
-                                        {scholarshipList.map((s) => (
-                                            <option key={s.ScholarshipID} value={s.ScholarshipID}>
-                                                {s.Name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        value={scholarshipOptions.find(opt => opt.value === formData.ScholarshipID) || null}
+                                        options={scholarshipOptions}
+                                        onChange={(selected) => onEdit({ target: { id: 'ScholarshipID', value: selected?.value || '' } })}
+                                        placeholder="Select Scholarship"
+                                        isClearable={false}
+                                    />
                                 </div>
                             </div>
                             <div className="modal-footer">

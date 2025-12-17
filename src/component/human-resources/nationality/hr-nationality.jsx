@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function HRNationality(props) {
-    const token = props.LoginDetails[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [nationalityDatatable, setNationalityDatatable] = useState({
@@ -130,22 +129,18 @@ function HRNationality(props) {
         setLgaForm(true);
     }
     const toggleUpdateLga = async (type) => {
-        await axios.get(`${serverLink}staff/hr/state/list`, token)
-            .then((result) => {
-                const data = result.data;
-                const country_id = data.filter(item => item.EntryID === type.StateID)[0]['NationalityID'];
-                setStateSelect(data.filter(item => item.NationalityID === country_id));
-                setCreateLGA({
-                    lga_name: type.LgaName,
-                    state_id: type.StateID,
-                    country: country_id,
-                    entry_id: type.EntryID,
-                })
-                setLgaForm(true);
+        const { success, data } = await api.get("staff/hr/state/list");
+        if (success) {
+            const country_id = data.filter(item => item.EntryID === type.StateID)[0]['NationalityID'];
+            setStateSelect(data.filter(item => item.NationalityID === country_id));
+            setCreateLGA({
+                lga_name: type.LgaName,
+                state_id: type.StateID,
+                country: country_id,
+                entry_id: type.EntryID,
             })
-            .catch((err) => {
-                console.log("NETWORK ERROR STATE");
-            });
+            setLgaForm(true);
+        }
     }
     const closeHandler = () => {
         setCreateState({
@@ -165,112 +160,102 @@ function HRNationality(props) {
     }
 
     const getRecords = async () => {
-        await axios.get(`${serverLink}staff/hr/nationality/list`, token)
-            .then((result) => {
-                const data = result.data;
-                setNationalityList(data)
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            title: item.NationalityTitle,
-                            country: item.Country,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setCreateNationality({
-                                            nationality_title: item.NationalityTitle,
-                                            country: item.Country,
-                                            entry_id: item.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        const nationalityResult = await api.get("staff/hr/nationality/list");
+        if (nationalityResult.success) {
+            const data = nationalityResult.data;
+            setNationalityList(data)
+            if (data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        title: item.NationalityTitle,
+                        country: item.Country,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#kt_modal_general"
+                                onClick={() =>
+                                    setCreateNationality({
+                                        nationality_title: item.NationalityTitle,
+                                        country: item.Country,
+                                        entry_id: item.EntryID,
+                                    })
+                                }
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setNationalityDatatable({
-                        ...nationalityDatatable,
-                        columns: nationalityDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK NATIONALITY ERROR");
-            });
+                });
+                setNationalityDatatable({
+                    ...nationalityDatatable,
+                    columns: nationalityDatatable.columns,
+                    rows: rows,
+                });
+            }
+        }
 
-        await axios.get(`${serverLink}staff/hr/state/list`, token)
-            .then((result) => {
-                const data = result.data;
-                setStateList(data)
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            state: item.StateName,
-                            country: item.NationalityID,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    onClick={() => toggleUpdateState(item)}
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        const stateResult = await api.get("staff/hr/state/list");
+        if (stateResult.success) {
+            const data = stateResult.data;
+            setStateList(data)
+            if (data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        state: item.StateName,
+                        country: item.NationalityID,
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                onClick={() => toggleUpdateState(item)}
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setStateDatatable({
-                        ...stateDatatable,
-                        columns: stateDatatable.columns,
-                        rows: rows,
-                    });
-                }
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR STATE");
-            });
+                });
+                setStateDatatable({
+                    ...stateDatatable,
+                    columns: stateDatatable.columns,
+                    rows: rows,
+                });
+            }
+        }
 
-        await axios.get(`${serverLink}staff/hr/lga/list`, token)
-            .then((result) => {
-                const data = result.data;
-                setLgaList(data)
-                if (data.length > 0) {
-                    let rows = [];
-                    data.map((item, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            lga: item.LgaName,
-                            state: item.StateID,
-                            country: "",
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    onClick={() => toggleUpdateLga(item)}
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
+        const lgaResult = await api.get("staff/hr/lga/list");
+        if (lgaResult.success) {
+            const data = lgaResult.data;
+            setLgaList(data)
+            if (data.length > 0) {
+                let rows = [];
+                data.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        lga: item.LgaName,
+                        state: item.StateID,
+                        country: "",
+                        action: (
+                            <button
+                                className="btn btn-sm btn-primary"
+                                onClick={() => toggleUpdateLga(item)}
+                            >
+                                <i className="fa fa-pen" />
+                            </button>
+                        ),
                     });
-                    setLGADatatable({
-                        ...lgaDatatable,
-                        columns: lgaDatatable.columns,
-                        rows: rows,
-                    });
-                }
-
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR LGA");
-            });
+                });
+                setLGADatatable({
+                    ...lgaDatatable,
+                    columns: lgaDatatable.columns,
+                    rows: rows,
+                });
+            }
+            setIsLoading(false);
+        }
     };
 
     const onNationalityEdit = (e) => {
@@ -292,64 +277,44 @@ function HRNationality(props) {
         }
 
         if (createNationality.entry_id === "") {
-            await axios
-                .post(`${serverLink}staff/hr/nationality/add`, createNationality, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Nationality Added Successfully");
-                        getRecords();
-                        setCreateNationality({
-                            ...createNationality,
-                            nationality_title: "",
-                            country: "",
-                            entry_id: "",
-                        });
-                    } else if (result.data.message === "exist") {
-                        showAlert("NATIONALITY EXIST", "Nationality already exist!", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.post("staff/hr/nationality/add", createNationality);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Nationality Added Successfully");
+                    getRecords();
+                    setCreateNationality({
+                        ...createNationality,
+                        nationality_title: "",
+                        country: "",
+                        entry_id: "",
+                    });
+                } else if (data.message === "exist") {
+                    showAlert("NATIONALITY EXIST", "Nationality already exist!", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/hr/nationality/update`, createNationality, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Nationality Updated Successfully");
-                        getRecords();
-                        setCreateNationality({
-                            ...createNationality,
-                            nationality_title: "",
-                            country: "",
-                            entry_id: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.patch("staff/hr/nationality/update", createNationality);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Nationality Updated Successfully");
+                    getRecords();
+                    setCreateNationality({
+                        ...createNationality,
+                        nationality_title: "",
+                        country: "",
+                        entry_id: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
@@ -371,66 +336,46 @@ function HRNationality(props) {
         }
 
         if (createState.entry_id === "") {
-            await axios
-                .post(`${serverLink}staff/hr/state/add`, createState, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("State Added Successfully");
-                        getRecords();
-                        setCreateState({
-                            ...createState,
-                            nationality_id: "",
-                            state_name: "",
-                            entry_id: "",
-                        });
-                        closeHandler();
-                    } else if (result.data.message === "exist") {
-                        showAlert("STATE EXIST", "State already exist!", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.post("staff/hr/state/add", createState);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("State Added Successfully");
+                    getRecords();
+                    setCreateState({
+                        ...createState,
+                        nationality_id: "",
+                        state_name: "",
+                        entry_id: "",
+                    });
+                    closeHandler();
+                } else if (data.message === "exist") {
+                    showAlert("STATE EXIST", "State already exist!", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/hr/state/update`, createState, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("State Updated Successfully");
-                        getRecords();
-                        setCreateNationality({
-                            ...createNationality,
-                            nationality_id: "",
-                            state_name: "",
-                            entry_id: "",
-                        });
-                        closeHandler();
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.patch("staff/hr/state/update", createState);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("State Updated Successfully");
+                    getRecords();
+                    setCreateNationality({
+                        ...createNationality,
+                        nationality_id: "",
+                        state_name: "",
+                        entry_id: "",
+                    });
+                    closeHandler();
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     }
 
@@ -452,6 +397,20 @@ function HRNationality(props) {
         });
     };
 
+    const nationalityOptions = useMemo(() => {
+        return nationalityList.map(item => ({
+            value: item.EntryID.toString(),
+            label: item.Country
+        }));
+    }, [nationalityList]);
+
+    const stateSelectOptions = useMemo(() => {
+        return stateSelect.map(item => ({
+            value: item.EntryID.toString(),
+            label: item.StateName
+        }));
+    }, [stateSelect]);
+
     const onSubmitLga = async () => {
         if (createLGA.state_id === "") {
             showAlert("EMPTY FIELD", "Please select the state name", "error");
@@ -463,70 +422,50 @@ function HRNationality(props) {
         }
 
         if (createLGA.entry_id === "") {
-            await axios
-                .post(`${serverLink}staff/hr/lga/add`, createLGA, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("LGA Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setCreateLGA({
-                            ...createLGA,
-                            lga_name: "",
-                            state_id: "",
-                            country: "",
-                            entry_id: "",
-                        });
-                        closeHandler();
-                    } else if (result.data.message === "exist") {
-                        showAlert("LGA EXIST", "LGA already exist!", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.post("staff/hr/lga/add", createLGA);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("LGA Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setCreateLGA({
+                        ...createLGA,
+                        lga_name: "",
+                        state_id: "",
+                        country: "",
+                        entry_id: "",
+                    });
+                    closeHandler();
+                } else if (data.message === "exist") {
+                    showAlert("LGA EXIST", "LGA already exist!", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
         else {
-            await axios
-                .patch(`${serverLink}staff/hr/lga/update`, createLGA, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("LGA Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setCreateLGA({
-                            ...createLGA,
-                            lga_name: "",
-                            state_id: "",
-                            country: "",
-                            entry_id: "",
-                        });
-                        closeHandler();
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.patch("staff/hr/lga/update", createLGA);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("LGA Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setCreateLGA({
+                        ...createLGA,
+                        lga_name: "",
+                        state_id: "",
+                        country: "",
+                        entry_id: "",
+                    });
+                    closeHandler();
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     }
 
@@ -540,13 +479,13 @@ function HRNationality(props) {
         let rows = [];
 
         stateDatatable.rows.length > 0 &&
-        stateDatatable.rows.map(item => {
-            const country_name = nationalityList.filter(i => i.EntryID === item.country);
-            if (country_name.length > 0) {
-                item.country = country_name[0].Country;
-            }
-            rows.push(item)
-        })
+            stateDatatable.rows.map(item => {
+                const country_name = nationalityList.filter(i => i.EntryID === item.country);
+                if (country_name.length > 0) {
+                    item.country = country_name[0].Country;
+                }
+                rows.push(item)
+            })
 
         setStateDatatable({
             ...stateDatatable,
@@ -554,23 +493,23 @@ function HRNationality(props) {
             rows: rows,
         });
 
-    },[stateList])
+    }, [stateList])
 
     useEffect(() => {
         let rows = [];
         lgaDatatable.rows.length > 0 &&
-        lgaDatatable.rows.map(item => {
-            const state_name = stateList.filter(i => i.EntryID === item.state);
-            if (state_name.length > 0) {
-                item.state = state_name[0].StateName;
+            lgaDatatable.rows.map(item => {
+                const state_name = stateList.filter(i => i.EntryID === item.state);
+                if (state_name.length > 0) {
+                    item.state = state_name[0].StateName;
 
-                const country_name = nationalityList.filter(i => i.EntryID === state_name[0].NationalityID);
-                if (country_name.length > 0) {
-                    item.country = country_name[0].Country;
+                    const country_name = nationalityList.filter(i => i.EntryID === state_name[0].NationalityID);
+                    if (country_name.length > 0) {
+                        item.country = country_name[0].Country;
+                    }
                 }
-            }
-            rows.push(item)
-        })
+                rows.push(item)
+            })
 
         setLGADatatable({
             ...lgaDatatable,
@@ -578,7 +517,7 @@ function HRNationality(props) {
             rows: rows,
         });
 
-    },[lgaList])
+    }, [lgaList])
 
     return isLoading ? (
         <Loader />
@@ -652,20 +591,19 @@ function HRNationality(props) {
                                             <h3>{createState.entry_id === '' ? 'Add' : 'Update'} State</h3>
                                             <div className="form-group pt-5">
                                                 <label htmlFor="">Select Country</label>
-                                                <select name="" id="nationality_id" className="form-select" onChange={onStateEdit} value={createState.nationality_id}>
-                                                    <option value="">Select Country</option>
-                                                    {
-                                                        nationalityList.length > 0 &&
-                                                        nationalityList.map((item, index) => {
-                                                            return <option key={index} value={item.EntryID}>{item.Country}</option>
-                                                        })
-                                                    }
-                                                </select>
+                                                <SearchSelect
+                                                    id="nationality_id"
+                                                    value={nationalityOptions.find(opt => opt.value === createState.nationality_id?.toString()) || null}
+                                                    options={nationalityOptions}
+                                                    onChange={(selected) => onStateEdit({ target: { id: 'nationality_id', value: selected?.value || '' } })}
+                                                    placeholder="Select Country"
+                                                    isClearable={false}
+                                                />
                                             </div>
 
                                             <div className="form-group pt-5">
                                                 <label htmlFor="">State Name</label>
-                                                <input type="text" className="form-control" id={"state_name"} value={createState.state_name} onChange={onStateEdit} placeholder={"Enter the State Name"}/>
+                                                <input type="text" className="form-control" id={"state_name"} value={createState.state_name} onChange={onStateEdit} placeholder={"Enter the State Name"} />
                                             </div>
 
                                             <div className="pt-5">
@@ -698,33 +636,31 @@ function HRNationality(props) {
                                             <h3>{createLGA.entry_id === '' ? 'Add' : 'Update'} LGA</h3>
                                             <div className="form-group pt-5">
                                                 <label htmlFor="">Select Country</label>
-                                                <select name="" id="country" className="form-select" onChange={onLgaEdit} value={createLGA.country}>
-                                                    <option value="">Select Country</option>
-                                                    {
-                                                        nationalityList.length > 0 &&
-                                                        nationalityList.map((item, index) => {
-                                                            return <option key={index} value={item.EntryID}>{item.Country}</option>
-                                                        })
-                                                    }
-                                                </select>
+                                                <SearchSelect
+                                                    id="country"
+                                                    value={nationalityOptions.find(opt => opt.value === createLGA.country?.toString()) || null}
+                                                    options={nationalityOptions}
+                                                    onChange={(selected) => onLgaEdit({ target: { id: 'country', value: selected?.value || '' } })}
+                                                    placeholder="Select Country"
+                                                    isClearable={false}
+                                                />
                                             </div>
 
                                             <div className="form-group pt-5">
                                                 <label htmlFor="">Select State</label>
-                                                <select name="" id="state_id" className="form-select" onChange={onLgaEdit} value={createLGA.state_id}>
-                                                    <option value="">Select State</option>
-                                                    {
-                                                        stateSelect.length > 0 &&
-                                                        stateSelect.map((item, index) => {
-                                                            return <option key={index} value={item.EntryID}>{item.StateName}</option>
-                                                        })
-                                                    }
-                                                </select>
+                                                <SearchSelect
+                                                    id="state_id"
+                                                    value={stateSelectOptions.find(opt => opt.value === createLGA.state_id?.toString()) || null}
+                                                    options={stateSelectOptions}
+                                                    onChange={(selected) => onLgaEdit({ target: { id: 'state_id', value: selected?.value || '' } })}
+                                                    placeholder="Select State"
+                                                    isClearable={false}
+                                                />
                                             </div>
 
                                             <div className="form-group pt-5">
                                                 <label htmlFor="">LGA Name</label>
-                                                <input type="text" className="form-control" id={"lga_name"} value={createLGA.lga_name} onChange={onLgaEdit} placeholder={"Enter the LGA Name"}/>
+                                                <input type="text" className="form-control" id={"lga_name"} value={createLGA.lga_name} onChange={onLgaEdit} placeholder={"Enter the LGA Name"} />
                                             </div>
 
                                             <div className="pt-5">

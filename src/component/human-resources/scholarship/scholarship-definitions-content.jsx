@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AGTable from "../../common/table/AGTable";
+import PageHeader from "../../common/pageheader/pageheader";
 import api from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
@@ -240,28 +241,32 @@ function ScholarshipDefinitionsContent(props) {
     if (isLoading) return <Loader />;
 
     return (
-        <>
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 className="mb-1">Scholarship Definitions</h4>
-                    <p className="text-muted mb-0">Manage scholarship types and discount percentages</p>
-                </div>
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => {
-                        resetForm();
-                        setShowModal(true);
-                    }}
-                >
-                    <i className="fa fa-plus me-2"></i>
-                    Add Scholarship
-                </button>
-            </div>
+        <div className="d-flex flex-column flex-row-fluid">
+            <PageHeader
+                title="Scholarship Definitions"
+                items={["Human Resources", "Scholarship", "Definitions"]}
+                buttons={
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => {
+                            resetForm();
+                            setShowModal(true);
+                        }}
+                    >
+                        <i className="fa fa-plus me-2"></i>
+                        Add Scholarship
+                    </button>
+                }
+            />
 
-            {/* Table */}
-            <AGTable data={datatable} />
+            <div className="flex-column-fluid">
+                <div className="card">
+                    <div className="card-body py-4">
+                        <AGTable data={datatable} />
+                    </div>
+                </div>
+            </div>
 
             {/* Modal */}
             {showModal && (
@@ -450,7 +455,7 @@ function ScholarshipDefinitionsContent(props) {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
 

@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Loader from "../../common/loader/loader";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import ReportTable from "../../common/table/ReportTable";
 import { connect } from "react-redux";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function PaymentReportByTrimester(props) {
-  const token = props.login[0].token;
 
   const [isLoading, setIsLoading] = useState(false);
   const [canSeeReport, setCanSeeReport] = useState(false);
   const [allSemester, setAllSemester] = useState([]);
+  const [selectedSemester, setSelectedSemester] = useState("");
   const [data, setData] = useState([]);
   const [tableHeight, setTableHeight] = useState("600px");
   const columns = [
@@ -26,30 +26,37 @@ function PaymentReportByTrimester(props) {
     "Balance",
   ];
 
+  // Options for SearchSelect
+  const semesterOptions = useMemo(() => {
+    return allSemester.map(s => ({
+      value: s.SemesterCode,
+      label: s.SemesterName
+    }));
+  }, [allSemester]);
+
   useEffect(() => {
     const getSchoolSemester = async () => {
-      axios
-        .get(`${serverLink}staff/timetable/timetable/semester`, token)
-        .then((response) => {
-          setAllSemester(response.data);
-          setIsLoading(false);
-        })
-        .catch((ex) => {
-          console.error(ex);
-        });
+      try {
+        const { success, data } = await api.get("staff/timetable/timetable/semester");
+        if (success) {
+          setAllSemester(data);
+        }
+        setIsLoading(false);
+      } catch (ex) {
+        console.error(ex);
+      }
     };
     getSchoolSemester();
   }, []);
 
   const handleChange = async (e) => {
     e.preventDefault();
-    await axios
-      .get(
-        `${serverLink}staff/human-resources/finance-report/payment-all/${e.target.value}`, token
-      )
-      .then((res) => {
+    try {
+      const { success, data: result } = await api.get(
+        `staff/human-resources/finance-report/payment-all/${e.target.value}`
+      );
+      if (success) {
         setIsLoading(true);
-        const result = res.data;
         if (result.length > 0) {
           let rows = [];
           result.map((item, index) => {
@@ -72,13 +79,13 @@ function PaymentReportByTrimester(props) {
           setCanSeeReport(false);
         }
         setIsLoading(false);
-      })
-      .catch((err) => {
-        toast.error("NETWORK ERROR");
-      });
+      }
+    } catch (err) {
+      toast.error("NETWORK ERROR");
+    }
   };
 
-  const handleSubmit = async (e) => {};
+  const handleSubmit = async (e) => { };
 
   return isLoading ? (
     <Loader />
@@ -103,21 +110,19 @@ function PaymentReportByTrimester(props) {
                       <label className="required fs-6 fw-bold mb-2">
                         Select School Semester
                       </label>
-                      <select
-                        className="form-select"
-                        data-placeholder="Select school semester"
+                      <SearchSelect
                         id="schoolSemester"
-                        required
-                        onChange={handleChange}
-                        value={module.schoolSemester}
-                      >
-                        <option value="">Select option</option>
-                        {allSemester.map((semester, index) => (
-                          <option key={index} value={semester.SemesterCode}>
-                            {semester.SemesterName}
-                          </option>
-                        ))}
-                      </select>
+                        value={semesterOptions.find(opt => opt.value === selectedSemester) || null}
+                        options={semesterOptions}
+                        onChange={(selected) => {
+                          setSelectedSemester(selected?.value || '');
+                          if (selected?.value) {
+                            handleChange({ target: { value: selected.value }, preventDefault: () => { } });
+                          }
+                        }}
+                        placeholder="Select option"
+                        isClearable={false}
+                      />
                     </div>
                   </div>
                 </form>

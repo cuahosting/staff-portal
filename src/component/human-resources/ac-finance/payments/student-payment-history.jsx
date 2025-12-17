@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
 import api from "../../../../resources/api";
@@ -6,6 +6,7 @@ import Loader from "../../../common/loader/loader";
 import { currencyConverter, formatDateAndTime } from "../../../../resources/constants";
 import { connect } from "react-redux";
 import PaymentReceipt from "./payment-receipt";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function StudentPaymentHistory(props) {
     const token = props.loginData[0]?.token;
@@ -45,6 +46,20 @@ function StudentPaymentHistory(props) {
         ],
         rows: [],
     });
+
+    const semesterOptions = useMemo(() => {
+        return [{ value: '', label: 'All' }, ...semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: s.SemesterName || s.SemesterCode
+        }))];
+    }, [semesterList]);
+
+    const statusOptions = [
+        { value: '', label: 'All' },
+        { value: 'Successful', label: 'Successful' },
+        { value: 'Pending', label: 'Pending' },
+        { value: 'Failed', label: 'Failed' }
+    ];
 
     const getPayments = async () => {
         let endpoint = "staff/ac-finance/payments/history";
@@ -95,13 +110,12 @@ function StudentPaymentHistory(props) {
                 Date: formatDateAndTime(item.PaymentDate, "datetime"),
                 Status: (
                     <span
-                        className={`badge badge-light-${
-                            item.Status === "Successful" || item.Status === "success"
+                        className={`badge badge-light-${item.Status === "Successful" || item.Status === "success"
                                 ? "success"
                                 : item.Status === "Pending"
-                                ? "warning"
-                                : "danger"
-                        }`}
+                                    ? "warning"
+                                    : "danger"
+                            }`}
                     >
                         {item.Status || "Successful"}
                     </span>
@@ -347,19 +361,14 @@ function StudentPaymentHistory(props) {
                                 <label htmlFor="SemesterCode" className="form-label">
                                     Semester
                                 </label>
-                                <select
+                                <SearchSelect
                                     id="SemesterCode"
-                                    className="form-select form-select-solid"
-                                    value={filters.SemesterCode}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">All</option>
-                                    {semesterList.map((s) => (
-                                        <option key={s.SemesterCode} value={s.SemesterCode}>
-                                            {s.SemesterName || s.SemesterCode}
-                                        </option>
-                                    ))}
-                                </select>
+                                    value={semesterOptions.find(opt => opt.value === filters.SemesterCode) || semesterOptions[0]}
+                                    options={semesterOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'SemesterCode', value: selected?.value || '' } })}
+                                    placeholder="All"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-2">
                                 <label htmlFor="DateFrom" className="form-label">
@@ -389,17 +398,14 @@ function StudentPaymentHistory(props) {
                                 <label htmlFor="Status" className="form-label">
                                     Status
                                 </label>
-                                <select
+                                <SearchSelect
                                     id="Status"
-                                    className="form-select form-select-solid"
-                                    value={filters.Status}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value="">All</option>
-                                    <option value="Successful">Successful</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Failed">Failed</option>
-                                </select>
+                                    value={statusOptions.find(opt => opt.value === filters.Status) || statusOptions[0]}
+                                    options={statusOptions}
+                                    onChange={(selected) => onFilterChange({ target: { id: 'Status', value: selected?.value || '' } })}
+                                    placeholder="All"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-2">
                                 <div className="d-flex gap-2">
@@ -486,12 +492,11 @@ function StudentPaymentHistory(props) {
                                                     <small className="text-muted">Status</small>
                                                     <div>
                                                         <span
-                                                            className={`badge badge-light-${
-                                                                selectedPayment.Status === "Successful" ||
-                                                                selectedPayment.Status === "success"
+                                                            className={`badge badge-light-${selectedPayment.Status === "Successful" ||
+                                                                    selectedPayment.Status === "success"
                                                                     ? "success"
                                                                     : "warning"
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {selectedPayment.Status || "Successful"}
                                                         </span>

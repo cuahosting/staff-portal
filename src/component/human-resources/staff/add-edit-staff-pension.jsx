@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
@@ -13,7 +12,6 @@ import SearchSelect from "../../common/select/SearchSelect";
 
 
 function AddEditStaffPensionRecord(props) {
-  const token = props.loginData[0]?.token;
 
   const [isLoading, setIsLoading] = useState(true);
   const [staffPensionRecordDatatable, setStaffPensionRecordDatatable] = useState({
@@ -60,101 +58,89 @@ function AddEditStaffPensionRecord(props) {
   const getStaffPensionRecords = async () => {
     const stlist = []
     getStaff().then(async (r) => {
-      await axios
-        .get(`${serverLink}staff/hr/staff-management/staff/pension/records`, token)
-        .then((result) => {
-          if (result.data.length > 0) {
-            let rows = [];
-            result.data.map((pension, index) => {
-              rows.push({
-                sn: index + 1,
-                EntryID: pension.EntryID,
-                StaffID: pension.StaffID,
-                StaffName: pension.StaffName,
-                PensionAdmin: pension.PensionAdmin,
-                RSAPin: pension.RSAPin,
-                PensionAdminID: pension.PensionAdminID,
-                action: (
-                  <button
-                    className="btn btn-sm btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#kt_modal_general"
-                    onClick={() => {
-
-                      // setCreateStaffPensionRecord({
-                      //   ...createStaffPensionRecord,
-                      //   Staff: "",
-                      //   EntryID: "",
-                      //   StaffID: "",
-                      //   RSAPin: "",
-                      //   PensionAdminID: "",
-                      // })
-
-                      if (r.length > 0) {
-                        const staff_list = r.filter(x => x.StaffID === pension.StaffID)[0];
-                        setCreateStaffPensionRecord({
-                          StaffID: pension.StaffID,
-                          Staff: { value: staff_list.StaffID, label: staff_list.StaffID + "--" + staff_list.FirstName + " " + staff_list.MiddleName + " " + staff_list.Surname },
-                          RSAPin: pension.RSAPin,
-                          PensionAdminID: pension.PensionAdminID,
-                          EntryID: pension.EntryID,
-                        })
-                      }
+      try {
+        const { success, data } = await api.get("staff/hr/staff-management/staff/pension/records");
+        if (success && data.length > 0) {
+          let rows = [];
+          data.map((pension, index) => {
+            rows.push({
+              sn: index + 1,
+              EntryID: pension.EntryID,
+              StaffID: pension.StaffID,
+              StaffName: pension.StaffName,
+              PensionAdmin: pension.PensionAdmin,
+              RSAPin: pension.RSAPin,
+              PensionAdminID: pension.PensionAdminID,
+              action: (
+                <button
+                  className="btn btn-sm btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_general"
+                  onClick={() => {
+                    if (r.length > 0) {
+                      const staff_list = r.filter(x => x.StaffID === pension.StaffID)[0];
+                      setCreateStaffPensionRecord({
+                        StaffID: pension.StaffID,
+                        Staff: { value: staff_list.StaffID, label: staff_list.StaffID + "--" + staff_list.FirstName + " " + staff_list.MiddleName + " " + staff_list.Surname },
+                        RSAPin: pension.RSAPin,
+                        PensionAdminID: pension.PensionAdminID,
+                        EntryID: pension.EntryID,
+                      })
                     }
-                    }
-                  >
-                    <i className="fa fa-pen" />
-                  </button>
-                ),
-              });
+                  }
+                  }
+                >
+                  <i className="fa fa-pen" />
+                </button>
+              ),
             });
+          });
 
-            setStaffPensionRecordDatatable({
-              ...staffPensionRecordDatatable,
-              columns: staffPensionRecordDatatable.columns,
-              rows: rows,
-            });
-          }
+          setStaffPensionRecordDatatable({
+            ...staffPensionRecordDatatable,
+            columns: staffPensionRecordDatatable.columns,
+            rows: rows,
+          });
+        }
 
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.log("NETWORK ERROR");
-        });
+        setIsLoading(false);
+      } catch (err) {
+        console.log("NETWORK ERROR");
+      }
     });
 
 
   };
 
   const getStaff = async () => {
-    return await axios
-      .get(`${serverLink}staff/hr/staff-management/staff/list`, token)
-      .then((response) => {
-        setStList(response.data)
+    try {
+      const { success, data } = await api.get("staff/hr/staff-management/staff/list");
+      if (success) {
+        setStList(data)
         let rows = [];
-        response.data.length > 0 &&
-          response.data.map((row) => {
+        data.length > 0 &&
+          data.map((row) => {
             rows.push({ value: row.StaffID, label: row.StaffID + "--" + row.FirstName + " " + row.MiddleName + " " + row.Surname })
           });
         setStaffList(rows);
         setIsLoading(false);
-        return response.data
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+        return data
+      }
+    } catch (err) {
+      console.log("NETWORK ERROR");
+    }
   };
 
   const getPensionAdministrators = async () => {
-    await axios
-      .get(`${serverLink}staff/hr/staff-management/pension/administrators/list`, token)
-      .then((response) => {
-        setPensionAdministratorsList(response.data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.log("NETWORK ERROR");
-      });
+    try {
+      const { success, data } = await api.get("staff/hr/staff-management/pension/administrators/list");
+      if (success) {
+        setPensionAdministratorsList(data);
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.log("NETWORK ERROR");
+    }
   };
 
   const onEdit = (e) => {
@@ -181,78 +167,74 @@ function AddEditStaffPensionRecord(props) {
 
     if (createStaffPensionRecord.EntryID === "") {
       toast.info("Submitting. Please wait...");
-      await axios
-        .post(
-          `${serverLink}staff/hr/staff-management/add/staff/pension/record`,
-          createStaffPensionRecord, token
-        )
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Pension record added successfully");
-            document.getElementById("pension-close").click()
-            getStaffPensionRecords();
-            setCreateStaffPensionRecord({
-              ...createStaffPensionRecord,
-              EntryID: "",
-              StaffID: "",
-              RSAPin: "",
-              PensionAdminID: "",
-            });
-          } else if (result.data.message === "exist") {
-            showAlert(
-              "PENSION EXIST",
-              "Staff pension record already exist!",
-              "error"
-            );
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
+      try {
+        const { success, data } = await api.post(
+          "staff/hr/staff-management/add/staff/pension/record",
+          createStaffPensionRecord
+        );
+        if (success && data.message === "success") {
+          toast.success("Pension record added successfully");
+          document.getElementById("pension-close").click()
+          getStaffPensionRecords();
+          setCreateStaffPensionRecord({
+            ...createStaffPensionRecord,
+            EntryID: "",
+            StaffID: "",
+            RSAPin: "",
+            PensionAdminID: "",
+          });
+        } else if (data.message === "exist") {
           showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
+            "PENSION EXIST",
+            "Staff pension record already exist!",
             "error"
           );
-        });
+        } else {
+          showAlert(
+            "ERROR",
+            "Something went wrong. Please try again!",
+            "error"
+          );
+        }
+      } catch (error) {
+        showAlert(
+          "NETWORK ERROR",
+          "Please check your connection and try again!",
+          "error"
+        );
+      }
     } else {
       toast.info("Updating. Please wait...");
-      await axios
-        .patch(
-          `${serverLink}staff/hr/staff-management/update/staff/pension/record`,
-          createStaffPensionRecord, token
-        )
-        .then((result) => {
-          if (result.data.message === "success") {
-            toast.success("Pension record updated successfully");
-            document.getElementById("pension-close").click()
-            getStaffPensionRecords();
-            setCreateStaffPensionRecord({
-              ...createStaffPensionRecord,
-              EntryID: "",
-              StaffID: "",
-              RSAPin: "",
-              PensionAdminID: "",
-            });
-          } else {
-            showAlert(
-              "ERROR",
-              "Something went wrong. Please try again!",
-              "error"
-            );
-          }
-        })
-        .catch((error) => {
+      try {
+        const { success, data } = await api.patch(
+          "staff/hr/staff-management/update/staff/pension/record",
+          createStaffPensionRecord
+        );
+        if (success && data.message === "success") {
+          toast.success("Pension record updated successfully");
+          document.getElementById("pension-close").click()
+          getStaffPensionRecords();
+          setCreateStaffPensionRecord({
+            ...createStaffPensionRecord,
+            EntryID: "",
+            StaffID: "",
+            RSAPin: "",
+            PensionAdminID: "",
+          });
+        } else {
           showAlert(
-            "NETWORK ERROR",
-            "Please check your connection and try again!",
+            "ERROR",
+            "Something went wrong. Please try again!",
             "error"
           );
-        });
+        }
+      } catch (error) {
+        showAlert(
+          "NETWORK ERROR",
+          "Please check your connection and try again!",
+          "error"
+        );
+      }
     }
   };
 

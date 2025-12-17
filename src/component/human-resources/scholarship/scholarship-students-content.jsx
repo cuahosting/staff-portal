@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AGTable from "../../common/table/AGTable";
 import api from "../../../resources/api";
 import Loader from "../../common/loader/loader";
@@ -6,6 +6,7 @@ import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { formatDateAndTime } from "../../../resources/constants";
 import SearchSelect from "../../common/select/SearchSelect";
+import PageHeader from "../../common/pageheader/pageheader";
 
 function ScholarshipStudentsContent(props) {
     const token = props.loginData[0]?.token;
@@ -54,6 +55,27 @@ function ScholarshipStudentsContent(props) {
         });
         setSelectedStudent(null);
     };
+
+    const scholarshipFilterOptions = useMemo(() => {
+        return [{ value: '', label: 'All Scholarships' }, ...scholarshipList.map(s => ({
+            value: s.ScholarshipID.toString(),
+            label: s.Name
+        }))];
+    }, [scholarshipList]);
+
+    const scholarshipOptions = useMemo(() => {
+        return scholarshipList.map(s => ({
+            value: s.ScholarshipID.toString(),
+            label: `${s.Name} (Tuition: ${s.Tuition}%)`
+        }));
+    }, [scholarshipList]);
+
+    const semesterOptions = useMemo(() => {
+        return semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: s.SemesterName || s.SemesterCode
+        }));
+    }, [semesterList]);
 
     const getEnrollments = async () => {
         const result = await api.get("staff/ac-finance/scholarship-students/list", token);
@@ -278,42 +300,43 @@ function ScholarshipStudentsContent(props) {
     if (isLoading) return <Loader />;
 
     return (
-        <>
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 className="mb-1">Student Enrollments</h4>
-                    <p className="text-muted mb-0">Manage scholarship student enrollments</p>
-                </div>
-                <div className="d-flex gap-3">
-                    <select
-                        className="form-select form-select-solid w-200px"
-                        value={filterScholarship}
-                        onChange={(e) => setFilterScholarship(e.target.value)}
-                    >
-                        <option value="">All Scholarships</option>
-                        {scholarshipList.map((s) => (
-                            <option key={s.ScholarshipID} value={s.ScholarshipID}>
-                                {s.Name}
-                            </option>
-                        ))}
-                    </select>
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={() => {
-                            resetForm();
-                            setShowModal(true);
-                        }}
-                    >
-                        <i className="fa fa-plus me-2"></i>
-                        Enroll Student
-                    </button>
+        <div className="d-flex flex-column flex-row-fluid">
+            <PageHeader
+                title="Student Enrollments"
+                items={["Human Resources", "Scholarship", "Student Enrollments"]}
+                buttons={
+                    <div className="d-flex gap-3">
+                        <div style={{ width: '200px' }}>
+                            <SearchSelect
+                                value={scholarshipFilterOptions.find(opt => opt.value === filterScholarship) || scholarshipFilterOptions[0]}
+                                options={scholarshipFilterOptions}
+                                onChange={(selected) => setFilterScholarship(selected?.value || '')}
+                                placeholder="All Scholarships"
+                                isClearable={false}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={() => {
+                                resetForm();
+                                setShowModal(true);
+                            }}
+                        >
+                            <i className="fa fa-plus me-2"></i>
+                            Enroll Student
+                        </button>
+                    </div>
+                }
+            />
+
+            <div className="flex-column-fluid">
+                <div className="card">
+                    <div className="card-body py-4">
+                        <AGTable data={datatable} />
+                    </div>
                 </div>
             </div>
-
-            {/* Table */}
-            <AGTable data={datatable} />
 
             {/* Modal */}
             {showModal && (
@@ -331,20 +354,13 @@ function ScholarshipStudentsContent(props) {
                             <div className="modal-body">
                                 <div className="form-group mb-4">
                                     <label className="required form-label">Scholarship</label>
-                                    <select
-                                        className="form-select form-select-solid"
-                                        value={formData.ScholarshipID}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, ScholarshipID: e.target.value })
-                                        }
-                                    >
-                                        <option value="">Select Scholarship</option>
-                                        {scholarshipList.map((s) => (
-                                            <option key={s.ScholarshipID} value={s.ScholarshipID}>
-                                                {s.Name} (Tuition: {s.Tuition}%)
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <SearchSelect
+                                        value={scholarshipOptions.find(opt => opt.value === formData.ScholarshipID.toString()) || null}
+                                        options={scholarshipOptions}
+                                        onChange={(selected) => setFormData({ ...formData, ScholarshipID: selected?.value || '' })}
+                                        placeholder="Select Scholarship"
+                                        isClearable={false}
+                                    />
                                 </div>
 
                                 <div className="form-group mb-4">
@@ -359,20 +375,13 @@ function ScholarshipStudentsContent(props) {
 
                                 <div className="form-group mb-4">
                                     <label className="required form-label">Semester</label>
-                                    <select
-                                        className="form-select form-select-solid"
-                                        value={formData.Semester}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, Semester: e.target.value })
-                                        }
-                                    >
-                                        <option value="">Select Semester</option>
-                                        {semesterList.map((s) => (
-                                            <option key={s.SemesterCode} value={s.SemesterCode}>
-                                                {s.SemesterName || s.SemesterCode}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <SearchSelect
+                                        value={semesterOptions.find(opt => opt.value === formData.Semester) || null}
+                                        options={semesterOptions}
+                                        onChange={(selected) => setFormData({ ...formData, Semester: selected?.value || '' })}
+                                        placeholder="Select Semester"
+                                        isClearable={false}
+                                    />
                                 </div>
                             </div>
                             <div className="modal-footer">
@@ -395,7 +404,7 @@ function ScholarshipStudentsContent(props) {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
 

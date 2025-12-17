@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AGTable from "../../../common/table/AGTable";
 import api from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { formatDateAndTime } from "../../../../resources/constants";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function ScholarshipAdmission(props) {
     const token = props.loginData[0]?.token;
@@ -40,6 +41,25 @@ function ScholarshipAdmission(props) {
 
     const [showModal, setShowModal] = useState(false);
     const [filterStatus, setFilterStatus] = useState("all");
+
+    const scholarshipOptions = useMemo(() => {
+        return scholarshipList.map(s => ({
+            value: s.ScholarshipID,
+            label: s.Name
+        }));
+    }, [scholarshipList]);
+
+    const semesterOptions = useMemo(() => {
+        return semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: s.SemesterName || s.SemesterCode
+        }));
+    }, [semesterList]);
+
+    const filterOptions = [
+        { value: 'all', label: 'All Status' },
+        { value: 'unused', label: 'Unused Only' }
+    ];
 
     const resetForm = () => {
         setFormData({
@@ -240,14 +260,14 @@ function ScholarshipAdmission(props) {
                     </p>
                 </div>
                 <div className="d-flex gap-3">
-                    <select
-                        className="form-select form-select-solid w-150px"
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                    >
-                        <option value="all">All Status</option>
-                        <option value="unused">Unused Only</option>
-                    </select>
+                    <SearchSelect
+                        id="filterStatus"
+                        value={filterOptions.find(opt => opt.value === filterStatus) || filterOptions[0]}
+                        options={filterOptions}
+                        onChange={(selected) => setFilterStatus(selected?.value || 'all')}
+                        placeholder="Status"
+                        isClearable={false}
+                    />
                     <button
                         type="button"
                         className="btn btn-primary"
@@ -325,38 +345,28 @@ function ScholarshipAdmission(props) {
                                     <label htmlFor="ScholarshipID" className="required form-label">
                                         Scholarship
                                     </label>
-                                    <select
+                                    <SearchSelect
                                         id="ScholarshipID"
-                                        className="form-select form-select-solid"
-                                        value={formData.ScholarshipID}
-                                        onChange={onEdit}
-                                    >
-                                        <option value="">Select Scholarship</option>
-                                        {scholarshipList.map((s) => (
-                                            <option key={s.ScholarshipID} value={s.ScholarshipID}>
-                                                {s.Name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        value={scholarshipOptions.find(opt => opt.value === formData.ScholarshipID) || null}
+                                        options={scholarshipOptions}
+                                        onChange={(selected) => onEdit({ target: { id: 'ScholarshipID', value: selected?.value || '' } })}
+                                        placeholder="Select Scholarship"
+                                        isClearable={false}
+                                    />
                                 </div>
 
                                 <div className="form-group mb-4">
                                     <label htmlFor="SchoolSemester" className="required form-label">
                                         Admission Semester
                                     </label>
-                                    <select
+                                    <SearchSelect
                                         id="SchoolSemester"
-                                        className="form-select form-select-solid"
-                                        value={formData.SchoolSemester}
-                                        onChange={onEdit}
-                                    >
-                                        <option value="">Select Semester</option>
-                                        {semesterList.map((s) => (
-                                            <option key={s.SemesterCode} value={s.SemesterCode}>
-                                                {s.SemesterName || s.SemesterCode}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        value={semesterOptions.find(opt => opt.value === formData.SchoolSemester) || null}
+                                        options={semesterOptions}
+                                        onChange={(selected) => onEdit({ target: { id: 'SchoolSemester', value: selected?.value || '' } })}
+                                        placeholder="Select Semester"
+                                        isClearable={false}
+                                    />
                                 </div>
                             </div>
                             <div className="modal-footer">

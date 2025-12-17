@@ -14,7 +14,7 @@ export default function PaySlipPrint(props) {
             maxWidth: '900px',
             margin: '0 auto',
             backgroundColor: '#ffffff',
-            padding: '40px',
+            padding: '20px',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
         },
         watermark: {
@@ -22,7 +22,7 @@ export default function PaySlipPrint(props) {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%) rotate(-45deg)',
-            fontSize: '80px',
+            fontSize: '60px',
             fontWeight: '900',
             color: 'rgba(0, 0, 0, 0.03)',
             zIndex: 0,
@@ -33,51 +33,53 @@ export default function PaySlipPrint(props) {
         header: {
             position: 'relative',
             zIndex: 1,
-            marginBottom: '30px'
+            marginBottom: '15px'
         },
         banner: {
             width: '100%',
-            marginBottom: '25px',
-            borderRadius: '8px'
+            marginBottom: '15px',
+            borderRadius: '8px',
+            maxHeight: '80px',
+            objectFit: 'contain'
         },
         titleSection: {
             backgroundColor: '#f8f9fa',
-            padding: '20px 25px',
+            padding: '10px 15px',
             borderRadius: '8px',
-            marginBottom: '25px',
+            marginBottom: '15px',
             borderLeft: '4px solid #0d6efd'
         },
         infoCard: {
             backgroundColor: '#ffffff',
             border: '1px solid #e3e6ef',
             borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '25px'
+            padding: '12px',
+            marginBottom: '15px'
         },
         infoRow: {
             display: 'flex',
             justifyContent: 'space-between',
-            marginBottom: '12px',
-            paddingBottom: '12px',
+            marginBottom: '6px',
+            paddingBottom: '6px',
             borderBottom: '1px solid #f1f3f5'
         },
         label: {
             color: '#6c757d',
-            fontSize: '13px',
+            fontSize: '10px',
             fontWeight: '600',
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
         },
         value: {
             color: '#212529',
-            fontSize: '14px',
+            fontSize: '11px',
             fontWeight: '600'
         },
         table: {
             width: '100%',
             borderCollapse: 'separate',
             borderSpacing: '0',
-            marginBottom: '25px',
+            marginBottom: '15px',
             border: '1px solid #e3e6ef',
             borderRadius: '8px',
             overflow: 'hidden'
@@ -86,12 +88,12 @@ export default function PaySlipPrint(props) {
             backgroundColor: '#0d6efd',
             color: '#ffffff',
             fontWeight: '600',
-            fontSize: '13px',
+            fontSize: '10px',
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
         },
         tableHeaderCell: {
-            padding: '15px 20px',
+            padding: '8px 10px',
             textAlign: 'left'
         },
         tableRow: {
@@ -102,38 +104,39 @@ export default function PaySlipPrint(props) {
             backgroundColor: '#f8f9fa'
         },
         tableCell: {
-            padding: '15px 20px',
-            fontSize: '14px',
+            padding: '6px 10px',
+            fontSize: '10px',
             color: '#495057'
         },
         summaryCard: {
             backgroundColor: '#f8f9fa',
             border: '2px solid #0d6efd',
             borderRadius: '8px',
-            padding: '25px',
-            marginBottom: '30px'
+            padding: '15px',
+            marginTop: '25px',
+            marginBottom: '15px'
         },
         summaryRow: {
             display: 'flex',
             justifyContent: 'space-between',
-            padding: '12px 0',
+            padding: '6px 0',
             borderBottom: '1px solid #dee2e6'
         },
         summaryLabel: {
-            fontSize: '14px',
+            fontSize: '11px',
             fontWeight: '600',
             color: '#6c757d',
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
         },
         summaryValue: {
-            fontSize: '16px',
+            fontSize: '12px',
             fontWeight: '700'
         },
         netPayRow: {
             backgroundColor: '#0d6efd',
-            margin: '-25px -25px 0 -25px',
-            padding: '20px 25px',
+            margin: '-15px -15px 0 -15px',
+            padding: '12px 15px',
             borderRadius: '0 0 6px 6px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -141,58 +144,75 @@ export default function PaySlipPrint(props) {
         },
         netPayLabel: {
             color: '#ffffff',
-            fontSize: '16px',
+            fontSize: '12px',
             fontWeight: '700',
             textTransform: 'uppercase',
             letterSpacing: '1px'
         },
         netPayValue: {
             color: '#ffffff',
-            fontSize: '24px',
+            fontSize: '18px',
             fontWeight: '900'
         },
         footer: {
-            marginTop: '40px',
-            paddingTop: '25px',
+            marginTop: '20px',
+            paddingTop: '15px',
             borderTop: '2px solid #e3e6ef',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end'
         },
         signatureBox: {
-            width: '250px'
+            width: '200px'
         },
         signatureLine: {
             borderTop: '2px solid #212529',
-            marginTop: '60px',
-            paddingTop: '8px',
+            marginTop: '40px',
+            paddingTop: '6px',
             textAlign: 'center',
-            fontSize: '12px',
+            fontSize: '10px',
             color: '#6c757d',
             fontWeight: '600'
         },
         confidentialNote: {
-            fontSize: '11px',
+            fontSize: '9px',
             color: '#6c757d',
             fontStyle: 'italic',
-            maxWidth: '400px',
+            maxWidth: '300px',
             textAlign: 'right',
-            lineHeight: '1.6'
+            lineHeight: '1.4'
         },
         slipId: {
             backgroundColor: '#e7f3ff',
-            padding: '8px 16px',
+            padding: '5px 10px',
             borderRadius: '20px',
-            fontSize: '12px',
+            fontSize: '10px',
             fontWeight: '700',
             color: '#0d6efd',
             display: 'inline-block'
         }
     };
 
+    const printStyles = `
+        @media print {
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            * {
+                box-sizing: border-box !important;
+            }
+        }
+    `;
+
 
     return (
         <div ref={props.componentRef} style={{ position: 'relative' }}>
+            <style>{printStyles}</style>
             <div style={styles.watermark}>
                 {projectName}
             </div>
@@ -204,38 +224,6 @@ export default function PaySlipPrint(props) {
                         alt="Banner"
                         style={styles.banner}
                     />
-
-                    <div style={styles.titleSection}>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            flexWrap: 'wrap',
-                            gap: '15px'
-                        }}>
-                            <div>
-                                <h1 style={{
-                                    margin: '0 0 5px 0',
-                                    fontSize: '28px',
-                                    fontWeight: '700',
-                                    color: '#212529'
-                                }}>
-                                    Salary Slip
-                                </h1>
-                                <p style={{
-                                    margin: 0,
-                                    fontSize: '15px',
-                                    color: '#6c757d',
-                                    fontWeight: '600'
-                                }}>
-                                    {formatDateAndTime(props.data?.salary_date, "month_and_year")}
-                                </p>
-                            </div>
-                            <div style={styles.slipId}>
-                                SLIP ID: {props.data?.employee_id + generate_token(3)}
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div style={styles.infoCard}>

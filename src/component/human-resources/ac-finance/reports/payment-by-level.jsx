@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
 import AGTable from "../../../common/table/AGTable";
 import api from "../../../../resources/api";
 import Loader from "../../../common/loader/loader";
 import { currencyConverter } from "../../../../resources/constants";
 import { connect } from "react-redux";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function PaymentByLevel(props) {
     const token = props.loginData[0]?.token;
@@ -31,6 +32,13 @@ function PaymentByLevel(props) {
         ],
         rows: [],
     });
+
+    const semesterOptions = useMemo(() => {
+        return semesterList.map(s => ({
+            value: s.SemesterCode,
+            label: (s.SemesterName || s.SemesterCode) + (s.IsCurrent === 1 ? ' (Current)' : '')
+        }));
+    }, [semesterList]);
 
     const getReportData = async () => {
         if (!selectedSemester) {
@@ -78,9 +86,8 @@ function PaymentByLevel(props) {
                     <div className="d-flex align-items-center">
                         <div className="progress flex-grow-1 me-2" style={{ height: "8px" }}>
                             <div
-                                className={`progress-bar ${
-                                    rate >= 80 ? "bg-success" : rate >= 50 ? "bg-warning" : "bg-danger"
-                                }`}
+                                className={`progress-bar ${rate >= 80 ? "bg-success" : rate >= 50 ? "bg-warning" : "bg-danger"
+                                    }`}
                                 style={{ width: `${rate}%` }}
                             ></div>
                         </div>
@@ -186,19 +193,14 @@ function PaymentByLevel(props) {
                         <div className="row align-items-end">
                             <div className="col-md-4">
                                 <label className="form-label required">Select Semester</label>
-                                <select
-                                    className="form-select form-select-solid"
-                                    value={selectedSemester}
-                                    onChange={(e) => setSelectedSemester(e.target.value)}
-                                >
-                                    <option value="">Select Semester</option>
-                                    {semesterList.map((s) => (
-                                        <option key={s.SemesterCode} value={s.SemesterCode}>
-                                            {s.SemesterName || s.SemesterCode}
-                                            {s.IsCurrent === 1 && " (Current)"}
-                                        </option>
-                                    ))}
-                                </select>
+                                <SearchSelect
+                                    id="selectedSemester"
+                                    value={semesterOptions.find(opt => opt.value === selectedSemester) || null}
+                                    options={semesterOptions}
+                                    onChange={(selected) => setSelectedSemester(selected?.value || '')}
+                                    placeholder="Select Semester"
+                                    isClearable={false}
+                                />
                             </div>
                             <div className="col-md-8 text-end">
                                 <button

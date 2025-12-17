@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "../../../../resources/api";
 import { toast } from "react-toastify";
-import { serverLink } from "../../../../resources/url";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import Loader from "../../../common/loader/loader";
 import Modal from "../../../common/modal/modal";
@@ -10,7 +9,6 @@ import AGReportTable from "../../../common/table/AGReportTable";
 import { formatDateAndTime } from "../../../../resources/constants";
 
 function LedgerBranch(props) {
-    const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [isFormLoading, setisFormLoading] = useState("off");
     const columns = ["SN", "Action", "Branch Code", "Branch Name", "Inserted By", "Inserted Date"];
@@ -24,37 +22,36 @@ function LedgerBranch(props) {
     });
 
     const getbranches = async () => {
-        await axios.get(`${serverLink}ledger/branch/list`, token).then((res) => {
-            if (res.data.length > 0) {
-                let rows = [];
-                res.data.map((x, i) => {
-                    rows.push([
-                        i + 1,
-                        <button
-                            className="btn btn-sm btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#kt_modal_general"
-                            onClick={() => {
-                                setBranches({
-                                    ...branches,
-                                    EntryID: x.EntryID,
-                                    BranchCode: x.BranchCode,
-                                    BranchName: x.BranchName
-                                });
-                            }}
-                        >
-                            <i className="fa fa-pen" />
-                        </button>,
-                        x.BranchCode,
-                        x.BranchName,
-                        x.InsertedBy,
-                        formatDateAndTime(x.InsertedDate, "date")
-                    ]);
-                });
-                setData(rows);
-            }
-            setIsLoading(false);
-        }).catch((e) => { console.log(e); });
+        const { success, data } = await api.get("ledger/branch/list");
+        if (success && data && data.length > 0) {
+            let rows = [];
+            data.map((x, i) => {
+                rows.push([
+                    i + 1,
+                    <button
+                        className="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() => {
+                            setBranches({
+                                ...branches,
+                                EntryID: x.EntryID,
+                                BranchCode: x.BranchCode,
+                                BranchName: x.BranchName
+                            });
+                        }}
+                    >
+                        <i className="fa fa-pen" />
+                    </button>,
+                    x.BranchCode,
+                    x.BranchName,
+                    x.InsertedBy,
+                    formatDateAndTime(x.InsertedDate, "date")
+                ]);
+            });
+            setData(rows);
+        }
+        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -90,41 +87,38 @@ function LedgerBranch(props) {
 
         if (branches.EntryID === "") {
             setisFormLoading("on");
-            await axios.post(`${serverLink}ledger/branch/add`, branches, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Branch Added Successfully");
-                        getbranches();
-                        Reset();
-                        document.getElementById("closeModal").click();
-                    } else if (result.data.message === "exists") {
-                        toast.error("Branch already exists");
-                    } else {
-                        toast.error("Error adding branch");
-                    }
-                    setisFormLoading("off");
-                })
-                .catch((error) => {
-                    showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
-                });
+            const { success, data } = await api.post("ledger/branch/add", branches);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Branch Added Successfully");
+                    getbranches();
+                    Reset();
+                    document.getElementById("closeModal").click();
+                } else if (data.message === "exists") {
+                    toast.error("Branch already exists");
+                } else {
+                    toast.error("Error adding branch");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
+            setisFormLoading("off");
         } else {
             setisFormLoading("on");
-            await axios
-                .patch(`${serverLink}ledger/branch/update`, branches, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Branch Updated Successfully");
-                        getbranches();
-                        Reset();
-                        document.getElementById("closeModal").click();
-                    } else {
-                        toast.error("Something went wrong. Please try again!");
-                    }
-                    setisFormLoading("off");
-                })
-                .catch((error) => {
-                    showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
-                });
+            const { success, data } = await api.patch("ledger/branch/update", branches);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Branch Updated Successfully");
+                    getbranches();
+                    Reset();
+                    document.getElementById("closeModal").click();
+                } else {
+                    toast.error("Something went wrong. Please try again!");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
+            setisFormLoading("off");
         }
     };
 

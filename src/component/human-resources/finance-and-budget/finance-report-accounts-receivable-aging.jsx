@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import PageHeader from "../../common/pageheader/pageheader";
 import ReportTable from "../../common/table/ReportTable";
 import Modal from "../../common/modal/modal";
-import {currencyConverter, formatDate, formatDateAndTime} from "../../../resources/constants";
+import { currencyConverter, formatDate, formatDateAndTime } from "../../../resources/constants";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function FinanceReportAccountReceivableAging(props) {
-    const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "Name", "Current", "1-30 Days", "31-60 Days", "61-90 Days", "Over 90 Days", "Total Due"];
     const [dataTable, setDataTable] = useState([]);
@@ -20,25 +19,20 @@ function FinanceReportAccountReceivableAging(props) {
     const [transactionList, setTransactionList] = useState([]);
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/finance/inventory/accounts-receivable-aging-report`, token)
-            .then((result) => {
-                if (result.data.message === 'success') {
-                    if (result.data.Request.length > 0) {
-                        //Vendor
-                        populate_vendor(result)
+        const { success, data: result } = await api.get("staff/finance/inventory/accounts-receivable-aging-report");
+        if (success && result.message === 'success') {
+            if (result.Request.length > 0) {
+                //Vendor
+                populate_vendor({ data: result })
 
-                        //Manufacturer
-                        populate_manufacturer(result)
-                    }else{
-                        setDataTable([])
-                        setDataTable2([])
-                    }
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR")
-            });
+                //Manufacturer
+                populate_manufacturer({ data: result })
+            } else {
+                setDataTable([])
+                setDataTable2([])
+            }
+        }
+        setIsLoading(false);
     }
 
     const populate_vendor = (result) => {
@@ -46,7 +40,7 @@ function FinanceReportAccountReceivableAging(props) {
         let current_column_total = 0; let one_thirty_column_total = 0; let thirty_sixty_column_total = 0; let sixty_ninety_column_total = 0; let over_ninety_column_total = 0; let total_due_column_total = 0;
         result.data.Vendor.map((item, index) => {
             let current = 0; let one_thirty = 0; let thirty_sixty = 0; let sixty_ninety = 0; let over_ninety = 0; let total_due = 0;
-            result.data.Request.filter(e=> e.request_type === "Vendor" && e.requested_from === item.vendor_id).map((x, i) => {
+            result.data.Request.filter(e => e.request_type === "Vendor" && e.requested_from === item.vendor_id).map((x, i) => {
                 let startDate = new Date(formatDate(x.inserted_date));
                 let endDate = new Date(Date.now());
                 let timeDiff = Math.abs(endDate.getTime() - startDate.getTime());
@@ -177,25 +171,33 @@ function FinanceReportAccountReceivableAging(props) {
             setReportType(value)
     }
 
+    const reportTypeOptions = [
+        { value: 'Vendor', label: 'Vendor' },
+        { value: 'Manufacturer', label: 'Manufacturer' }
+    ];
+
     return isLoading ? (
-            <Loader />
-        ) :
+        <Loader />
+    ) :
         (
             <>
-                <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width:'100%' }}>
+                <div className="card" style={{ borderStyle: 'none', borderWidth: '0px', width: '100%' }}>
                     <div className="">
-                        <PageHeader title={"ACCOUNT RECEIVABLE AGING REPORT"} items={["Human-Resources", "Finance & Budget", "Account Receivable Aging Report"]}/>
+                        <PageHeader title={"ACCOUNT RECEIVABLE AGING REPORT"} items={["Human-Resources", "Finance & Budget", "Account Receivable Aging Report"]} />
                         <div className="row">
                             <div className="col-md-4 mb-3">
                                 <label htmlFor="report_type">Select Report Type</label>
-                                <select id="report_type" value={reportType} className="form-control" onChange={handleChange}>
-                                    <option value="">Select Option</option>
-                                    <option value="Vendor">Vendor</option>
-                                    <option value="Manufacturer">Manufacturer</option>
-                                </select>
+                                <SearchSelect
+                                    id="report_type"
+                                    value={reportTypeOptions.find(opt => opt.value === reportType) || null}
+                                    options={reportTypeOptions}
+                                    onChange={(selected) => setReportType(selected?.value || '')}
+                                    placeholder="Select Option"
+                                    isClearable={false}
+                                />
                             </div>
                         </div>
-                        <div className="row col-md-12" style={{width:'100%'}}>
+                        <div className="row col-md-12" style={{ width: '100%' }}>
                             {
                                 reportType === "Vendor" ?
                                     <ReportTable

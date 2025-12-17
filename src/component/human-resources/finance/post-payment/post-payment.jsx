@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PageHeader from "../../../common/pageheader/pageheader";
 import SearchSelect from "../../../common/select/SearchSelect";
-import axios from "axios";
+import { api } from "../../../../resources/api";
 import { serverLink } from "../../../../resources/url";
 import Loader from "../../../common/loader/loader";
 import { showAlert, showConfirm } from "../../../common/sweetalert/sweetalert";
@@ -12,7 +12,6 @@ import { currencyConverter, encryptData, projectCode } from "../../../../resourc
 import { Link } from "react-router-dom";
 
 function PostPayment(props) {
-    const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(false);
     const [isFormLoading, setIsFormLoading] = useState('off');
@@ -154,45 +153,50 @@ function PostPayment(props) {
     });
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/academics/timetable/semester/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    setSemesterList(result.data)
-                }
-            }).catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+        try {
+            const { success: semesterSuccess, data: semesterData } = await api.get("staff/academics/timetable/semester/list");
+            if (semesterSuccess && semesterData.length > 0) {
+                setSemesterList(semesterData)
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
 
-        await axios.get(`${serverLink}staff/student-manager/student/active`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    let rows = [];
-                    result.data.map((item) => {
-                        rows.push({
-                            value: item.StudentID,
-                            label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
-                        });
+        try {
+            const { success: studentSuccess, data: studentData } = await api.get("staff/student-manager/student/active");
+            if (studentSuccess && studentData.length > 0) {
+                let rows = [];
+                studentData.map((item) => {
+                    rows.push({
+                        value: item.StudentID,
+                        label: `${item.FirstName} ${item.MiddleName} ${item.Surname} (${item.StudentID})`,
                     });
-                    setStudentSelectList(rows);
-
-                    setStudentList(result.data)
-                }
-            }).catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+                });
+                setStudentSelectList(rows);
+                setStudentList(studentData)
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
 
     }
 
     const getApplicantData = async (id) => {
         setShowOutStanding(0)
-        await axios.get(`${serverLink}staff/finance/applicant/details/${btoa(id)}`, token)
-            .then((result) => {
-                if (result.data.studentData.length > 0) {
-                    const data = result.data.studentData[0];
-                    const other_fee = result.data.otherFee;
-                    const payment_history = result.data.paymentHistory;
-                    const studentScholarshipData = result.data.scholarship;
-                    const studentOutstanding = result.data.OutStandingAmount;
+        try {
+            const { success, data: resultData } = await api.get(`staff/finance/applicant/details/${btoa(id)}`);
+            if (success) {
+                // api wrapper might return data directly or wrapped. 
+                // Based on other files, api returns {success, data}.
+                // The original code accessed result.data.studentData
+                // So resultData here corresponds to result.data
+
+                if (resultData.studentData.length > 0) {
+                    const data = resultData.studentData[0];
+                    const other_fee = resultData.otherFee;
+                    const payment_history = resultData.paymentHistory;
+                    const studentScholarshipData = resultData.scholarship;
+                    const studentOutstanding = resultData.OutStandingAmount;
                     setAmountDue(parseFloat(studentOutstanding))
                     setShowOutStanding(prevState => prevState + studentOutstanding)
                     outStandingAmount += studentOutstanding;
@@ -214,70 +218,71 @@ function PostPayment(props) {
                     setChange('First Data')
 
                     const dataSet = { CourseCode: data.CourseCode, Level: data.DecisionLevel, Semester: data.DecisionSemester }
-                    axios.post(`${serverLink}staff/finance/tuition/details`, dataSet, token)
-                        .then((result) => {
-                            if (result.data.length > 0) {
-                                const res = result.data[0];
-                                let desc, session_desc = '';
-                                let amt, session_amt = 0;
-                                if (studentScholarshipData.length > 0) {
-                                    desc = `Semester Tuition (${studentScholarshipData[0].ScholarshipName})`;
-                                    session_desc = `Session Tuition (${studentScholarshipData[0].ScholarshipName})`;
-                                    amt = parseFloat(res.SemesterTuition) - (parseFloat(res.SemesterTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
-                                    session_amt = parseFloat(res.SessionTuition) - (parseFloat(res.SessionTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
-                                } else {
-                                    desc = `Semester Tuition`;
-                                    session_desc = `Session Tuition`;
-                                    amt = res.SemesterTuition;
-                                    session_amt = res.SessionTuition;
-                                }
-                                let rows = [{
-                                    sn: '1',
-                                    Description: desc,
-                                    SemesterTuition: (
-                                        <div className="form-group">
-                                            <input
-                                                type="radio"
-                                                id="tuitionCheck"
-                                                name="tuitionCheck"
-                                                className="form-check-input"
-                                                onChange={() => onTuitionSelect(amt, desc)}
-                                                value={amt}
-                                            /> <span>{currencyConverter(amt)}</span>
 
-                                        </div>
-                                    ),
-                                }, {
-                                    sn: '2',
-                                    Description: session_desc,
-                                    SemesterTuition: (
-                                        <div className="form-group">
-                                            <input
-                                                type="radio"
-                                                id="tuitionCheck"
-                                                name="tuitionCheck"
-                                                className="form-check-input"
-                                                onChange={() => onTuitionSelect(session_amt, session_desc)}
-                                                value={session_amt}
-                                            /> <span>{currencyConverter(session_amt)}</span>
-
-                                        </div>
-                                    ),
-                                }];
-
-                                setTuitionDatatable({
-                                    ...tuitionDatatable,
-                                    columns: tuitionDatatable.columns,
-                                    rows: rows,
-                                });
+                    try {
+                        const { success: postSuccess, data: postResult } = await api.post(`staff/finance/tuition/details`, dataSet);
+                        if (postSuccess && postResult.length > 0) {
+                            const res = postResult[0];
+                            let desc, session_desc = '';
+                            let amt, session_amt = 0;
+                            if (studentScholarshipData.length > 0) {
+                                desc = `Semester Tuition (${studentScholarshipData[0].ScholarshipName})`;
+                                session_desc = `Session Tuition (${studentScholarshipData[0].ScholarshipName})`;
+                                amt = parseFloat(res.SemesterTuition) - (parseFloat(res.SemesterTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
+                                session_amt = parseFloat(res.SessionTuition) - (parseFloat(res.SessionTuition) / 100) * parseFloat(studentScholarshipData[0].TuitionPercentage);
+                            } else {
+                                desc = `Semester Tuition`;
+                                session_desc = `Session Tuition`;
+                                amt = res.SemesterTuition;
+                                session_amt = res.SessionTuition;
                             }
+                            let rows = [{
+                                sn: '1',
+                                Description: desc,
+                                SemesterTuition: (
+                                    <div className="form-group">
+                                        <input
+                                            type="radio"
+                                            id="tuitionCheck"
+                                            name="tuitionCheck"
+                                            className="form-check-input"
+                                            onChange={() => onTuitionSelect(amt, desc)}
+                                            value={amt}
+                                        /> <span>{currencyConverter(amt)}</span>
 
-                            document.getElementById("student_details").style.display = 'block';
-                            document.getElementById("tab_content").style.display = 'block';
-                            document.getElementById("payment_content").style.display = 'block';
-                        }).catch((err) => {
-                            console.log("NETWORK ERROR");
-                        });
+                                    </div>
+                                ),
+                            }, {
+                                sn: '2',
+                                Description: session_desc,
+                                SemesterTuition: (
+                                    <div className="form-group">
+                                        <input
+                                            type="radio"
+                                            id="tuitionCheck"
+                                            name="tuitionCheck"
+                                            className="form-check-input"
+                                            onChange={() => onTuitionSelect(session_amt, session_desc)}
+                                            value={session_amt}
+                                        /> <span>{currencyConverter(session_amt)}</span>
+
+                                    </div>
+                                ),
+                            }];
+
+                            setTuitionDatatable({
+                                ...tuitionDatatable,
+                                columns: tuitionDatatable.columns,
+                                rows: rows,
+                            });
+                        }
+                    } catch (err) {
+                        console.log("NETWORK ERROR");
+                    }
+
+                    document.getElementById("student_details").style.display = 'block';
+                    document.getElementById("tab_content").style.display = 'block';
+                    document.getElementById("payment_content").style.display = 'block';
 
                     if (other_fee.length > 0) {
                         let rows = [];
@@ -359,21 +364,23 @@ function PostPayment(props) {
                     const PaymentID = formData.SemesterCode + generate_token(6) + data.ApplicationID.slice(-4);
                     setPaymentRefID(PaymentID)
                 }
-            }).catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
     }
 
     const getStudentData = async (id) => {
         setShowOutStanding(0)
-        await axios.get(`${serverLink}staff/finance/student/details/${btoa(id)}`, token)
-            .then((result) => {
-                if (result.data.studentData.length > 0) {
-                    const data = result.data.studentData[0];
-                    const other_fee = result.data.otherFee;
-                    const payment_history = result.data.paymentHistory;
-                    const studentScholarshipData = result.data.scholarship;
-                    const studentOutstanding = result.data.OutStandingAmount;
+        try {
+            const { success, data: resultData } = await api.get(`staff/finance/student/details/${btoa(id)}`);
+            if (success) {
+                if (resultData.studentData.length > 0) {
+                    const data = resultData.studentData[0];
+                    const other_fee = resultData.otherFee;
+                    const payment_history = resultData.paymentHistory;
+                    const studentScholarshipData = resultData.scholarship;
+                    const studentOutstanding = resultData.OutStandingAmount;
                     setAmountDue(parseFloat(studentOutstanding))
                     setShowOutStanding(prevState => prevState + studentOutstanding)
                     outStandingAmount += studentOutstanding;
@@ -394,10 +401,12 @@ function PostPayment(props) {
                     setChange('First Data')
 
                     const dataSet = { CourseCode: data.CourseCode, StudentID: data.StudentID, Level: data.StudentLevel, Semester: data.StudentSemester }
-                    axios.post(`${serverLink}staff/finance/tuition/details`, dataSet, token)
-                        .then((result) => {
-                            if (result.data.length > 0) {
-                                const res = result.data[0];
+
+                    try {
+                        const { success: postSuccess, data: postResult } = await api.post(`staff/finance/tuition/details`, dataSet);
+                        if (postSuccess) {
+                            if (postResult.length > 0) {
+                                const res = postResult[0];
                                 let desc, session_desc = '';
                                 let amt, session_amt = 0;
                                 if (studentScholarshipData.length > 0) {
@@ -463,13 +472,15 @@ function PostPayment(props) {
                                     rows: [],
                                 });
                             }
+                        }
+                    } catch (err) {
+                        console.log("NETWORK ERROR");
+                    }
 
-                            document.getElementById("student_details").style.display = 'block';
-                            document.getElementById("tab_content").style.display = 'block';
-                            document.getElementById("payment_content").style.display = 'block';
-                        }).catch((err) => {
-                            console.log("NETWORK ERROR");
-                        });
+                    document.getElementById("student_details").style.display = 'block';
+                    document.getElementById("tab_content").style.display = 'block';
+                    document.getElementById("payment_content").style.display = 'block';
+
 
                     if (other_fee.length > 0) {
                         let rows = [];
@@ -564,9 +575,10 @@ function PostPayment(props) {
                     const PaymentID = formData.SemesterCode + generate_token(6) + data.StudentID.slice(-4);
                     setPaymentRefID(PaymentID)
                 }
-            }).catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+            }
+        } catch (err) {
+            console.log("NETWORK ERROR");
+        }
     }
 
 
@@ -578,7 +590,9 @@ function PostPayment(props) {
         document.getElementById("tab_content").style.display = 'none';
         document.getElementById("payment_content").style.display = 'none';
         document.getElementById("AmountDue").value = outStandingAmount;
-    }, [""])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { setFormData(formData) }, [change])
     // useEffect(()=>{setPaymentRefID(paymentRefID)}, [change])
 
@@ -834,45 +848,41 @@ function PostPayment(props) {
         }
 
         let sendData = { ...formData, TotalExpectedAmount: amount_expected, AmountDue: amountDue, OutStandingAmount: outstanding, PaymentID: paymentRefID, cartItems: [...cart] };
-        await axios
-            .post(`${serverLink}staff/finance/post-payment`, sendData, token)
-            .then((result) => {
-                if (result.data.message === "success") {
-                    axios.post(`${serverLink}staff/finance/post-payment-details`, sendData, token)
-                        .then(result => {
-                            if (result.data.message === "success") {
-                                toast.success("Payment Posted Successfully");
-                                setShowSuccess(true)
-                                setChange("UpdateNewData");
-                            } else {
-                                showAlert(
-                                    "ERROR",
-                                    "Something went wrong. Please try again!",
-                                    "error"
-                                );
-                            }
-                        })
-                        .catch(err => {
-                            console.error('ERROR', err);
-                        });
 
-                } else {
-                    showAlert(
-                        "ERROR",
-                        "Something went wrong. Please try again!",
-                        "error"
-                    );
+        try {
+            const { success, data: result } = await api.post(`staff/finance/post-payment`, sendData);
+            if (success && result.message === "success") {
+                try {
+                    const { success: detailSuccess, data: detailResult } = await api.post(`staff/finance/post-payment-details`, sendData);
+                    if (detailSuccess && detailResult.message === "success") {
+                        toast.success("Payment Posted Successfully");
+                        setShowSuccess(true)
+                        setChange("UpdateNewData");
+                    } else {
+                        showAlert(
+                            "ERROR",
+                            "Something went wrong. Please try again!",
+                            "error"
+                        );
+                    }
+                } catch (err) {
+                    console.error('ERROR', err);
                 }
-                setIsSubmitLoading(false)
-            })
-            .catch((error) => {
-                setIsSubmitLoading(false)
+            } else {
                 showAlert(
-                    "NETWORK ERROR",
-                    "Please check your connection and try again!",
+                    "ERROR",
+                    "Something went wrong. Please try again!",
                     "error"
                 );
-            });
+            }
+        } catch (error) {
+            showAlert(
+                "NETWORK ERROR",
+                "Please check your connection and try again!",
+                "error"
+            );
+        }
+        setIsSubmitLoading(false);
     }
 
     const onAllowResult = async () => {
@@ -884,21 +894,20 @@ function PostPayment(props) {
             "warning"
         ).then(async (IsConfirmed) => {
             if (IsConfirmed) {
-                await axios.post(`${serverLink}staff/finance/allow-student-result`, sendData, token)
-                    .then(result => {
-                        if (result.data.message === "success") {
-                            toast.success("Result Access Granted Successfully");
-                        } else {
-                            showAlert(
-                                "ERROR",
-                                "Something went wrong. Please try again!",
-                                "error"
-                            );
-                        }
-                    })
-                    .catch(err => {
-                        console.error('ERROR', err);
-                    })
+                try {
+                    const { success, data: result } = await api.post(`staff/finance/allow-student-result`, sendData);
+                    if (success && result.message === "success") {
+                        toast.success("Result Access Granted Successfully");
+                    } else {
+                        showAlert(
+                            "ERROR",
+                            "Something went wrong. Please try again!",
+                            "error"
+                        );
+                    }
+                } catch (err) {
+                    console.error('ERROR', err);
+                }
             } else {
 
             }
@@ -914,21 +923,20 @@ function PostPayment(props) {
             "warning"
         ).then(async (IsConfirmed) => {
             if (IsConfirmed) {
-                await axios.post(`${serverLink}staff/finance/allow-student-registration`, sendData, token)
-                    .then(result => {
-                        if (result.data.message === "success") {
-                            toast.success("Registration Access Granted Successfully");
-                        } else {
-                            showAlert(
-                                "ERROR",
-                                "Something went wrong. Please try again!",
-                                "error"
-                            );
-                        }
-                    })
-                    .catch(err => {
-                        console.error('ERROR', err);
-                    })
+                try {
+                    const { success, data: result } = await api.post(`staff/finance/allow-student-registration`, sendData);
+                    if (success && result.message === "success") {
+                        toast.success("Registration Access Granted Successfully");
+                    } else {
+                        showAlert(
+                            "ERROR",
+                            "Something went wrong. Please try again!",
+                            "error"
+                        );
+                    }
+                } catch (err) {
+                    console.error('ERROR', err);
+                }
             } else {
 
             }

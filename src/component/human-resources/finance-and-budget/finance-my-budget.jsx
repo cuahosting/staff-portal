@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import React, { useEffect, useState, useMemo } from "react";
+import { api } from "../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
@@ -9,9 +8,9 @@ import { currencyConverter, formatDate, formatDateAndTime, sumObjectArray } from
 import Modal from "../../common/modal/modal";
 import AGTable from "../../common/table/AGTable";
 import swal from "sweetalert";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function FinanceMyBudget(props) {
-    const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const [budgetDatatable, setBudgetDatatable] = useState({
         columns: [
@@ -55,67 +54,62 @@ function FinanceMyBudget(props) {
     }
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/finance/finance-and-budget/my-budget-data/${props.LoginDetails[0].StaffID}`, token)
-            .then((result) => {
-                if (result.data.message === 'success') {
-                    const year_list = result.data.year;
-                    const budget_list = result.data.data;
-                    const tracker_list = result.data.tracker
-                    const budget_items = result.data.item;
-                    const budget_item_list = result.data.budget_item_list;
-                    const account_list = result.data.account_list
-                    setYearList(year_list)
-                    setBudgetTrackerList(tracker_list);
-                    setBudgetItems(budget_item_list);
-                    setAccountList(account_list)
+        const { success, data: result } = await api.get(`staff/finance/finance-and-budget/my-budget-data/${props.LoginDetails[0].StaffID}`);
+        if (success && result.message === 'success') {
+            const year_list = result.year;
+            const budget_list = result.data;
+            const tracker_list = result.tracker
+            const budget_items = result.item;
+            const budget_item_list = result.budget_item_list;
+            const account_list = result.account_list
+            setYearList(year_list)
+            setBudgetTrackerList(tracker_list);
+            setBudgetItems(budget_item_list);
+            setAccountList(account_list)
 
-                    if (budget_list.length > 0) {
-                        let rows = [];
-                        budget_list.map((item, index) => {
-                            rows.push({
-                                sn: index + 1,
-                                year: getBudgetYear(year_list, item.YearID),
-                                amount: currencyConverter(item.Amount),
-                                allocatedAmount: currencyConverter(item.AllocatedAmount),
-                                balanceAmount: currencyConverter(item.BalanceAmount),
-                                status: item.Status,
-                                addedDate: formatDateAndTime(item.InsertedDate, 'date'),
-                                decisionBy: item.DecisionBy,
-                                decisionDate: formatDateAndTime(item.DecisionDate, 'date'),
-                                action: (
-                                    <>
-                                        <button className="btn btn-primary btn-sm" style={{ marginRight: 15 }} data-bs-toggle="modal" data-bs-target="#kt_modal_general"
-                                            onClick={() => handleOnEdit(item, budget_items)}
-                                        ><i className="fa fa-pen" /></button>
-                                        {
-                                            item.Status === 'submitted' &&
-                                            <button className="btn btn-danger btn-sm"
-                                                onClick={() => {
-                                                    swal({
-                                                        title: "Are you sure?", text: "Once deleted, you will not be able to recover the budget!", icon: "warning", buttons: true, dangerMode: true,
-                                                    }).then((willDelete) => {
-                                                        if (willDelete) {
-                                                            handleBudgetDelete(item.EntryID);
-                                                        }
-                                                    });
-                                                }}
-                                            ><i className="fa fa-trash" /></button>
-                                        }
-                                    </>
-                                )
-                            });
-                        });
-                        setBudgetDatatable({
-                            ...budgetDatatable,
-                            rows: rows,
-                        });
-                    }
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR")
-            });
+            if (budget_list.length > 0) {
+                let rows = [];
+                budget_list.map((item, index) => {
+                    rows.push({
+                        sn: index + 1,
+                        year: getBudgetYear(year_list, item.YearID),
+                        amount: currencyConverter(item.Amount),
+                        allocatedAmount: currencyConverter(item.AllocatedAmount),
+                        balanceAmount: currencyConverter(item.BalanceAmount),
+                        status: item.Status,
+                        addedDate: formatDateAndTime(item.InsertedDate, 'date'),
+                        decisionBy: item.DecisionBy,
+                        decisionDate: formatDateAndTime(item.DecisionDate, 'date'),
+                        action: (
+                            <>
+                                <button className="btn btn-primary btn-sm" style={{ marginRight: 15 }} data-bs-toggle="modal" data-bs-target="#kt_modal_general"
+                                    onClick={() => handleOnEdit(item, budget_items)}
+                                ><i className="fa fa-pen" /></button>
+                                {
+                                    item.Status === 'submitted' &&
+                                    <button className="btn btn-danger btn-sm"
+                                        onClick={() => {
+                                            swal({
+                                                title: "Are you sure?", text: "Once deleted, you will not be able to recover the budget!", icon: "warning", buttons: true, dangerMode: true,
+                                            }).then((willDelete) => {
+                                                if (willDelete) {
+                                                    handleBudgetDelete(item.EntryID);
+                                                }
+                                            });
+                                        }}
+                                    ><i className="fa fa-trash" /></button>
+                                }
+                            </>
+                        )
+                    });
+                });
+                setBudgetDatatable({
+                    ...budgetDatatable,
+                    rows: rows,
+                });
+            }
+        }
+        setIsLoading(false);
     }
 
     const handleSubmit = async (e) => {
@@ -140,35 +134,29 @@ function FinanceMyBudget(props) {
         toast.info("Submitting...");
 
         if (selectedBudget.entry_id === '') {
-            await axios.post(`${serverLink}staff/finance/finance-and-budget/budget`, sendData, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Budget Added Successfully");
-                        setSelectedBudget(formInitialize);
-                        setSelectedItem([]);
-                        document.getElementById("closeModal").click();
-                        getData();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.post("staff/finance/finance-and-budget/budget", sendData);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Budget Added Successfully");
+                    setSelectedBudget(formInitialize);
+                    setSelectedItem([]);
+                    document.getElementById("closeModal").click();
+                    getData();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         } else {
-            await axios.patch(`${serverLink}staff/finance/finance-and-budget/budget`, sendData, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Budget Updated Successfully");
-                        getData();
-                        document.getElementById("closeModal").click();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.patch("staff/finance/finance-and-budget/budget", sendData);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Budget Updated Successfully");
+                    getData();
+                    document.getElementById("closeModal").click();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         }
     }
 
@@ -179,33 +167,27 @@ function FinanceMyBudget(props) {
         toast.info("Submitting...");
 
         if (budgetSelectValue.entry_id === '') {
-            await axios.post(`${serverLink}staff/finance/finance-and-budget/budget-item`, budgetSelectValue, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Budget Item Added Successfully");
-                        setBudgetSelectValue({ entry_id: '', item_name: '', account_id: '' });
-                        getData();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.post("staff/finance/finance-and-budget/budget-item", budgetSelectValue);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Budget Item Added Successfully");
+                    setBudgetSelectValue({ entry_id: '', item_name: '', account_id: '' });
+                    getData();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         } else {
-            await axios.patch(`${serverLink}staff/finance/finance-and-budget/budget-item`, budgetSelectValue, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Budget Item Updated Successfully");
-                        setBudgetSelectValue({ entry_id: '', item_name: '', account_id: '' });
-                        getData();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.patch("staff/finance/finance-and-budget/budget-item", budgetSelectValue);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Budget Item Updated Successfully");
+                    setBudgetSelectValue({ entry_id: '', item_name: '', account_id: '' });
+                    getData();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         }
     }
 
@@ -233,36 +215,30 @@ function FinanceMyBudget(props) {
         setSelectedItem(items);
         if (filter_selected_item.entry_id !== '') {
             toast.info("Deleting...")
-            await axios.delete(`${serverLink}staff/finance/finance-and-budget/budget-item/${item.entry_id}/${item.total}`, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Budget Item Deleted Successfully");
-                        getData();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.delete(`staff/finance/finance-and-budget/budget-item/${item.entry_id}/${item.total}`);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Budget Item Deleted Successfully");
+                    getData();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         }
     }
 
     //ITEM DELETE
     const handleBudgetDelete = async (item) => {
         toast.info("Deleting...")
-        await axios.delete(`${serverLink}staff/finance/finance-and-budget/budget/${item}`, token)
-            .then(res => {
-                if (res.data.message === 'success') {
-                    toast.success("Budget Deleted Successfully");
-                    getData();
-                } else {
-                    toast.error(res.data.message)
-                }
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR")
-            })
+        const { success, data } = await api.delete(`staff/finance/finance-and-budget/budget/${item}`);
+        if (success) {
+            if (data.message === 'success') {
+                toast.success("Budget Deleted Successfully");
+                getData();
+            } else {
+                toast.error(data.message)
+            }
+        }
     }
 
     const onAddBudgetItem = () => {
@@ -311,15 +287,14 @@ function FinanceMyBudget(props) {
                                         <div className="col-md-3">
                                             <div className="form-group">
                                                 <label htmlFor={`item-name-${i}`}>Item {i + 1} Name</label>
-                                                <select id={`item-name-${i}`} className="form-control" value={r.item_name} onChange={handleItemChange}>
-                                                    <option value="">Select Option</option>
-                                                    {
-                                                        budgetItems.length > 0 &&
-                                                        budgetItems.map((r, i) => {
-                                                            return <option key={i} value={r.ItemName}>{r.ItemName}</option>
-                                                        })
-                                                    }
-                                                </select>
+                                                <SearchSelect
+                                                    id={`item-name-${i}`}
+                                                    value={budgetItems.map(r => ({ value: r.ItemName, label: r.ItemName })).find(opt => opt.value === r.item_name) || null}
+                                                    options={budgetItems.map(r => ({ value: r.ItemName, label: r.ItemName }))}
+                                                    onChange={(selected) => handleItemChange({ target: { id: `item-name-${i}`, value: selected?.value || '' } })}
+                                                    placeholder="Select Option"
+                                                    isClearable={false}
+                                                />
                                             </div>
                                         </div>
                                         <div className="col-md-4">
@@ -452,15 +427,14 @@ function FinanceMyBudget(props) {
                         <div className="col-md-6 mb-3">
                             <div className="form-group">
                                 <label htmlFor="account_type">Select Account Type</label>
-                                <select id="account_type" className="form-control" value={budgetSelectValue.account_id} onChange={(e) => { setBudgetSelectValue({ ...budgetSelectValue, account_id: e.target.value }) }}>
-                                    <option value="">Select Option</option>
-                                    {
-                                        accountList.length > 0 &&
-                                        accountList.map((r, i) => {
-                                            return <option key={i} value={r.EntryID}>{`${r.AccountName} (${r.AccountType})`}</option>
-                                        })
-                                    }
-                                </select>
+                                <SearchSelect
+                                    id="account_type"
+                                    value={accountList.map(r => ({ value: r.EntryID.toString(), label: `${r.AccountName} (${r.AccountType})` })).find(opt => opt.value === budgetSelectValue.account_id?.toString()) || null}
+                                    options={accountList.map(r => ({ value: r.EntryID.toString(), label: `${r.AccountName} (${r.AccountType})` }))}
+                                    onChange={(selected) => setBudgetSelectValue({ ...budgetSelectValue, account_id: selected?.value || '' })}
+                                    placeholder="Select Option"
+                                    isClearable={false}
+                                />
                             </div>
                         </div>
                     </div>

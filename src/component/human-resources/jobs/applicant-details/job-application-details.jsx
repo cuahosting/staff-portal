@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import { showAlert } from "../../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux/es/exports";
@@ -12,7 +11,6 @@ import { sendEmail } from "../../../../resources/constants";
 
 
 function JobApplicantDetails(props) {
-    const token = props.LoginDetails[0].token;
 
     const params = useParams();
     const applicationID = decryptData(params.id);
@@ -53,54 +51,43 @@ function JobApplicantDetails(props) {
     })
 
     const getMetaData = async () => {
-        await axios.get(`${serverLink}staff/academics/faculty/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    setFacultyList(result.data)
-                }
-            })
+        const facultyResult = await api.get("staff/academics/faculty/list");
+        if (facultyResult.success && facultyResult.data.length > 0) {
+            setFacultyList(facultyResult.data)
+        }
 
-        await axios.get(`${serverLink}staff/academics/department/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    setDepartmentList(result.data)
-                }
-            })
+        const deptResult = await api.get("staff/academics/department/list");
+        if (deptResult.success && deptResult.data.length > 0) {
+            setDepartmentList(deptResult.data)
+        }
     }
 
     const getData = async () => {
-        await axios.get(`${serverLink}jobs/job-applications/${applicationID}`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    setData(result.data);
-                    setApplicant(result.data[0])
-                    const name = result.data[0].FirstName + " " + result.data[0].Surname
-                    setEmail({
-                        ...mail,
-                        ApplicationID: result.data[0].ApplicationID,
-                        EmailAddress: result.data[0].EmailAddress,
-                    })
-                    const jobID = result.data[0].JobID
-                    axios.get(`${serverLink}jobs/job-openings/all/list`, token)
-                        .then((result) => {
-                            if (result.data.length > 0) {
-                                const filtered = result.data.filter(x => x.EntryID.toString() === jobID.toString())
-                                setInterView({
-                                    ...interview,
-                                    InterviewTime: filtered[0].InterviewTime,
-                                    InterviewDate: filtered[0].InterViewDate,
-                                    InterviewVenue: filtered[0].InterviewVenue,
-                                    Position: filtered[0].Position,
-                                    applicantName: name
-                                })
-                            }
-                            setIsLoading(false);
-                        })
-                }
+        const { success, data } = await api.get(`jobs/job-applications/${applicationID}`);
+        if (success && data.length > 0) {
+            setData(data);
+            setApplicant(data[0])
+            const name = data[0].FirstName + " " + data[0].Surname
+            setEmail({
+                ...mail,
+                ApplicationID: data[0].ApplicationID,
+                EmailAddress: data[0].EmailAddress,
             })
-            .catch((err) => {
-                console.log('NETWORK ERROR');
-            });
+            const jobID = data[0].JobID
+            const jobResult = await api.get("jobs/job-openings/all/list");
+            if (jobResult.success && jobResult.data.length > 0) {
+                const filtered = jobResult.data.filter(x => x.EntryID.toString() === jobID.toString())
+                setInterView({
+                    ...interview,
+                    InterviewTime: filtered[0].InterviewTime,
+                    InterviewDate: filtered[0].InterViewDate,
+                    InterviewVenue: filtered[0].InterviewVenue,
+                    Position: filtered[0].Position,
+                    applicantName: name
+                })
+            }
+            setIsLoading(false);
+        }
     }
 
     const onEdit = (e) => {
@@ -135,50 +122,39 @@ function JobApplicantDetails(props) {
         }
         if (mail.Status !== "") {
             setIsFormLoading('on')
-            await axios
-                .patch(`${serverLink}jobs/job-applications/make_decision`, mail, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        getData()
-                        const text = mail.Status === "1" ? 'Applicant invited for interview'
-                            : mail.Status === "2" ? 'Applicant Rejected'
-                                : 'Applicant Accepted'
-                        toast.success(text);
+            const { success, data } = await api.patch("jobs/job-applications/make_decision", mail);
+            if (success) {
+                if (data.message === "success") {
+                    getData()
+                    const text = mail.Status === "1" ? 'Applicant invited for interview'
+                        : mail.Status === "2" ? 'Applicant Rejected'
+                            : 'Applicant Accepted'
+                    toast.success(text);
 
-                        const auditmessage = mail.Status === "1" ? `Applicant ${applicationID} invited for interview by ${props.LoginDetails[0].StaffID}`
-                            : mail.Status === "2" ? `Applicant ${applicationID} job application Rejected bt ${props.LoginDetails[0].StaffID}`
-                                : `Applicant ${applicationID} Accepted by ${props.LoginDetails[0].StaffID}`
-                        Audit(props.LoginDetails[0].StaffID, auditmessage);
-                        setEmail({
-                            ...mail,
-                            Status: "",
-
-                        });
-                        sendEmail(
-                            mail.EmailAddress,
-                            mail.subject,
-                            mail.title,
-                            mail.name.charAt(0).toUpperCase() + mail.name.slice(1),
-                            mail.EmailBody,
-                            mail.signature)
-                        setIsFormLoading('off')
-                        document.getElementById("closeModal").click();
-                    }
-                    else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+                    const auditmessage = mail.Status === "1" ? `Applicant ${applicationID} invited for interview by ${props.LoginDetails[0].StaffID}`
+                        : mail.Status === "2" ? `Applicant ${applicationID} job application Rejected bt ${props.LoginDetails[0].StaffID}`
+                            : `Applicant ${applicationID} Accepted by ${props.LoginDetails[0].StaffID}`
+                    Audit(props.LoginDetails[0].StaffID, auditmessage);
+                    setEmail({
+                        ...mail,
+                        Status: "",
+                    });
+                    sendEmail(
+                        mail.EmailAddress,
+                        mail.subject,
+                        mail.title,
+                        mail.name.charAt(0).toUpperCase() + mail.name.slice(1),
+                        mail.EmailBody,
+                        mail.signature)
+                    setIsFormLoading('off')
+                    document.getElementById("closeModal").click();
+                }
+                else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         } else {
             await showAlert("EMPTY FIELD", `Please select status`, "error");
         }

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-toastify';
 import './DataTable.css';
 
 /**
@@ -141,6 +142,7 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
     link.download = `export-${new Date().toISOString().split('T')[0]}.xls`;
     link.click();
     URL.revokeObjectURL(url);
+    toast.success('Excel file downloaded!');
   }, [columns, sortedRows]);
 
   // Export to CSV
@@ -168,6 +170,7 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
     link.download = `export-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+    toast.success('CSV file downloaded!');
   }, [columns, sortedRows]);
 
   // Copy to clipboard
@@ -182,6 +185,7 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
     }).join('\n');
 
     navigator.clipboard.writeText(`${headers}\n${textRows}`);
+    toast.success('Copied to clipboard!');
   }, [columns, sortedRows]);
 
   // Generate pagination numbers

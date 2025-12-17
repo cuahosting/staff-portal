@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
@@ -11,7 +10,6 @@ import SearchSelect from '../../common/select/SearchSelect';
 import { currencyConverter, formatDateAndTime } from "../../../resources/constants";
 
 function FinanceAccount(props) {
-    const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "Action", "Account Name", "Account Type", "Added By", "Added Date", "Updated By", "Updated Date"];
     const [dataTable, setDataTable] = useState([]);
@@ -19,30 +17,25 @@ function FinanceAccount(props) {
     const [formData, setFormData] = useState(formDataVariable)
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/finance/finance-and-budget/account`, token)
-            .then((result) => {
-                if (result.data.message === 'success') {
-                    if (result.data.data.length > 0) {
-                        let rows = [];
-                        result.data.data.map((item, index) => {
-                            rows.push([index + 1,
-                            <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"
-                                onClick={() => setFormData({
-                                    ...formData,
-                                    entry_id: item.EntryID, account_name: item.AccountName, account_type: item.AccountType
-                                })}
-                            ><i className="fa fa-pen" /></button>,
-                            item.AccountName, item.AccountType, item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date'), item.UpdatedBy, formatDateAndTime(item.UpdatedDate, 'date')
-                            ]);
-                        });
-                        setDataTable(rows)
-                    }
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR")
-            });
+        const { success, data } = await api.get("staff/finance/finance-and-budget/account");
+        if (success && data.message === 'success') {
+            if (data.data.length > 0) {
+                let rows = [];
+                data.data.map((item, index) => {
+                    rows.push([index + 1,
+                    <button className="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#kt_modal_general"
+                        onClick={() => setFormData({
+                            ...formData,
+                            entry_id: item.EntryID, account_name: item.AccountName, account_type: item.AccountType
+                        })}
+                    ><i className="fa fa-pen" /></button>,
+                    item.AccountName, item.AccountType, item.InsertedBy, formatDateAndTime(item.InsertedDate, 'date'), item.UpdatedBy, formatDateAndTime(item.UpdatedDate, 'date')
+                    ]);
+                });
+                setDataTable(rows)
+            }
+        }
+        setIsLoading(false);
     }
 
     const handleSubmit = async (e) => {
@@ -62,33 +55,27 @@ function FinanceAccount(props) {
             account_type: formData.account_type.trim()
         }
         if (formData.entry_id === '') {
-            await axios.post(`${serverLink}staff/finance/finance-and-budget/account`, sendData, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Account Added Successfully");
-                        document.getElementById("closeModal").click();
-                        getData();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.post("staff/finance/finance-and-budget/account", sendData);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Account Added Successfully");
+                    document.getElementById("closeModal").click();
+                    getData();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         } else {
-            await axios.patch(`${serverLink}staff/finance/finance-and-budget/account`, sendData, token)
-                .then(res => {
-                    if (res.data.message === 'success') {
-                        toast.success("Account Updated Successfully");
-                        getData();
-                        document.getElementById("closeModal").click();
-                    } else {
-                        toast.error(res.data.message)
-                    }
-                })
-                .catch((err) => {
-                    toast.error("NETWORK ERROR")
-                })
+            const { success, data } = await api.patch("staff/finance/finance-and-budget/account", sendData);
+            if (success) {
+                if (data.message === 'success') {
+                    toast.success("Account Updated Successfully");
+                    getData();
+                    document.getElementById("closeModal").click();
+                } else {
+                    toast.error(data.message)
+                }
+            }
         }
     }
 

@@ -2,15 +2,13 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../common/modal/modal";
 import PageHeader from "../../common/pageheader/pageheader";
 import AGTable from "../../common/table/AGTable";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { showAlert } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 
 function HRDesignations(props) {
-    const token = props.loginData[0].token;
 
     const [isLoading, setIsLoading] = useState(true);
     const [datatable, setDatatable] = useState({
@@ -37,45 +35,37 @@ function HRDesignations(props) {
     });
 
     const getRecords = async () => {
-        await axios
-            .get(`${serverLink}staff/hr/designation/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    let rows = [];
-                    result.data.map((designation, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            name: designation.DesignationName,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setCreate({
-                                            designation_name: designation.DesignationName,
-                                            entry_id: designation.EntryID
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
-                    });
-
-                    setDatatable({
-                        ...datatable,
-                        columns: datatable.columns,
-                        rows: rows,
-                    });
-                }
-
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
+        const { success, data } = await api.get("staff/hr/designation/list");
+        if (success && data.length > 0) {
+            let rows = [];
+            data.map((designation, index) => {
+                rows.push({
+                    sn: index + 1,
+                    name: designation.DesignationName,
+                    action: (
+                        <button
+                            className="btn btn-sm btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#kt_modal_general"
+                            onClick={() =>
+                                setCreate({
+                                    designation_name: designation.DesignationName,
+                                    entry_id: designation.EntryID
+                                })
+                            }
+                        >
+                            <i className="fa fa-pen" />
+                        </button>
+                    ),
+                });
             });
+            setDatatable({
+                ...datatable,
+                columns: datatable.columns,
+                rows: rows,
+            });
+        }
+        setIsLoading(false);
     };
 
     const onEdit = (e) => {
@@ -92,106 +82,48 @@ function HRDesignations(props) {
         }
 
         if (create.entry_id === "") {
-            await axios
-                .post(`${serverLink}staff/hr/designation/add`, create, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Designation Added Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setCreate({
-                            ...create,
-                            designation_name: "",
-                            entry_id: "",
-                        });
-                    } else if (result.data.message === "exist") {
-                        showAlert("DESIGNATION EXIST", "Designation already exist!", "error");
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.post("staff/hr/designation/add", create);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Designation Added Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setCreate({
+                        ...create,
+                        designation_name: "",
+                        entry_id: "",
+                    });
+                } else if (data.message === "exist") {
+                    showAlert("DESIGNATION EXIST", "Designation already exist!", "error");
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         } else {
-            await axios
-                .patch(`${serverLink}staff/hr/designation/update`, create, token)
-                .then((result) => {
-                    if (result.data.message === "success") {
-                        toast.success("Designation Updated Successfully");
-                        document.getElementById("closeModal").click()
-                        getRecords();
-                        setCreate({
-                            ...create,
-                            designation_name: "",
-                            entry_id: "",
-                        });
-                    } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
-                    }
-                })
-                .catch((error) => {
-                    showAlert(
-                        "NETWORK ERROR",
-                        "Please check your connection and try again!",
-                        "error"
-                    );
-                });
+            const { success, data } = await api.patch("staff/hr/designation/update", create);
+            if (success) {
+                if (data.message === "success") {
+                    toast.success("Designation Updated Successfully");
+                    document.getElementById("closeModal").click()
+                    getRecords();
+                    setCreate({
+                        ...create,
+                        designation_name: "",
+                        entry_id: "",
+                    });
+                } else {
+                    showAlert("ERROR", "Something went wrong. Please try again!", "error");
+                }
+            } else {
+                showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
+            }
         }
     };
 
     useEffect(() => {
-        axios
-            .get(`${serverLink}staff/hr/designation/list`, token)
-            .then((result) => {
-                if (result.data.length > 0) {
-                    let rows = [];
-                    result.data.map((designation, index) => {
-                        rows.push({
-                            sn: index + 1,
-                            name: designation.DesignationName,
-                            action: (
-                                <button
-                                    className="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_general"
-                                    onClick={() =>
-                                        setCreate({
-                                            designation_name: designation.DesignationName,
-                                            entry_id: designation.EntryID,
-                                        })
-                                    }
-                                >
-                                    <i className="fa fa-pen" />
-                                </button>
-                            ),
-                        });
-                    });
-
-                    setDatatable({
-                        ...datatable,
-                        columns: datatable.columns,
-                        rows: rows,
-                    });
-                }
-
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                console.log("NETWORK ERROR");
-            });
+        getRecords();
     }, []);
 
     return isLoading ? (
@@ -252,9 +184,9 @@ function HRDesignations(props) {
 
 const mapStateToProps = (state) => {
     return {
-      loginData: state.LoginDetails,
+        loginData: state.LoginDetails,
     };
-  };
-  
-  
+};
+
+
 export default connect(mapStateToProps, null)(HRDesignations);

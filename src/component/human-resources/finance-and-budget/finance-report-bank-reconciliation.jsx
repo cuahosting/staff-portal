@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../resources/url";
+import { api } from "../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../common/loader/loader";
 import { toast } from "react-toastify";
@@ -11,7 +10,6 @@ import ReportTable from "../../common/table/ReportTable";
 import swal from "sweetalert";
 
 function FinanceReportBankReconciliation(props) {
-    const token = props.LoginDetails[0].token;
     const [isLoading, setIsLoading] = useState(true);
     const columns = ["S/N", "Transaction Date", "Description", "Debit Account", "Credit Account", "Amount", "Added By", "Added Date"];
     const [dataTable, setDataTable] = useState([]);
@@ -24,17 +22,12 @@ function FinanceReportBankReconciliation(props) {
     }
 
     const getData = async () => {
-        await axios.get(`${serverLink}staff/finance/finance-and-budget/transaction-data`, token)
-            .then((result) => {
-                if (result.data.message === 'success') {
-                    setTransactionList(result.data.data)
-                    setAccountList(result.data.account)
-                }
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                toast.error("NETWORK ERROR")
-            });
+        const { success, data: result } = await api.get("staff/finance/finance-and-budget/transaction-data");
+        if (success && result.message === 'success') {
+            setTransactionList(result.data)
+            setAccountList(result.account)
+        }
+        setIsLoading(false);
     }
 
     const handleChange = (e) => {

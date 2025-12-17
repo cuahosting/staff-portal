@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { serverLink } from "../../../../resources/url";
+import { api } from "../../../../resources/api";
 import { connect } from "react-redux/es/exports";
 import Loader from "../../../common/loader/loader";
 import AGTable from "../../../common/table/AGTable";
@@ -8,9 +7,7 @@ import { toast } from "react-toastify";
 import { showAlert, showConfirm, showContentAlert } from "../../../common/sweetalert/sweetalert";
 import PageHeader from "../../../common/pageheader/pageheader";
 
-function FinanceAllowRegistration(props)
-{
-    const token = props.LoginDetails[0].token;
+function FinanceAllowRegistration(props) {
     const [isFormLoading, setIsFormLoading] = useState('off');
 
     const [isLoading, setIsLoading] = useState(true);
@@ -62,52 +59,39 @@ function FinanceAllowRegistration(props)
         rows: [],
     });
 
-    const getData = async () =>
-    {
-        await axios.get(`${serverLink}staff/student-manager/finance/registration/clearance`, token)
-            .then((result) =>
-            {
-                if (result.data.length > 0)
-                {
-                    let rows = [];
-                    result.data.map((item, index) =>
-                    {
-                        rows.push({
-                            sn: index + 1,
-                            StudentID: item.StudentID,
-                            FirstName: item.FirstName,
-                            MiddleName: item.MiddleName,
-                            Surname: item.Surname,
-                            StudentLevel: item.StudentLevel,
-                            StudentSemester: item.StudentSemester.replace("Semester", ""),
-                            CourseName: item.CourseName,
-                            unblock: (
-                                <button className="btn btn-primary btn-sm" onClick={() => onAllowRegistration(item)}> Unblock <i className="fa fa-unlock" /></button>
-                            ),
-                            unblockRequest: (
-                                <button className="btn btn-primary btn-sm" onClick={() => onAllowRegistrationRequest(item)}> Unblock Request <i className="fa fa-send" /></button>
-                            ),
-                        });
-                    });
-                    setStudentDatatable({
-                        ...studentDatatable,
-                        columns: studentDatatable.columns,
-                        rows: rows,
-                    });
-
-                }
-                setIsLoading(false);
-            })
-            .catch((err) =>
-            {
-                console.log(err)
-                console.log('NETWORK ERROR');
+    const getData = async () => {
+        const { success, data } = await api.get("staff/student-manager/finance/registration/clearance");
+        if (success && data && data.length > 0) {
+            let rows = [];
+            data.map((item, index) => {
+                rows.push({
+                    sn: index + 1,
+                    StudentID: item.StudentID,
+                    FirstName: item.FirstName,
+                    MiddleName: item.MiddleName,
+                    Surname: item.Surname,
+                    StudentLevel: item.StudentLevel,
+                    StudentSemester: item.StudentSemester.replace("Semester", ""),
+                    CourseName: item.CourseName,
+                    unblock: (
+                        <button className="btn btn-primary btn-sm" onClick={() => onAllowRegistration(item)}> Unblock <i className="fa fa-unlock" /></button>
+                    ),
+                    unblockRequest: (
+                        <button className="btn btn-primary btn-sm" onClick={() => onAllowRegistrationRequest(item)}> Unblock Request <i className="fa fa-send" /></button>
+                    ),
+                });
             });
+            setStudentDatatable({
+                ...studentDatatable,
+                columns: studentDatatable.columns,
+                rows: rows,
+            });
+        }
+        setIsLoading(false);
     }
 
 
-    const onAllowRegistration = async (data) =>
-    {
+    const onAllowRegistration = async (data) => {
         let sendData = {
             StudentID: data.StudentID,
             FirstName: data.FirstName,
@@ -127,51 +111,33 @@ function FinanceAllowRegistration(props)
             "CONFIRM UNBLOCKING",
             `Are you sure you want to unblock ${studentName} for Registration?`,
             "warning"
-        ).then(async (IsConfirmed) =>
-        {
-            if (IsConfirmed)
-            {
-                await axios.post(`${serverLink}staff/finance/allow-student-registration`, sendData, token)
-                    .then(result =>
-                    {
-                        if (result.data.message === "success")
-                        {
-                            getData()
-                            toast.success("Registration Access Granted Successfully");
-                        } else
-                        {
-                            showAlert(
-                                "ERROR",
-                                "Something went wrong. Please try again!",
-                                "error"
-                            );
-                        }
-                    })
-                    .catch(err =>
-                    {
-                        console.error('ERROR', err);
-                    })
-            } else
-            {
-
+        ).then(async (IsConfirmed) => {
+            if (IsConfirmed) {
+                const { success, data } = await api.post("staff/finance/allow-student-registration", sendData);
+                if (success && data.message === "success") {
+                    getData()
+                    toast.success("Registration Access Granted Successfully");
+                } else {
+                    showAlert(
+                        "ERROR",
+                        "Something went wrong. Please try again!",
+                        "error"
+                    );
+                }
             }
         });
     }
 
 
-    const onAllowRegistrationRequest = async (data) =>
-    {
+    const onAllowRegistrationRequest = async (data) => {
         let studentName = `${data.FirstName} ${data.MiddleName} ${data.Surname}`
         showContentAlert(
             `Unblock  ${studentName} `,
-        ).then(async (StaffID) =>
-        {
-            if (!StaffID)
-            {
+        ).then(async (StaffID) => {
+            if (!StaffID) {
                 throw showAlert("EMPTY FIELD", "Please enter the StaffID", "error");
                 return false;
-            } else
-            {
+            } else {
                 let sendData = {
                     StudentID: data.StudentID,
                     FirstName: data.FirstName,
@@ -185,13 +151,11 @@ function FinanceAllowRegistration(props)
                     InsertedBy: props.LoginDetails[0].StaffID,
                     RequestBy: StaffID
                 };
-                return await axios.post(`${serverLink}staff/finance/allow-student-registration`, sendData, token)
+                return await api.post("staff/finance/allow-student-registration", sendData)
             }
 
-        }).then(result =>
-        {
-            if (result.data.message === "success")
-            {
+        }).then(result => {
+            if (result.success && result.data.message === "success") {
                 getData()
                 toast.success("Request Sent Successfully");
                 showAlert(
@@ -199,8 +163,7 @@ function FinanceAllowRegistration(props)
                     "Request Sent Successfully",
                     "success"
                 );
-            } else
-            {
+            } else {
                 showAlert(
                     "ERROR",
                     "Something went wrong. Please try again!",
@@ -209,13 +172,10 @@ function FinanceAllowRegistration(props)
             }
 
         })
-            .catch(err =>
-            {
-                if (err)
-                {
+            .catch(err => {
+                if (err) {
                     showAlert("EMPTY FIELD", "Please enter the StaffID", "error");
-                } else
-                {
+                } else {
                     showContentAlert.stopLoading();
                     showContentAlert.close();
                 }
@@ -225,8 +185,7 @@ function FinanceAllowRegistration(props)
 
 
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         getData()
     }, []);
 
@@ -252,8 +211,7 @@ function FinanceAllowRegistration(props)
 }
 
 
-const mapStateToProps = (state) =>
-{
+const mapStateToProps = (state) => {
     return {
         LoginDetails: state.LoginDetails,
     };
