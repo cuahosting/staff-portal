@@ -22,11 +22,22 @@ function AddEditStaff(props) {
 
   const [isLoading, setIsLoading] = useState(true);
   const currentYear = new Date().getFullYear();
+  const [editSettings, setEditSettings] = useState({
+    EntryID: "",
+    StaffID: "",
+    IsDeductions: "0",
+    IsWebsite: "0",
+  });
+
   const [datatable, setDatatable] = useState({
     columns: [
       {
         label: "S/N",
         field: "sn",
+      },
+      {
+        label: "Action",
+        field: "action",
       },
       {
         label: "StaffID",
@@ -55,14 +66,6 @@ function AddEditStaff(props) {
       {
         label: "Official EmailAddress",
         field: "OfficialEmailAddress",
-      },
-      // {
-      //   label: "Action",
-      //   field: "action",
-      // },
-      {
-        label: "View",
-        field: "view",
       },
     ],
     rows: [],
@@ -271,100 +274,109 @@ function AddEditStaff(props) {
             Academia: staff.Academia,
             Orcid: staff.Orcid,
             action: (
-              <button
-                className="btn btn-sm btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#kt_modal_general"
-                onClick={() => {
-                  const nat = nationalities.filter(x => x.value === staff.NationalityID)[0];
-                  setCreateStaff({
-                    EntryID: staff.EntryID,
-                    FirstName: staff.FirstName,
-                    MiddleName: staff.MiddleName,
-                    Surname: staff.Surname,
-                    TitleID: staff.TitleID,
-                    Gender: staff.Gender,
-                    DateOfBirth:
-                      formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
-                    MaritalStatus: staff.MaritalStatus,
-                    NationalityID: { value: nat?.EntryID, label: nat?.Country }, //staff.NationalityID,
-                    StateID: staff.StateID,
-                    LgaID: staff.LgaID,
-                    Religion: staff.Religion,
-                    PhoneNumber: staff.PhoneNumber,
-                    AltPhoneNumber: staff.AltPhoneNumber,
-                    EmailAddress: staff.EmailAddress,
-                    OfficialEmailAddress: staff.OfficialEmailAddress,
-                    ContactAddress: staff.ContactAddress,
-                    StaffType: staff.StaffType,
-                    DesignationID: staff.DesignationID,
-                    GrossPay: staff.GrossPay,
-                    DepartmentCode: staff.DepartmentCode,
-                    IsActive: staff.IsActive,
-                    IsAcademicStaff: staff.IsAcademicStaff,
-                    DateOfFirstEmployment:
-                      formatDateAndTime(
-                        staff.DateOfFirstEmployment,
-                        "date"
-                      ) ?? "N/A",
-                    DateOfCurrentEmployment:
-                      formatDateAndTime(
-                        staff.DateOfCurrentEmployment,
-                        "date"
-                      ) ?? "N/A",
-                    ContractStartDate:
-                      formatDateAndTime(staff.ContractStartDate, "date") ??
-                      "N/A",
-                    ContractEndDate:
-                      formatDateAndTime(staff.ContractEndDate, "date") ??
-                      "N/A",
-                    LineManagerID: staff.LineManagerID,
-                    CourseCode: staff.CourseCode,
-                    AddedBy: staff.AddedBy,
-                    UpdatedBy: props.loginData[0].StaffID,
-                    UpdatedDate: props.loginData[0].StaffID,
-                    BankID: staff.BankID,
-                    AccountNumber: staff.AccountNumber,
-                    BVN: staff.BVN,
-                    AccountType: staff.AccountType,
-                    NFirstName: staff.NFirstName,
-                    NSurname: staff.NSurname,
-                    NMiddleName: staff.NMiddleName,
-                    Relationship: staff.Relationship,
-                    NPhoneNumber: staff.NPhoneNumber,
-                    NEmailAddress: staff.NEmailAddress,
-                    NContactAddress: staff.NContactAddress,
-                    Biography: staff.Biography,
-                    file: staff.file,
-                    Research: staff.Research,
-                    Facebook: staff.Facebook,
-                    Linkedin: staff.Linkedin,
-                    Twitter: staff.Twitter,
-                    Scholar: staff.Scholar,
-                    Researchgate: staff.Researchgate,
-                    Academia: staff.Academia,
-                    Orcid: staff.Orcid,
-                    update_passport: false,
-                    file2: staff.Image,
-                    action: "update",
-                  })
-                }
-                }
-              >
-                <i className="fa fa-pen" />
-              </button>
-            ),
-            view: (
-              <Link
-                to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
-              >
+              <div className="d-flex gap-1">
                 <button
                   className="btn btn-sm btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_general"
+                  onClick={() => {
+                    const nat = nationalities.filter(x => x.value === staff.NationalityID)[0];
+                    setCreateStaff({
+                      EntryID: staff.EntryID,
+                      StaffID: staff.StaffID,
+                      FirstName: staff.FirstName,
+                      MiddleName: staff.MiddleName,
+                      Surname: staff.Surname,
+                      TitleID: staff.TitleID,
+                      Gender: staff.Gender,
+                      DateOfBirth:
+                        formatDateAndTime(staff.DateOfBirth, "date") ?? "N/A",
+                      MaritalStatus: staff.MaritalStatus,
+                      NationalityID: { value: nat?.EntryID, label: nat?.Country },
+                      StateID: staff.StateID,
+                      LgaID: staff.LgaID,
+                      Religion: staff.Religion,
+                      PhoneNumber: staff.PhoneNumber,
+                      AltPhoneNumber: staff.AltPhoneNumber,
+                      EmailAddress: staff.EmailAddress,
+                      OfficialEmailAddress: staff.OfficialEmailAddress,
+                      ContactAddress: staff.ContactAddress,
+                      StaffType: staff.StaffType,
+                      DesignationID: staff.DesignationID,
+                      GrossPay: staff.GrossPay,
+                      DepartmentCode: staff.DepartmentCode,
+                      IsActive: staff.IsActive,
+                      IsAcademicStaff: staff.IsAcademicStaff,
+                      DateOfFirstEmployment:
+                        formatDateAndTime(staff.DateOfFirstEmployment, "date") ?? "N/A",
+                      DateOfCurrentEmployment:
+                        formatDateAndTime(staff.DateOfCurrentEmployment, "date") ?? "N/A",
+                      ContractStartDate:
+                        formatDateAndTime(staff.ContractStartDate, "date") ?? "N/A",
+                      ContractEndDate:
+                        formatDateAndTime(staff.ContractEndDate, "date") ?? "N/A",
+                      LineManagerID: staff.LineManagerID,
+                      CourseCode: staff.CourseCode,
+                      AddedBy: staff.AddedBy,
+                      UpdatedBy: props.loginData[0].StaffID,
+                      UpdatedDate: props.loginData[0].StaffID,
+                      BankID: staff.BankID,
+                      AccountNumber: staff.AccountNumber,
+                      BVN: staff.BVN,
+                      AccountType: staff.AccountType,
+                      NFirstName: staff.NFirstName,
+                      NSurname: staff.NSurname,
+                      NMiddleName: staff.NMiddleName,
+                      Relationship: staff.Relationship,
+                      NPhoneNumber: staff.NPhoneNumber,
+                      NEmailAddress: staff.NEmailAddress,
+                      NContactAddress: staff.NContactAddress,
+                      Biography: staff.Biography,
+                      file: staff.file,
+                      Research: staff.Research,
+                      Facebook: staff.Facebook,
+                      Linkedin: staff.Linkedin,
+                      Twitter: staff.Twitter,
+                      Scholar: staff.Scholar,
+                      Researchgate: staff.Researchgate,
+                      Academia: staff.Academia,
+                      Orcid: staff.Orcid,
+                      update_passport: false,
+                      file2: staff.Image,
+                      action: "update",
+                    });
+                  }}
+                  title="Edit Staff"
+                >
+                  <i className="fa fa-pen" />
+                </button>
+                <button
+                  className="btn btn-sm btn-warning"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_settings"
+                  onClick={() => {
+                    setEditSettings({
+                      EntryID: staff.EntryID,
+                      StaffID: staff.StaffID,
+                      IsDeductions: staff.IsDeductions || "0",
+                      IsWebsite: staff.IsWebsite || "0",
+                    });
+                  }}
+                  title="Edit Settings"
+                >
+                  <i className="fa fa-cog" />
+                </button>
+                <Link
                   to={`/human-resources/staff/profile/${staff.StaffID}`.toLowerCase()}
                 >
-                  <i className="fa fa-eye" />
-                </button>
-              </Link>
+                  <button
+                    className="btn btn-sm btn-info"
+                    title="View Profile"
+                  >
+                    <i className="fa fa-eye" />
+                  </button>
+                </Link>
+              </div>
             ),
           });
         });
@@ -895,6 +907,39 @@ function AddEditStaff(props) {
       const file = e.dataTransfer.files[0];
       const event = { target: { id: 'file', files: [file] } };
       onEdit(event);
+    }
+  };
+
+  const onUpdateSettings = async (e) => {
+    e.preventDefault();
+
+    if (!editSettings.StaffID) {
+      toast.error("Staff ID is required");
+      return;
+    }
+
+    toast.info("Updating staff settings. Please wait..");
+
+    try {
+      const { success, data: result } = await api.patch("staff/hr/staff-management/update/staff/settings/", {
+        EntryID: editSettings.EntryID,
+        StaffID: editSettings.StaffID,
+        IsDeductions: editSettings.IsDeductions,
+        IsWebsite: editSettings.IsWebsite,
+        UpdatedBy: props.loginData[0].StaffID,
+      });
+
+      if (success && result.message === "success") {
+        toast.success("Staff settings updated successfully");
+        getStaff();
+        // Close modal
+        document.querySelector('[data-bs-dismiss="modal"]')?.click();
+      } else {
+        toast.error("Unable to update settings. Please try again!");
+      }
+    } catch (error) {
+      console.log("NETWORK ERROR", error);
+      toast.error("Network error. Please check your connection.");
     }
   };
 
@@ -1653,6 +1698,61 @@ function AddEditStaff(props) {
             </div>
           </form>
         </Modal>
+
+        {/* Settings Edit Modal */}
+        <div className="modal fade" id="kt_modal_settings" tabIndex="-1" aria-hidden="true">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Staff Settings</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form onSubmit={onUpdateSettings}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="settingsStaffID" className="form-label fw-bold">Staff ID</label>
+                    <input
+                      type="text"
+                      id="settingsStaffID"
+                      className="form-control"
+                      value={editSettings.StaffID}
+                      onChange={(e) => setEditSettings({ ...editSettings, StaffID: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="settingsIsDeductions" className="form-label fw-bold">Is Deductions</label>
+                    <select
+                      id="settingsIsDeductions"
+                      className="form-select"
+                      value={editSettings.IsDeductions}
+                      onChange={(e) => setEditSettings({ ...editSettings, IsDeductions: e.target.value })}
+                    >
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="settingsIsWebsite" className="form-label fw-bold">Is Website</label>
+                    <select
+                      id="settingsIsWebsite"
+                      className="form-select"
+                      value={editSettings.IsWebsite}
+                      onChange={(e) => setEditSettings({ ...editSettings, IsWebsite: e.target.value })}
+                    >
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" className="btn btn-primary">Update Settings</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

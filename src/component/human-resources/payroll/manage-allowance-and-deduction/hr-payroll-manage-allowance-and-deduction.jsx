@@ -14,7 +14,7 @@ function HRPayrollManageAllowanceAndDeduction(props) {
     const [ledgerList, setLedgerList] = useState([]);
     const [staffList, setStaffList] = useState([]);
     const [staffSelect, setStaffSelect] = useState([]);
-    const columns = ["SN", "Action", "Staff ID", "Staff Name", "Post Type", "Ledger Account", "Start Date", "End Date", "Frequency", "Amount", "Status", "Added By"];
+    const columns = ["Action", "Staff ID", "Staff Name", "Post Type", "Ledger Account", "Start Date", "End Date", "Frequency", "Amount", "Status", "Added By"];
     const [data, setData] = useState([]);
 
     // Bulk Allowance State
@@ -73,29 +73,38 @@ function HRPayrollManageAllowanceAndDeduction(props) {
 
         if (entryRes.success && entryRes.data?.length > 0) {
             const rows = entryRes.data.map((item, index) => [
-                index + 1,
-                <button
-                    className="btn btn-sm btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#kt_modal_general"
-                    onClick={() => {
-                        setCreateItem({
-                            staff_id: item.StaffID,
-                            staff: { value: item.StaffID, label: item.StaffID + "--" + item.StaffName },
-                            post_type: item.PostType,
-                            ledger_account: item.LedgerAccount,
-                            start_date: item.StartDate,
-                            end_date: item.EndDate,
-                            frequency: item.Frequency,
-                            amount: item.Amount,
-                            status: item.Status,
-                            inserted_by: props.loginData[0].StaffID,
-                            entry_id: item.EntryID,
-                        });
-                    }}
-                >
-                    <i className="fa fa-pen" />
-                </button>,
+                <div className="d-flex gap-1">
+                    <button
+                        className="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#kt_modal_general"
+                        onClick={() => {
+                            setCreateItem({
+                                staff_id: item.StaffID,
+                                staff: { value: item.StaffID, label: item.StaffID + "--" + item.StaffName },
+                                post_type: item.PostType,
+                                ledger_account: item.LedgerAccount,
+                                start_date: item.StartDate,
+                                end_date: item.EndDate,
+                                frequency: item.Frequency,
+                                amount: item.Amount,
+                                status: item.Status,
+                                inserted_by: props.loginData[0].StaffID,
+                                entry_id: item.EntryID,
+                            });
+                        }}
+                        title="Edit"
+                    >
+                        <i className="fa fa-pen" />
+                    </button>
+                    <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => onDelete(item.EntryID, item.StaffName)}
+                        title="Delete"
+                    >
+                        <i className="fa fa-trash" />
+                    </button>
+                </div>,
                 item.StaffID,
                 item.StaffName,
                 item.PostType,
@@ -137,6 +146,25 @@ function HRPayrollManageAllowanceAndDeduction(props) {
             staff_id: e?.value || "",
             staff: e
         });
+    };
+
+    const onDelete = async (entryId, staffName) => {
+        const confirmDelete = window.confirm(`Are you sure you want to delete the entry for "${staffName}"?`);
+        if (!confirmDelete) return;
+
+        toast.info("Deleting entry...");
+        try {
+            const { success, data } = await api.delete(`staff/hr/payroll/entry/delete/${entryId}`);
+            if (success && data?.message === "success") {
+                toast.success("Entry deleted successfully");
+                getRecord();
+            } else {
+                toast.error("Failed to delete entry");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            toast.error("Network error. Please try again.");
+        }
     };
 
     // Bulk Allowance Functions
