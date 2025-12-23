@@ -26,6 +26,7 @@ function AddEditStaff(props) {
     EntryID: "",
     StaffID: "",
     IsDeductions: "0",
+    IsPension: "0",
     IsWebsite: "0",
   });
 
@@ -359,6 +360,7 @@ function AddEditStaff(props) {
                       EntryID: staff.EntryID,
                       StaffID: staff.StaffID,
                       IsDeductions: staff.IsDeductions || "0",
+                      IsPension: staff.IsPension || "0",
                       IsWebsite: staff.IsWebsite || "0",
                     });
                   }}
@@ -925,6 +927,7 @@ function AddEditStaff(props) {
         EntryID: editSettings.EntryID,
         StaffID: editSettings.StaffID,
         IsDeductions: editSettings.IsDeductions,
+        IsPension: editSettings.IsPension,
         IsWebsite: editSettings.IsWebsite,
         UpdatedBy: props.loginData[0].StaffID,
       });
@@ -1727,6 +1730,18 @@ function AddEditStaff(props) {
                       className="form-select"
                       value={editSettings.IsDeductions}
                       onChange={(e) => setEditSettings({ ...editSettings, IsDeductions: e.target.value })}
+                    >
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="settingsIsPension" className="form-label fw-bold">Is Pension</label>
+                    <select
+                      id="settingsIsPension"
+                      className="form-select"
+                      value={editSettings.IsPension}
+                      onChange={(e) => setEditSettings({ ...editSettings, IsPension: e.target.value })}
                     >
                       <option value="0">No</option>
                       <option value="1">Yes</option>
