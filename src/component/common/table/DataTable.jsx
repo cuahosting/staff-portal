@@ -21,21 +21,21 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
   const columns = data?.columns || [];
   const rows = data?.rows || [];
 
-  // Filter rows by search text
+  // Filter rows by search text - searches through ALL row properties
   const filteredRows = useMemo(() => {
     if (!searchText.trim()) return rows;
 
     const searchLower = searchText.toLowerCase();
     return rows.filter(row => {
-      return columns.some(col => {
-        const value = row[col.field];
-        // Skip React elements (like buttons)
+      // Search through all properties in the row, not just columns
+      return Object.values(row).some(value => {
+        // Skip React elements (like buttons, JSX)
         if (React.isValidElement(value)) return false;
         if (value == null) return false;
         return String(value).toLowerCase().includes(searchLower);
       });
     });
-  }, [rows, columns, searchText]);
+  }, [rows, searchText]);
 
   // Sort filtered rows
   const sortedRows = useMemo(() => {

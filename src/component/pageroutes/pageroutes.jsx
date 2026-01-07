@@ -16,6 +16,7 @@ import Faculty from "../academic/faculty/faculty";
 import HRDesignations from "../human-resources/designations/hr-designations";
 import HRTitle from "../human-resources/title/hr-title";
 import RegistrationDashboard from "../registration/admissions/Dashboard";
+import EditApplicant from "../registration/admissions/EditApplicant";
 import SupportingDocument from "../registration/admissions/supporting-document/SupportingDocument";
 import Course from "../academic/course/course";
 import TimetableStudentGroup from "../academic/timetable/student-group/timetable-student-group";
@@ -641,6 +642,10 @@ export default function PageRoutes() {
                 <Route
                   path="/registration/admissions/admission-dateline"
                   element={<AdmissionDateLine />}
+                />
+                <Route
+                  path="/registration/admissions/edit-applicant/:id"
+                  element={<EditApplicant />}
                 />
                 {/* regisration report */}
                 <Route
