@@ -13,7 +13,7 @@ function TimetableReport(props) {
     const [semesterList, setSemesterList] = useState([]);
     const [schoolSemester, setSchoolSemester] = useState("");
     const [semesterOptions, setSemesterOptions] = useState([]);
-    const columns = ["Day", "Action", "Delete", "Module", "Type", "Block", "Venue", "Start Time", "End Time", "Staff", "Group"];
+    const columns = ["Action", "Day", "Module", "Type", "Block", "Venue", "Start Time", "End Time", "Staff", "Group"];
     const [tableData, setTableData] = useState([]);
     const navigate = useNavigate();
     const [selectedSemester, setSelectedSemester] = useState("");
@@ -49,9 +49,35 @@ function TimetableReport(props) {
                     let staff_list = "";
                     if (filter_staff.length > 0) { filter_staff.forEach(staff => { staff_list += staff.StaffID + ', '; }); }
                     const filter_group = res.group.filter(i => i.TimetableID === data.EntryID);
-                    let group_list_str = "";
-                    if (filter_group.length > 0) { filter_group.forEach(group => { group_list_str += groupList.filter(i => i.EntryID === parseInt(group.GroupID))[0]?.['GroupName'] + ', '; }); }
-                    rows.push([data.DayName, <button className={"btn btn-sm btn-info"} data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => navigate(`/academics/timetable/update-schedule/${data.EntryID}`)}><i style={{ fontSize: '15px', color: "blue" }} className="fa fa-pen color-blue" /></button>, <button className={"btn btn-sm btn-danger"} data-bs-toggle="modal" data-bs-target="#kt_modal_general" onClick={() => delete_timetable(data.EntryID)}><i className="fa fa-trash-alt" /></button>, data.ModuleCode, data.ModuleType, block, venue_name, data.StartTime + ':00', data.EndTime + ':00', staff_list.replace(/,(\s+)?$/, ''), group_list_str.replace(/,(\s+)?$/, '')]);
+                    // Create stacked group display instead of comma-separated string
+                    const groupNames = filter_group.map(group => {
+                        const matchedGroup = groupList.find(i => i.EntryID === parseInt(group.GroupID));
+                        return matchedGroup?.GroupName || '';
+                    }).filter(Boolean);
+
+                    const groupDisplay = groupNames.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            {groupNames.map((name, idx) => (
+                                <span key={idx} className="badge badge-light-primary" style={{ fontSize: '11px', whiteSpace: 'nowrap' }}>
+                                    {name}
+                                </span>
+                            ))}
+                        </div>
+                    ) : '--';
+
+                    // Combined Action buttons (Edit + Delete)
+                    const actionButtons = (
+                        <div key={`action-${data.EntryID}`} className="d-flex gap-2" style={{ whiteSpace: 'nowrap' }}>
+                            <button className="btn btn-sm btn-icon btn-info" title="Edit" onClick={() => navigate(`/academics/timetable/update-schedule/${data.EntryID}`)}>
+                                <i className="fa fa-pen" />
+                            </button>
+                            <button className="btn btn-sm btn-icon btn-danger" title="Delete" onClick={() => delete_timetable(data.EntryID)}>
+                                <i className="fa fa-trash-alt" />
+                            </button>
+                        </div>
+                    );
+
+                    rows.push([actionButtons, data.DayName, data.ModuleCode, data.ModuleType, block, venue_name, data.StartTime + ':00', data.EndTime + ':00', staff_list.replace(/,(\s+)?$/, ''), groupDisplay]);
                 });
                 setTableData(rows);
             } else { setTableData([]); toast.error('No timetable data for the selected semester'); }

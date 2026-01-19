@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { formatDateAndTime } from "../../../../resources/constants";
 import { connect } from "react-redux";
 import swal from "sweetalert";
+import SearchSelect from "../../../common/select/SearchSelect";
 
 function PermissionMenus(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -73,6 +74,7 @@ function PermissionMenus(props) {
     entry_id: "",
   });
   const [subSubMenuList, setSubSubMenuList] = useState([]);
+  const [submittingSubSubMenu, setSubmittingSubSubMenu] = useState(false);
 
   const getRecords = async () => {
     const [mainRes, subRes, subSubRes] = await Promise.all([
@@ -399,22 +401,13 @@ function PermissionMenus(props) {
       return false;
     }
 
+    setSubmittingSubSubMenu(true);
     if (createSubSubMenu.entry_id === "") {
       const { success, data } = await api.post("staff/settings/menu/sub/sub/add", createSubSubMenu);
       if (success && data?.message === "success") {
         toast.success("Sub Sub Menu Added Successfully");
-        document.getElementById("closeModal").click();
         getRecords();
-        setCreateSubSubMenu({
-          ...createSubSubMenu,
-          sub_menu_id: "",
-          sub_sub_menu_name: "",
-          sub_sub_menu_link: "",
-          visibility: 1,
-          main_menu_id: "",
-          entry_id: "",
-        });
-        closeHandler();
+        // Modal stays open, form data preserved - user can add more
       } else if (success && data?.message === "exist") {
         showAlert("SUB SUB MENU EXIST", "Sub Sub Menu already exist!", "error");
       } else if (success) {
@@ -424,23 +417,15 @@ function PermissionMenus(props) {
       const { success, data } = await api.patch("staff/settings/menu/sub/sub/update", createSubSubMenu);
       if (success && data?.message === "success") {
         toast.success("Sub Sub Menu Updated Successfully");
-        document.getElementById("closeModal").click();
+        document.getElementById("closeModalSubSubMenu").click();
         getRecords();
-        setCreateSubSubMenu({
-          ...createSubSubMenu,
-          sub_menu_id: "",
-          sub_sub_menu_link: "",
-          sub_sub_menu_name: "",
-          visibility: 1,
-          main_menu_id: "",
-          entry_id: "",
-        });
-        closeHandler();
       } else if (success) {
         showAlert("ERROR", "Something went wrong. Please try again!", "error");
       }
     }
+    setSubmittingSubSubMenu(false);
   };
+
 
   useEffect(() => {
     getRecords();
@@ -516,13 +501,13 @@ function PermissionMenus(props) {
 
         <Modal title={`${createSubMenu.entry_id === "" ? "Add" : "Update"} Sub Menu`} id="kt_modal_sub_menu" close="closeModalSubMenu">
           <div className="form-group">
-            <label htmlFor="main_menu_id">Select Main Menu</label>
-            <select id="main_menu_id" className="form-select" onChange={onSubMenuEdit} value={createSubMenu.main_menu_id}>
-              <option value="">Select Main Menu</option>
-              {mainMenuList.length > 0 && mainMenuList.map((item, index) => (
-                <option key={index} value={item.EntryID}>{item.MenuName}</option>
-              ))}
-            </select>
+            <SearchSelect
+              label="Select Main Menu"
+              options={mainMenuList.map(item => ({ value: item.EntryID, label: item.MenuName }))}
+              value={createSubMenu.main_menu_id ? mainMenuList.map(item => ({ value: item.EntryID, label: item.MenuName })).find(opt => opt.value == createSubMenu.main_menu_id) || null : null}
+              onChange={(e) => setCreateSubMenu({ ...createSubMenu, main_menu_id: e?.value || "" })}
+              placeholder="Select Main Menu"
+            />
           </div>
           <div className="form-group pt-3">
             <label htmlFor="sub_menu_name">Sub Menu Name</label>
@@ -533,24 +518,32 @@ function PermissionMenus(props) {
           </div>
         </Modal>
 
-        <Modal title={`${createSubSubMenu.entry_id === "" ? "Add" : "Update"} Sub Sub Menu`} id="kt_modal_sub_sub_menu" large={true} close="closeModalSubSubMenu">
+        <Modal title={`${createSubSubMenu.entry_id === "" ? "Add" : "Update"} Sub Sub Menu`} id="kt_modal_sub_sub_menu" large={true} close="closeModalSubSubMenu" onClose={closeHandler}>
           <div className="form-group">
-            <label htmlFor="main_menu_id">Select Main Menu</label>
-            <select id="main_menu_id" className="form-select" onChange={onSubSubMenuEdit} value={createSubSubMenu.main_menu_id}>
-              <option value="">Select Main Menu</option>
-              {mainMenuList.length > 0 && mainMenuList.map((item, index) => (
-                <option key={index} value={item.EntryID}>{item.MenuName}</option>
-              ))}
-            </select>
+            <SearchSelect
+              label="Select Main Menu"
+              options={mainMenuList.map(item => ({ value: item.EntryID, label: item.MenuName }))}
+              value={createSubSubMenu.main_menu_id ? mainMenuList.map(item => ({ value: item.EntryID, label: item.MenuName })).find(opt => opt.value == createSubSubMenu.main_menu_id) || null : null}
+              onChange={(e) => {
+                const value = e?.value || "";
+                if (value !== "") {
+                  setSubMenuSelect(subMenuList.filter(item => item.MainMenuID === parseInt(value)));
+                } else {
+                  setSubMenuSelect([]);
+                }
+                setCreateSubSubMenu({ ...createSubSubMenu, main_menu_id: value, sub_menu_id: "" });
+              }}
+              placeholder="Select Main Menu"
+            />
           </div>
           <div className="form-group pt-3">
-            <label htmlFor="sub_menu_id">Select Sub Menu</label>
-            <select id="sub_menu_id" className="form-select" onChange={onSubSubMenuEdit} value={createSubSubMenu.sub_menu_id}>
-              <option value="">Select Sub Menu</option>
-              {subMenuSelect.length > 0 && subMenuSelect.map((item, index) => (
-                <option key={index} value={item.EntryID}>{item.SubMenuName}</option>
-              ))}
-            </select>
+            <SearchSelect
+              label="Select Sub Menu"
+              options={subMenuSelect.map(item => ({ value: item.EntryID, label: item.SubMenuName }))}
+              value={createSubSubMenu.sub_menu_id ? subMenuSelect.map(item => ({ value: item.EntryID, label: item.SubMenuName })).find(opt => opt.value == createSubSubMenu.sub_menu_id) || null : null}
+              onChange={(e) => setCreateSubSubMenu({ ...createSubSubMenu, sub_menu_id: e?.value || "" })}
+              placeholder="Select Sub Menu"
+            />
           </div>
           <div className="form-group pt-3">
             <label htmlFor="sub_sub_menu_name">Sub Sub Menu Name</label>
@@ -561,14 +554,19 @@ function PermissionMenus(props) {
             <input type="text" className="form-control" id="sub_sub_menu_link" value={createSubSubMenu.sub_sub_menu_link} onChange={onSubSubMenuEdit} placeholder="Enter the Sub Sub Menu Link" />
           </div>
           <div className="form-group pt-3">
-            <label htmlFor="visibility">Select Visibility</label>
-            <select id="visibility" className="form-select" onChange={onSubSubMenuEdit} value={createSubSubMenu.visibility}>
-              <option value="1">Show</option>
-              <option value="0">Hide</option>
-            </select>
+            <SearchSelect
+              label="Select Visibility"
+              options={[{ value: 1, label: "Show" }, { value: 0, label: "Hide" }]}
+              value={{ value: createSubSubMenu.visibility, label: createSubSubMenu.visibility === 1 ? "Show" : "Hide" }}
+              onChange={(e) => setCreateSubSubMenu({ ...createSubSubMenu, visibility: e?.value ?? 1 })}
+              placeholder="Select Visibility"
+            />
           </div>
           <div className="form-group pt-3">
-            <button onClick={onSubmitSubSubMenu} className="btn btn-primary w-100">{createSubSubMenu.entry_id === "" ? "Add" : "Update"} Sub Sub Menu</button>
+            <button onClick={onSubmitSubSubMenu} className="btn btn-primary w-100" disabled={submittingSubSubMenu}>
+              {submittingSubSubMenu ? <span className="spinner-border spinner-border-sm me-2"></span> : null}
+              {createSubSubMenu.entry_id === "" ? "Add" : "Update"} Sub Sub Menu
+            </button>
           </div>
         </Modal>
       </div>

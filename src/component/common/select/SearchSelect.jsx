@@ -226,6 +226,8 @@ function SearchSelect({
                 styles={mergedStyles}
                 menuPortalTarget={document.body}
                 menuPosition="fixed"
+                closeMenuOnScroll={true}
+                blurInputOnSelect={true}
                 noOptionsMessage={() => noOptionsMessage}
                 loadingMessage={() => loadingMessage}
                 classNamePrefix="search-select"

@@ -1,0 +1,129 @@
+/* Senate Report Styles */
+
+.senate-report-container {
+    padding: 20px;
+}
+
+/* Print Header with Letterhead */
+.senate-print-header {
+    display: none;
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #1a237e;
+    padding-bottom: 20px;
+}
+
+.senate-print-header img {
+    width: 80px;
+    height: 80px;
+}
+
+.senate-print-header h2 {
+    color: #1a237e;
+    margin: 10px 0 5px;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+}
+
+.senate-print-header h3 {
+    color: #333;
+    font-size: 1.1rem;
+    margin: 5px 0;
+}
+
+.senate-print-header p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 5px 0;
+}
+
+/* Grade Columns */
+.grade-col {
+    width: 50px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.grade-a { color: #28a745; }
+.grade-b { color: #17a2b8; }
+.grade-c { color: #ffc107; }
+.grade-d { color: #fd7e14; }
+.grade-e { color: #dc3545; }
+.grade-f { color: #6c757d; }
+
+/* Clickable Rows */
+.senate-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.senate-table tbody tr:hover {
+    background-color: #f1faff !important;
+}
+
+/* Group Headers */
+.group-header {
+    background-color: #1a237e !important;
+    color: white;
+    font-weight: 600;
+}
+
+.subgroup-header {
+    background-color: #e3f2fd !important;
+    font-weight: 600;
+}
+
+/* Modal Styles */
+.senate-modal-table th,
+.senate-modal-table td {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+/* Print Styles */
+@media print {
+    .printPageButton,
+    .no-print {
+        display: none !important;
+    }
+
+    .senate-print-header {
+        display: block !important;
+    }
+
+    .senate-report-container {
+        padding: 0;
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .senate-table {
+        font-size: 10px;
+    }
+
+    .senate-table th,
+    .senate-table td {
+        padding: 4px 6px;
+        border: 1px solid #333 !important;
+    }
+
+    .group-header {
+        background-color: #333 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .subgroup-header {
+        background-color: #eee !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    @page {
+        size: landscape;
+        margin: 1cm;
+    }
+}

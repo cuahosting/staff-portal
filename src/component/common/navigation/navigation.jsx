@@ -4,7 +4,7 @@ import "./navigation.css";
 import { useLocation, useNavigate } from "react-router";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import {Audit} from "../../../resources/constants";
+import { Audit } from "../../../resources/constants";
 function Navigation(props) {
   const navigation = useNavigate();
   const location = useLocation();
@@ -22,7 +22,7 @@ function Navigation(props) {
           (menuName) => typeof menuName === "string" && menuName.trim().length
         );
       const menu_list = [...new Set(cleanedMenuList)];
-     
+
       setMainMenu(menu_list.sort());
       const sub_menu_array = [];
       if (menu_list.length > 0) {
@@ -71,7 +71,6 @@ function Navigation(props) {
                 if (typeof menu !== "string") return null;
                 const safeMenu = menu.trim();
                 if (!safeMenu.length) return null;
-                console.log(menu)
                 let is_active =
                   (currentTab || "").toLowerCase() === safeMenu.toLowerCase()
                     ? "active"
@@ -152,34 +151,34 @@ function Navigation(props) {
                                     </span>
                                   }
                                 >
-                                    {permissionList.filter(
-                                            (item) =>
-                                                item.MenuName === safeMenu &&
-                                                item.SubMenuName === sub_menu
-                                        ).length > 0 &&
-                                        permissionList
-                                            .filter(
-                                                (item) =>
-                                                    item.MenuName === safeMenu &&
-                                                    item.SubMenuName === sub_menu
-                                            )
-                                            .map((sub_sub_menu, index) => {
-                                              if (sub_sub_menu.Visibility === 1) {
-                                                return (
-                                                    <NavDropdown.Item
-                                                        key={index}
-                                                        className="py-3 table-responsive"
-                                                        onClick={() =>
-                                                            navigation(
-                                                                sub_sub_menu.SubSubMenuLink
-                                                            )
-                                                        }
-                                                    >
-                                                      {sub_sub_menu.SubSubMenuName}
-                                                    </NavDropdown.Item>
-                                                );
+                                  {permissionList.filter(
+                                    (item) =>
+                                      item.MenuName === safeMenu &&
+                                      item.SubMenuName === sub_menu
+                                  ).length > 0 &&
+                                    permissionList
+                                      .filter(
+                                        (item) =>
+                                          item.MenuName === safeMenu &&
+                                          item.SubMenuName === sub_menu
+                                      )
+                                      .map((sub_sub_menu, index) => {
+                                        if (sub_sub_menu.Visibility === 1) {
+                                          return (
+                                            <NavDropdown.Item
+                                              key={index}
+                                              className="py-3 table-responsive"
+                                              onClick={() =>
+                                                navigation(
+                                                  sub_sub_menu.SubSubMenuLink
+                                                )
                                               }
-                                            })}
+                                            >
+                                              {sub_sub_menu.SubSubMenuName}
+                                            </NavDropdown.Item>
+                                          );
+                                        }
+                                      })}
                                 </NavDropdown>
                               </Nav>
                             );

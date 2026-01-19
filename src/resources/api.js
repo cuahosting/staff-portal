@@ -116,7 +116,7 @@ apiClient.interceptors.response.use(
  * @returns {Promise<{success: boolean, data: any, message: string, error?: any}>}
  */
 const request = async (method, endpoint, data = null, options = {}) => {
-    const { showError = true, headers = {} } = options;
+    const { showError = true, headers = {}, timeout } = options;
 
     try {
         const config = {
@@ -124,6 +124,11 @@ const request = async (method, endpoint, data = null, options = {}) => {
             url: endpoint,
             headers: { ...headers },
         };
+
+        // Add custom timeout if specified
+        if (timeout) {
+            config.timeout = timeout;
+        }
 
         // Add data based on method type
         if (["POST", "PATCH", "PUT"].includes(method.toUpperCase()) && data) {

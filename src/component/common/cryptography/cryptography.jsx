@@ -1,6 +1,6 @@
 import { projectCode } from "../../../resources/constants";
 
-const CryptoJS = require("crypto-js");
+import CryptoJS from "crypto-js";
 
 export function encryptData(string, val = false) {
   try {
@@ -17,7 +17,7 @@ export function encryptData(string, val = false) {
 
     let result = decrypted.toString();
     return btoa(result);
-  }catch (e) {
+  } catch (e) {
     console.log(e)
   }
 }
@@ -36,7 +36,7 @@ export function decryptData(string, val = false) {
     var decrypted = CryptoJS.AES.decrypt(atob(string), kee, { iv: ivv });
 
     return decrypted.toString(CryptoJS.enc.Utf8);
-  }catch (e) {
+  } catch (e) {
     console.log(e)
   }
 }

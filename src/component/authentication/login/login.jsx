@@ -56,11 +56,7 @@ function Login(props) {
       props.setOnLoginDetails(data.userData);
       navigate("/");
     } else if (success) {
-      showAlert(
-        "INVALID",
-        "Invalid login credentials. Please check and try again!",
-        "error"
-      );
+      toast.error("Invalid login credentials. Please check and try again!");
     }
   };
 
@@ -200,7 +196,7 @@ function Login(props) {
                       size="large"
                       text="signin_with"
                       shape="rectangular"
-                      width="100%"
+                      width="300"
                     />
                   </div>
                 </div>

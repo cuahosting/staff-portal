@@ -6,10 +6,10 @@ import { useLocation } from "react-router";
 import { api } from "../../../../resources/api";
 import SearchSelect from "../../../common/select/SearchSelect";
 import { toast } from "react-toastify";
-import ExamTemplate from "./Exam_template.csv";
+import ExamTemplate from "./Exam_template.csv?url";
 import AGTable from "../../../common/table/AGTable";
 
-const randomToken = require('random-token');
+import randomToken from 'random-token';
 
 function ExamResultBulkUpload(props) {
     const [isLoading, setIsLoading] = useState(true);

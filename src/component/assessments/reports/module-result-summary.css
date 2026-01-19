@@ -1,0 +1,59 @@
+.module-result-summary-container {
+    background: white;
+    padding: 20px;
+}
+
+.module-summary-table {
+    font-size: 12px;
+}
+
+.module-summary-table th {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.module-summary-table td {
+    vertical-align: middle;
+}
+
+.signature-section {
+    margin-top: 60px;
+    page-break-inside: avoid;
+}
+
+.signature-line {
+    border-bottom: 1px solid #000;
+    margin-bottom: 5px;
+    height: 40px;
+}
+
+.print-header {
+    display: none;
+}
+
+@media print {
+    .printPageButton {
+        display: none !important;
+    }
+
+    .print-header {
+        display: block !important;
+    }
+
+    .module-result-summary-container {
+        padding: 0;
+    }
+
+    .module-summary-table {
+        font-size: 10px;
+    }
+
+    .module-summary-table th,
+    .module-summary-table td {
+        padding: 4px 6px !important;
+    }
+
+    .signature-section {
+        margin-top: 40px;
+    }
+}

@@ -1,0 +1,76 @@
+.cumulative-result-container {
+    background: white;
+    padding: 20px;
+}
+
+.cumulative-table,
+.gpa-analysis-table {
+    font-size: 10px;
+}
+
+.cumulative-table th,
+.gpa-analysis-table th {
+    white-space: nowrap;
+    vertical-align: middle;
+    font-size: 9px;
+}
+
+.cumulative-table td,
+.gpa-analysis-table td {
+    vertical-align: middle;
+    padding: 3px !important;
+}
+
+.module-header {
+    writing-mode: horizontal-tb;
+    min-width: 50px;
+}
+
+.legend {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.print-header {
+    display: none;
+}
+
+@media print {
+    .printPageButton {
+        display: none !important;
+    }
+
+    .print-header {
+        display: block !important;
+    }
+
+    .cumulative-result-container {
+        padding: 0;
+    }
+
+    .cumulative-table,
+    .gpa-analysis-table {
+        font-size: 7px;
+    }
+
+    .cumulative-table th,
+    .gpa-analysis-table th {
+        font-size: 6px;
+        padding: 2px !important;
+    }
+
+    .cumulative-table td,
+    .gpa-analysis-table td {
+        padding: 1px 2px !important;
+    }
+
+    .module-header {
+        min-width: 30px;
+    }
+
+    .legend {
+        font-size: 8px;
+        padding: 5px;
+    }
+}

@@ -2,6 +2,7 @@
   "name": "euniversity_staff",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
@@ -65,7 +66,6 @@
     "react-redux": "^8.0.2",
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0",
-    "react-scripts": "^5.0.1",
     "react-select": "^5.4.0",
     "react-select-2": "^2.0.11",
     "react-select2-wrapper": "^1.0.4-beta6",
@@ -78,19 +78,20 @@
     "redux-thunk": "^2.4.1",
     "styled-components": "^5.3.5",
     "sweetalert": "^2.1.2",
+    "sweetalert2": "^11.26.17",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "eslint:recommended"
     ]
   },
   "browserslist": {
@@ -106,6 +107,8 @@
     ]
   },
   "devDependencies": {
-    "uuid": "^8.3.2"
+    "@vitejs/plugin-react": "^4.2.1",
+    "uuid": "^8.3.2",
+    "vite": "^5.4.0"
   }
 }
