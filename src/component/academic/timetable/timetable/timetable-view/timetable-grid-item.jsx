@@ -1,4 +1,4 @@
-import * as DOMPurify from 'dompurify';
+import DOMPurify from '../../../../../resources/dom-sanitizer';
 
 const TimeTableGridItem = (props) => {
     return (
@@ -11,7 +11,7 @@ const TimeTableGridItem = (props) => {
 
                 <div className="d-flex align-items-center flex-wrap mb-1 mt-auto fs-6">
                     {
-                        <span dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(props.staff_list)}} />
+                        <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.staff_list) }} />
                     }
                 </div>
 

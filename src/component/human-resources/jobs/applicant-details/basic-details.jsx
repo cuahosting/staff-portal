@@ -4,7 +4,7 @@ import Modal from "../../../common/modal/modal";
 import { Document, Page, pdfjs } from 'react-pdf';
 import { serverLink } from "../../../../resources/url";
 import { Link } from "react-router-dom";
-import * as DOMPurify from 'dompurify';
+import DOMPurify from '../../../../resources/dom-sanitizer';
 import { projectURL, shortCode } from "../../../../resources/constants";
 import SearchSelect from "../../../common/select/SearchSelect";
 

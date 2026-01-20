@@ -11,7 +11,7 @@ import JoditEditor from "jodit-react";
 import ReportTable from "../../common/table/ReportTable";
 import SearchSelect from "../../common/select/SearchSelect";
 import { formatDateAndTime, shortCode } from "../../../resources/constants";
-import * as DOMPurify from 'dompurify';
+import DOMPurify from '../../../resources/dom-sanitizer';
 
 const ComplainsAssignedToMe = (props) => {
     const color = ['success', 'danger', 'info', 'secondary', 'primary', 'warning'];
