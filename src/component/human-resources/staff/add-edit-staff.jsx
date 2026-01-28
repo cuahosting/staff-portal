@@ -5,7 +5,7 @@ import AGTable from "../../common/table/AGTable";
 import axios from "axios";
 import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
-import { showAlert } from "../../common/sweetalert/sweetalert";
+import { showAlert, showConfirm } from "../../common/sweetalert/sweetalert";
 import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import { serverLink } from "../../../resources/url";
@@ -206,6 +206,25 @@ function AddEditStaff(props) {
     }
   };
 
+  const handleDisable = async (id) => {
+    try {
+      const payload = {
+        EntryID: id,
+        UpdatedBy: props.loginData[0].StaffID,
+      };
+      const { success, data } = await api.patch("staff/hr/staff-management/disable/staff/", payload);
+      if (success) {
+        toast.success("Staff Disabed Successfully");
+        getStaff();
+      } else {
+        toast.error("An error occurred while disabling staff");
+      }
+    } catch (error) {
+      console.error("Error disabling staff:", error);
+      toast.error("Network error. Please try again.");
+    }
+  };
+
   const getStaff = async () => {
     try {
       const { success, data } = await api.get("staff/hr/staff-management/staff/list");
@@ -378,6 +397,25 @@ function AddEditStaff(props) {
                     <i className="fa fa-eye" />
                   </button>
                 </Link>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => {
+                    showConfirm(
+                      "Disable Staff",
+                      "Are you sure you want to disable this staff member?",
+                      "warning",
+                      null,
+                      ["No", "Yes"]
+                    ).then((res) => {
+                      if (res) {
+                        handleDisable(staff.EntryID);
+                      }
+                    });
+                  }}
+                  title="Disable Staff"
+                >
+                  <i className="fa fa-ban" />
+                </button>
               </div>
             ),
           });
