@@ -110,7 +110,7 @@ function InventoryReport(props) {
                         CategoryName: item.CategoryName ?? "N/A",
                         SubCategoryName: item.SubCategoryName ?? "N/A",
                         Quantity: item.Quantity ?? 0,
-                        QuantityAvailable: item.Quantity - item.QuantityTaken ?? 0,
+                        QuantityAvailable: (item.Quantity ?? 0) - (item.QuantityTaken ?? 0),
                         QuantityTaken: item.QuantityTaken ?? 0,
                     });
                 });

@@ -39,7 +39,11 @@ function ProcessApplication(props) {
   const [decisionDetails, setDescionsDetails] = useState([]);
   const [st_tuition, setSt_tuition] = useState(0);
   const [showAdmissionLetter, setShowAdmissionLetter] = useState(false);
+  const [showScholarshipLetter, setShowScholarshipLetter] = useState(false);
+  const [scholarshipBody, setScholarshipBody] = useState('');
+  const [showScholarshipModal, setShowScholarshipModal] = useState(false);
   const componentRef = useRef();
+  const scholarshipRef = useRef();
   const [closeModal, setCloseModal] = useState(false);
   const [documentsTable, setDocumentsTable] = useState({ columns: [{ label: "S/N", field: "sn" }, { label: "Document Name", field: "DocumentType" }, { label: "Action", field: "action" }], rows: [] });
   const [paymentTable, setPaymentTable] = useState({ columns: [{ label: "S/N", field: "sn" }, { label: "Description", field: "Description" }, { label: "Amount", field: "AmountPaid" }, { label: "Reference", field: "PaymentReference" }, { label: "Payment Document", field: "PaymentDocument" }, { label: "Date Paid", field: "DatePaid" }, { label: "Action", field: "action" }], rows: [] });
@@ -159,10 +163,20 @@ function ProcessApplication(props) {
     });
   };
 
-  var sendData = { applicantInfo: appInfo.applicant_data, applicantCourse: appInfo.course, decison: decision, school: { logo: projectLogo, name: projectName, address: projectAddress, email: projectEmail, phone: projectPhone, shortCode: shortCode, viceChancellor: projectViceChancellor }, facultyDetails: facultyDetails, appInfo: appInfo, decisionDetails: decisionDetails, tuition: st_tuition };
+  var sendData = { applicantInfo: appInfo.applicant_data, applicantCourse: appInfo.course, decison: decision, school: { logo: projectLogo, name: projectName, address: projectAddress, email: projectEmail, phone: projectPhone, shortCode: shortCode, viceChancellor: projectViceChancellor }, facultyDetails: facultyDetails, appInfo: appInfo, decisionDetails: decisionDetails, tuition: st_tuition, scholarshipBody: scholarshipBody, isScholarship: false };
+  var scholarshipData = { ...sendData, isScholarship: true, scholarshipBody: scholarshipBody };
 
   const printAdmission = () => { setShowAdmissionLetter(true); setTimeout(() => { handleAdmissionPrint(); setShowAdmissionLetter(false); }, 100); };
   const handleAdmissionPrint = useReactToPrint({ content: () => componentRef.current });
+
+  const openScholarshipModal = () => { setShowScholarshipModal(true); };
+  const printScholarshipAdmission = () => {
+    if (!scholarshipBody.trim()) { toast.error('Please enter scholarship body name'); return; }
+    setShowScholarshipModal(false);
+    setShowScholarshipLetter(true);
+    setTimeout(() => { handleScholarshipPrint(); setShowScholarshipLetter(false); }, 100);
+  };
+  const handleScholarshipPrint = useReactToPrint({ content: () => scholarshipRef.current });
 
   return isLoading ? (<Loader />) : (
     <div className="d-flex flex-column flex-row-fluid">
@@ -174,7 +188,59 @@ function ProcessApplication(props) {
             <table className="table table-responsive table-hover"><tbody><tr><td className="fw-bolder">Application ID</td><th>{applicant}</th></tr><tr><td className="fw-bolder">Name</td><th>{`${appInfo.applicant_data[0].FirstName} ${appInfo.applicant_data[0] > 0 ? appInfo.applicant_data[0].Middlename : ""} ${appInfo.applicant_data[0].Surname}`}</th></tr><tr><td className="fw-bolder">Email Address</td><th>{appInfo.applicant_data[0].EmailAddress}</th></tr><tr><td className="fw-bolder">Phone Number</td><th>{appInfo.applicant_data[0].PhoneNumber}</th></tr><tr><td className="fw-bolder">Date of Birth</td><th>{formatDateAndTime(appInfo.applicant_data[0].DateOfBirth, "date")}</th></tr><tr><td className="fw-bolder">Gender</td><th>{appInfo.applicant_data[0].Gender}</th></tr><tr><td className="fw-bolder">Nationality</td><th>{appInfo.applicant_data[0].Nationality}</th></tr><tr><td className="fw-bolder">State of Origin</td><th>{appInfo.applicant_data[0].StateOfOrigin}</th></tr><tr><td className="fw-bolder">LGA</td><th>{appInfo.applicant_data[0].LGA}</th></tr><tr><td className="fw-bolder">Religion</td><th>{appInfo.applicant_data[0].Religion}</th></tr><tr><td className="fw-bolder">Occupation</td><th>{appInfo.applicant_data[0].Occupation ? appInfo.applicant_data[0].Occupation : "Nil"}</th></tr><tr><td className="fw-bolder">Address</td><th>{appInfo.applicant_data[0].Address}</th></tr>{shortCode === "CU" && <tr><td className="fw-bolder">ReferralCode</td><th>{appInfo.applicant_data[0].ReferralCode}</th></tr>}</tbody></table>
           </div>
           {decisionDetails.length > 0 && appInfo.course[0]?.Status !== 3 && (
-            <div className="col-md-4 pt-20"><div className="bg-light bg-opacity-100 rounded-3 p-10 mx-md-5 h-md-100"><h3>Admission Details</h3><div className="table table-responsive"><table className="table"><tbody style={{ paddingLeft: '10px' }}><tr><td className="fw-bolder">Application ID</td><th>{applicant}</th></tr><tr><td className="fw-bolder">Approved Course</td><th>{decisionDetails[0]?.CourseName}</th></tr><tr><td className="fw-bolder">Admission Level</td><th>{decisionDetails[0]?.AdmissionLevel} Level</th></tr><tr><td className="fw-bolder">Admission Semester</td><th>{decisionDetails[0]?.AdmissionSemester}</th></tr><tr><td className="fw-bolder">School Semester</td><th>{decisionDetails[0]?.AdmissionSchoolSemester}</th></tr><tr><td className="fw-bolder">Admission Type</td><th>{decisionDetails[0]?.AdmissionType}</th></tr><tr><td className="fw-bolder">Admission Conditions</td><th>{decisionDetails[0]?.AdmissionCondition?.split(",")?.join(" |")}</th></tr><tr><td className="fw-bolder">Admission Date</td><th>{formatDateAndTime(decisionDetails[0]?.InsertedOn, "date")}</th></tr></tbody></table></div><div className="d-flex justify-content-between mt-4">{AdmissionLetter.length > 0 && <>{shortCode === "AUM" && <div><button className="btn btn-md btn-primary" onClick={printAdmission}>Print Admission Letter</button></div>}{shortCode === "BAUK" || shortCode === "CU" && <div><button className="btn btn-md btn-primary" onClick={printAdmission}>Print Admission Letter</button></div>}{shortCode === "BAUK" || shortCode === "AUM" || shortCode === "CU" && <button disabled={parseInt(appInfo.course[0].Status) !== 2} className="btn btn-sm btn-success ms-3" onClick={allowEnrolment}>Allow Enrolment</button>}</>}</div><div className="d-flex justify-content-center mt-4"><button className="btn btn-md btn-secondary" data-bs-toggle="modal" data-bs-target="#update_modal" onClick={''}>Update Admission Requirements</button></div><Modal title={'Update Admission Details (AppID: ' + applicant + ')'} id={'update_modal'} large close="close_jamb"><UpdateAdmissionDetails jambData={appInfo.jamb} AppId={applicant} getApplicantData={getApplicantData} setCloseModal={setCloseModal} /></Modal></div></div>
+            <div className="col-md-4 pt-20"><div className="bg-light bg-opacity-100 rounded-3 p-10 mx-md-5 h-md-100"><h3>Admission Details</h3><div className="table table-responsive"><table className="table"><tbody style={{ paddingLeft: '10px' }}><tr><td className="fw-bolder">Application ID</td><th>{applicant}</th></tr><tr><td className="fw-bolder">Approved Course</td><th>{decisionDetails[0]?.CourseName}</th></tr><tr><td className="fw-bolder">Admission Level</td><th>{decisionDetails[0]?.AdmissionLevel} Level</th></tr><tr><td className="fw-bolder">Admission Semester</td><th>{decisionDetails[0]?.AdmissionSemester}</th></tr><tr><td className="fw-bolder">School Semester</td><th>{decisionDetails[0]?.AdmissionSchoolSemester}</th></tr><tr><td className="fw-bolder">Admission Type</td><th>{decisionDetails[0]?.AdmissionType}</th></tr><tr><td className="fw-bolder">Admission Conditions</td><th>{decisionDetails[0]?.AdmissionCondition?.split(",")?.join(" |")}</th></tr><tr><td className="fw-bolder">Admission Date</td><th>{formatDateAndTime(decisionDetails[0]?.InsertedOn, "date")}</th></tr></tbody></table></div>
+              {/* Standardized Button Layout */}
+              {AdmissionLetter.length > 0 && (
+                <>
+                  {/* Row 1: Print Buttons */}
+                  <div className="d-flex gap-2 mb-3">
+                    <button className="btn btn-primary flex-fill" onClick={printAdmission}>
+                      <i className="fa fa-print me-2"></i>Print Admission Letter
+                    </button>
+                    <button className="btn btn-info flex-fill text-white" onClick={openScholarshipModal}>
+                      <i className="fa fa-graduation-cap me-2"></i>Print Scholarship Admission
+                    </button>
+                  </div>
+                  {/* Row 2: Action Buttons */}
+                  <div className="d-flex gap-2">
+                    <button disabled={parseInt(appInfo.course[0].Status) !== 2} className="btn btn-success flex-fill" onClick={allowEnrolment}>
+                      <i className="fa fa-check me-2"></i>Allow Enrolment
+                    </button>
+                    <button className="btn btn-secondary flex-fill" data-bs-toggle="modal" data-bs-target="#update_modal">
+                      <i className="fa fa-edit me-2"></i>Update Requirements
+                    </button>
+                  </div>
+                </>
+              )}
+              <Modal title={'Update Admission Details (AppID: ' + applicant + ')'} id={'update_modal'} large close="close_jamb"><UpdateAdmissionDetails jambData={appInfo.jamb} AppId={applicant} getApplicantData={getApplicantData} setCloseModal={setCloseModal} /></Modal>
+
+              {/* Scholarship Body Modal */}
+              {showScholarshipModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                  <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content">
+                      <div className="modal-header bg-info text-white">
+                        <h5 className="modal-title"><i className="fa fa-graduation-cap me-2"></i>Scholarship Admission Letter</h5>
+                        <button type="button" className="btn-close btn-close-white" onClick={() => setShowScholarshipModal(false)}></button>
+                      </div>
+                      <div className="modal-body">
+                        <div className="mb-3">
+                          <label className="form-label fw-bold">Scholarship Body Name <span className="text-danger">*</span></label>
+                          <input type="text" className="form-control" placeholder="e.g. TETFUND, Petroleum Trust Fund, etc." value={scholarshipBody} onChange={(e) => setScholarshipBody(e.target.value)} />
+                          <small className="text-muted">Enter the name of the scholarship sponsoring body</small>
+                        </div>
+                      </div>
+                      <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" onClick={() => setShowScholarshipModal(false)}>Cancel</button>
+                        <button type="button" className="btn btn-info text-white" onClick={printScholarshipAdmission}>
+                          <i className="fa fa-print me-2"></i>Print Letter
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div></div>
           )}
         </div><hr />
         <h3>O'level Information</h3>
@@ -200,6 +266,8 @@ function ProcessApplication(props) {
       {showAdmissionLetter && shortCode === "BAUK" && <BabaAhmadAdmissionLetter componentRef={componentRef} data={sendData} />}
       {showAdmissionLetter && shortCode === "AUM" && <AlAnsarAdmissionLetter componentRef={componentRef} data={sendData} />}
       {showAdmissionLetter && shortCode === "CU" && <CosmopolitanAdmissionLetter componentRef={componentRef} data={sendData} />}
+      {/* Scholarship Admission Letters */}
+      {showScholarshipLetter && shortCode === "CU" && <CosmopolitanAdmissionLetter componentRef={scholarshipRef} data={{ ...sendData, isScholarship: true, scholarshipBody: scholarshipBody }} />}
     </div>
   );
 }

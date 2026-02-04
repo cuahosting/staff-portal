@@ -61,13 +61,15 @@ function ProcessRunningModules(props) {
     useEffect(() => { getSemester(); }, []);
 
     return (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="card card-xxl-stretch mb-5 mb-xl-8">
-            <div className="card-header border-0 pt-5"><h3 className="card-title align-items-start flex-column"><span className="card-label fw-bolder fs-3 mb-1">Process Running Modules</span><span className="text-muted mt-1 fw-bold fs-7">Manage and process modules for the semester</span></h3></div>
-            <div className="card-body py-3">
-                <div className="row mb-5"><div className="col-md-4"><label className="form-label">Select Semester</label><SearchSelect options={semesterList} onChange={(e) => { setSelectedSemester(e.value); getTimetableModules(e.value); }} placeholder="Select Semester" /></div><div className="col-md-8 d-flex align-items-end justify-content-end gap-2"><button className="btn btn-primary" onClick={onProcessModules} disabled={isLoading}>{isLoading ? "Processing..." : "Process Modules"}</button><button className="btn btn-danger" onClick={clearProcessedModules} disabled={isLoading}>Clear Processed</button></div></div>
-                {isLoading ? (<Loader />) : (<AGReportTable columns={columns} data={t_data} title={`Timetable Modules - ${selectedSemester}`} />)}
-            </div>
-        </motion.div>
+        <div className="container-fluid px-0">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="card card-xxl-stretch mb-5 mb-xl-8">
+                <div className="card-header border-0 pt-5"><h3 className="card-title align-items-start flex-column"><span className="card-label fw-bolder fs-3 mb-1">Process Running Modules</span><span className="text-muted mt-1 fw-bold fs-7">Manage and process modules for the semester</span></h3></div>
+                <div className="card-body py-3">
+                    <div className="row mb-5"><div className="col-md-4"><label className="form-label">Select Semester</label><SearchSelect options={semesterList} onChange={(e) => { setSelectedSemester(e.value); getTimetableModules(e.value); }} placeholder="Select Semester" /></div><div className="col-md-8 d-flex align-items-end justify-content-end gap-2"><button className="btn btn-primary" onClick={onProcessModules} disabled={isLoading}>{isLoading ? "Processing..." : "Process Modules"}</button><button className="btn btn-danger" onClick={clearProcessedModules} disabled={isLoading}>Clear Processed</button></div></div>
+                    {isLoading ? (<Loader />) : (<AGReportTable columns={columns} data={t_data} title={`Timetable Modules - ${selectedSemester}`} />)}
+                </div>
+            </motion.div>
+        </div>
     );
 }
 

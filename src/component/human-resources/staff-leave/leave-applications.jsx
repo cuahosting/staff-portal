@@ -10,7 +10,7 @@ import JoditEditor from "jodit-react";
 import { toast } from "react-toastify";
 import { formatDate, formatDateAndTime } from "../../../resources/constants";
 import Loader from "../../common/loader/loader";
-import * as DOMPurify from 'dompurify';
+import DOMPurify from '../../../resources/dom-sanitizer';
 
 const StaffLeaveApplications = (props) => {
     const editorRef = React.createRef();

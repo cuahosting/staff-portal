@@ -8,7 +8,7 @@ import { serverLink } from "../../../../resources/url";
 import Modal from "../../../common/modal/modal";
 import ReportTable from "../../../common/table/ReportTable";
 import { shortCode } from "../../../../resources/constants";
-import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
+import { Document, Page } from "react-pdf";
 
 function PendingTranscriptApplications(props) {
   const [isLoading, setIsLoading] = useState(false);

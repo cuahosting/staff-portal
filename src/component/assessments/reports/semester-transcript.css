@@ -1,0 +1,74 @@
+.semester-transcript-container {
+    background: white;
+    padding: 20px;
+}
+
+.transcript-table {
+    font-size: 10px;
+}
+
+.transcript-table th {
+    white-space: nowrap;
+    vertical-align: middle;
+    font-size: 9px;
+}
+
+.transcript-table td {
+    vertical-align: middle;
+    padding: 4px !important;
+}
+
+.module-key {
+    page-break-inside: avoid;
+}
+
+.signature-section {
+    margin-top: 60px;
+    page-break-inside: avoid;
+}
+
+.signature-line {
+    border-bottom: 1px solid #000;
+    margin-bottom: 5px;
+    height: 40px;
+}
+
+.print-header {
+    display: none;
+}
+
+@media print {
+    .printPageButton {
+        display: none !important;
+    }
+
+    .print-header {
+        display: block !important;
+    }
+
+    .semester-transcript-container {
+        padding: 0;
+    }
+
+    .transcript-table {
+        font-size: 8px;
+    }
+
+    .transcript-table th {
+        font-size: 7px;
+        padding: 2px !important;
+    }
+
+    .transcript-table td {
+        padding: 2px !important;
+    }
+
+    .badge {
+        padding: 1px 4px !important;
+        font-size: 7px !important;
+    }
+
+    .signature-section {
+        margin-top: 30px;
+    }
+}

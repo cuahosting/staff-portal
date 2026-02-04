@@ -109,6 +109,7 @@ import ActiveStudentListByDepartment from "../user/student-report/ActiveStudentL
 
 import StudentListByLecturerModule from "../user/student-report/StudentListByLecturerModule";
 import SemesterProgression from "../registration/progressions/semester-progression/semester-progression";
+import ProgressionHistory from "../registration/progressions/progression-history/progression-history";
 import MissingRegistrationModule from "../registration/semeter-registration/missing-registration";
 import ProcessRunningModules from "../academic/timetable-planner/process-running-modules";
 import ChangeofCourseGuardian from "../registration/change-of-course/guardian-approval";
@@ -119,6 +120,13 @@ import GuardianApprovalForm from "../registration/change-of-course/guardian-appr
 import EXAMSCASettings from "../assessments/assessment/ca-settings/exams-ca-settings";
 
 import ProcessCA from "../assessments/assessment/process-ca/process-ca";
+import DepartmentalModeration from "../assessments/moderation/departmental-moderation";
+import CollegeModeration from "../assessments/moderation/college-moderation";
+import SBCModeration from "../assessments/moderation/sbc-moderation";
+import ModerationApproval from "../assessments/moderation/moderation-approval";
+import DeanApprovalPage from "../assessments/moderation/dean-approval";
+import SBCApprovalPage from "../assessments/moderation/sbc-approval";
+import UniversityModeration from "../assessments/moderation/university-moderation";
 import GenerateAttendance from "../assessments/attendance/attendance";
 import AttendanceList from "../assessments/attendance/lecturer-mark-attendance";
 
@@ -213,6 +221,7 @@ import UpdateStudentInformation from "../user/student-manager/update-student-inf
 import UpdateStaffPassword from "../user/staff-report/update-staff-password";
 import ComplainTypes from "../user/service-desk/complain-types";
 import TimetableMigration from "../academic/timetable/timetable-migration/timetable-migration";
+import AutoGenerateTimetable from "../academic/timetable/auto-generate/auto-generate";
 import RegistrationClearanceReport
   from "../human-resources/finance/clearance-report/registration-clearance-report";
 import ResultClearanceReport from "../human-resources/finance/clearance-report/result-clearance-report";
@@ -251,6 +260,15 @@ import CASubmitted from "../assessments/reports/ca-submitted";
 import CAAcknowledgementByCourse from "../assessments/reports/ca-acknowledgment-by-course";
 import AcademicResultByUniversity from "../assessments/academic-result/academic-result-by-university";
 import StudentResultSlip from "../assessments/reports/student-result-slip";
+import ModuleResultSummary from "../assessments/reports/module-result-summary";
+import ModuleIndividualResults from "../assessments/reports/module-individual-results";
+import SemesterTranscript from "../assessments/reports/semester-transcript";
+import CumulativeResultReport from "../assessments/reports/cumulative-result-report";
+import SenateUniversity from "../assessments/reports/senate/senate-university";
+import SenateFaculty from "../assessments/reports/senate/senate-faculty";
+import SenateDepartment from "../assessments/reports/senate/senate-department";
+import SenateCourse from "../assessments/reports/senate/senate-course";
+import SenateModule from "../assessments/reports/senate/senate-module";
 import ExamBulkUpload from "../assessments/exam/post-exam-lecturer/exam-bulk-upload";
 import ExamResultBulkUpload from "../assessments/exam/post-exam-lecturer/exam-bulk-upload";
 import BankReport from "../human-resources/salary-report/bank-report";
@@ -286,6 +304,29 @@ import ScholarshipAdmission from "../human-resources/scholarship/scholarship-adm
 import AcademicScholarships from "../human-resources/scholarship/academic-scholarships";
 import ScholarshipUsage from "../human-resources/scholarship/scholarship-usage";
 import ScholarshipReportNew from "../human-resources/scholarship/scholarship-report";
+
+// Staff Appraisal Module Imports
+import AppraisalSettings from "../human-resources/appraisal/settings/appraisal-settings";
+import HodScoreSettings from "../human-resources/appraisal/settings/hod-score-settings";
+import MyAppraisal from "../human-resources/appraisal/staff/my-appraisal";
+import BasicDetailsForm from "../human-resources/appraisal/staff/basic-details-form";
+import HodPendingEvaluations from "../human-resources/appraisal/hod/pending-evaluations";
+import HodEvaluateStaff from "../human-resources/appraisal/hod/evaluate-staff";
+import DeanPendingApprovals from "../human-resources/appraisal/dean/pending-approvals";
+import DeanReviewAppraisal from "../human-resources/appraisal/dean/review-appraisal";
+import RegistrarPendingApprovals from "../human-resources/appraisal/registrar/pending-approvals";
+import RegistrarReviewAppraisal from "../human-resources/appraisal/registrar/review-appraisal";
+import VcPendingApprovals from "../human-resources/appraisal/vc/pending-approvals";
+import VcFinalReview from "../human-resources/appraisal/vc/final-review";
+import AppraisalDashboard from "../human-resources/appraisal/reports/appraisal-dashboard";
+import AcademicPositions from "../human-resources/appraisal/staff/academic-positions";
+import AdminResponsibilities from "../human-resources/appraisal/staff/admin-responsibilities";
+import Memberships from "../human-resources/appraisal/staff/memberships";
+import Trainings from "../human-resources/appraisal/staff/trainings";
+import CommunityService from "../human-resources/appraisal/staff/community-service";
+import Contributions from "../human-resources/appraisal/staff/contributions";
+import DutySchedule from "../human-resources/appraisal/staff/duty-schedule";
+import ViewHodScore from "../human-resources/appraisal/staff/view-hod-score";
 
 export default function PageRoutes() {
   return (
@@ -505,6 +546,30 @@ export default function PageRoutes() {
                   element={<StaffLeaveApplications />}
                 />
 
+                {/* Staff Appraisal Routes */}
+                <Route path="/human-resources/appraisal/settings" element={<AppraisalSettings />} />
+                <Route path="/human-resources/appraisal/hod-score-settings" element={<HodScoreSettings />} />
+                <Route path="/human-resources/appraisal/my-appraisal" element={<MyAppraisal />} />
+                <Route path="/human-resources/appraisal/basic-details" element={<BasicDetailsForm />} />
+                <Route path="/human-resources/appraisal/basic-details/:appraisalId" element={<BasicDetailsForm />} />
+                <Route path="/human-resources/appraisal/hod/pending" element={<HodPendingEvaluations />} />
+                <Route path="/human-resources/appraisal/hod/evaluate/:appraisalId" element={<HodEvaluateStaff />} />
+                <Route path="/human-resources/appraisal/dean/pending" element={<DeanPendingApprovals />} />
+                <Route path="/human-resources/appraisal/dean/review/:appraisalId" element={<DeanReviewAppraisal />} />
+                <Route path="/human-resources/appraisal/registrar/pending" element={<RegistrarPendingApprovals />} />
+                <Route path="/human-resources/appraisal/registrar/review/:appraisalId" element={<RegistrarReviewAppraisal />} />
+                <Route path="/human-resources/appraisal/vc/pending" element={<VcPendingApprovals />} />
+                <Route path="/human-resources/appraisal/vc/review/:appraisalId" element={<VcFinalReview />} />
+                <Route path="/human-resources/appraisal/dashboard" element={<AppraisalDashboard />} />
+                <Route path="/human-resources/appraisal/academic-positions/:appraisalId" element={<AcademicPositions />} />
+                <Route path="/human-resources/appraisal/admin-responsibilities/:appraisalId" element={<AdminResponsibilities />} />
+                <Route path="/human-resources/appraisal/memberships/:appraisalId" element={<Memberships />} />
+                <Route path="/human-resources/appraisal/trainings/:appraisalId" element={<Trainings />} />
+                <Route path="/human-resources/appraisal/community-service/:appraisalId" element={<CommunityService />} />
+                <Route path="/human-resources/appraisal/contributions/:appraisalId" element={<Contributions />} />
+                <Route path="/human-resources/appraisal/duty-schedule/:appraisalId" element={<DutySchedule />} />
+                <Route path="/human-resources/appraisal/view-hod-score" element={<ViewHodScore />} />
+
                 {/*academics*/}
                 <Route path="/academics/faculty" element={<Faculty />} />
                 <Route path="/academics/department" element={<Department />} />
@@ -558,6 +623,10 @@ export default function PageRoutes() {
                   element={<ClashByPass />}
                 />
                 <Route
+                  path="/academics/timetable/auto-generate"
+                  element={<AutoGenerateTimetable />}
+                />
+                <Route
                   path="/academics/module-running/by-course"
                   element={<ByCourse />}
                 />
@@ -609,6 +678,17 @@ export default function PageRoutes() {
                 <Route path="/assessment/report/ca-summary-print-by-course" element={<CAAcknowledgementByCourse />} />
                 <Route path="/assessment/report/ca-summary-print" element={<CAAcknowledgementByCourse />} />
                 <Route path="/assessment/report/student-result-slip" element={<StudentResultSlip />} />
+                <Route path="/assessment/report/module-result-summary" element={<ModuleResultSummary />} />
+                <Route path="/assessment/report/module-individual-results" element={<ModuleIndividualResults />} />
+                <Route path="/assessment/report/semester-transcript" element={<SemesterTranscript />} />
+                <Route path="/assessment/report/cumulative-results" element={<CumulativeResultReport />} />
+
+                {/* Senate Result Reports */}
+                <Route path="/assessment/senate-report/university" element={<SenateUniversity />} />
+                <Route path="/assessment/senate-report/faculty" element={<SenateFaculty />} />
+                <Route path="/assessment/senate-report/department" element={<SenateDepartment />} />
+                <Route path="/assessment/senate-report/course" element={<SenateCourse />} />
+                <Route path="/assessment/senate-report/module" element={<SenateModule />} />
 
                 <Route path="/academics/exam-timetable" element={""} />
                 <Route
@@ -678,6 +758,10 @@ export default function PageRoutes() {
                 <Route
                   path="/registration/progression/semester-progression"
                   element={<SemesterProgression />}
+                />
+                <Route
+                  path="/registration/progression/progression-history"
+                  element={<ProgressionHistory />}
                 />
                 <Route
                   path="/registration/registration/missing-registration-module"
@@ -936,6 +1020,36 @@ export default function PageRoutes() {
                 <Route
                   path="/assessments/continuous-assessment/process/ca"
                   element={<ProcessCA />}
+                />
+
+                {/* Moderation Routes */}
+                <Route
+                  path="/assessments/moderation/departmental"
+                  element={<DepartmentalModeration />}
+                />
+                <Route
+                  path="/assessments/moderation/college"
+                  element={<CollegeModeration />}
+                />
+                <Route
+                  path="/assessments/moderation/sbc"
+                  element={<SBCModeration />}
+                />
+                <Route
+                  path="/assessments/moderation/approval"
+                  element={<ModerationApproval />}
+                />
+                <Route
+                  path="/assessments/moderation/dean-approval"
+                  element={<DeanApprovalPage />}
+                />
+                <Route
+                  path="/assessments/moderation/sbc-approval"
+                  element={<SBCApprovalPage />}
+                />
+                <Route
+                  path="/assessments/moderation/university"
+                  element={<UniversityModeration />}
                 />
 
                 <Route

@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { connect } from "react-redux";
 import SearchSelect from "../../../common/select/SearchSelect";
 import AgReportTable from "../../../common/table/AGReportTable";
-import CATemplate from "./CA_template.csv"
+import CATemplate from "./CA_template.csv?url"
 
 function CAEntry(props) {
     const [isLoading, setIsLoading] = useState(false);

@@ -26,6 +26,7 @@ export default function Modal(props) {
                 data-bs-dismiss="modal"
                 id={`${typeof props.close !== "undefined" ? props.close : "closeModal"
                   }`}
+                onClick={() => props.onClose && props.onClose()}
               >
                 <span id="closeModal" className="svg-icon svg-icon-1 closeModal">
                   <svg

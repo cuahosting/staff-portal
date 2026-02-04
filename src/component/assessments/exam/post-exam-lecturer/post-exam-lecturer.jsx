@@ -6,7 +6,7 @@ import { useLocation } from "react-router";
 import { api } from "../../../../resources/api";
 import SearchSelect from "../../../common/select/SearchSelect";
 import { toast } from "react-toastify";
-const randomToken = require('random-token');
+import randomToken from 'random-token';
 
 function PostExamResultByLecturer(props) {
     const [isLoading, setIsLoading] = useState(true);

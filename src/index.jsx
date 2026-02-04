@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import App from "./App.jsx";
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import { applyMiddleware, createStore, compose } from "redux";
@@ -15,17 +15,17 @@ import { initializeApi } from "./resources/api";
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 let store;
 // Only include redux-logger in development mode
-if (process.env.NODE_ENV === 'development') {
-  store = createStore(
-    rootReducer,
-    composeEnhancers(applyMiddleware(logger, thunkMiddleware))
-  );
-} else {
-  store = createStore(
-    rootReducer,
-    composeEnhancers(applyMiddleware(thunkMiddleware))
-  );
-}
+// if (process.env.NODE_ENV === 'development') {
+//   store = createStore(
+//     rootReducer,
+//     composeEnhancers(applyMiddleware(logger, thunkMiddleware))
+//   );
+// } else {
+store = createStore(
+  rootReducer,
+  composeEnhancers(applyMiddleware(thunkMiddleware))
+);
+// }
 
 // Initialize API client with store for automatic token injection
 initializeApi(store);

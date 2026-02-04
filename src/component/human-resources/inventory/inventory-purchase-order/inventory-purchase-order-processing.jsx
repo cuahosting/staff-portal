@@ -64,7 +64,7 @@ export default function InventoryPurchaseOrderProcessing(props) {
                                 <rect x="7" y="6" width="4" height="4" rx="2" fill="currentColor" />
                             </svg>
                         </span>
-                        Order From => {props.selectedOrder.request_type}</a>
+                        Order From =&gt; {props.selectedOrder.request_type}</a>
                     <div className="d-flex flex-column flex-grow-1 pe-8">
                         <div className="d-flex flex-wrap">
                             <div
@@ -160,8 +160,8 @@ export default function InventoryPurchaseOrderProcessing(props) {
                     <h2>Warning!</h2>
                     <p>Are you sure you want to receive the above items?</p>
                     <p>
-                        <b> FROM => <span className="text-uppercase">{props.selectedOrder.request_type}</span>:  </b> {props.selectedOrder.requested_from_name} <br />
-                        <b> TO => STORE LOCATION:  </b> {props.selectedOrder.location_name} <br />
+                        <b> FROM =&gt; <span className="text-uppercase">{props.selectedOrder.request_type}</span>:  </b> {props.selectedOrder.requested_from_name} <br />
+                        <b> TO =&gt; STORE LOCATION:  </b> {props.selectedOrder.location_name} <br />
 
                     </p>
                 </div>

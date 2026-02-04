@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import ReportTable from "../../common/table/ReportTable";
 import { formatDateAndTime, shortCode } from "../../../resources/constants";
-import * as DOMPurify from 'dompurify';
+import DOMPurify from '../../../resources/dom-sanitizer';
 import SearchSelect from "../../common/select/SearchSelect";
 
 const MyComplainList = (props) => {
