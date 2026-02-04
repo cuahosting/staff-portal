@@ -62,6 +62,7 @@ import TimetableReport from "../academic/timetable/timetable-report/timetable";
 import ManageTimetableSchedule from "../academic/timetable/manage-schedule/manage-schedule";
 import ClashByPass from "../academic/timetable/clash-by-pass/clash-by-pass";
 import SemesterRegistration from "../registration/semeter-registration/semester-registration";
+import SemesterRegistrationApproval from "../registration/semeter-registration/semeter-registration-approval";
 import SemesterRegistrationSettings from "../settings/registration-settings/registration-settings";
 import OfficerAssignment from "../academic/timetable-planner/OfficerAssignment";
 import DeanApproval from "../academic/timetable-planner/DeanApproval";
@@ -853,10 +854,8 @@ export default function PageRoutes() {
                 <Route path="/human-resources/finance-and-budget/my-budget" element={<FinanceMyBudget />} />
                 <Route path="/human-resources/finance-and-budget/budget-profile" element={<FinanceBudgetProfile />} />
 
-                <Route
-                  path="/registration/registration/semester-registration"
-                  element={<SemesterRegistration />}
-                />
+                <Route path="/registration/registration/semester-registration" element={<SemesterRegistration />} />
+                <Route path="/registration/registration/approve-semester-registration" element={<SemesterRegistrationApproval />} />
                 {/* timetable planner */}
                 <Route
                   path="/academics/timetable-planner/module-assignment"
