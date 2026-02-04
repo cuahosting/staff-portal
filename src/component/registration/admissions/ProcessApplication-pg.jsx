@@ -43,7 +43,11 @@ function ProcessApplicationPG(props) {
   useEffect(() => {
     const getCourses = async () => {
       const { success, data } = await api.get("registration/admissions/courses");
-      if (success) setCourses(data || []);
+      if (success && Array.isArray(data)) {
+        const merged = data.flat();
+        const distinctCourses = Array.from(new Map(merged.map(item => [item.CourseCode, item])).values());
+        setCourses(distinctCourses);
+      }
     };
     getCourses();
   }, []);
