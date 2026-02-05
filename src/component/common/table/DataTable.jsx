@@ -27,6 +27,11 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
 
     const searchLower = searchText.toLowerCase();
     return rows.filter(row => {
+      // If it's a group header, we might want to show it, 
+      // but only if there are matching rows under it.
+      // For simplicity, we'll keep the search simple.
+      if (row.isGroupHeader) return false; // We filter out group headers from the search pool, we'll re-add them below
+
       // Search through all properties in the row, not just columns
       return Object.values(row).some(value => {
         // Skip React elements (like buttons, JSX)
@@ -117,13 +122,17 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
 
     // Data rows
     sortedRows.forEach(row => {
-      tableHtml += '<tr>';
-      columns.forEach(col => {
-        const val = row[col.field];
-        const cellValue = React.isValidElement(val) ? '' : (val ?? '');
-        tableHtml += `<td style="padding:6px;">${cellValue}</td>`;
-      });
-      tableHtml += '</tr>';
+      if (row.isGroupHeader) {
+        tableHtml += `<tr><td colspan="${columns.length}" style="background-color:#F4F6FA;font-weight:bold;padding:8px;">${row.groupTitle}</td></tr>`;
+      } else {
+        tableHtml += 'tr>';
+        columns.forEach(col => {
+          const val = row[col.field];
+          const cellValue = React.isValidElement(val) ? '' : (val ?? '');
+          tableHtml += `<td style="padding:6px;">${cellValue}</td>`;
+        });
+        tableHtml += '</tr>';
+      }
     });
     tableHtml += '</table>';
 
@@ -149,6 +158,9 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
   const handleExportCSV = useCallback(() => {
     const headers = columns.map(col => col.label).join(',');
     const csvRows = sortedRows.map(row => {
+      if (row.isGroupHeader) {
+        return `"${row.groupTitle.replace(/"/g, '""')}"` + (','.repeat(columns.length - 1));
+      }
       return columns.map(col => {
         const val = row[col.field];
         if (React.isValidElement(val)) return '';
@@ -177,6 +189,9 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
   const handleCopy = useCallback(() => {
     const headers = columns.map(col => col.label).join('\t');
     const textRows = sortedRows.map(row => {
+      if (row.isGroupHeader) {
+        return row.groupTitle;
+      }
       return columns.map(col => {
         const val = row[col.field];
         if (React.isValidElement(val)) return '';
@@ -286,25 +301,43 @@ export default function DataTable({ data, paging = true, pageSize: initialPageSi
               <AnimatePresence>
                 {paginatedRows.length > 0 ? (
                   paginatedRows.map((row, rowIdx) => (
-                    <motion.tr
-                      key={row.EntryID || row.sn || rowIdx}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2, delay: rowIdx * 0.03 }}
-                    >
-                      {columns.map((col, colIdx) => (
+                    row.isGroupHeader ? (
+                      <tr key={`group-${rowIdx}`} className="group-header">
                         <td
-                          key={colIdx}
-                          className={
-                            col.field === 'sn' ? 'sn-cell' :
-                              col.field === 'action' ? 'action-cell' : ''
-                          }
+                          colSpan={columns.length}
+                          style={{
+                            backgroundColor: '#F1F3F9',
+                            color: '#181C32',
+                            fontWeight: '700',
+                            padding: '12px 16px',
+                            borderBottom: '2px solid #E1E3EA'
+                          }}
                         >
-                          {row[col.field]}
+                          <i className="fa fa-folder-open me-2 text-primary"></i>
+                          {row.groupTitle}
                         </td>
-                      ))}
-                    </motion.tr>
+                      </tr>
+                    ) : (
+                      <motion.tr
+                        key={row.EntryID || row.sn || rowIdx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.2, delay: rowIdx * 0.03 }}
+                      >
+                        {columns.map((col, colIdx) => (
+                          <td
+                            key={colIdx}
+                            className={
+                              col.field === 'sn' ? 'sn-cell' :
+                                col.field === 'action' ? 'action-cell' : ''
+                            }
+                          >
+                            {row[col.field]}
+                          </td>
+                        ))}
+                      </motion.tr>
+                    )
                   ))
                 ) : (
                   <tr>

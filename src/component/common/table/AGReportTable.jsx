@@ -26,6 +26,14 @@ export default function AGReportTable({
 }) {
   const printRef = useRef();
 
+  // Check if S/N column already exists (case insensitive)
+  const hasSnHeader = useMemo(() => {
+    if (!columns) return false;
+    return columns.some(col =>
+      typeof col === 'string' && ['s/n', 'sn', 's.n'].includes(col.toLowerCase())
+    );
+  }, [columns]);
+
   // Convert string columns to DataTable format
   const tableColumns = useMemo(() => {
     if (!columns) return [];
@@ -41,7 +49,12 @@ export default function AGReportTable({
     if (!data) return [];
 
     return data.map((row, rowIdx) => {
-      const obj = { sn: rowIdx + 1 };
+      if (row && typeof row === 'object' && !Array.isArray(row)) {
+        // If it's already an object (like a group header), return as is
+        return row;
+      }
+
+      const obj = { sn: rowIdx + 1 }; // Default SN if not provided in columns
       row.forEach((cell, idx) => {
         obj[`col${idx}`] = cell;
       });
@@ -50,10 +63,16 @@ export default function AGReportTable({
   }, [data]);
 
   // Prepare data for DataTable
-  const tableData = useMemo(() => ({
-    columns: [{ label: 'S/N', field: 'sn' }, ...tableColumns],
-    rows: tableRows,
-  }), [tableColumns, tableRows]);
+  const tableData = useMemo(() => {
+    const finalColumns = hasSnHeader
+      ? tableColumns
+      : [{ label: 'S/N', field: 'sn' }, ...tableColumns];
+
+    return {
+      columns: finalColumns,
+      rows: tableRows,
+    };
+  }, [hasSnHeader, tableColumns, tableRows]);
 
   return (
     <div ref={printRef} style={{ width: '100%' }}>

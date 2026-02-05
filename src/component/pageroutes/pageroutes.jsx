@@ -87,6 +87,7 @@ import ExamGradeSettings from "../assessments/exam/grade-settings/exam-grade-set
 import ExamTimeTableSchedule from "../assessments/exam/exam-timetable/timetable-schedule";
 import ExamTimeTableHall from "../assessments/exam/exam-timetable/timetable-hall";
 import ExamTimeTableReport from "../assessments/exam/exam-timetable/timetable-report";
+import TimetableReportByFaculty from "../academic/timetable/timetable-report/timetable-report-by-faculty";
 
 import StaffListByModuleAndSemester from "../user/staff-report/staff-list-by-module-and-semester";
 import StaffListByGoogleScholar from "../user/staff-report/staff-list-with-google-scholar";
@@ -615,6 +616,10 @@ export default function PageRoutes() {
                 <Route
                   path="/academics/timetable/timetable-report"
                   element={<TimetableReport />}
+                />
+                <Route
+                  path="/academics/timetable/timetable-report-by-faculty"
+                  element={<TimetableReportByFaculty />}
                 />
                 <Route
                   path="/academics/timetable/timetable-migration"

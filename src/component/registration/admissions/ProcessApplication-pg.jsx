@@ -9,6 +9,7 @@ import AGTable from "../../common/table/AGTable";
 import { formatDateAndTime, projectAddress, projectEmail, projectHREmail, projectLogo, projectName, projectPhone, projectURL, projectViceChancellor, sendEmail, shortCode } from "../../../resources/constants";
 import { serverLink } from "../../../resources/url";
 import { saveAs } from "file-saver";
+import SearchSelect from "../../common/select/SearchSelect";
 
 function ProcessApplicationPG(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -81,6 +82,9 @@ function ProcessApplicationPG(props) {
         const rows = appData.documents.map((doc, index) => ({ sn: index + 1, DocumentType: doc.DocumentType, action: (<a href={`${serverLink}public/uploads/${shortCode}/application/document/${doc.FileName}`} target="_blank" className="btn btn-primary">View</a>) }));
         setDocumentsTable({ ...documentsTable, rows: rows });
       }
+      if (appData.course?.length > 0) {
+        setDecision(prev => ({ ...prev, courseCode: appData.course[0].CourseCode }));
+      }
     }
     setIsLoading(false);
   };
@@ -96,6 +100,10 @@ function ProcessApplicationPG(props) {
     setDecision({ ...decision, [e.target.id]: e.target.value });
   };
 
+  const handleSelectChange = (id, val) => {
+    setDecision(prev => ({ ...prev, [id]: val?.value || "" }));
+  };
+
   const getAdmissionLetter = async () => {
     const sendData = { applicantInfo: appInfo.applicant_data, applicantCourse: appInfo.course, decison: decision, school: { logo: projectLogo, name: projectName, address: projectAddress, email: projectEmail, phone: projectPhone, shortCode: shortCode, viceChancellor: projectViceChancellor } };
     const { success, data } = await api.post("registration/admissions/create-pg-admission-letter-pdf", sendData);
@@ -108,8 +116,27 @@ function ProcessApplicationPG(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (decision.action.trim() === "") { showAlert("EMPTY FIELD", "Please select a decision", "error"); return false; }
+
     if (applicant !== "") {
-      const { success, data } = await api.put("registration/admissions/admission-status", decision);
+      // Find the name of the selected course for the admission letter
+      const selectedCourse = courses.find(c => c.CourseCode === decision.courseCode);
+
+      const payload = {
+        decision: decision,
+        admission_data: {
+          applicantion_id: applicant, // Backend expects this specific key (typo included)
+          type: decision.type,
+          level: decision.level,
+          admissionSemester: decision.admissionSemester,
+          semester: decision.semester,
+          courseCode: decision.courseCode,
+          CourseName: selectedCourse ? selectedCourse.CourseName : "",
+          cons: "As specified in the university handbook", // Default admission condition
+          decisionStaff: decision.decisionStaff
+        }
+      };
+
+      const { success, data } = await api.put("registration/admissions/admission-status", payload);
       if (success && data?.message === "success") {
         sendEmail(appInfo.applicant_data[0].EmailAddress, "Congratulations your admission has been Approved", "Admission Approved", `${appInfo.applicant_data[0].FirstName} ${appInfo.applicant_data[0].MiddleName} ${appInfo.applicant_data[0].Surname}`, "Admission", `${projectName}`);
         toast.success("Successfully Approve application");
@@ -132,7 +159,7 @@ function ProcessApplicationPG(props) {
         <h3>Personal Information</h3><hr />
         <table className="table">
           <tbody>
-            <tr><td className="fw-bolder">Name</td><th>{`${appInfo.applicant_data[0].FirstName} ${appInfo.applicant_data[0] > 0 ? appInfo.applicant_data[0].Middlename : ""} ${appInfo.applicant_data[0].Surname}`}</th></tr>
+            <tr><td className="fw-bolder">Name</td><th>{`${appInfo.applicant_data[0].FirstName} ${appInfo.applicant_data[0].MiddleName || ""} ${appInfo.applicant_data[0].Surname}`}</th></tr>
             <tr><td className="fw-bolder">Email Address</td><th>{appInfo.applicant_data[0].EmailAddress}</th></tr>
             <tr><td className="fw-bolder">Phone Number</td><th>{appInfo.applicant_data[0].PhoneNumber}</th></tr>
             <tr><td className="fw-bolder">Date of Birth</td><th>{formatDateAndTime(appInfo.applicant_data[0].DateOfBirth, "date")}</th></tr>
@@ -151,8 +178,29 @@ function ProcessApplicationPG(props) {
         <h3>Admission Decision</h3>
         <div className="row mt-5">
           <form onSubmit={handleSubmit}>
-            <div className="col-lg-12 fv-row"><label className="required fs-6 fw-bold mb-2">Decision</label><select className="form-select" data-placeholder="Select a Decision" id="action" required onChange={handleChange}><option value="">Select option</option><option value="2">Approve</option><option value="3">Reject</option></select></div>
-            {approved ? (<><div className="row mt-5"><div className="col-md-6 fv-row"><label className="required fs-6 fw-bold mb-2">Decision Type</label><select className="form-select" data-placeholder="Select a Decision type" id="type" required onChange={handleChange}><option value="">Select option</option><option value="Conditional">Admission</option></select></div><div className="col-md-6 fv-row"><label className="required fs-6 fw-bold mb-2">Decision Semester</label><select className="form-select" data-placeholder="Select a Decision" id="semester" required onChange={handleChange}><option value="">Select option</option><option value="First Semester">First Semester</option><option value="Second Semester">Second Semester</option></select></div></div><div className="row mt-5"><div className="col-md-6 fv-row"><label className="required fs-6 fw-bold mb-2">Decision Level</label><select className="form-select" data-placeholder="Select a Decision" id="level" required onChange={handleChange}><option value="">Select option</option><option value="500">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option></select></div><div className="col-md-6 fv-row"><label className="required fs-6 fw-bold mb-2">Admission Semester</label><select className="form-select" data-placeholder="Select admission semester" id="admissionSemester" required onChange={handleChange}><option value="">Select option</option>{semester.map((sem, index) => (<option key={index} value={sem.SemesterCode}>{sem.SemesterName}</option>))}</select></div><div className="col-md-12 fv-row"><label className="required fs-6 fw-bold mb-2">Course</label><select className="form-select" data-control="select2" data-placeholder="Select a Course" id="courseCode" value={appInfo.course[0].CourseCode} required onChange={handleChange}><option value="">Select option</option>{courses.map((course, index) => (<option key={index} value={course.CourseCode}>{course.CourseName}</option>))}</select></div></div></>) : null}
+            <div className="col-lg-12 fv-row"><label className="required fs-6 fw-bold mb-2">Decision</label><select className="form-select" data-placeholder="Select a Decision" id="action" value={decision.action} required onChange={handleChange}><option value="">Select option</option><option value="2">Approve</option><option value="3">Reject</option></select></div>
+            {approved ? (<><div className="row mt-5"><div className="col-md-6 fv-row"><label className="required fs-6 fw-bold mb-2">Decision Type</label><select className="form-select" data-placeholder="Select a Decision type" id="type" value={decision.type} required onChange={handleChange}><option value="">Select option</option><option value="Conditional">Admission</option></select></div><div className="col-md-6 fv-row"><label className="required fs-6 fw-bold mb-2">Decision Semester</label><select className="form-select" data-placeholder="Select a Decision" id="semester" value={decision.semester} required onChange={handleChange}><option value="">Select option</option><option value="First Semester">First Semester</option><option value="Second Semester">Second Semester</option></select></div></div><div className="row mt-5">
+              <div className="col-md-6 fv-row"><label className="required fs-6 fw-bold mb-2">Decision Level</label><select className="form-select" data-placeholder="Select a Decision" id="level" value={decision.level} required onChange={handleChange}><option value="">Select option</option><option value="500">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option></select></div>
+              <div className="col-md-6 fv-row">
+                <SearchSelect
+                  label="Admission Semester"
+                  id="admissionSemester"
+                  value={semester.find(s => s.SemesterCode === decision.admissionSemester) ? { value: decision.admissionSemester, label: semester.find(s => s.SemesterCode === decision.admissionSemester).SemesterName } : null}
+                  options={semester.map(s => ({ value: s.SemesterCode, label: s.SemesterName }))}
+                  onChange={(val) => handleSelectChange('admissionSemester', val)}
+                  required
+                />
+              </div>
+              <div className="col-md-12 fv-row mt-5">
+                <SearchSelect
+                  label="Admitted Course"
+                  id="courseCode"
+                  value={courses.find(c => c.CourseCode === decision.courseCode) ? { value: decision.courseCode, label: courses.find(c => c.CourseCode === decision.courseCode).CourseName } : null}
+                  options={courses.map(c => ({ value: c.CourseCode, label: c.CourseName }))}
+                  onChange={(val) => handleSelectChange('courseCode', val)}
+                  required
+                />
+              </div></div></>) : null}
             {reason ? (<div className="d-flex flex-column mb-8"><label className="fs-6 fw-bold mb-2">Reason</label><textarea className="form-control form-control-solid" rows="3" placeholder="Reason for rejection" onChange={handleChange} id="rejectReason" required></textarea></div>) : null}
             <div className="d-flex flex-column mb-8 mt-8"><button type="submit" className="btn btn-primary mt-4">Submit</button></div>
           </form>
