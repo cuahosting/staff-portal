@@ -194,6 +194,7 @@ import FeedingPaymentReport from "../human-resources/finance-report/feeding-paym
 import HostelPaymentReport from "../human-resources/finance-report/hostel-payment-report";
 import FeedingPaymentReportDateRange from "../human-resources/finance-report/feeding-payment-report-date-range";
 import HostelPaymentReportDateRange from "../human-resources/finance-report/hostel-payment-report-date-range";
+import TuitionPaymentReportDateRange from "../human-resources/finance-report/tuition-payment-report-date-range";
 import StudentPaymentAnalysis from "../human-resources/finance-report/student-payment-analysis";
 import ExamAttendanceSheet from "../assessments/reports/exam-attendance-sheet";
 import GraduatingList from "../user/student-report/graduating-list";
@@ -501,6 +502,10 @@ export default function PageRoutes() {
                 <Route
                   path="/human-resources/finance-report/tuition-fee-payment-report"
                   element={<TuitionFeePaymentReport />}
+                />
+                <Route
+                  path="/human-resources/finance-report/tuition-payment-report-date-range"
+                  element={<TuitionPaymentReportDateRange />}
                 />
                 <Route
                   path="/human-resources/finance-report/feeding-payment-report"
