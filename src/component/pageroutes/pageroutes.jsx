@@ -300,6 +300,14 @@ import PaymentByFaculty from "../human-resources/ac-finance/reports/payment-by-f
 import OutstandingReport from "../human-resources/ac-finance/reports/outstanding-report";
 import BalanceReport from "../human-resources/ac-finance/reports/balance-report";
 import ScholarshipReport from "../human-resources/ac-finance/reports/scholarship-report";
+import ScheduleFeeItems from "../human-resources/ac-finance-module/schedule-fee/schedule_fee_items";
+import CourseScheduleFees from "../human-resources/ac-finance-module/course-schedule-fees/course-schedule-fees";
+import CourseScheduleFeeAllocation from "../human-resources/ac-finance-module/course_schedule_fee_allocation/course_schedule_fee_allocation";
+import OtherFeesManagement from "../human-resources/ac-finance-module/other-fee/other-fee";
+import ScholarshipDefinitionsModule from "../human-resources/ac-finance-module/scholarship/scholarship";
+import AdmissionScholarshipEnrolment from "../human-resources/ac-finance-module/admission-scholarship-enrolment/admission-scholarship-enrolment";
+import StudentScholarshipEnrolment from "../human-resources/ac-finance-module/student-scholarship-enrolment/student-scholarship-enrolment";
+import UsedScholarshipReport from "../human-resources/ac-finance-module/used-scholarship/used-scholarship";
 
 // Scholarship Module Imports
 import ScholarshipDefinitions from "../human-resources/scholarship/scholarship-definitions";
@@ -1390,7 +1398,7 @@ export default function PageRoutes() {
                 <Route path="/human-resources/salary-report/itf-report" element={<ITFReport />} />
 
                 {/* AC-Finance Module Routes */}
-                <Route path="/human-resources/ac-finance/dashboard" element={<ACFinanceDashboard />} />
+                {/* <Route path="/human-resources/ac-finance/dashboard" element={<ACFinanceDashboard />} />
                 <Route path="/human-resources/ac-finance/fee-items" element={<FeeItems />} />
                 <Route path="/human-resources/ac-finance/other-fees" element={<OtherFees />} />
                 <Route path="/human-resources/ac-finance/fee-schedules" element={<FeeSchedules />} />
@@ -1404,7 +1412,17 @@ export default function PageRoutes() {
                 <Route path="/human-resources/ac-finance/reports/payment-by-faculty" element={<PaymentByFaculty />} />
                 <Route path="/human-resources/ac-finance/reports/outstanding" element={<OutstandingReport />} />
                 <Route path="/human-resources/ac-finance/reports/balance" element={<BalanceReport />} />
-                <Route path="/human-resources/ac-finance/reports/scholarship" element={<ScholarshipReport />} />
+                <Route path="/human-resources/ac-finance/reports/scholarship" element={<ScholarshipReport />} /> */}
+
+                {/* AC-Finance Module Routes */}
+                <Route path="/human-resources/ac-finance/fee-items" element={<ScheduleFeeItems />} />
+                <Route path="/human-resources/ac-finance/course-schedules" element={<CourseScheduleFees />} />
+                <Route path="/human-resources/ac-finance/fee-allocation" element={<CourseScheduleFeeAllocation />} />
+                <Route path="/human-resources/ac-finance/other-fees-management" element={<OtherFeesManagement />} />
+                <Route path="/human-resources/ac-finance/scholarships" element={<ScholarshipDefinitionsModule />} />
+                <Route path="/human-resources/ac-finance/admission-scholarships" element={<AdmissionScholarshipEnrolment />} />
+                <Route path="/human-resources/ac-finance/student-scholarships" element={<StudentScholarshipEnrolment />} />
+                <Route path="/human-resources/ac-finance/scholarship-usage-report" element={<UsedScholarshipReport />} />
 
                 {/* Scholarship Module Routes */}
                 <Route path="/human-resources/scholarship/definitions" element={<ScholarshipDefinitions />} />
