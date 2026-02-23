@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { api } from "../../../resources/api";
 import Loader from "../../common/loader/loader";
 import { useNavigate, useParams } from "react-router";
@@ -10,8 +10,11 @@ import { formatDateAndTime, projectAddress, projectEmail, projectHREmail, projec
 import { serverLink } from "../../../resources/url";
 import { saveAs } from "file-saver";
 import SearchSelect from "../../common/select/SearchSelect";
+import { useReactToPrint } from "react-to-print";
+import CosmopolitanAdmissionLetter from "./admission-letter/cu_admission/cu_admission_pg";
 
 function ProcessApplicationPG(props) {
+  const SEND_EMAILS = false;
   const [isLoading, setIsLoading] = useState(true);
   const [appInfo, setAppInfo] = useState([]);
   const { applicant } = useParams();
@@ -21,6 +24,9 @@ function ProcessApplicationPG(props) {
   const [courses, setCourses] = useState([]);
   const [approved, setApproved] = useState(false);
   const [paymentHistory, setPaymentHistory] = useState([]);
+  const [showAdmissionLetter, setShowAdmissionLetter] = useState(false);
+  const componentRef = useRef();
+  const [tuitionPerSemester, setTuitionPerSemester] = useState(0);
 
   const [qualificationTable, setQualificationTable] = useState({ columns: [{ label: "S/N", field: "sn" }, { label: "Awarding Institution", field: "AwardingInstitution" }, { label: "Qualification Name", field: "QualificationName" }, { label: "Qualification Title", field: "QualificationTitle" }, { label: "Grade Obtained", field: "GradeObtained" }, { label: "Date Awarded", field: "DateAwarded" }], rows: [] });
   const [employmentTable, setEmploymentTable] = useState({ columns: [{ label: "S/N", field: "sn" }, { label: "Employer", field: "Employer" }, { label: "Employer Address", field: "EmployerAddress" }, { label: "Designation", field: "Designation" }, { label: "Start Date", field: "StartDate" }, { label: "End Date", field: "EndDate" }], rows: [] });
@@ -84,6 +90,13 @@ function ProcessApplicationPG(props) {
       }
       if (appData.course?.length > 0) {
         setDecision(prev => ({ ...prev, courseCode: appData.course[0].CourseCode }));
+        const initialTuition = Number(
+          appData.course[0].TuitionFee ||
+          appData.course[0].TuitionAmount ||
+          appData.course[0].Amount ||
+          0
+        );
+        setTuitionPerSemester(initialTuition);
       }
     }
     setIsLoading(false);
@@ -91,17 +104,43 @@ function ProcessApplicationPG(props) {
 
   useEffect(() => { getApplicantData(); }, []);
 
+  const fetchTuitionFee = async (nextDecision) => {
+    const payload = {
+      CourseCode: nextDecision.courseCode,
+      AdmissionLevel: nextDecision.level,
+      AdmissionSemester: nextDecision.semester,
+      AdmissionSchoolSemester: nextDecision.admissionSemester
+    };
+
+    if (!payload.CourseCode || !payload.AdmissionLevel || !payload.AdmissionSemester || !payload.AdmissionSchoolSemester) {
+      return;
+    }
+
+    const { success, data } = await api.post("registration/admissions/tuition-fee", payload);
+    if (success && Array.isArray(data) && data.length > 0) {
+      setTuitionPerSemester(Number(data[0]?.TuitionAmount || 0));
+    }
+  };
+
   const handleChange = (e) => {
     const target = e.target;
     if (target.id === "action") {
       target.value === "2" ? setApproved(true) : setApproved(false);
       target.value === "3" ? setReason(true) : setReason(false);
     }
-    setDecision({ ...decision, [e.target.id]: e.target.value });
+    const nextDecision = { ...decision, [e.target.id]: e.target.value };
+    setDecision(nextDecision);
+    if (["level", "semester"].includes(target.id)) {
+      fetchTuitionFee(nextDecision);
+    }
   };
 
   const handleSelectChange = (id, val) => {
-    setDecision(prev => ({ ...prev, [id]: val?.value || "" }));
+    const nextDecision = { ...decision, [id]: val?.value || "" };
+    setDecision(nextDecision);
+    if (["admissionSemester", "courseCode"].includes(id)) {
+      fetchTuitionFee(nextDecision);
+    }
   };
 
   const getAdmissionLetter = async () => {
@@ -138,11 +177,32 @@ function ProcessApplicationPG(props) {
 
       const { success, data } = await api.put("registration/admissions/admission-status", payload);
       if (success && data?.message === "success") {
-        sendEmail(appInfo.applicant_data[0].EmailAddress, "Congratulations your admission has been Approved", "Admission Approved", `${appInfo.applicant_data[0].FirstName} ${appInfo.applicant_data[0].MiddleName} ${appInfo.applicant_data[0].Surname}`, "Admission", `${projectName}`);
+        if (SEND_EMAILS) {
+          sendEmail(appInfo.applicant_data[0].EmailAddress, "Congratulations your admission has been Approved", "Admission Approved", `${appInfo.applicant_data[0].FirstName} ${appInfo.applicant_data[0].MiddleName} ${appInfo.applicant_data[0].Surname}`, "Admission", `${projectName}`);
+        }
         toast.success("Successfully Approve application");
         setTimeout(() => { navigate("/registration/admissions"); }, 1000);
       }
     } else { navigate("/registration/admissions"); }
+  };
+
+  const admissionLetterData = {
+    applicantInfo: appInfo.applicant_data,
+    applicantCourse: appInfo.course,
+    decison: decision,
+    decisionDetails: [],
+    school: { logo: projectLogo, name: projectName, address: projectAddress, email: projectEmail, phone: projectPhone, shortCode: shortCode, viceChancellor: projectViceChancellor },
+    applicationFee: 50000,
+    tuitionPerSemester
+  };
+
+  const handleAdmissionPrint = useReactToPrint({ content: () => componentRef.current });
+  const printAdmission = () => {
+    setShowAdmissionLetter(true);
+    setTimeout(() => {
+      handleAdmissionPrint();
+      setShowAdmissionLetter(false);
+    }, 100);
   };
 
   const allowEnrolment = async () => {
@@ -202,10 +262,21 @@ function ProcessApplicationPG(props) {
                 />
               </div></div></>) : null}
             {reason ? (<div className="d-flex flex-column mb-8"><label className="fs-6 fw-bold mb-2">Reason</label><textarea className="form-control form-control-solid" rows="3" placeholder="Reason for rejection" onChange={handleChange} id="rejectReason" required></textarea></div>) : null}
-            <div className="d-flex flex-column mb-8 mt-8"><button type="submit" className="btn btn-primary mt-4">Submit</button></div>
+            <div className="d-flex flex-column mb-8 mt-8 gap-2">
+              <button type="submit" className="btn btn-primary mt-2">Submit</button>
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                disabled={!approved || !decision.admissionSemester || !decision.courseCode}
+                onClick={printAdmission}
+              >
+                Print Admission Letter
+              </button>
+            </div>
           </form>
         </div>
       </div>
+      {showAdmissionLetter && shortCode === "CU" && <CosmopolitanAdmissionLetter componentRef={componentRef} data={admissionLetterData} />}
     </div>
   );
 }
