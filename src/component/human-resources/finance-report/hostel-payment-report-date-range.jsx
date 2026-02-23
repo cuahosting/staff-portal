@@ -11,8 +11,6 @@ import { formatDate, currencyConverter } from "../../../resources/constants";
 function HostelPaymentReportDateRange(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [canSeeReport, setCanSeeReport] = useState(false);
-    const [allSemester, setAllSemester] = useState([]);
-    const [selectedSemester, setSelectedSemester] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [data, setData] = useState([]);
@@ -31,35 +29,13 @@ function HostelPaymentReportDateRange(props) {
         "Semester",
     ];
 
-    const semesterOptions = useMemo(() => {
-        return allSemester.map((s) => ({
-            value: s.SemesterCode,
-            label: s.SemesterName || s.SemesterCode,
-        }));
-    }, [allSemester]);
-
-    useEffect(() => {
-        const getSchoolSemester = async () => {
-            try {
-                const { success, data } = await api.get("staff/human-resources/finance-report/student-payment/semesters");
-                if (success) {
-                    setAllSemester(data);
-                }
-            } catch (ex) {
-                console.error(ex);
-            }
-        };
-        getSchoolSemester();
-    }, []);
-
-    const handleChange = async (semesterCode) => {
-        if (!semesterCode) return toast.info("Please select a semester");
+    const handleChange = async () => {
         if (!startDate || !endDate) return toast.info("Please select both start and end dates");
 
         try {
             setIsLoading(true);
             const { success, data: result } = await api.get(
-                `staff/human-resources/finance-report/hostel-payment-report-date-range?semester=${semesterCode}&startDate=${startDate}&endDate=${endDate}`
+                `staff/human-resources/finance-report/hostel-payment-report-date-range?startDate=${startDate}&endDate=${endDate}`
             );
 
             if (success) {
@@ -109,22 +85,7 @@ function HostelPaymentReportDateRange(props) {
                     <div className="card-body pt-2">
                         <div className="col-md-12">
                             <div className="row">
-                                <div className="col-md-3">
-                                    <label className="required fs-6 fw-bold mb-2">
-                                        Select Semester
-                                    </label>
-                                    <SearchSelect
-                                        id="semester"
-                                        value={semesterOptions.find((opt) => opt.value === selectedSemester) || null}
-                                        options={semesterOptions}
-                                        onChange={(selected) => {
-                                            setSelectedSemester(selected?.value || "");
-                                        }}
-                                        placeholder="Select semester"
-                                        isClearable={false}
-                                    />
-                                </div>
-                                <div className="col-md-3">
+                                <div className="col-md-4">
                                     <label className="required fs-6 fw-bold mb-2">Start Date</label>
                                     <input
                                         type="date"
@@ -133,7 +94,7 @@ function HostelPaymentReportDateRange(props) {
                                         onChange={(e) => setStartDate(e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-3">
+                                <div className="col-md-4">
                                     <label className="required fs-6 fw-bold mb-2">End Date</label>
                                     <input
                                         type="date"
@@ -142,10 +103,10 @@ function HostelPaymentReportDateRange(props) {
                                         onChange={(e) => setEndDate(e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-3 d-flex align-items-end">
+                                <div className="col-md-4 d-flex align-items-end">
                                     <button
-                                        className="btn btn-primary"
-                                        onClick={() => handleChange(selectedSemester)}
+                                        className="btn btn-primary w-100"
+                                        onClick={() => handleChange()}
                                     >
                                         Fetch Records
                                     </button>
@@ -161,7 +122,7 @@ function HostelPaymentReportDateRange(props) {
                                         <strong> Total Records:</strong> {data.length}
                                     </div>
                                     <ReportTable
-                                        title={`Hostel Payment Report - ${selectedSemester}`}
+                                        title={`Hostel Payment Report`}
                                         columns={columns}
                                         data={data}
                                         height={tableHeight}

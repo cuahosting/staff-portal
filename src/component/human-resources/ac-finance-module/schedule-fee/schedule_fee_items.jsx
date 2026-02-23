@@ -16,10 +16,10 @@ function ScheduleFeeItems(props) {
     const [datatable, setDatatable] = useState({
         columns: [
             { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
             { label: "Name", field: "Name" },
             { label: "Description", field: "Description" },
             { label: "Amount", field: "Amount" },
-            { label: "Action", field: "action" },
         ],
         rows: [],
     });

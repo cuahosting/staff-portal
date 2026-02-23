@@ -19,12 +19,12 @@ function StudentScholarshipEnrolment(props) {
     const [datatable, setDatatable] = useState({
         columns: [
             { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
             { label: "Student ID", field: "StudentID" },
             { label: "Full Name", field: "FullName" },
             { label: "Scholarship", field: "ScholarshipName" },
             { label: "Semester", field: "Semester" },
             { label: "Status", field: "statusBadge" },
-            { label: "Action", field: "action" },
         ],
         rows: [],
     });
