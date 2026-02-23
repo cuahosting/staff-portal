@@ -17,12 +17,12 @@ function CourseScheduleFees(props) {
     const [datatable, setDatatable] = useState({
         columns: [
             { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
             { label: "Course Name", field: "CourseName" },
             { label: "Course Code", field: "CourseCode" },
             { label: "Level", field: "Level" },
             { label: "Semester", field: "Semester" },
             { label: "Type", field: "typeName" },
-            { label: "Action", field: "action" },
         ],
         rows: [],
     });

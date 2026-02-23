@@ -16,11 +16,11 @@ function OtherFees(props) {
     const [datatable, setDatatable] = useState({
         columns: [
             { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
             { label: "Name", field: "Name" },
             { label: "Category", field: "Category" },
             { label: "Amount", field: "amountFormatted" },
             { label: "Status", field: "statusBadge" },
-            { label: "Action", field: "action" },
         ],
         rows: [],
     });

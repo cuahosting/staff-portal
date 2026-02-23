@@ -18,10 +18,10 @@ function CourseScheduleFeeAllocation(props) {
     const [allocations, setAllocations] = useState({
         columns: [
             { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
             { label: "Fee Item", field: "FeeItemName" },
             { label: "Amount", field: "FeeItemAmount" },
             { label: "Description", field: "Description" },
-            { label: "Action", field: "action" },
         ],
         rows: [],
     });

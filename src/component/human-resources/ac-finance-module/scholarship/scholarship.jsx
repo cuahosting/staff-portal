@@ -16,6 +16,7 @@ function ScholarshipDefinitions(props) {
     const [datatable, setDatatable] = useState({
         columns: [
             { label: "S/N", field: "sn" },
+            { label: "Action", field: "action" },
             { label: "Name", field: "Name" },
             { label: "Description", field: "Description" },
             { label: "Start Date", field: "startDateFormatted" },
@@ -25,7 +26,6 @@ function ScholarshipDefinitions(props) {
             { label: "Feeding", field: "feedingPct" },
             { label: "Trans", field: "transPct" },
             { label: "Accom", field: "accomPct" },
-            { label: "Action", field: "action" },
         ],
         rows: [],
     });

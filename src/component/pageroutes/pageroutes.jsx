@@ -308,6 +308,7 @@ import ScholarshipDefinitionsModule from "../human-resources/ac-finance-module/s
 import AdmissionScholarshipEnrolment from "../human-resources/ac-finance-module/admission-scholarship-enrolment/admission-scholarship-enrolment";
 import StudentScholarshipEnrolment from "../human-resources/ac-finance-module/student-scholarship-enrolment/student-scholarship-enrolment";
 import UsedScholarshipReport from "../human-resources/ac-finance-module/used-scholarship/used-scholarship";
+import GenerateStudentInvoice from "../human-resources/ac-finance-module/generate-student-invoice/generate-student-invoice";
 
 // Scholarship Module Imports
 import ScholarshipDefinitions from "../human-resources/scholarship/scholarship-definitions";
@@ -1423,6 +1424,7 @@ export default function PageRoutes() {
                 <Route path="/human-resources/ac-finance/admission-scholarships" element={<AdmissionScholarshipEnrolment />} />
                 <Route path="/human-resources/ac-finance/student-scholarships" element={<StudentScholarshipEnrolment />} />
                 <Route path="/human-resources/ac-finance/scholarship-usage-report" element={<UsedScholarshipReport />} />
+                <Route path="/human-resources/ac-finance/generate-student-invoice" element={<GenerateStudentInvoice />} />
 
                 {/* Scholarship Module Routes */}
                 <Route path="/human-resources/scholarship/definitions" element={<ScholarshipDefinitions />} />
