@@ -53,6 +53,7 @@ import AddStaffNOK from "../human-resources/staff/add-staff-nok";
 import ModuleAssignment2 from "../academic/timetable-planner/module-assignment_2";
 import LecturerAssignment from "../academic/timetable-planner/LecturerAssignment";
 import FinanceSettings from "../human-resources/finance/finance-settings/finance-settings";
+import AdmissionLetterSettings from "../human-resources/finance/admission-letter-settings/admission-letter-settings";
 import PostPayment from "../human-resources/finance/post-payment/post-payment";
 import PaymentReceipt from "../human-resources/finance/payment-receipt/payment-receipt";
 import FinanceAllowRegistration from "../human-resources/finance/finance-allow-registration/finance-allow-registration";
@@ -946,6 +947,10 @@ export default function PageRoutes() {
                 <Route
                   path="/human-resources/finance/finance-settings"
                   element={<FinanceSettings />}
+                />
+                <Route
+                  path="/human-resources/finance/admission-letter-settings"
+                  element={<AdmissionLetterSettings />}
                 />
                 <Route
                   path="/human-resources/finance/post-payment"

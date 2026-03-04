@@ -43,13 +43,13 @@ const CosmopolitanAdmissionLetter = (props) => {
                         margin: '0 auto',
                         fontFamily: "'Times New Roman', Times, serif",
                         fontSize: '12pt',
-                        lineHeight: '1.5',
+                        lineHeight: '1.3',
                         color: '#333'
                     }} ref={props.componentRef}>
 
-                        <div style={{ padding: '240px 50px 40px 50px' }}>
+                        <div style={{ padding: '170px 50px 15px 50px' }}>
                             {/* Two Column Header - Student Info (Left) and Reference (Right) */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                                 {/* Left Column - Student Info */}
                                 <div style={{ flex: 1 }}>
                                     <p style={{ marginBottom: '3px', fontSize: '11pt' }}>
@@ -71,13 +71,13 @@ const CosmopolitanAdmissionLetter = (props) => {
                             </div>
 
                             {/* Salutation */}
-                            <p style={{ marginBottom: '15px', fontSize: '12pt' }}>Dear <strong>{applicantInfo.FirstName}</strong>,</p>
+                            <p style={{ marginBottom: '10px', fontSize: '12pt' }}>Dear <strong>{applicantInfo.FirstName}</strong>,</p>
 
                             {/* Title */}
                             <div style={{
                                 textAlign: 'center',
-                                marginBottom: '20px',
-                                padding: '10px',
+                                marginBottom: '12px',
+                                padding: '8px',
                                 backgroundColor: isScholarship ? 'rgba(0, 100, 0, 0.1)' : 'rgba(0, 51, 102, 0.1)',
                                 borderRadius: '5px'
                             }}>
@@ -98,7 +98,7 @@ const CosmopolitanAdmissionLetter = (props) => {
                             </div>
 
                             {/* Main Body */}
-                            <p style={{ textAlign: 'justify', marginBottom: '15px', fontSize: '12pt' }}>
+                            <p style={{ textAlign: 'justify', marginBottom: '10px', fontSize: '12pt' }}>
                                 Further to your application for admission to study at <strong>{school.name.split("|")[0].trim()}</strong>,
                                 I am pleased to inform you that you have been offered {isScholarship ? 'a Scholarship' : 'Provisional'} Admission
                                 to undertake the programme below:
@@ -107,20 +107,20 @@ const CosmopolitanAdmissionLetter = (props) => {
                             {/* Programme Details Box */}
                             <div style={{
                                 marginLeft: '30px',
-                                marginBottom: '20px',
-                                padding: '15px 20px',
+                                marginBottom: '12px',
+                                padding: '10px 15px',
                                 backgroundColor: '#f8f9fa',
                                 borderLeft: '4px solid #003366',
                                 borderRadius: '0 5px 5px 0'
                             }}>
                                 <table style={{ width: '100%', fontSize: '11pt' }}>
                                     <tbody>
-                                        <tr><td style={{ width: '40%', padding: '4px 0' }}><strong>Title of Programme:</strong></td><td>{dec.CourseName}</td></tr>
-                                        <tr><td style={{ padding: '4px 0' }}><strong>Mode of Study:</strong></td><td>Full-Time</td></tr>
-                                        <tr><td style={{ padding: '4px 0' }}><strong>Admission Type:</strong></td><td>{dec.AdmissionType}</td></tr>
-                                        <tr><td style={{ padding: '4px 0' }}><strong>Term of Admission:</strong></td><td>{dec.StartMonth} {dec.StartYear}</td></tr>
-                                        <tr><td style={{ padding: '4px 0' }}><strong>Course Duration:</strong></td><td>{applicantCourse.Duration} {applicantCourse.DurationType}</td></tr>
-                                        <tr><td style={{ padding: '4px 0' }}><strong>Fee Status:</strong></td><td>{isScholarship ? 'Scholarship' : 'Home'}</td></tr>
+                                        <tr><td style={{ width: '40%', padding: '2px 0' }}><strong>Title of Programme:</strong></td><td>{dec.CourseName}</td></tr>
+                                        <tr><td style={{ padding: '2px 0' }}><strong>Mode of Study:</strong></td><td>Full-Time</td></tr>
+                                        <tr><td style={{ padding: '2px 0' }}><strong>Admission Type:</strong></td><td>{dec.AdmissionType}</td></tr>
+                                        <tr><td style={{ padding: '2px 0' }}><strong>Term of Admission:</strong></td><td>{dec.StartMonth} {dec.StartYear}</td></tr>
+                                        <tr><td style={{ padding: '2px 0' }}><strong>Course Duration:</strong></td><td>{applicantCourse.Duration} {applicantCourse.DurationType}</td></tr>
+                                        <tr><td style={{ padding: '2px 0' }}><strong>Fee Status:</strong></td><td>{isScholarship ? 'Scholarship' : 'Home'}</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -128,26 +128,26 @@ const CosmopolitanAdmissionLetter = (props) => {
                             {/* Fees Section - Only show for regular admission, not scholarship */}
                             {!isScholarship && (
                                 <>
-                                    <h4 style={{ fontSize: '12pt', fontWeight: 'bold', marginBottom: '10px', color: '#003366' }}>
+                                    <h4 style={{ fontSize: '12pt', fontWeight: 'bold', marginBottom: '5px', color: '#003366' }}>
                                         Fees and Other Costs
                                     </h4>
-                                    <p style={{ marginBottom: '10px', fontSize: '11pt' }}>
+                                    <p style={{ marginBottom: '5px', fontSize: '11pt' }}>
                                         The Tuition Fee for the first year of the programme is stated below:
                                     </p>
                                     <div style={{
                                         marginLeft: '30px',
-                                        marginBottom: '20px',
-                                        padding: '15px 20px',
+                                        marginBottom: '12px',
+                                        padding: '10px 15px',
                                         backgroundColor: '#fff8e1',
                                         borderLeft: '4px solid #ffc107',
                                         borderRadius: '0 5px 5px 0'
                                     }}>
                                         <table style={{ width: '100%', fontSize: '11pt' }}>
                                             <tbody>
-                                                <tr><td style={{ padding: '4px 0' }}>Tuition Fee (per semester):</td><td style={{ textAlign: 'right' }}><strong>{currencyConverter(parseInt(applicantCourse.TuitionFee || 0))}</strong></td></tr>
-                                                <tr><td style={{ padding: '4px 0' }}>Tuition Fee (per session):</td><td style={{ textAlign: 'right' }}><strong>{currencyConverter(parseInt(applicantCourse.TuitionFee || 0) * 2)}</strong></td></tr>
-                                                <tr><td style={{ padding: '4px 0' }}>Accommodation (per semester):</td><td style={{ textAlign: 'right' }}><strong>₦450,000.00</strong></td></tr>
-                                                <tr><td style={{ padding: '4px 0' }}>Application Processing Fee:</td><td style={{ textAlign: 'right' }}><strong>₦20,000.00</strong></td></tr>
+                                                <tr><td style={{ padding: '2px 0' }}>Tuition Fee (per semester):</td><td style={{ textAlign: 'right' }}><strong>{currencyConverter(parseInt(applicantCourse.TuitionFee || 0))}</strong></td></tr>
+                                                <tr><td style={{ padding: '2px 0' }}>Tuition Fee (per session):</td><td style={{ textAlign: 'right' }}><strong>{currencyConverter(parseInt(applicantCourse.TuitionFee || 0) * 2)}</strong></td></tr>
+                                                <tr><td style={{ padding: '2px 0' }}>Accommodation (per semester):</td><td style={{ textAlign: 'right' }}><strong>₦450,000.00</strong></td></tr>
+                                                <tr><td style={{ padding: '2px 0' }}>Application Processing Fee:</td><td style={{ textAlign: 'right' }}><strong>₦20,000.00</strong></td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -157,8 +157,8 @@ const CosmopolitanAdmissionLetter = (props) => {
                             {/* Scholarship Note */}
                             {isScholarship && scholarshipBody && (
                                 <div style={{
-                                    marginBottom: '20px',
-                                    padding: '15px 20px',
+                                    marginBottom: '12px',
+                                    padding: '10px 15px',
                                     backgroundColor: 'rgba(0, 100, 0, 0.05)',
                                     borderLeft: '4px solid #006400',
                                     borderRadius: '0 5px 5px 0'
@@ -171,15 +171,15 @@ const CosmopolitanAdmissionLetter = (props) => {
                             )}
 
                             {/* Closing */}
-                            <p style={{ textAlign: 'justify', marginBottom: '10px', fontSize: '11pt' }}>
+                            <p style={{ textAlign: 'justify', marginBottom: '5px', fontSize: '11pt' }}>
                                 Please note that this offer of admission is subject to your acceptance of the conditions and undertaking.
                             </p>
-                            <p style={{ marginBottom: '20px', fontSize: '11pt' }}>
+                            <p style={{ marginBottom: '10px', fontSize: '11pt' }}>
                                 Please accept my congratulations on your admission!
                             </p>
 
                             {/* Signature Section */}
-                            <div style={{ marginTop: '30px' }}>
+                            <div style={{ marginTop: '10px' }}>
                                 <img src={RegSign} style={{ width: '180px', height: '45px' }} alt="Registrar Signature" />
                                 <div style={{ borderTop: '1px solid #333', width: '280px', paddingTop: '5px', marginTop: '5px' }}>
                                     <p style={{ margin: 0, fontSize: '11pt' }}><strong>Mani Ibrahim Ahmad, PhD. FNIM</strong></p>
@@ -189,15 +189,12 @@ const CosmopolitanAdmissionLetter = (props) => {
 
                             {/* Footer */}
                             <div style={{
-                                position: 'absolute',
-                                bottom: '20px',
-                                left: '50px',
-                                right: '50px',
+                                marginTop: '10px',
                                 textAlign: 'center',
                                 fontSize: '9pt',
                                 color: '#666',
                                 borderTop: '1px solid #ccc',
-                                paddingTop: '10px'
+                                paddingTop: '5px'
                             }}>
                                 <p style={{ margin: 0 }}>
                                     Cosmopolitan University, Abuja | www.cosmopolitan.edu.ng | admissions@cosmopolitan.edu.ng

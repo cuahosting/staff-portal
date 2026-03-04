@@ -9,9 +9,11 @@ import { toast } from "react-toastify";
 import AGTable from "../../common/table/AGTable";
 import { admissionEmail, sendEmail, projectName, formatDateAndTime, projectHREmail, shortCode, projectAddress, projectURL, projectLogo, projectEmail, projectPhone, projectViceChancellor, CuAdmissionEmail } from "../../../resources/constants";
 import { useReactToPrint } from "react-to-print";
+import { pdf } from '@react-pdf/renderer';
 import BabaAhmadAdmissionLetter from "./admission-letter/baba-ahmad-admission";
 import AlAnsarAdmissionLetter from "./admission-letter/al-ansar-admission";
-import CosmopolitanAdmissionLetter from "./admission-letter/cu_admission/cu_admission_pg";
+import CosmopolitanAdmissionLetter from "./admission-letter/cu_admission/cu_admission";
+import CUAdmissionLetterPDF from "./admission-letter/cu_admission/cu_admission_pdf";
 import Modal from "../../common/modal/modal";
 import UpdateAdmissionDetails from "./update-admission-details/update-admission-details";
 
@@ -45,6 +47,7 @@ function ProcessApplication(props) {
   const componentRef = useRef();
   const scholarshipRef = useRef();
   const [closeModal, setCloseModal] = useState(false);
+  const [admissionFeeSettings, setAdmissionFeeSettings] = useState(null);
   const [documentsTable, setDocumentsTable] = useState({ columns: [{ label: "S/N", field: "sn" }, { label: "Document Name", field: "DocumentType" }, { label: "Action", field: "action" }], rows: [] });
   const [paymentTable, setPaymentTable] = useState({ columns: [{ label: "S/N", field: "sn" }, { label: "Description", field: "Description" }, { label: "Amount", field: "AmountPaid" }, { label: "Reference", field: "PaymentReference" }, { label: "Payment Document", field: "PaymentDocument" }, { label: "Date Paid", field: "DatePaid" }, { label: "Action", field: "action" }], rows: [] });
   const [decision, setDecision] = useState({ applicant_id: applicant, rejectReason: "", action: "", decisionStaff: decisionStaff[0].FirstName + " " + decisionStaff[0].MiddleName + " " + decisionStaff[0].Surname, decisionDate: date, appliedDate: "", type: "", level: "", semester: "", admissionSemester: props.currentSemester, courseCode: "", CourseName: "", con1: "", con2: "", con3: "", con4: "", con5: "", con6: "", tutionFee: "", url: projectURL.split("//")[1] });
@@ -108,6 +111,12 @@ function ProcessApplication(props) {
 
     const { success: facSuccess, data: facData } = await api.get(`registration/admissions/ad-faculty/${course_code}`);
     if (facSuccess && facData?.length > 0) { setFacultyDetails(facData); }
+
+    try {
+      const { success: feeSuccess, data: feeData } = await api.get("staff/ac-finance/admission-letter-settings/active");
+      if (feeSuccess && feeData?.data) { setAdmissionFeeSettings(feeData.data); }
+    } catch (err) { console.log("Fee settings fetch error"); }
+
     setIsLoading(false);
   };
 
@@ -163,20 +172,43 @@ function ProcessApplication(props) {
     });
   };
 
-  var sendData = { applicantInfo: appInfo.applicant_data, applicantCourse: appInfo.course, decison: decision, school: { logo: projectLogo, name: projectName, address: projectAddress, email: projectEmail, phone: projectPhone, shortCode: shortCode, viceChancellor: projectViceChancellor }, facultyDetails: facultyDetails, appInfo: appInfo, decisionDetails: decisionDetails, tuition: st_tuition, scholarshipBody: scholarshipBody, isScholarship: false };
+  var sendData = { applicantInfo: appInfo.applicant_data, applicantCourse: appInfo.course, decison: decision, school: { logo: projectLogo, name: projectName, address: projectAddress, email: projectEmail, phone: projectPhone, shortCode: shortCode, viceChancellor: projectViceChancellor }, facultyDetails: facultyDetails, appInfo: appInfo, decisionDetails: decisionDetails, tuition: st_tuition, scholarshipBody: scholarshipBody, isScholarship: false, accommodationFee: admissionFeeSettings?.AccommodationFee || 450000, applicationFee: admissionFeeSettings?.ApplicationFee || 20000 };
   var scholarshipData = { ...sendData, isScholarship: true, scholarshipBody: scholarshipBody };
 
-  const printAdmission = () => { setShowAdmissionLetter(true); setTimeout(() => { handleAdmissionPrint(); setShowAdmissionLetter(false); }, 100); };
   const handleAdmissionPrint = useReactToPrint({ content: () => componentRef.current });
 
+  const printAdmission = async () => {
+    if (shortCode === "CU") {
+      try {
+        toast.info('Generating PDF...');
+        const blob = await pdf(<CUAdmissionLetterPDF data={sendData} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      } catch (err) { toast.error('Failed to generate PDF'); console.error(err); }
+    } else {
+      setShowAdmissionLetter(true);
+      setTimeout(() => { handleAdmissionPrint(); setShowAdmissionLetter(false); }, 100);
+    }
+  };
+
   const openScholarshipModal = () => { setShowScholarshipModal(true); };
-  const printScholarshipAdmission = () => {
+  const handleScholarshipPrint = useReactToPrint({ content: () => scholarshipRef.current });
+
+  const printScholarshipAdmission = async () => {
     if (!scholarshipBody.trim()) { toast.error('Please enter scholarship body name'); return; }
     setShowScholarshipModal(false);
-    setShowScholarshipLetter(true);
-    setTimeout(() => { handleScholarshipPrint(); setShowScholarshipLetter(false); }, 100);
+    if (shortCode === "CU") {
+      try {
+        toast.info('Generating PDF...');
+        const blob = await pdf(<CUAdmissionLetterPDF data={{ ...sendData, isScholarship: true, scholarshipBody: scholarshipBody }} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      } catch (err) { toast.error('Failed to generate PDF'); console.error(err); }
+    } else {
+      setShowScholarshipLetter(true);
+      setTimeout(() => { handleScholarshipPrint(); setShowScholarshipLetter(false); }, 100);
+    }
   };
-  const handleScholarshipPrint = useReactToPrint({ content: () => scholarshipRef.current });
 
   return isLoading ? (<Loader />) : (
     <div className="d-flex flex-column flex-row-fluid">
