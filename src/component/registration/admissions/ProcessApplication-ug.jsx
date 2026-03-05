@@ -11,7 +11,7 @@ import { admissionEmail, sendEmail, projectName, formatDateAndTime, projectHREma
 import { useReactToPrint } from "react-to-print";
 import BabaAhmadAdmissionLetter from "./admission-letter/baba-ahmad-admission";
 import AlAnsarAdmissionLetter from "./admission-letter/al-ansar-admission";
-import CosmopolitanAdmissionLetter from "./admission-letter/cu_admission/cu_admission";
+import CosmopolitanAdmissionLetter from "./admission-letter/cu_admission/cu_admission_pg";
 import Modal from "../../common/modal/modal";
 import UpdateAdmissionDetails from "./update-admission-details/update-admission-details";
 
