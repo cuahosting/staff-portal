@@ -12,6 +12,8 @@ function FinanceAllowResult(props) {
     const [isFormLoading, setIsFormLoading] = useState('off');
     const [requestBy, setRequestBy] = useState("");
     const [isLoading, setIsLoading] = useState(true);
+    const [allSemester, setAllSemester] = useState([]);
+    const [selectedSemester, setSelectedSemester] = useState("");
     const [studentDatatable, setStudentDatatable] = useState({
         columns: [
             {
@@ -55,8 +57,12 @@ function FinanceAllowResult(props) {
         rows: [],
     });
 
-    const getData = async () => {
-        const { success, data } = await api.get("staff/student-manager/finance/result/clearance");
+    const getData = async (semesterCode) => {
+        const semester = semesterCode || selectedSemester;
+        if (!semester) return;
+
+        setIsLoading(true);
+        const { success, data } = await api.get(`staff/student-manager/finance/result/clearance/${semester}`);
         if (success && data && data.length > 0) {
             let rows = [];
             data.map((item, index) => {
@@ -79,12 +85,37 @@ function FinanceAllowResult(props) {
             });
             setStudentDatatable({
                 ...studentDatatable,
-                columns: studentDatatable.columns,
                 rows: rows,
+            });
+        } else {
+            setStudentDatatable({
+                ...studentDatatable,
+                rows: [],
             });
         }
         setIsLoading(false);
     }
+
+    useEffect(() => {
+        const getSchoolSemester = async () => {
+            try {
+                const { success, data } = await api.get("staff/human-resources/finance-report/student-payment/semesters");
+                if (success) {
+                    setAllSemester(data);
+                    if (data.length > 0) {
+                        setSelectedSemester(data[0].SemesterCode);
+                        getData(data[0].SemesterCode);
+                    } else {
+                        setIsLoading(false);
+                    }
+                }
+            } catch (ex) {
+                console.error(ex);
+                setIsLoading(false);
+            }
+        };
+        getSchoolSemester();
+    }, []);
 
 
     const onAllowResult = async (data) => {
@@ -181,9 +212,9 @@ function FinanceAllowResult(props) {
 
 
 
-    useEffect(() => {
-        getData()
-    }, []);
+    // useEffect(() => {
+    //     getData()
+    // }, []);
 
     return isLoading ? (
         <Loader />
@@ -196,6 +227,26 @@ function FinanceAllowResult(props) {
                             title={"FINANCE UNBLOCK STUDENT RESULT"}
                             items={["Human-Resources", "Finance", "Finance Unblock Student Result"]}
                         />
+                        <div className="row col-md-12 mb-5">
+                            <div className="col-md-4">
+                                <label className="fs-6 fw-bold mb-2">Select Semester</label>
+                                <select
+                                    className="form-control"
+                                    value={selectedSemester}
+                                    onChange={(e) => {
+                                        setSelectedSemester(e.target.value);
+                                        getData(e.target.value);
+                                    }}
+                                >
+                                    <option value="">Select Semester</option>
+                                    {allSemester.map((s) => (
+                                        <option key={s.SemesterCode} value={s.SemesterCode}>
+                                            {s.SemesterName || s.SemesterCode}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
                         <div className="row col-md-12" style={{ width: '100%' }}>
                             <AGTable data={studentDatatable} />
                         </div>
