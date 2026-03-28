@@ -49,8 +49,15 @@ function AcFinanceDashboard(props) {
             title: "Invoices",
             description: "View and manage student invoices",
             icon: "fa-solid fa-file-invoice-dollar",
-            link: "/human-resources/ac-finance/invoices",
+            link: "/human-resources/finance/invoices",
             color: "warning",
+        },
+        {
+            title: "Create/Manage Invoice",
+            description: "Create or modify individual student invoices",
+            icon: "fa-solid fa-file-circle-plus",
+            link: "/human-resources/finance/create-invoice",
+            color: "primary",
         },
         {
             title: "Balances",
@@ -78,38 +85,43 @@ function AcFinanceDashboard(props) {
     const reportItems = [
         {
             title: "Payment by Level",
-            link: "/human-resources/ac-finance/reports/payment-by-level",
+            link: "/human-resources/finance/reports/payment-by-level",
             icon: "fa-solid fa-layer-group",
         },
         {
             title: "Payment by Programme",
-            link: "/human-resources/ac-finance/reports/payment-by-programme",
+            link: "/human-resources/finance/reports/payment-by-programme",
             icon: "fa-solid fa-book",
         },
         {
             title: "Payment by Department",
-            link: "/human-resources/ac-finance/reports/payment-by-department",
+            link: "/human-resources/finance/reports/payment-by-department",
             icon: "fa-solid fa-building",
         },
         {
             title: "Payment by Faculty",
-            link: "/human-resources/ac-finance/reports/payment-by-faculty",
+            link: "/human-resources/finance/reports/payment-by-faculty",
             icon: "fa-solid fa-university",
         },
         {
             title: "Outstanding Report",
-            link: "/human-resources/ac-finance/reports/outstanding",
+            link: "/human-resources/finance/reports/outstanding",
             icon: "fa-solid fa-exclamation-triangle",
         },
         {
             title: "Balance Report",
-            link: "/human-resources/ac-finance/reports/balance",
+            link: "/human-resources/finance/reports/balance",
             icon: "fa-solid fa-wallet",
         },
         {
             title: "Scholarship Report",
-            link: "/human-resources/ac-finance/reports/scholarships",
+            link: "/human-resources/finance/reports/scholarships",
             icon: "fa-solid fa-award",
+        },
+        {
+            title: "Scholarship Students",
+            link: "/human-resources/finance/reports/scholarship-students",
+            icon: "fa-solid fa-user-graduate",
         },
     ];
 

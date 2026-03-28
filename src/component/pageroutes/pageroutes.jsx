@@ -88,7 +88,6 @@ import ExamGradeSettings from "../assessments/exam/grade-settings/exam-grade-set
 import ExamTimeTableSchedule from "../assessments/exam/exam-timetable/timetable-schedule";
 import ExamTimeTableHall from "../assessments/exam/exam-timetable/timetable-hall";
 import ExamTimeTableReport from "../assessments/exam/exam-timetable/timetable-report";
-import TimetableReportByFaculty from "../academic/timetable/timetable-report/timetable-report-by-faculty";
 
 import StaffListByModuleAndSemester from "../user/staff-report/staff-list-by-module-and-semester";
 import StaffListByGoogleScholar from "../user/staff-report/staff-list-with-google-scholar";
@@ -131,6 +130,18 @@ import SBCApprovalPage from "../assessments/moderation/sbc-approval";
 import UniversityModeration from "../assessments/moderation/university-moderation";
 import GenerateAttendance from "../assessments/attendance/attendance";
 import AttendanceList from "../assessments/attendance/lecturer-mark-attendance";
+import AttendanceReport from "../assessments/attendance/attendance-report";
+import DITAttendanceReport from "../assessments/attendance/dit-attendance-report";
+import DeanAttendanceReport from "../assessments/attendance/dean-attendance-report";
+import HODAttendanceReport from "../assessments/attendance/hod-attendance-report";
+import LecturerAttendanceReport from "../assessments/attendance/lecturer-attendance-report";
+import UniversityAttendanceOverview from "../assessments/attendance/university-attendance-overview";
+import FacultyAttendanceSummary from "../assessments/attendance/faculty-attendance-summary";
+import DepartmentAttendanceSummary from "../assessments/attendance/department-attendance-summary";
+import SendAttendanceEmail from "../assessments/attendance/send-attendance-email";
+import ModuleAvgUniversity from "../assessments/attendance/module-avg-university";
+import ModuleAvgFaculty from "../assessments/attendance/module-avg-faculty";
+import ModuleAvgDepartment from "../assessments/attendance/module-avg-department";
 
 import StudentListByCourseAll from "../user/student-report/student-list-by-course-all";
 import StudentListAll from "../user/student-report/student-list-all";
@@ -195,9 +206,6 @@ import FeedingPaymentReport from "../human-resources/finance-report/feeding-paym
 import HostelPaymentReport from "../human-resources/finance-report/hostel-payment-report";
 import FeedingPaymentReportDateRange from "../human-resources/finance-report/feeding-payment-report-date-range";
 import HostelPaymentReportDateRange from "../human-resources/finance-report/hostel-payment-report-date-range";
-import TuitionPaymentReportDateRange from "../human-resources/finance-report/tuition-payment-report-date-range";
-import LaundryPaymentReport from "../human-resources/finance-report/laundry-payment-report";
-import LaundryPaymentReportDateRange from "../human-resources/finance-report/laundry-payment-report-date-range";
 import StudentPaymentAnalysis from "../human-resources/finance-report/student-payment-analysis";
 import ExamAttendanceSheet from "../assessments/reports/exam-attendance-sheet";
 import GraduatingList from "../user/student-report/graduating-list";
@@ -258,6 +266,14 @@ import AccountPayable from "../human-resources/inventory/inventory-account/accou
 import FinanceBudgetReport from "../human-resources/finance-and-budget/finance-budget-report";
 import FinanceMyBudget from "../human-resources/finance-and-budget/finance-my-budget";
 import FinanceBudgetProfile from "../human-resources/finance-and-budget/finance-budget-profile";
+import GLChartOfAccounts from "../human-resources/general-ledger/gl-chart-of-accounts";
+import GLJournalEntries from "../human-resources/general-ledger/gl-journal-entries";
+import GLJournalDetail from "../human-resources/general-ledger/gl-journal-detail";
+import GLFiscalPeriods from "../human-resources/general-ledger/gl-fiscal-periods";
+import GLReportTrialBalance from "../human-resources/general-ledger/gl-report-trial-balance";
+import GLReportAccountLedger from "../human-resources/general-ledger/gl-report-account-ledger";
+import GLReportIncomeStatement from "../human-resources/general-ledger/gl-report-income-statement";
+import GLReportBalanceSheet from "../human-resources/general-ledger/gl-report-balance-sheet";
 import StaffActivity from "../human-resources/staff-activity/staff-activity";
 import PostExamResultByLecturer from "../assessments/exam/post-exam-lecturer/post-exam-lecturer";
 import AcademicResultSummaryByCourse from "../assessments/academic-result/academic-result-summary-by-course";
@@ -294,24 +310,22 @@ import OtherFees from "../human-resources/ac-finance/other-fees/other-fees";
 import FeeSchedules from "../human-resources/ac-finance/fee-schedules/fee-schedules";
 import ScholarshipManagement from "../human-resources/ac-finance/scholarships/scholarship-management";
 import InvoiceManagement from "../human-resources/ac-finance/invoices/invoice-management";
+import CreateInvoice from "../human-resources/ac-finance/invoices/create-invoice";
 import BalanceManagement from "../human-resources/ac-finance/balances/balance-management";
 import StudentPaymentHistory from "../human-resources/ac-finance/payments/student-payment-history";
-import PaymentByLevel from "../human-resources/ac-finance/reports/payment-by-level";
-import PaymentByProgramme from "../human-resources/ac-finance/reports/payment-by-programme";
-import PaymentByDepartment from "../human-resources/ac-finance/reports/payment-by-department";
-import PaymentByFaculty from "../human-resources/ac-finance/reports/payment-by-faculty";
-import OutstandingReport from "../human-resources/ac-finance/reports/outstanding-report";
-import BalanceReport from "../human-resources/ac-finance/reports/balance-report";
-import ScholarshipReport from "../human-resources/ac-finance/reports/scholarship-report";
-import ScheduleFeeItems from "../human-resources/ac-finance-module/schedule-fee/schedule_fee_items";
-import CourseScheduleFees from "../human-resources/ac-finance-module/course-schedule-fees/course-schedule-fees";
-import CourseScheduleFeeAllocation from "../human-resources/ac-finance-module/course_schedule_fee_allocation/course_schedule_fee_allocation";
-import OtherFeesManagement from "../human-resources/ac-finance-module/other-fee/other-fee";
-import ScholarshipDefinitionsModule from "../human-resources/ac-finance-module/scholarship/scholarship";
-import AdmissionScholarshipEnrolment from "../human-resources/ac-finance-module/admission-scholarship-enrolment/admission-scholarship-enrolment";
-import StudentScholarshipEnrolment from "../human-resources/ac-finance-module/student-scholarship-enrolment/student-scholarship-enrolment";
-import UsedScholarshipReport from "../human-resources/ac-finance-module/used-scholarship/used-scholarship";
-import GenerateStudentInvoice from "../human-resources/ac-finance-module/generate-student-invoice/generate-student-invoice";
+import PaymentByLevel from "../human-resources/finance/reports/payment-by-level";
+import PaymentByProgramme from "../human-resources/finance/reports/payment-by-programme";
+import PaymentByDepartment from "../human-resources/finance/reports/payment-by-department";
+import PaymentByFaculty from "../human-resources/finance/reports/payment-by-faculty";
+import OutstandingReport from "../human-resources/finance/reports/outstanding-report";
+import BalanceReport from "../human-resources/finance/reports/balance-report";
+import ScholarshipReport from "../human-resources/finance/reports/scholarship-report";
+import ScholarshipStudentsReport from "../human-resources/finance/reports/scholarship-students-report";
+import FinanceInvoiceManagement from "../human-resources/finance/invoices/invoice-management";
+import FinanceCreateInvoice from "../human-resources/finance/invoices/create-invoice";
+import InvoiceReport from "../human-resources/finance/invoices/invoice-report";
+import FinancePaymentReport from "../human-resources/finance/invoices/payment-report";
+import OutstandingBalanceReport from "../human-resources/finance/invoices/outstanding-balance-report";
 
 // Scholarship Module Imports
 import ScholarshipDefinitions from "../human-resources/scholarship/scholarship-definitions";
@@ -516,10 +530,6 @@ export default function PageRoutes() {
                   element={<TuitionFeePaymentReport />}
                 />
                 <Route
-                  path="/human-resources/finance-report/tuition-payment-report-date-range"
-                  element={<TuitionPaymentReportDateRange />}
-                />
-                <Route
                   path="/human-resources/finance-report/feeding-payment-report"
                   element={<FeedingPaymentReport />}
                 />
@@ -534,14 +544,6 @@ export default function PageRoutes() {
                 <Route
                   path="/human-resources/finance-report/hostel-payment-report-date-range"
                   element={<HostelPaymentReportDateRange />}
-                />
-                <Route
-                  path="/human-resources/finance-report/laundry-payment-report"
-                  element={<LaundryPaymentReport />}
-                />
-                <Route
-                  path="/human-resources/finance-report/laundry-payment-report-date-range"
-                  element={<LaundryPaymentReportDateRange />}
                 />
                 <Route
                   path="/human-resources/finance-report/student-payment-analysis"
@@ -641,10 +643,6 @@ export default function PageRoutes() {
                 <Route
                   path="/academics/timetable/timetable-report"
                   element={<TimetableReport />}
-                />
-                <Route
-                  path="/academics/timetable/timetable-report-by-faculty"
-                  element={<TimetableReportByFaculty />}
                 />
                 <Route
                   path="/academics/timetable/timetable-migration"
@@ -982,6 +980,16 @@ export default function PageRoutes() {
                 <Route path="/human-resources/finance-and-budget/my-budget" element={<FinanceMyBudget />} />
                 <Route path="/human-resources/finance-and-budget/budget-profile" element={<FinanceBudgetProfile />} />
 
+                {/* General Ledger */}
+                <Route path="/human-resources/general-ledger/chart-of-accounts" element={<GLChartOfAccounts />} />
+                <Route path="/human-resources/general-ledger/journal-entries" element={<GLJournalEntries />} />
+                <Route path="/human-resources/general-ledger/journal-detail/:id" element={<GLJournalDetail />} />
+                <Route path="/human-resources/general-ledger/fiscal-periods" element={<GLFiscalPeriods />} />
+                <Route path="/human-resources/general-ledger/trial-balance" element={<GLReportTrialBalance />} />
+                <Route path="/human-resources/general-ledger/account-ledger/:id" element={<GLReportAccountLedger />} />
+                <Route path="/human-resources/general-ledger/income-statement" element={<GLReportIncomeStatement />} />
+                <Route path="/human-resources/general-ledger/balance-sheet" element={<GLReportBalanceSheet />} />
+
                 <Route path="/registration/registration/semester-registration" element={<SemesterRegistration />} />
                 <Route path="/registration/registration/approve-semester-registration" element={<SemesterRegistrationApproval />} />
                 {/* timetable planner */}
@@ -1201,6 +1209,54 @@ export default function PageRoutes() {
                   path="/assessments/attendance/list"
                   element={<AttendanceList />}
                 />
+                <Route
+                  path="/assessments/attendance/report"
+                  element={<AttendanceReport />}
+                />
+                <Route
+                  path="/assessments/attendance/dit-report"
+                  element={<DITAttendanceReport />}
+                />
+                <Route
+                  path="/assessments/attendance/dean-report"
+                  element={<DeanAttendanceReport />}
+                />
+                <Route
+                  path="/assessments/attendance/hod-report"
+                  element={<HODAttendanceReport />}
+                />
+                <Route
+                  path="/assessments/attendance/lecturer-report"
+                  element={<LecturerAttendanceReport />}
+                />
+                <Route
+                  path="/assessments/attendance/university-overview"
+                  element={<UniversityAttendanceOverview />}
+                />
+                <Route
+                  path="/assessments/attendance/faculty-summary"
+                  element={<FacultyAttendanceSummary />}
+                />
+                <Route
+                  path="/assessments/attendance/department-summary"
+                  element={<DepartmentAttendanceSummary />}
+                />
+                <Route
+                  path="/assessments/attendance/send-email"
+                  element={<SendAttendanceEmail />}
+                />
+                <Route
+                  path="/assessments/attendance/module-avg-university"
+                  element={<ModuleAvgUniversity />}
+                />
+                <Route
+                  path="/assessments/attendance/module-avg-faculty"
+                  element={<ModuleAvgFaculty />}
+                />
+                <Route
+                  path="/assessments/attendance/module-avg-department"
+                  element={<ModuleAvgDepartment />}
+                />
 
                 <Route
                   path="/assessments/evaluate/gpa"
@@ -1414,32 +1470,28 @@ export default function PageRoutes() {
                 <Route path="/human-resources/salary-report/itf-report" element={<ITFReport />} />
 
                 {/* AC-Finance Module Routes */}
-                {/* <Route path="/human-resources/ac-finance/dashboard" element={<ACFinanceDashboard />} />
+                <Route path="/human-resources/ac-finance/dashboard" element={<ACFinanceDashboard />} />
                 <Route path="/human-resources/ac-finance/fee-items" element={<FeeItems />} />
                 <Route path="/human-resources/ac-finance/other-fees" element={<OtherFees />} />
                 <Route path="/human-resources/ac-finance/fee-schedules" element={<FeeSchedules />} />
                 <Route path="/human-resources/ac-finance/scholarships" element={<ScholarshipManagement />} />
                 <Route path="/human-resources/ac-finance/invoices" element={<InvoiceManagement />} />
+                <Route path="/human-resources/ac-finance/create-invoice" element={<CreateInvoice />} />
                 <Route path="/human-resources/ac-finance/balances" element={<BalanceManagement />} />
                 <Route path="/human-resources/ac-finance/payment-history" element={<StudentPaymentHistory />} />
-                <Route path="/human-resources/ac-finance/reports/payment-by-level" element={<PaymentByLevel />} />
-                <Route path="/human-resources/ac-finance/reports/payment-by-programme" element={<PaymentByProgramme />} />
-                <Route path="/human-resources/ac-finance/reports/payment-by-department" element={<PaymentByDepartment />} />
-                <Route path="/human-resources/ac-finance/reports/payment-by-faculty" element={<PaymentByFaculty />} />
-                <Route path="/human-resources/ac-finance/reports/outstanding" element={<OutstandingReport />} />
-                <Route path="/human-resources/ac-finance/reports/balance" element={<BalanceReport />} />
-                <Route path="/human-resources/ac-finance/reports/scholarship" element={<ScholarshipReport />} /> */}
-
-                {/* AC-Finance Module Routes */}
-                <Route path="/human-resources/ac-finance/fee-items" element={<ScheduleFeeItems />} />
-                <Route path="/human-resources/ac-finance/course-schedules" element={<CourseScheduleFees />} />
-                <Route path="/human-resources/ac-finance/fee-allocation" element={<CourseScheduleFeeAllocation />} />
-                <Route path="/human-resources/ac-finance/other-fees-management" element={<OtherFeesManagement />} />
-                <Route path="/human-resources/ac-finance/scholarships" element={<ScholarshipDefinitionsModule />} />
-                <Route path="/human-resources/ac-finance/admission-scholarships" element={<AdmissionScholarshipEnrolment />} />
-                <Route path="/human-resources/ac-finance/student-scholarships" element={<StudentScholarshipEnrolment />} />
-                <Route path="/human-resources/ac-finance/scholarship-usage-report" element={<UsedScholarshipReport />} />
-                <Route path="/human-resources/ac-finance/generate-student-invoice" element={<GenerateStudentInvoice />} />
+                <Route path="/human-resources/finance/reports/payment-by-level" element={<PaymentByLevel />} />
+                <Route path="/human-resources/finance/reports/payment-by-programme" element={<PaymentByProgramme />} />
+                <Route path="/human-resources/finance/reports/payment-by-department" element={<PaymentByDepartment />} />
+                <Route path="/human-resources/finance/reports/payment-by-faculty" element={<PaymentByFaculty />} />
+                <Route path="/human-resources/finance/reports/outstanding" element={<OutstandingReport />} />
+                <Route path="/human-resources/finance/reports/balance" element={<BalanceReport />} />
+                <Route path="/human-resources/finance/reports/scholarships" element={<ScholarshipReport />} />
+                <Route path="/human-resources/finance/reports/scholarship-students" element={<ScholarshipStudentsReport />} />
+                <Route path="/human-resources/finance/invoices" element={<FinanceInvoiceManagement />} />
+                <Route path="/human-resources/finance/create-invoice" element={<FinanceCreateInvoice />} />
+                <Route path="/human-resources/finance/invoices/report" element={<InvoiceReport />} />
+                <Route path="/human-resources/finance/invoices/payment-report" element={<FinancePaymentReport />} />
+                <Route path="/human-resources/finance/invoices/outstanding-report" element={<OutstandingBalanceReport />} />
 
                 {/* Scholarship Module Routes */}
                 <Route path="/human-resources/scholarship/definitions" element={<ScholarshipDefinitions />} />

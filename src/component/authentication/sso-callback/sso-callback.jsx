@@ -6,9 +6,9 @@ import { toast } from "react-toastify";
 import { serverLink } from "../../../resources/url";
 import axios from "axios";
 
-const UPS_SSO_EXCHANGE_URL = process.env.REACT_APP_UPS_SSO_EXCHANGE_URL || "https://portal.cosmopolitan.edu.ng/api/sso/exchange";
-const PORTAL_SSO_SECRET = process.env.REACT_APP_PORTAL_SSO_SECRET || "";
-const BACKEND_SSO_SECRET = process.env.REACT_APP_UPS_SSO_SECRET || "";
+const UPS_SSO_EXCHANGE_URL = import.meta.env.VITE_UPS_SSO_EXCHANGE_URL || "https://portal.cosmopolitan.edu.ng/api/sso/exchange";
+const PORTAL_SSO_SECRET = import.meta.env.VITE_PORTAL_SSO_SECRET || "";
+const BACKEND_SSO_SECRET = import.meta.env.VITE_UPS_SSO_SECRET || "";
 
 function SSOCallback(props) {
     const navigate = useNavigate();
