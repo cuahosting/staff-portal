@@ -15,6 +15,7 @@ function PostPayment(props) {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isFormLoading, setIsFormLoading] = useState('off');
+    const [isStudentLoading, setIsStudentLoading] = useState(false);
     const [isSubmitLoading, setIsSubmitLoading] = useState(false);
     const [semesterList, setSemesterList] = useState([]);
     const [studentList, setStudentList] = useState([]);
@@ -28,6 +29,7 @@ function PostPayment(props) {
     const [showSuccess, setShowSuccess] = useState(false);
     const [change, setChange] = useState("");
     const [studentSelectList, setStudentSelectList] = useState([]);
+    const [studentDataLoaded, setStudentDataLoaded] = useState(false);
     let itemArray = [];
     let outStandingAmount = 0;
 
@@ -67,87 +69,35 @@ function PostPayment(props) {
 
     const [tuitionDatatable, setTuitionDatatable] = useState({
         columns: [
-            {
-                label: "S/N",
-                field: "sn",
-            },
-            {
-                label: "Description",
-                field: "Description",
-            },
-            {
-                label: "Amount",
-                field: "SemesterTuition",
-            }
+            { label: "S/N", field: "sn" },
+            { label: "Description", field: "Description" },
+            { label: "Amount", field: "SemesterTuition" }
         ],
         rows: [],
     });
 
     const [otherFeeDatatable, setOtherFeeDatatable] = useState({
         columns: [
-            {
-                label: "S/N",
-                field: "sn",
-            },
-            {
-                label: "Description",
-                field: "Title",
-            },
-            {
-                label: "Amount",
-                field: "Amount",
-            }
+            { label: "S/N", field: "sn" },
+            { label: "Description", field: "Title" },
+            { label: "Amount", field: "Amount" }
         ],
         rows: [],
     });
 
     const [paymentHistoryDatatable, setPaymentHistoryDatatable] = useState({
         columns: [
-            {
-                label: "S/N",
-                field: "sn",
-            },
-            {
-                label: "Payment ID",
-                field: "PaymentID",
-            },
-            {
-                label: "Payment Method",
-                field: "PaymentMethod",
-            },
-            {
-                label: "Description",
-                field: "Description",
-            },
-            {
-                label: "Amount Paid",
-                field: "AmountPaid",
-            },
-            {
-                label: "Amount Expected",
-                field: "TotalExpectedAmount",
-            },
-            {
-                label: "Outstanding",
-                field: "OutStandingAmount",
-            },
-            {
-                label: "Payment Semester",
-                field: "SemesterCode",
-            },
-            {
-                label: "Paid On",
-                field: "InsertedDate",
-            },
-            {
-                label: "Received By",
-                field: "InsertedBy",
-            },
-            {
-                label: "Print",
-                field: "action",
-            },
-
+            { label: "S/N", field: "sn" },
+            { label: "Payment ID", field: "PaymentID" },
+            { label: "Payment Method", field: "PaymentMethod" },
+            { label: "Description", field: "Description" },
+            { label: "Amount Paid", field: "AmountPaid" },
+            { label: "Amount Expected", field: "TotalExpectedAmount" },
+            { label: "Outstanding", field: "OutStandingAmount" },
+            { label: "Payment Semester", field: "SemesterCode" },
+            { label: "Paid On", field: "InsertedDate" },
+            { label: "Received By", field: "InsertedBy" },
+            { label: "Print", field: "action" },
         ],
         rows: [],
     });
@@ -183,14 +133,11 @@ function PostPayment(props) {
 
     const getApplicantData = async (id) => {
         setShowOutStanding(0)
+        setIsStudentLoading(true);
+        setStudentDataLoaded(false);
         try {
             const { success, data: resultData } = await api.get(`staff/finance/applicant/details/${btoa(id)}`);
             if (success) {
-                // api wrapper might return data directly or wrapped. 
-                // Based on other files, api returns {success, data}.
-                // The original code accessed result.data.studentData
-                // So resultData here corresponds to result.data
-
                 if (resultData.studentData.length > 0) {
                     const data = resultData.studentData[0];
                     const other_fee = resultData.otherFee;
@@ -241,15 +188,7 @@ function PostPayment(props) {
                                 Description: desc,
                                 SemesterTuition: (
                                     <div className="form-group">
-                                        <input
-                                            type="radio"
-                                            id="tuitionCheck"
-                                            name="tuitionCheck"
-                                            className="form-check-input"
-                                            onChange={() => onTuitionSelect(amt, desc)}
-                                            value={amt}
-                                        /> <span>{currencyConverter(amt)}</span>
-
+                                        <input type="radio" id="tuitionCheck" name="tuitionCheck" className="form-check-input" onChange={() => onTuitionSelect(amt, desc)} value={amt} /> <span>{currencyConverter(amt)}</span>
                                     </div>
                                 ),
                             }, {
@@ -257,32 +196,16 @@ function PostPayment(props) {
                                 Description: session_desc,
                                 SemesterTuition: (
                                     <div className="form-group">
-                                        <input
-                                            type="radio"
-                                            id="tuitionCheck"
-                                            name="tuitionCheck"
-                                            className="form-check-input"
-                                            onChange={() => onTuitionSelect(session_amt, session_desc)}
-                                            value={session_amt}
-                                        /> <span>{currencyConverter(session_amt)}</span>
-
+                                        <input type="radio" id="tuitionCheck" name="tuitionCheck" className="form-check-input" onChange={() => onTuitionSelect(session_amt, session_desc)} value={session_amt} /> <span>{currencyConverter(session_amt)}</span>
                                     </div>
                                 ),
                             }];
 
-                            setTuitionDatatable({
-                                ...tuitionDatatable,
-                                columns: tuitionDatatable.columns,
-                                rows: rows,
-                            });
+                            setTuitionDatatable({ ...tuitionDatatable, columns: tuitionDatatable.columns, rows: rows });
                         }
                     } catch (err) {
                         console.log("NETWORK ERROR");
                     }
-
-                    document.getElementById("student_details").style.display = 'block';
-                    document.getElementById("tab_content").style.display = 'block';
-                    document.getElementById("payment_content").style.display = 'block';
 
                     if (other_fee.length > 0) {
                         let rows = [];
@@ -316,24 +239,12 @@ function PostPayment(props) {
                                 Title: title,
                                 Amount: (
                                     <div className="form-group">
-                                        <input
-                                            type="checkbox"
-                                            id="checkItem"
-                                            name="checkItem"
-                                            className="form-check-input checkItem"
-                                            data={title}
-                                            onChange={(e) => onOtherFeeChecked(amount, title, e)}
-                                            value={amount}
-                                        /> <span>{currencyConverter(amount)}</span>
+                                        <input type="checkbox" id="checkItem" name="checkItem" className="form-check-input checkItem" data={title} onChange={(e) => onOtherFeeChecked(amount, title, e)} value={amount} /> <span>{currencyConverter(amount)}</span>
                                     </div>
                                 ),
                             });
                         });
-                        setOtherFeeDatatable({
-                            ...otherFeeDatatable,
-                            columns: otherFeeDatatable.columns,
-                            rows: rows,
-                        });
+                        setOtherFeeDatatable({ ...otherFeeDatatable, columns: otherFeeDatatable.columns, rows: rows });
                     }
 
                     if (payment_history.length > 0) {
@@ -355,23 +266,23 @@ function PostPayment(props) {
                                 ),
                             });
                         });
-                        setPaymentHistoryDatatable({
-                            ...paymentHistoryDatatable,
-                            columns: paymentHistoryDatatable.columns,
-                            rows: rows,
-                        });
+                        setPaymentHistoryDatatable({ ...paymentHistoryDatatable, columns: paymentHistoryDatatable.columns, rows: rows });
                     }
                     const PaymentID = formData.SemesterCode + generate_token(6) + data.ApplicationID.slice(-4);
                     setPaymentRefID(PaymentID)
+                    setStudentDataLoaded(true);
                 }
             }
         } catch (err) {
             console.log("NETWORK ERROR");
         }
+        setIsStudentLoading(false);
     }
 
     const getStudentData = async (id) => {
         setShowOutStanding(0)
+        setIsStudentLoading(true);
+        setStudentDataLoaded(false);
         try {
             const { success, data: resultData } = await api.get(`staff/finance/student/details/${btoa(id)}`);
             if (success) {
@@ -425,19 +336,10 @@ function PostPayment(props) {
                                     Description: desc,
                                     SemesterTuition: (
                                         <div className="form-group">
-                                            <input
-                                                type="radio"
-                                                id="tuitionCheck"
-                                                name="tuitionCheck"
-                                                className="form-check-input"
-                                                onChange={() => onTuitionSelect(amt, desc)}
-                                                value={amt}
-                                            /> <span>{currencyConverter(amt)}</span>
-
+                                            <input type="radio" id="tuitionCheck" name="tuitionCheck" className="form-check-input" onChange={() => onTuitionSelect(amt, desc)} value={amt} /> <span>{currencyConverter(amt)}</span>
                                         </div>
                                     ),
                                 },
-
                                 projectCode === "ALANSAR_UNIVERSITY_STAFF_PORTAL" ?
                                     <></>
                                     :
@@ -446,41 +348,20 @@ function PostPayment(props) {
                                         Description: session_desc,
                                         SemesterTuition: (
                                             <div className="form-group">
-                                                <input
-                                                    type="radio"
-                                                    id="tuitionCheck"
-                                                    name="tuitionCheck"
-                                                    className="form-check-input"
-                                                    onChange={() => onTuitionSelect(session_amt, session_desc)}
-                                                    value={session_amt}
-                                                /> <span>{currencyConverter(session_amt)}</span>
-
+                                                <input type="radio" id="tuitionCheck" name="tuitionCheck" className="form-check-input" onChange={() => onTuitionSelect(session_amt, session_desc)} value={session_amt} /> <span>{currencyConverter(session_amt)}</span>
                                             </div>
                                         ),
                                     }
                                 ];
 
-                                setTuitionDatatable({
-                                    ...tuitionDatatable,
-                                    columns: tuitionDatatable.columns,
-                                    rows: rows,
-                                });
+                                setTuitionDatatable({ ...tuitionDatatable, columns: tuitionDatatable.columns, rows: rows });
                             } else {
-                                setTuitionDatatable({
-                                    ...tuitionDatatable,
-                                    columns: tuitionDatatable.columns,
-                                    rows: [],
-                                });
+                                setTuitionDatatable({ ...tuitionDatatable, columns: tuitionDatatable.columns, rows: [] });
                             }
                         }
                     } catch (err) {
                         console.log("NETWORK ERROR");
                     }
-
-                    document.getElementById("student_details").style.display = 'block';
-                    document.getElementById("tab_content").style.display = 'block';
-                    document.getElementById("payment_content").style.display = 'block';
-
 
                     if (other_fee.length > 0) {
                         let rows = [];
@@ -514,30 +395,14 @@ function PostPayment(props) {
                                 Title: title,
                                 Amount: (
                                     <div className="form-group">
-                                        <input
-                                            type="checkbox"
-                                            id="checkItem"
-                                            name="checkItem"
-                                            className="form-check-input checkItem"
-                                            data={title}
-                                            onChange={(e) => onOtherFeeChecked(amount, title, e)}
-                                            value={amount}
-                                        /> <span>{currencyConverter(amount)}</span>
+                                        <input type="checkbox" id="checkItem" name="checkItem" className="form-check-input checkItem" data={title} onChange={(e) => onOtherFeeChecked(amount, title, e)} value={amount} /> <span>{currencyConverter(amount)}</span>
                                     </div>
                                 ),
                             });
                         });
-                        setOtherFeeDatatable({
-                            ...otherFeeDatatable,
-                            columns: otherFeeDatatable.columns,
-                            rows: rows,
-                        });
+                        setOtherFeeDatatable({ ...otherFeeDatatable, columns: otherFeeDatatable.columns, rows: rows });
                     } else {
-                        setOtherFeeDatatable({
-                            ...otherFeeDatatable,
-                            columns: otherFeeDatatable.columns,
-                            rows: [],
-                        });
+                        setOtherFeeDatatable({ ...otherFeeDatatable, columns: otherFeeDatatable.columns, rows: [] });
                     }
 
                     if (payment_history.length > 0) {
@@ -559,42 +424,28 @@ function PostPayment(props) {
                                 ),
                             });
                         });
-                        setPaymentHistoryDatatable({
-                            ...paymentHistoryDatatable,
-                            columns: paymentHistoryDatatable.columns,
-                            rows: rows,
-                        });
+                        setPaymentHistoryDatatable({ ...paymentHistoryDatatable, columns: paymentHistoryDatatable.columns, rows: rows });
                     } else {
-                        setPaymentHistoryDatatable({
-                            ...paymentHistoryDatatable,
-                            columns: paymentHistoryDatatable.columns,
-                            rows: [],
-                        });
+                        setPaymentHistoryDatatable({ ...paymentHistoryDatatable, columns: paymentHistoryDatatable.columns, rows: [] });
                     }
 
                     const PaymentID = formData.SemesterCode + generate_token(6) + data.StudentID.slice(-4);
                     setPaymentRefID(PaymentID)
+                    setStudentDataLoaded(true);
                 }
             }
         } catch (err) {
             console.log("NETWORK ERROR");
         }
+        setIsStudentLoading(false);
     }
 
 
     useEffect(() => {
         getData();
-        document.getElementById("student_id").style.display = 'none';
-        document.getElementById("new_student").style.display = 'none';
-        document.getElementById("student_details").style.display = 'none';
-        document.getElementById("tab_content").style.display = 'none';
-        document.getElementById("payment_content").style.display = 'none';
-        document.getElementById("AmountDue").value = outStandingAmount;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     useEffect(() => { setFormData(formData) }, [change])
-    // useEffect(()=>{setPaymentRefID(paymentRefID)}, [change])
 
     const onTuitionSelect = (amount, name) => {
         setChange('onTuitionSelect')
@@ -640,7 +491,6 @@ function PostPayment(props) {
             for (let i = 0; i < itemArray.length; i++) {
                 itemTotal += itemArray[i].item_amount
             }
-            // setAmountDue(amountDue => amountDue - item_value)
         }
 
         let newAmountDue = outStandingAmount < 1 ? outStandingAmount + itemTotal : itemTotal + outStandingAmount;
@@ -658,38 +508,8 @@ function PostPayment(props) {
                 AppID: "",
                 UserType: "",
             })
-            if (e.target.value === 'Returning Student') {
-                document.getElementById("student_id").style.display = 'block';
-                document.getElementById("new_student").style.display = 'none';
-                document.getElementById("student_details").style.display = 'none';
-                document.getElementById("tab_content").style.display = 'none';
-                document.getElementById("payment_content").style.display = 'none';
-            } else if (e.target.value === 'New Student') {
-                document.getElementById("new_student").style.display = 'block';
-                document.getElementById("student_id").style.display = 'none';
-                document.getElementById("student_details").style.display = 'none';
-                document.getElementById("tab_content").style.display = 'none';
-                document.getElementById("payment_content").style.display = 'none';
-            } else {
-
-            }
+            setStudentDataLoaded(false);
         }
-
-
-        // if (e.target.name === 'StudentID') {
-        //
-        //     if (e.target.value !== '') {
-        //         const filter_student = studentList.filter(
-        //             (i) => i.StudentID === e.target.value
-        //         );
-        //         if (filter_student.length > 0) {
-        //             selectedStudent.StudentID = filter_student[0].StudentID;
-        //             const id = filter_student[0].StudentID;
-        //             getStudentData(id);
-        //         }
-        //
-        //     }
-        // }
 
         if (e.target.name === 'AmountPaid') {
             if (e.target.value !== '') {
@@ -723,9 +543,7 @@ function PostPayment(props) {
     };
 
     const handleStudentChange = (e) => {
-        document.getElementById("student_details").style.display = 'none';
-        document.getElementById("tab_content").style.display = 'none';
-        document.getElementById("payment_content").style.display = 'none';
+        setStudentDataLoaded(false);
         if (e.target.value !== '') {
             const filter_student = studentList.filter(
                 (i) => i.StudentID === e.target.value
@@ -741,9 +559,7 @@ function PostPayment(props) {
     };
 
     const handleApplicantChange = (e) => {
-        document.getElementById("student_details").style.display = 'none';
-        document.getElementById("tab_content").style.display = 'none';
-        document.getElementById("payment_content").style.display = 'none';
+        setStudentDataLoaded(false);
         if (e.target.value !== '') {
             const id = formData.ApplicationID;
             getApplicantData(id);
@@ -752,7 +568,6 @@ function PostPayment(props) {
     };
 
     const generate_token = (length) => {
-        //edit the token allowed characters
         let a = "1234567890".split("");
         let b = [];
         for (let i = 0; i < length; i++) {
@@ -859,28 +674,16 @@ function PostPayment(props) {
                         setShowSuccess(true)
                         setChange("UpdateNewData");
                     } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
+                        showAlert("ERROR", "Something went wrong. Please try again!", "error");
                     }
                 } catch (err) {
                     console.error('ERROR', err);
                 }
             } else {
-                showAlert(
-                    "ERROR",
-                    "Something went wrong. Please try again!",
-                    "error"
-                );
+                showAlert("ERROR", "Something went wrong. Please try again!", "error");
             }
         } catch (error) {
-            showAlert(
-                "NETWORK ERROR",
-                "Please check your connection and try again!",
-                "error"
-            );
+            showAlert("NETWORK ERROR", "Please check your connection and try again!", "error");
         }
         setIsSubmitLoading(false);
     }
@@ -899,17 +702,11 @@ function PostPayment(props) {
                     if (success && result.message === "success") {
                         toast.success("Result Access Granted Successfully");
                     } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
+                        showAlert("ERROR", "Something went wrong. Please try again!", "error");
                     }
                 } catch (err) {
                     console.error('ERROR', err);
                 }
-            } else {
-
             }
         });
     }
@@ -928,17 +725,11 @@ function PostPayment(props) {
                     if (success && result.message === "success") {
                         toast.success("Registration Access Granted Successfully");
                     } else {
-                        showAlert(
-                            "ERROR",
-                            "Something went wrong. Please try again!",
-                            "error"
-                        );
+                        showAlert("ERROR", "Something went wrong. Please try again!", "error");
                     }
                 } catch (err) {
                     console.error('ERROR', err);
                 }
-            } else {
-
             }
         });
     }
@@ -953,33 +744,34 @@ function PostPayment(props) {
             />
             <div className="flex-column-fluid">
                 <div className="card card-no-border">
-                    <div className="card-body pt-1">
-                        <div className="row mt-1">
-                            <div className="col-md-3">
-                                <div className="form-group mb-4">
-                                    <SearchSelect
-                                        id="SemesterCode"
-                                        label="Select Semester"
-                                        value={semesterList.map(s => ({ value: s.SemesterCode, label: s.Description })).find(op => op.value === formData.SemesterCode) || null}
-                                        options={semesterList.map(s => ({ value: s.SemesterCode, label: s.Description }))}
-                                        onChange={(selected) => onEdit({ target: { name: 'SemesterCode', value: selected?.value || '' } })}
-                                        placeholder="Select Semester"
-                                    />
-                                </div>
-                                <div className="form-group mb-4">
-                                    <SearchSelect
-                                        id="UserType"
-                                        label="Select User Type"
-                                        value={formData.UserType ? { value: formData.UserType, label: formData.UserType } : null}
-                                        options={[
-                                            { value: "Returning Student", label: "Returning Student" },
-                                            { value: "New Student", label: "New Student" }
-                                        ]}
-                                        onChange={(selected) => onEdit({ target: { name: 'UserType', value: selected?.value || '' } })}
-                                        placeholder="Select User Type"
-                                    />
-                                </div>
-                                <div className="form-group mb-4" id="student_id">
+                    <div className="card-body pt-3">
+                        {/* Row 1: Three dropdowns in a row */}
+                        <div className="row mb-5">
+                            <div className="col-md-4">
+                                <SearchSelect
+                                    id="SemesterCode"
+                                    label="Select Semester"
+                                    value={semesterList.map(s => ({ value: s.SemesterCode, label: s.Description })).find(op => op.value === formData.SemesterCode) || null}
+                                    options={semesterList.map(s => ({ value: s.SemesterCode, label: s.Description }))}
+                                    onChange={(selected) => onEdit({ target: { name: 'SemesterCode', value: selected?.value || '' } })}
+                                    placeholder="Select Semester"
+                                />
+                            </div>
+                            <div className="col-md-4">
+                                <SearchSelect
+                                    id="UserType"
+                                    label="Select User Type"
+                                    value={formData.UserType ? { value: formData.UserType, label: formData.UserType } : null}
+                                    options={[
+                                        { value: "Returning Student", label: "Returning Student" },
+                                        { value: "New Student", label: "New Student" }
+                                    ]}
+                                    onChange={(selected) => onEdit({ target: { name: 'UserType', value: selected?.value || '' } })}
+                                    placeholder="Select User Type"
+                                />
+                            </div>
+                            <div className="col-md-4">
+                                {formData.UserType === 'Returning Student' && (
                                     <SearchSelect
                                         id="StudentID"
                                         label="Select Student"
@@ -988,298 +780,278 @@ function PostPayment(props) {
                                         onChange={(selected) => handleStudentChange({ target: { value: selected?.value || '' } })}
                                         placeholder="Search Student"
                                     />
-                                    {/*<select*/}
-                                    {/*    id={"StudentID"}*/}
-                                    {/*    name={"StudentID"}*/}
-                                    {/*    onChange={onEdit}*/}
-                                    {/*    value={formData.StudentID}*/}
-                                    {/*    className={"form-control"}*/}
-                                    {/*>*/}
-                                    {/*    <option value=''>Select Student</option>*/}
-                                    {/*    {*/}
-                                    {/*        studentList.length > 0 && studentList.map((item, index) => {*/}
-                                    {/*            return <option key={index} value={item.StudentID}>{item.FirstName} {item.MiddleName} {item.Surname} ({item.StudentID})</option>*/}
-                                    {/*        })*/}
-                                    {/*    }*/}
-
-                                    {/*</select>*/}
-                                </div>
-                                <div id="new_student">
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="ApplicationID">Application ID</label>
-                                        <input
-                                            type="text"
-                                            id={"ApplicationID"}
-                                            name={"ApplicationID"}
-                                            onChange={onEdit}
-                                            value={formData.ApplicationID}
-                                            className={"form-control"}
-                                            placeholder={"Enter the Application ID"}
-                                        />
+                                )}
+                                {formData.UserType === 'New Student' && (
+                                    <div className="row">
+                                        <div className="col-md-7">
+                                            <label htmlFor="ApplicationID">Application ID</label>
+                                            <input
+                                                type="text"
+                                                id="ApplicationID"
+                                                name="ApplicationID"
+                                                onChange={onEdit}
+                                                value={formData.ApplicationID}
+                                                className="form-control"
+                                                placeholder="Enter Application ID"
+                                            />
+                                        </div>
+                                        <div className="col-md-5">
+                                            <SearchSelect
+                                                id="AdmissionType"
+                                                label="Admission Type"
+                                                value={formData.AdmissionType ? { value: formData.AdmissionType, label: formData.AdmissionType.charAt(0).toUpperCase() + formData.AdmissionType.slice(1) } : null}
+                                                options={[
+                                                    { value: "undergraduate", label: "Undergraduate" },
+                                                    { value: "postgraduate", label: "Postgraduate" }
+                                                ]}
+                                                onChange={(selected) => handleApplicantChange({ target: { name: 'AdmissionType', value: selected?.value || '' } })}
+                                                placeholder="Type"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="form-group mb-4">
-                                        <SearchSelect
-                                            id="AdmissionType"
-                                            label="Select Admission Type"
-                                            value={formData.AdmissionType ? { value: formData.AdmissionType, label: formData.AdmissionType.charAt(0).toUpperCase() + formData.AdmissionType.slice(1) } : null}
-                                            options={[
-                                                { value: "undergraduate", label: "Undergraduate" },
-                                                { value: "postgraduate", label: "Postgraduate" }
-                                            ]}
-                                            onChange={(selected) => handleApplicantChange({ target: { name: 'AdmissionType', value: selected?.value || '' } })}
-                                            placeholder="Select Admission Type"
-                                        />
-                                    </div>
-                                </div>
-                                <div id="student_details">
-                                    {
-                                        formData.UserType === "Returning Student" && formData.StudentID !== "" ? <div className="form-group mb-4">
-                                            <a href={`/registration/student-manager/enrolment/${encryptData(formData.StudentID)}`} target="_blank" className="btn btn-sm btn-circle btn-primary w-100">
-                                                Student Dashboard
-                                            </a>
-                                        </div> : <></>
-                                    }
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="AppID">Application ID</label>
-                                        <input
-                                            type="text"
-                                            name={"AppID"}
-                                            onChange={onEdit}
-                                            value={formData.AppID}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="FirstName">FirstName</label>
-                                        <input
-                                            type="FirstName"
-                                            name={"FirstName"}
-                                            onChange={onEdit}
-                                            value={formData.FirstName}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="MiddleName">MiddleName</label>
-                                        <input
-                                            type="text"
-                                            name={"MiddleName"}
-                                            onChange={onEdit}
-                                            value={formData.MiddleName}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="Surname">Surname</label>
-                                        <input
-                                            type="text"
-                                            name={"Surname"}
-                                            onChange={onEdit}
-                                            value={formData.Surname}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="Course">Course</label>
-                                        <input
-                                            type="text"
-                                            name={"Course"}
-                                            onChange={onEdit}
-                                            value={formData.Course}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="StudentLevel">Level</label>
-                                        <input
-                                            type="text"
-                                            name={"StudentLevel"}
-                                            onChange={onEdit}
-                                            value={formData.StudentLevel}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="StudentSemester">Semester</label>
-                                        <input
-                                            type="text"
-                                            name={"StudentSemester"}
-                                            onChange={onEdit}
-                                            value={formData.StudentSemester}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div className="form-group mb-4">
-                                        <label htmlFor="EmailAddress">Email</label>
-                                        <input
-                                            type="text"
-                                            name={"EmailAddress"}
-                                            onChange={onEdit}
-                                            value={formData.EmailAddress}
-                                            className={"form-control"}
-                                            readOnly
-                                        />
-                                    </div>
-
-                                </div>
+                                )}
                             </div>
-                            <div className="col-md-6" id="tab_content">
-                                <ul className="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-bold mb-8">
+                        </div>
 
+                        {/* Loading spinner */}
+                        {isStudentLoading && (
+                            <div className="text-center py-10">
+                                <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                                <p className="text-muted mt-3">Loading student data...</p>
+                            </div>
+                        )}
+
+                        {/* Student Profile Card + Tabs (shown after data loads) */}
+                        {studentDataLoaded && !isStudentLoading && (
+                            <>
+                                {/* Student Profile Card */}
+                                <div className="card bg-light border-0 shadow-sm mb-5">
+                                    <div className="card-body py-4">
+                                        <div className="d-flex align-items-center justify-content-between flex-wrap">
+                                            <div className="d-flex align-items-center">
+                                                <div className="symbol symbol-50px symbol-circle me-5">
+                                                    <span className="symbol-label bg-primary text-white fs-2 fw-bold">
+                                                        {formData.FirstName.charAt(0)}{formData.Surname.charAt(0)}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h4 className="mb-0 fw-bold">{formData.FirstName} {formData.MiddleName} {formData.Surname}</h4>
+                                                    <span className="text-muted fs-7">{formData.AppID}</span>
+                                                </div>
+                                            </div>
+                                            <div className="d-flex gap-6 flex-wrap">
+                                                <div className="text-center">
+                                                    <span className="text-muted fs-8 d-block">Course</span>
+                                                    <span className="fw-bold fs-7">{formData.Course}</span>
+                                                </div>
+                                                <div className="text-center">
+                                                    <span className="text-muted fs-8 d-block">Level</span>
+                                                    <span className="fw-bold fs-7">{formData.StudentLevel}</span>
+                                                </div>
+                                                <div className="text-center">
+                                                    <span className="text-muted fs-8 d-block">Semester</span>
+                                                    <span className="fw-bold fs-7">{formData.StudentSemester}</span>
+                                                </div>
+                                                <div className="text-center">
+                                                    <span className="text-muted fs-8 d-block">Email</span>
+                                                    <span className="fw-bold fs-7">{formData.EmailAddress}</span>
+                                                </div>
+                                                <div className="text-center">
+                                                    <span className="text-muted fs-8 d-block">Outstanding</span>
+                                                    <span className={`fw-bold fs-7 ${showOutStanding > 0 ? 'text-danger' : 'text-success'}`}>
+                                                        {currencyConverter(showOutStanding)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="d-flex gap-2 mt-2 mt-md-0">
+                                                {formData.UserType === "Returning Student" && formData.StudentID !== "" && (
+                                                    <a href={`/registration/student-manager/enrolment/${encryptData(formData.StudentID)}`} target="_blank" className="btn btn-sm btn-light-primary">
+                                                        <i className="fa fa-external-link-alt me-1"></i> Dashboard
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Tabs Section - Full Width */}
+                                <ul className="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-bold mb-6">
                                     <li className="nav-item">
                                         <a className="nav-link text-active-primary pb-4 active" data-bs-toggle="tab" href="#tuition_fee">Tuition Fee</a>
                                     </li>
-
                                     <li className="nav-item">
                                         <a className="nav-link text-active-primary pb-4" data-kt-countup-tabs="true" data-bs-toggle="tab" href="#other_fee_tab">Other Fee</a>
                                     </li>
-
                                     <li className="nav-item">
                                         <a className="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#payment_history">Payment History</a>
                                     </li>
-
                                 </ul>
+
                                 <div className="tab-content" id="myTabContent">
-
                                     <div className="tab-pane fade active show" id="tuition_fee" role="tabpanel">
-                                        <div className="" data-kt-customer-table-toolbar="base">
-                                            <AGTable data={tuitionDatatable} paging={false} />
-                                        </div>
-                                    </div>
-                                    <div className="tab-pane fade" id="other_fee_tab" role="tabpanel">
-                                        <div className="" data-kt-customer-table-toolbar="base">
-                                            <AGTable data={otherFeeDatatable} paging={false} />
-                                        </div>
-                                    </div>
-                                    <div className="tab-pane fade " id="payment_history" role="tabpanel">
-                                        <div className="" data-kt-customer-table-toolbar="base">
-                                            <AGTable data={paymentHistoryDatatable} paging={false} />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-md-3" id="payment_content">
-                                <div className="alert alert-primary">
-                                    <div className="d-flex flex-column text-center">
-                                        <span className="h3">Outstanding: <b><del>N</del></b>{showOutStanding}</span>
-                                    </div>
-                                </div>
+                                        <div className="row">
+                                            <div className="col-md-8">
+                                                <AGTable data={tuitionDatatable} paging={false} />
+                                            </div>
+                                            <div className="col-md-4">
+                                                <div className="card border shadow-sm">
+                                                    <div className="card-header bg-light py-3">
+                                                        <h5 className="card-title mb-0">Post Payment</h5>
+                                                    </div>
+                                                    <div className="card-body">
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="ItemTotal">Item Total</label>
+                                                            <input type="text" id="ItemTotal" name="ItemTotal" value={totalCheckedItems} className="form-control" readOnly />
+                                                        </div>
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="AmountDue">Amount Due</label>
+                                                            <input type="text" id="AmountDue" name="AmountDue" value={amountDue} className="form-control" readOnly />
+                                                        </div>
+                                                        <div id="calculate" style={{ color: 'teal' }} className="mb-2">{showAmountPaid}</div>
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="AmountPaid">Amount Paid</label>
+                                                            <input type="number" id="AmountPaid" name="AmountPaid" onChange={onEdit} value={formData.AmountPaid} className="form-control" />
+                                                        </div>
+                                                        <div className="form-group mb-3">
+                                                            <SearchSelect
+                                                                id="PaymentMethod"
+                                                                label="Payment Method"
+                                                                value={formData.PaymentMethod ? { value: formData.PaymentMethod, label: formData.PaymentMethod } : null}
+                                                                options={[
+                                                                    { value: "Bank", label: "Bank" },
+                                                                    { value: "Bank Draft", label: "Bank Draft" },
+                                                                    { value: "Transfer", label: "Transfer" },
+                                                                    { value: "Trimester Credit", label: "Trimester Credit" }
+                                                                ]}
+                                                                onChange={(selected) => onEdit({ target: { name: 'PaymentMethod', value: selected?.value || '' } })}
+                                                                placeholder="Select Payment Method"
+                                                            />
+                                                        </div>
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="PaymentRef">Payment Reference</label>
+                                                            <input type="text" name="PaymentRef" onChange={onEdit} value={formData.PaymentRef} className="form-control" />
+                                                        </div>
+                                                        <div className="form-group pt-2 mb-2">
+                                                            <button onClick={onTriggerSubmit} className="btn btn-primary w-100">
+                                                                Post Payment
+                                                            </button>
+                                                        </div>
+                                                        {showSuccess && (
+                                                            <>
+                                                                <div className="alert alert-success mb-3 text-center">
+                                                                    Payment Posted Successfully
+                                                                </div>
+                                                                <div className="d-flex gap-2 flex-wrap">
+                                                                    <button className="btn btn-primary btn-sm flex-fill" onClick={onAllowResult}>Allow Result</button>
+                                                                    <button className="btn btn-info btn-sm flex-fill" onClick={onAllowRegistration}>Allow Registration</button>
+                                                                    <a href={`/human-resources/finance/payment-receipt/${encryptData(paymentRefID)}`} target="_blank" className="btn btn-success btn-sm flex-fill">Print</a>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
 
-                                <div className="form-group mb-4">
-                                    <label htmlFor="ItemTotal">Item Total</label>
-                                    <input
-                                        type="text"
-                                        id={"ItemTotal"}
-                                        name={"ItemTotal"}
-                                        value={totalCheckedItems}
-                                        className={"form-control"}
-                                        readOnly
-                                    />
-                                </div>
-                                <div className="form-group mb-4">
-                                    <label htmlFor="AmountDue">Amount Due</label>
-                                    <input
-                                        type="text"
-                                        id="AmountDue"
-                                        name={"AmountDue"}
-                                        value={amountDue}
-                                        className={"form-control"}
-                                        readOnly
-                                    />
-                                </div>
-                                <div id="calculate" style={{ color: 'teal' }}>{showAmountPaid}</div>
-                                <div className="form-group mb-4">
-                                    <label htmlFor="AmountPaid">Amount Paid</label>
-                                    <input
-                                        type="number"
-                                        id={"AmountPaid"}
-                                        name={"AmountPaid"}
-                                        onChange={onEdit}
-                                        value={formData.AmountPaid}
-                                        className={"form-control"}
-                                    />
-                                </div>
-                                <div className="form-group mb-4">
-                                    <SearchSelect
-                                        id="PaymentMethod"
-                                        label="Payment Method"
-                                        value={formData.PaymentMethod ? { value: formData.PaymentMethod, label: formData.PaymentMethod } : null}
-                                        options={[
-                                            { value: "Bank", label: "Bank" },
-                                            { value: "Bank Draft", label: "Bank Draft" },
-                                            { value: "Transfer", label: "Transfer" },
-                                            { value: "Trimester Credit", label: "Trimester Credit" }
-                                        ]}
-                                        onChange={(selected) => onEdit({ target: { name: 'PaymentMethod', value: selected?.value || '' } })}
-                                        placeholder="Select Payment Method"
-                                    />
-                                </div>
-                                <div className="form-group mb-4">
-                                    <label htmlFor="PaymentID">Payment Reference</label>
-                                    <input
-                                        type="text"
-                                        name={"PaymentRef"}
-                                        onChange={onEdit}
-                                        value={formData.PaymentRef}
-                                        className={"form-control"}
-                                    />
-                                </div>
-                                <div className="form-group pt-4 mb-2">
-                                    <button onClick={onTriggerSubmit} className="btn btn-primary w-100">
-                                        Post Payment
-                                    </button>
-                                </div>
-                                {
-                                    showSuccess ?
-                                        <>
-                                            <div className="alert alert-success mb-3">
-                                                <div className="d-flex flex-column text-center">
-                                                    <span >Payment Posted Successfully</span>
+                                                {cart.length > 0 && (
+                                                    <div className="card border shadow-sm mt-4">
+                                                        <div className="card-header bg-light py-3">
+                                                            <h6 className="card-title mb-0">Cart Items</h6>
+                                                        </div>
+                                                        <div className="card-body p-0">
+                                                            <table className="table table-striped mb-0">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>S/N</th>
+                                                                        <th>Item</th>
+                                                                        <th>Amount</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {cart.map((item, index) => (
+                                                                        <tr key={index}><td>{index + 1}</td><td>{item.item_name}</td><td>{currencyConverter(item.item_amount)}</td></tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="tab-pane fade" id="other_fee_tab" role="tabpanel">
+                                        <div className="row">
+                                            <div className="col-md-8">
+                                                <AGTable data={otherFeeDatatable} paging={false} />
+                                            </div>
+                                            <div className="col-md-4">
+                                                <div className="card border shadow-sm">
+                                                    <div className="card-header bg-light py-3">
+                                                        <h5 className="card-title mb-0">Post Payment</h5>
+                                                    </div>
+                                                    <div className="card-body">
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="ItemTotal2">Item Total</label>
+                                                            <input type="text" name="ItemTotal" value={totalCheckedItems} className="form-control" readOnly />
+                                                        </div>
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="AmountDue2">Amount Due</label>
+                                                            <input type="text" name="AmountDue" value={amountDue} className="form-control" readOnly />
+                                                        </div>
+                                                        <div style={{ color: 'teal' }} className="mb-2">{showAmountPaid}</div>
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="AmountPaid2">Amount Paid</label>
+                                                            <input type="number" name="AmountPaid" onChange={onEdit} value={formData.AmountPaid} className="form-control" />
+                                                        </div>
+                                                        <div className="form-group mb-3">
+                                                            <SearchSelect
+                                                                id="PaymentMethod2"
+                                                                label="Payment Method"
+                                                                value={formData.PaymentMethod ? { value: formData.PaymentMethod, label: formData.PaymentMethod } : null}
+                                                                options={[
+                                                                    { value: "Bank", label: "Bank" },
+                                                                    { value: "Bank Draft", label: "Bank Draft" },
+                                                                    { value: "Transfer", label: "Transfer" },
+                                                                    { value: "Trimester Credit", label: "Trimester Credit" }
+                                                                ]}
+                                                                onChange={(selected) => onEdit({ target: { name: 'PaymentMethod', value: selected?.value || '' } })}
+                                                                placeholder="Select Payment Method"
+                                                            />
+                                                        </div>
+                                                        <div className="form-group mb-3">
+                                                            <label htmlFor="PaymentRef2">Payment Reference</label>
+                                                            <input type="text" name="PaymentRef" onChange={onEdit} value={formData.PaymentRef} className="form-control" />
+                                                        </div>
+                                                        <div className="form-group pt-2 mb-2">
+                                                            <button onClick={onTriggerSubmit} className="btn btn-primary w-100">
+                                                                Post Payment
+                                                            </button>
+                                                        </div>
+                                                        {showSuccess && (
+                                                            <>
+                                                                <div className="alert alert-success mb-3 text-center">
+                                                                    Payment Posted Successfully
+                                                                </div>
+                                                                <div className="d-flex gap-2 flex-wrap">
+                                                                    <button className="btn btn-primary btn-sm flex-fill" onClick={onAllowResult}>Allow Result</button>
+                                                                    <button className="btn btn-info btn-sm flex-fill" onClick={onAllowRegistration}>Allow Registration</button>
+                                                                    <a href={`/human-resources/finance/payment-receipt/${encryptData(paymentRefID)}`} target="_blank" className="btn btn-success btn-sm flex-fill">Print</a>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="mb-2 " style={{ display: 'flex' }}>
-                                                <button className="btn btn-primary btn-sm" onClick={onAllowResult}>Allow Result</button>
-                                                <button className="btn btn-info btn-sm" onClick={onAllowRegistration}>Allow Registration</button>
-                                                <a href={`/human-resources/finance/payment-receipt/${encryptData(paymentRefID)}`} target="_blank" className="btn btn-success btn-sm">Print</a>
-                                            </div>
-                                        </>
-                                        : ""
-                                }
+                                        </div>
+                                    </div>
 
-                                {
-                                    cart.length > 0 ?
-                                        (
-                                            <table className="table table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>S/N</th>
-                                                        <th>Item</th>
-                                                        <th>Amount</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {
-                                                        cart.map((item, index) => {
-                                                            return (
-                                                                <tr key={index}><td>{index + 1}</td><td>{item.item_name}</td><td>{item.item_amount}</td></tr>
-                                                            )
-                                                        })
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        )
-                                        : <></>
-
-                                }
-                            </div>
-                        </div>
+                                    <div className="tab-pane fade" id="payment_history" role="tabpanel">
+                                        <AGTable data={paymentHistoryDatatable} paging={false} />
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
