@@ -321,6 +321,7 @@ import OutstandingReport from "../human-resources/finance/reports/outstanding-re
 import BalanceReport from "../human-resources/finance/reports/balance-report";
 import ScholarshipReport from "../human-resources/finance/reports/scholarship-report";
 import ScholarshipStudentsReport from "../human-resources/finance/reports/scholarship-students-report";
+import ActiveStudentsOutstanding from "../human-resources/finance/reports/active-students-outstanding";
 import FinanceInvoiceManagement from "../human-resources/finance/invoices/invoice-management";
 import FinanceCreateInvoice from "../human-resources/finance/invoices/create-invoice";
 import InvoiceReport from "../human-resources/finance/invoices/invoice-report";
@@ -1485,6 +1486,7 @@ export default function PageRoutes() {
                 <Route path="/human-resources/finance/reports/payment-by-faculty" element={<PaymentByFaculty />} />
                 <Route path="/human-resources/finance/reports/outstanding" element={<OutstandingReport />} />
                 <Route path="/human-resources/finance/reports/balance" element={<BalanceReport />} />
+                <Route path="/human-resources/finance/reports/active-students-outstanding" element={<ActiveStudentsOutstanding />} />
                 <Route path="/human-resources/finance/reports/scholarships" element={<ScholarshipReport />} />
                 <Route path="/human-resources/finance/reports/scholarship-students" element={<ScholarshipStudentsReport />} />
                 <Route path="/human-resources/finance/invoices" element={<FinanceInvoiceManagement />} />
