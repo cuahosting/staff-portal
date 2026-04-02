@@ -679,6 +679,8 @@ function PostPayment(props) {
                 } catch (err) {
                     console.error('ERROR', err);
                 }
+            } else if (success && result.message === "duplicate") {
+                showAlert("DUPLICATE", "This payment has already been posted!", "warning");
             } else {
                 showAlert("ERROR", "Something went wrong. Please try again!", "error");
             }
