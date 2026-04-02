@@ -145,8 +145,8 @@ function PostPayment(props) {
                     const studentScholarshipData = resultData.scholarship;
                     const studentOutstanding = resultData.OutStandingAmount;
                     setAmountDue(parseFloat(studentOutstanding))
-                    setShowOutStanding(prevState => prevState + studentOutstanding)
-                    outStandingAmount += studentOutstanding;
+                    setShowOutStanding(prevState => prevState + parseFloat(studentOutstanding))
+                    outStandingAmount += parseFloat(studentOutstanding);
 
                     setFormData({
                         ...formData,
@@ -293,8 +293,8 @@ function PostPayment(props) {
                     const studentScholarshipData = resultData.scholarship;
                     const studentOutstanding = resultData.OutStandingAmount;
                     setAmountDue(parseFloat(studentOutstanding))
-                    setShowOutStanding(prevState => prevState + studentOutstanding)
-                    outStandingAmount += studentOutstanding;
+                    setShowOutStanding(prevState => prevState + parseFloat(studentOutstanding))
+                    outStandingAmount += parseFloat(studentOutstanding);
 
                     setFormData({
                         ...formData,
